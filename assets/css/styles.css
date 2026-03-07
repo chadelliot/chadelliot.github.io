@@ -1703,3 +1703,117 @@ footer { padding:80px; background:var(--charcoal); border-top:1px solid #444; di
   }
 }
 
+
+/* =========================================================
+   CLASS-BASED SECTION ALIASES (append to end of styles.css)
+   Purpose: make section styling reusable across pages by class
+   without relying on IDs.
+   Usage in HTML:
+     <section class="qxo-story"> ... </section>
+     <section class="data-orchestration"> ... </section>
+     <section class="segmentation"> ... </section>
+     <section class="timeline-section"> ... </section>
+     <section class="expertise-section"> ... </section>
+     <section class="education-section"> ... </section>
+     <section class="pillars-section"> ... </section>
+     <section class="impact-section"> ... </section>
+     <section class="activation"> ... </section>
+========================================================= */
+
+/* QXO Story (was #qxo-story) */
+:is(#qxo-story, .qxo-story) {
+  padding: 120px 80px 60px;
+  background: var(--off-black);
+  overflow: hidden;
+  background-image:
+    linear-gradient(rgba(47,163,127,0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(47,163,127,0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* Data Orchestration (was #data-orchestration) */
+:is(#data-orchestration, .data-orchestration) {
+  padding: 120px 0px;
+  background: var(--off-black);
+  overflow: hidden;
+}
+
+/* Segmentation (was #segmentation) */
+:is(#segmentation, .segmentation) {
+  padding: 0;
+  background: var(--black);
+}
+
+/* Timeline (was #timeline) */
+:is(#timeline, .timeline-section) {
+  padding: 120px 80px;
+  background: var(--black);
+}
+
+/* Expertise (was #expertise) */
+:is(#expertise, .expertise-section) {
+  padding: 0px 80px 60px;
+  background: var(--black);
+}
+
+/* Education (was #education) */
+:is(#education, .education-section) {
+  padding: 120px 80px;
+  background: var(--black);
+}
+
+/* Pillars (was #pillars) */
+:is(#pillars, .pillars-section) {
+  padding: 120px 80px;
+  background: var(--off-black);
+}
+
+/* Impact (was #impact) */
+:is(#impact, .impact-section) {
+  padding: 120px 80px;
+  background: var(--off-black);
+}
+
+/* Activation (was #activation) */
+:is(#activation, .activation) {
+  background: var(--off-black);
+}
+
+/* --- common nested selectors that referenced IDs --- */
+:is(#segmentation, .segmentation) .section-title,
+:is(#data-orchestration, .data-orchestration) .section-title,
+:is(#qxo-story, .qxo-story) .section-title {
+  font-size: clamp(28px, 3vw, 40px);
+}
+
+/* Responsive padding for class-based sections (mirrors your breakpoints) */
+@media (max-width: 1100px) {
+  :is(#pillars, .pillars-section),
+  .qxo-tabs-shell,
+  :is(#timeline, .timeline-section),
+  :is(#expertise, .expertise-section),
+  :is(#impact, .impact-section),
+  :is(#education, .education-section),
+  :is(#qxo-story, .qxo-story),
+  :is(#data-orchestration, .data-orchestration),
+  :is(#segmentation, .segmentation) {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+}
+
+@media (max-width: 768px) {
+  :is(#pillars, .pillars-section),
+  .qxo-tabs-shell,
+  :is(#timeline, .timeline-section),
+  :is(#expertise, .expertise-section),
+  :is(#impact, .impact-section),
+  :is(#education, .education-section),
+  :is(#qxo-story, .qxo-story),
+  :is(#data-orchestration, .data-orchestration),
+  :is(#segmentation, .segmentation) {
+    padding: 88px 20px;
+  }
+  .qxo-tabs-shell { padding-bottom: 0; }
+  :is(#segmentation, .segmentation) { padding-top: 0; }
+}
