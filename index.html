@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>QXO Story – Overview Above Tabs Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --black:#F8F9FA; --off-black:#fff; --panel:#F0F2F4; --border:#E6E6E6;
+      --gold:#2FA37F; --gold-dim:#1F7F63; --white:#1A1A1A; --muted:#6B6B6B; --charcoal:#2B2B2B;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:Inter,sans-serif;background:var(--black);color:var(--white);line-height:1.7}
+    main{max-width:1280px;margin:0 auto}
+    .qxo-tabs-shell{padding:36px 80px 0;background:var(--off-black)}
+    .section-header{display:flex;align-items:center;gap:20px;margin-bottom:28px}
+    .section-num{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.1em}
+    .section-title{font-family:Manrope,sans-serif;font-size:clamp(36px,4vw,54px);font-weight:800;line-height:1;letter-spacing:-.025em}
+    .section-title em{font-style:italic;color:var(--gold)}
+    .section-line{flex:1;height:1px;background:var(--border)}
+    .qxo-tabs-intro{max-width:760px;margin:0 0 24px}
+    .qxo-tabs-intro p{font-size:14px;color:var(--muted)}
+    .qxo-overview-block{
+      display:grid;grid-template-columns:minmax(0,1.35fr) minmax(240px,.65fr);
+      gap:1px;background:var(--border);border:1px solid var(--border);margin:0 0 30px;
+    }
+    .qxo-overview-main,.qxo-overview-side{background:var(--off-black);padding:28px 30px}
+    .qxo-overview-kicker{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+    .qxo-overview-title{font-family:Manrope,sans-serif;font-size:28px;font-weight:800;line-height:1.06;letter-spacing:-.03em;color:var(--charcoal);margin-bottom:12px}
+    .qxo-overview-copy{font-size:14px;color:var(--muted);line-height:1.8}
+    .qxo-overview-side{display:flex;flex-direction:column;justify-content:space-between}
+    .qxo-overview-metric{padding-bottom:16px;border-bottom:1px solid var(--border);margin-bottom:16px}
+    .qxo-overview-metric:last-child{padding-bottom:0;border-bottom:none;margin-bottom:0}
+    .qxo-overview-value{font-family:Manrope,sans-serif;font-size:24px;font-weight:800;line-height:1;color:var(--gold);margin-bottom:5px}
+    .qxo-overview-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+    .qxo-subnav{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 30px;align-items:flex-end}
+    .qxo-tab{
+      position:relative;border:1px solid var(--border);background:#f5f5f2;color:var(--muted);
+      padding:15px 20px 13px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;
+      clip-path:polygon(0 100%,0 18%,72% 18%,80% 0,100% 0,100% 100%);
+      border-radius:12px 12px 0 0;font-family:Inter,sans-serif;
+    }
+    .qxo-tab.is-active{background:var(--gold);color:#fff;border-color:var(--gold)}
+    .panel{
+      border:1px solid var(--border);background:var(--off-black);padding:28px 30px 34px;margin-bottom:60px;
+    }
+    .panel h3{font-family:Manrope,sans-serif;font-size:28px;line-height:1.06;letter-spacing:-.03em;margin-bottom:12px;color:var(--charcoal)}
+    .panel p{font-size:14px;color:var(--muted)}
+    @media (max-width:900px){
+      .qxo-tabs-shell{padding:36px 20px 0}
+      .qxo-overview-block{grid-template-columns:1fr}
+    }
+    @media (max-width:768px){
+      .qxo-subnav{flex-direction:column}
+      .qxo-tab{width:100%;clip-path:none;border-radius:12px;text-align:left}
+    }
+  </style>
+</head>
+<body>
+<main>
+  <section class="qxo-tabs-shell">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">QXO <em>Story</em></h2>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="qxo-tabs-intro">
+      <p>Use the tabs to move through a four-part growth story — strategic overview, marketing intelligence, customer segmentation, and activation — showing how unified data becomes measurable business outcomes.</p>
+    </div>
+
+    <div class="qxo-overview-block">
+      <div class="qxo-overview-main">
+        <div class="qxo-overview-kicker">Strategic Overview</div>
+        <h3 class="qxo-overview-title">A unified growth system built to turn intelligence into activation.</h3>
+        <p class="qxo-overview-copy">
+          Rather than treating campaigns, segmentation, and reporting as separate workstreams, the model here connects
+          customer data, decisioning, and activation into a single operating system. That creates a tighter feedback loop:
+          unified signals inform segmentation, segmentation shapes prioritization, and activation translates those insights
+          into measurable commercial outcomes.
+        </p>
+      </div>
+      <aside class="qxo-overview-side">
+        <div class="qxo-overview-metric">
+          <div class="qxo-overview-value">4</div>
+          <div class="qxo-overview-label">Story Components</div>
+        </div>
+        <div class="qxo-overview-metric">
+          <div class="qxo-overview-value">1</div>
+          <div class="qxo-overview-label">Connected Operating Model</div>
+        </div>
+        <div class="qxo-overview-metric">
+          <div class="qxo-overview-value">Data → Revenue</div>
+          <div class="qxo-overview-label">Primary Narrative</div>
+        </div>
+      </aside>
+    </div>
+
+    <div class="qxo-subnav">
+      <button class="qxo-tab is-active">Marketing Intelligence</button>
+      <button class="qxo-tab">Customer Segmentation</button>
+      <button class="qxo-tab">Revenue Activation</button>
+    </div>
+
+    <div class="panel">
+      <h3>Marketing Intelligence</h3>
+      <p>
+        This panel stays as the first active tab. The Strategic Overview now sits above the tabs as a framing layer,
+        which keeps the story intact while simplifying the navigation from four tabs down to three.
+      </p>
+    </div>
+  </section>
+</main>
+</body>
+</html>
