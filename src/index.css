@@ -1,0 +1,123 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&family=Caveat:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Audaption Brand — Light Theme */
+    --background: 210 17% 98%;       /* #F8F9FA page bg */
+    --foreground: 0 0% 10%;          /* #1A1A1A text */
+    --card: 0 0% 100%;               /* #FFFFFF */
+    --card-foreground: 0 0% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 10%;
+    --primary: 160 55% 38%;          /* #2FA37F teal */
+    --primary-foreground: 0 0% 100%;
+    --primary-deep: 160 60% 31%;     /* #1F7F63 deep teal */
+    --secondary: 210 12% 95%;        /* #F0F2F4 panel */
+    --secondary-foreground: 0 0% 10%;
+    --muted: 0 0% 42%;               /* #6B6B6B */
+    --muted-foreground: 0 0% 42%;
+    --accent: 160 60% 31%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 90%;              /* #E6E6E6 */
+    --input: 0 0% 90%;
+    --ring: 160 55% 38%;
+    --radius: 0.5rem;
+    --charcoal: 0 0% 17%;            /* #2B2B2B */
+    --charcoal-light: 0 0% 24%;      /* #3d3d3d */
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes scanline {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+@keyframes gridPan {
+  0% { background-position: 0 0; }
+  100% { background-position: 48px 48px; }
+}
+@keyframes orb {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.08); opacity: 0.9; }
+}
+@keyframes dotPulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(94,209,174,0.15), 0 0 20px rgba(94,209,174,0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(94,209,174,0.08), 0 0 32px rgba(94,209,174,0.6); }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes pulsering {
+  0% { transform: translate(-50%,-50%) scale(0.9); opacity: 0.5; }
+  100% { transform: translate(-50%,-50%) scale(1.15); opacity: 0; }
+}
+@keyframes rotateBorder {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+@keyframes flowDash {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -100; }
+}
+@keyframes progress-fill {
+  from { width: 0; }
+}
+
+.animate-fadeUp { animation: fadeUp 0.8s ease forwards; }
+.animate-fadeUp-delay-1 { animation: fadeUp 0.8s ease 0.2s forwards; opacity: 0; }
+.animate-fadeUp-delay-2 { animation: fadeUp 0.9s ease 0.4s forwards; opacity: 0; }
+.animate-fadeUp-delay-3 { animation: fadeUp 0.9s ease 0.6s forwards; opacity: 0; }
+.animate-fadeUp-delay-4 { animation: fadeUp 0.9s ease 0.8s forwards; opacity: 0; }
+.animate-fadeIn-delay { animation: fadeIn 1s ease 1.4s forwards; opacity: 0; }
+.animate-fadeIn-badge { animation: fadeIn 0.7s ease 1.4s forwards; opacity: 0; transform: translateX(12px); }
+.animate-marquee { animation: marquee 22s linear infinite; }
+.animate-gridPan { animation: gridPan 20s linear infinite; }
+.animate-orb { animation: orb 4s ease-in-out infinite; }
+.animate-dotPulse { animation: dotPulse 2s ease-in-out infinite; }
+.animate-blink { animation: blink 2s ease-in-out infinite; }
