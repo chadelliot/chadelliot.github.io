@@ -24,8 +24,8 @@ const jobs = [
       { label: "Offline Sales Influenced", value: "$2.5B" },
       { label: "Leads / Quarter", value: "30,000" },
       { label: "New Customers / Qtr", value: "1,500" },
-      { label: "Marketing Budget", value: "$7M" },
-      { label: "Team Size", value: "11 People" },
+      { label: "Marketing Budget", value: "$4M+" },
+      { label: "Team Size", value: "6 People" },
     ],
     featured: {
       label: "NYSE Ceremony",

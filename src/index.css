@@ -121,3 +121,6 @@
 .animate-orb { animation: orb 4s ease-in-out infinite; }
 .animate-dotPulse { animation: dotPulse 2s ease-in-out infinite; }
 .animate-blink { animation: blink 2s ease-in-out infinite; }
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }

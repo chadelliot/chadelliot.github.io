@@ -97,7 +97,7 @@ const StoryOverview = () => {
       backgroundSize: "56px 56px",
     }}>
       {/* 12-Month Playbook badge — top right */}
-      <div className="absolute top-4 right-4 md:top-8 md:right-8 flex items-center gap-2.5 px-4 py-3 rounded-lg border border-primary/30 bg-card shadow-sm"
+      <div className="relative md:absolute mt-2 mb-4 md:mt-0 md:mb-0 md:top-8 md:right-8 inline-flex items-center gap-2.5 px-4 py-3 rounded-lg border border-primary/30 bg-card shadow-sm"
         style={{ background: "linear-gradient(135deg, rgba(47,163,127,0.08), rgba(47,163,127,0.02))" }}>
         <div className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-primary relative">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="hsl(160, 55%, 38%)" strokeWidth="2" strokeLinecap="round">
@@ -115,7 +115,7 @@ const StoryOverview = () => {
       </div>
 
       {/* Section intro */}
-      <p className="max-w-[520px] font-sans text-[15px] md:text-[16px] leading-[1.85] text-muted-foreground mb-2">
+      <p className="max-w-[520px] font-sans text-[15px] md:text-[16px] leading-[1.85] text-muted-foreground mb-2 md:pr-[220px]">
         <span className="font-display font-semibold text-foreground text-[16px] md:text-[17px]">Refined through real-world execution,</span>{" "}
         this framework brings a repeatable approach to building scalable marketing engines.
       </p>
@@ -670,20 +670,27 @@ const QxoStorySection = () => {
     <div>
       {/* Strategy in Action header */}
       <div className="px-6 pt-[60px] md:px-20 md:pt-20 bg-background">
-        <SectionHeader num="02" title="Building a Scalable Marketing" em="Infrastructure for Growth" />
+        <div className="w-full lg:w-[65%]">
+          <SectionHeader num="02" title="Building a Scalable Marketing" em="Infrastructure for Growth" />
+        </div>
         <p className="font-sans text-[14px] text-muted-foreground leading-[1.8] max-w-[700px] mb-8">
           I've developed a proven playbook for building scalable marketing infrastructure from scratch — establishing the data foundation, signal strategy, segmentation model, and activation engine required to drive growth. I know how to bring together the right people, platforms, and processes to make it operational within 12 to 24 months.
         </p>
       </div>
 
       {/* File-folder tab bar */}
-      <div className="sticky top-14 md:top-16 z-40 bg-background px-4 md:px-20 overflow-x-auto">
-        <div className="flex gap-0 items-end min-w-max">
+      <div className="sticky top-14 md:top-16 z-40 bg-background px-4 md:px-20">
+        <div className="flex gap-0 items-end overflow-x-auto scrollbar-hide" id="tab-bar-scroll">
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative px-5 md:px-6 py-3 text-[10px] md:text-[11px] font-sans tracking-[0.12em] uppercase transition-all cursor-pointer whitespace-nowrap ${
+              id={`tab-${tab.id}`}
+              onClick={() => {
+                setActiveTab(tab.id);
+                const el = document.getElementById(`tab-${tab.id}`);
+                if (el) el.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+              }}
+              className={`relative px-5 md:px-6 py-3 text-[10px] md:text-[11px] font-sans tracking-[0.12em] uppercase transition-all cursor-pointer whitespace-nowrap flex-shrink-0 ${
                 activeTab === tab.id
                   ? "font-semibold z-10"
                   : "text-muted-foreground hover:text-foreground"

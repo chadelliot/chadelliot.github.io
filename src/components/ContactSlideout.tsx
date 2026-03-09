@@ -169,13 +169,6 @@ const ContactSlideout = () => {
             {/* Quick links */}
             <div className="mt-8 pt-6 border-t border-border space-y-3">
               <a
-                href="mailto:cparker@audaption.com"
-                className="flex items-center gap-3 px-4 py-3 rounded-md border border-border bg-card text-foreground font-sans text-[12px] font-medium hover:border-primary hover:text-primary transition-colors no-underline"
-              >
-                <Mail size={15} className="text-primary" />
-                cparker@audaption.com
-              </a>
-              <a
                 href="https://www.linkedin.com/in/chadelliot/"
                 target="_blank"
                 rel="noopener noreferrer"
