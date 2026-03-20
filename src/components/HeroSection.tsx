@@ -168,7 +168,7 @@ const HeroSection = () => {
               }}
             />
             <span className="font-sans text-[11px] tracking-[0.1em] uppercase text-primary">
-              Director · Digital Marketing & Ops
+              Sr. Director · Digital Marketing & Ops
             </span>
           </div>
         </div>
