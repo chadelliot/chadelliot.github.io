@@ -9,7 +9,7 @@ const jobs = [
     current: true,
     company: "QXO Building Products, Inc.",
     companyDescriptor: "a Brad Jacobs Company",
-    title: "Director – Digital Marketing & Marketing Operations · Herndon, VA",
+    title: "Sr. Director – Digital Marketing & Marketing Operations · Herndon, VA",
     description: "Built QXO's entire digital marketing infrastructure from zero inside an $800B industry. Architected the funnel, CDP, segmentation engine, Growth Lab, and attribution system — then scaled it to $1.25B in digital revenue while influencing $2.5B in branch sales. Stood on the podium during the Beacon Building Products acquisition.",
     bullets: [
       "Built complete marketing funnel and lifecycle tracking system from scratch",
