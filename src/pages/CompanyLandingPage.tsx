@@ -142,6 +142,7 @@ const CompanyLandingPage = () => {
 
   const proofPoints = page.proofPoints?.length ? page.proofPoints : fallbackProofPoints;
   const proposal = page.proposal;
+  const opportunityColumnCount = Math.min(Math.max(page.likelyPriorities.length, 1), 4);
 
   return (
     <div className="min-h-screen bg-background">
@@ -223,9 +224,10 @@ const CompanyLandingPage = () => {
               <p>{proposal?.opportunity || page.fitSummary}</p>
             </div>
 
-            <div className="opportunity-card-grid">
-              {page.likelyPriorities.map((priority) => (
+            <div className="opportunity-card-grid" style={{ gridTemplateColumns: `repeat(${opportunityColumnCount}, minmax(0, 1fr))` }}>
+              {page.likelyPriorities.map((priority, index) => (
                 <div key={priority} className="opportunity-card">
+                  <span className="opportunity-card-dot" aria-hidden="true" />
                   <p>{priority}</p>
                 </div>
               ))}
