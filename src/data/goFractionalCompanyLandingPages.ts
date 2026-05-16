@@ -52,6 +52,9 @@ export const goFractionalCompanyLandingPages: Record<string, CompanyLandingPage>
     outreachAngle: "I can help Acuvance translate a broad RevOps mandate into a CFO-ready operating system for forecasting, pricing discipline, compensation governance, and scalable service-line growth.",
     ctaLabel: "Discuss project fit",
     ctaHref: "mailto:cparker@audaption.com?subject=Acuvance%20RevOps%20Fit",
+    outreachContacts: [
+      { name: "Josh Nazarian", title: "Chief Executive Officer", linkedinUrl: "https://www.linkedin.com/in/josh-nazarian-a804611/", email: "josh.nazarian@acuvance.com", selectionRationale: "Clay surfaced Josh as Acuvance’s CEO. For a Director of Revenue Operations role tied to CFO and executive leadership needs, the CEO is a strong escalation or referral path when direct CFO/revenue leadership contacts are not visible." }
+    ],
     status: "ready"
   },
   "town-web": {
@@ -88,6 +91,9 @@ export const goFractionalCompanyLandingPages: Record<string, CompanyLandingPage>
     outreachAngle: "I can help Town Web turn CPQ from a quoting tool decision into a scalable quote-to-revenue operating system that supports pricing discipline, proposal automation, and leadership visibility.",
     ctaLabel: "Discuss project fit",
     ctaHref: "mailto:cparker@audaption.com?subject=Town%20Web%20CPQ%20RevOps%20Fit",
+    outreachContacts: [
+      { name: "Angela Stănescu", title: "Operations Management", linkedinUrl: "https://www.linkedin.com/in/angela-stanescu/", email: "angela.stanescu@townweb.com", selectionRationale: "Clay shows Angela in current Operations Management at Town Web Design. For a CPQ and RevOps architecture role, operations is the clearest available internal stakeholder path; email is pattern-inferred because Clay returned no exact email." }
+    ],
     status: "ready"
   },
   "everist": {
@@ -153,6 +159,11 @@ export const goFractionalCompanyLandingPages: Record<string, CompanyLandingPage>
     outreachAngle: "I can help Turtl connect customer success operations to customer revenue outcomes through lifecycle visibility, segmentation, renewal-risk logic, expansion signals, and executive reporting.",
     ctaLabel: "Discuss project fit",
     ctaHref: "mailto:cparker@audaption.com?subject=Turtl%20Customer%20Success%20Fit",
+    outreachContacts: [
+      { name: "Nick Mason", title: "CEO & Founder | Chief Storytelling Officer", linkedinUrl: "https://www.linkedin.com/in/nickmasonsays/", email: "nick@turtl.co", selectionRationale: "The posted Fractional VP of Customer Success role reports to the CEO, making Nick the clearest hiring stakeholder and executive sponsor." },
+      { name: "Claire McNee", title: "Director of Customer Success", linkedinUrl: "https://www.linkedin.com/in/clairemcnee/", email: "claire.mcnee@turtl.co", selectionRationale: "Claire leads Customer Success and is a likely functional stakeholder for a fractional VP of Customer Success engagement." },
+      { name: "Francesca Edwards", title: "Head of Revenue Operations", linkedinUrl: "https://www.linkedin.com/in/francescamedwards/", email: "francesca.edwards@turtl.co", selectionRationale: "Francesca owns Revenue Operations, making her a strong adjacent stakeholder for lifecycle, renewal, expansion, and reporting work tied to the CS leadership role." }
+    ],
     status: "ready"
   },
   "software-solutions-firm-vp-sales": {
