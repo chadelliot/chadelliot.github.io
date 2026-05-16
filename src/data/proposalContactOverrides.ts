@@ -16,10 +16,10 @@ export const proposalContactOverrides: Record<string, ProposalContactOverride[]>
   ],
   "speridian-technologies": [
     {
-      name: "Speridian DHCS Product Owner Chief",
-      title: "Likely DHCS product leadership / interview stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Speridian%20DHCS%20Product%20Owner%20Chief%20Behavioral%20Health%20Transformation",
-      selectionRationale: "The job post says the interview panel includes the Product Owner Chief, making this function a high-confidence stakeholder path."
+      name: "Namrata Nagaraj",
+      title: "Product Owner Chief / likely DHCS product leadership stakeholder",
+      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Namrata%20Nagaraj%20Speridian%20DHCS%20Product%20Owner%20Chief",
+      selectionRationale: "This replaces the Product Owner Chief placeholder with the likely named person surfaced from the LinkedIn profile search path."
     },
     {
       name: "Speridian DHCS Division Chief",
