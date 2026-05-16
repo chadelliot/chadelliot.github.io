@@ -83,13 +83,61 @@ const nodePositions = [
   { cx: 209, cy: 250, nameX: 140, nameY: 220, descX: 140, descY: 240, anchor: "end" as const, descLines: ["Closed-loop reporting", "tied to revenue outcomes"] },
 ];
 
+const proposalWorkstreamDetails = [
+  { title: "Foundation audit", details: ["Review CRM", "Marketing automation", "Analytics", "Attribution fields"] },
+  { title: "Operating model", details: ["Lifecycle stages", "Handoff points", "Team ownership", "Decision cadence"] },
+  { title: "Signal map", details: ["Buyer behavior", "Account intent", "Content signals", "Revenue triggers"] },
+  { title: "Prioritization", details: ["Segment logic", "Scoring rules", "ICP fit", "Focus markets"] },
+  { title: "Activation plays", details: ["Campaign flows", "Sales plays", "Landing pages", "Routing logic"] },
+  { title: "Closed-loop reporting", details: ["Funnel movement", "Pipeline impact", "EBITDA return", "Optimization queue"] },
+];
+
 const proposalNodePositions = [
-  { x: 58, y: 70, rotate: -4 },
-  { x: 368, y: 34, rotate: 3 },
-  { x: 670, y: 82, rotate: -2 },
-  { x: 174, y: 248, rotate: 3 },
-  { x: 486, y: 244, rotate: -3 },
-  { x: 742, y: 258, rotate: 2 },
+  { x: 64, y: 74, rotate: -3 },
+  { x: 378, y: 54, rotate: 2 },
+  { x: 692, y: 78, rotate: -2 },
+  { x: 112, y: 344, rotate: 2 },
+  { x: 426, y: 326, rotate: -3 },
+  { x: 736, y: 350, rotate: 2 },
+];
+
+const detailOffsets = [
+  [
+    { dx: -10, dy: 158 },
+    { dx: 126, dy: 172 },
+    { dx: 10, dy: 222 },
+    { dx: 146, dy: 238 },
+  ],
+  [
+    { dx: -18, dy: 162 },
+    { dx: 120, dy: 152 },
+    { dx: 6, dy: 224 },
+    { dx: 144, dy: 214 },
+  ],
+  [
+    { dx: -18, dy: 156 },
+    { dx: 124, dy: 168 },
+    { dx: 4, dy: 220 },
+    { dx: 140, dy: 236 },
+  ],
+  [
+    { dx: -4, dy: 154 },
+    { dx: 136, dy: 164 },
+    { dx: 18, dy: 218 },
+    { dx: 154, dy: 230 },
+  ],
+  [
+    { dx: -16, dy: 158 },
+    { dx: 122, dy: 148 },
+    { dx: 0, dy: 222 },
+    { dx: 138, dy: 214 },
+  ],
+  [
+    { dx: -8, dy: 154 },
+    { dx: 130, dy: 168 },
+    { dx: 10, dy: 218 },
+    { dx: 146, dy: 232 },
+  ],
 ];
 
 const splitSvgLines = (text: string, maxChars = 34, maxLines = 3) => {
@@ -332,130 +380,172 @@ const CompanyLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-6 md:px-20 py-16 md:py-20 bg-muted/40 border-y border-border">
+        <section className="px-6 md:px-20 py-16 md:py-20 bg-[#050505] text-white border-y border-black overflow-hidden">
           <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-[0.82fr_1.18fr] gap-8 md:gap-12 items-center mb-12">
-              <div>
-                <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Recommended proposal</p>
-                <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
-                  {page.recommendedEngagement.title}
-                </h2>
-                <p className="text-muted-foreground leading-relaxed mb-5">{page.recommendedEngagement.description}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  The work is organized as connected workstreams instead of isolated tasks, so strategy, systems, activation, and measurement stay tied together from the beginning.
-                </p>
-              </div>
+            <div className="max-w-4xl mx-auto text-center mb-10 md:mb-12">
+              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Recommended proposal</p>
+              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-5">
+                {page.recommendedEngagement.title}
+              </h2>
+              <p className="text-white/70 leading-relaxed mb-4">{page.recommendedEngagement.description}</p>
+              <p className="text-sm text-white/55 leading-relaxed max-w-3xl mx-auto">
+                The work is organized as connected workstreams instead of isolated tasks, so strategy, systems, activation, and measurement stay tied together from the beginning.
+              </p>
+            </div>
 
-              <div className="relative rounded-[2rem] border border-border bg-background/80 p-4 md:p-5 shadow-sm overflow-hidden">
-                <div className="absolute inset-0 opacity-50" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(47, 163, 127, 0.18) 1px, transparent 0)", backgroundSize: "22px 22px" }} />
-                <svg viewBox="0 0 980 440" xmlns="http://www.w3.org/2000/svg" className="relative z-10 w-full h-auto" aria-label="Connected proposal workstreams diagram">
-                  <defs>
-                    <filter id="proposal-shadow" x="-20%" y="-20%" width="140%" height="150%">
-                      <feDropShadow dx="0" dy="18" stdDeviation="10" floodColor="#0f1d19" floodOpacity="0.13" />
-                    </filter>
-                    <linearGradient id="proposal-top" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#ffffff" />
-                      <stop offset="100%" stopColor="#f4f6f3" />
-                    </linearGradient>
-                  </defs>
+            <div className="relative rounded-[2rem] border border-white/10 bg-white/[0.03] p-3 md:p-5 shadow-2xl overflow-hidden">
+              <div className="absolute inset-0 opacity-35" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(47, 163, 127, 0.42) 1px, transparent 0)", backgroundSize: "24px 24px" }} />
+              <div className="absolute -top-32 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
+              <svg viewBox="0 0 1120 710" xmlns="http://www.w3.org/2000/svg" className="relative z-10 hidden md:block w-full h-auto" aria-label="Connected proposal workstreams diagram">
+                <defs>
+                  <filter id="proposal-shadow-dark" x="-25%" y="-25%" width="150%" height="160%">
+                    <feDropShadow dx="0" dy="22" stdDeviation="12" floodColor="#000000" floodOpacity="0.35" />
+                  </filter>
+                  <linearGradient id="proposal-top-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff" />
+                    <stop offset="100%" stopColor="#eef1ec" />
+                  </linearGradient>
+                  <linearGradient id="detail-card-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#171717" />
+                    <stop offset="100%" stopColor="#0f0f0f" />
+                  </linearGradient>
+                </defs>
 
-                  <path d="M24 50 C250 -30 430 112 602 72 C744 40 830 84 952 38" fill="none" stroke="rgba(47, 163, 127, 0.24)" strokeWidth="1.5" strokeDasharray="7 8" />
-                  <path d="M20 330 C206 246 316 396 490 310 C638 238 762 378 946 294" fill="none" stroke="rgba(0, 0, 0, 0.12)" strokeWidth="1.5" strokeDasharray="7 8" />
+                <path d="M42 82 C246 -16 434 118 596 82 C754 48 878 90 1082 42" fill="none" stroke="rgba(47, 163, 127, 0.26)" strokeWidth="1.3" strokeDasharray="7 9" />
+                <path d="M38 610 C256 508 404 660 582 566 C760 470 900 628 1080 540" fill="none" stroke="rgba(255, 255, 255, 0.12)" strokeWidth="1.3" strokeDasharray="7 9" />
 
-                  {proposalDiagramNodes.slice(0, -1).map((_, index) => {
-                    const from = proposalNodePositions[index];
-                    const to = proposalNodePositions[index + 1];
-                    const fromX = from.x + 220;
-                    const fromY = from.y + 62;
-                    const toX = to.x;
-                    const toY = to.y + 62;
-                    const midX = (fromX + toX) / 2;
+                {proposalDiagramNodes.slice(0, -1).map((_, index) => {
+                  const from = proposalNodePositions[index];
+                  const to = proposalNodePositions[index + 1];
+                  const fromX = from.x + 236;
+                  const fromY = from.y + 72;
+                  const toX = to.x + 8;
+                  const toY = to.y + 72;
+                  const midX = (fromX + toX) / 2;
 
-                    return (
-                      <path
-                        key={`connector-${index}`}
-                        d={`M ${fromX} ${fromY} C ${midX} ${fromY - 38}, ${midX} ${toY + 38}, ${toX} ${toY}`}
-                        fill="none"
-                        stroke="rgba(47, 163, 127, 0.36)"
-                        strokeWidth="1.75"
-                        strokeDasharray="6 7"
-                        strokeLinecap="round"
-                      />
-                    );
-                  })}
+                  return (
+                    <path
+                      key={`connector-${index}`}
+                      d={`M ${fromX} ${fromY} C ${midX} ${fromY - 42}, ${midX} ${toY + 42}, ${toX} ${toY}`}
+                      fill="none"
+                      stroke="rgba(47, 163, 127, 0.48)"
+                      strokeWidth="1.7"
+                      strokeDasharray="6 8"
+                      strokeDashoffset="36"
+                      strokeLinecap="round"
+                    >
+                      <animate attributeName="opacity" from="0" to="1" dur="0.45s" begin={`${0.2 + index * 0.16}s`} fill="freeze" />
+                      <animate attributeName="stroke-dashoffset" from="36" to="0" dur="0.65s" begin={`${0.2 + index * 0.16}s`} fill="freeze" />
+                    </path>
+                  );
+                })}
 
-                  {proposalDiagramNodes.map((bullet, index) => {
-                    const position = proposalNodePositions[index];
-                    const lines = splitSvgLines(bullet, 32, 4);
+                {proposalDiagramNodes.map((bullet, index) => {
+                  const position = proposalNodePositions[index];
+                  const workstream = proposalWorkstreamDetails[index] || proposalWorkstreamDetails[proposalWorkstreamDetails.length - 1];
+                  const titleLines = splitSvgLines(workstream.title, 22, 2);
+                  const begin = index * 0.18;
 
-                    return (
-                      <g key={bullet} transform={`translate(${position.x} ${position.y}) rotate(${position.rotate} 110 64)`} filter="url(#proposal-shadow)">
-                        <path d="M14 18 L186 0 L222 24 L222 116 L50 136 L14 112 Z" fill="#e6e3de" stroke="#bdb7af" strokeWidth="1" />
-                        <path d="M14 18 L186 0 L222 24 L50 42 Z" fill="url(#proposal-top)" stroke="#c9c3ba" strokeWidth="1" />
-                        <path d="M50 42 L222 24 L222 116 L50 136 Z" fill="#f6f3ef" stroke="#c9c3ba" strokeWidth="1" />
-                        <path d="M14 18 L50 42 L50 136 L14 112 Z" fill="#ddd8d0" stroke="#c9c3ba" strokeWidth="1" />
-                        <path d="M68 49 L202 35" stroke="rgba(47, 163, 127, 0.24)" strokeWidth="1" strokeDasharray="4 5" />
-                        <text x="70" y="62" fill="#2fa37f" fontFamily="DM Mono, monospace" fontSize="10" fontWeight="600" letterSpacing="2">
+                  return (
+                    <g key={bullet} opacity="0">
+                      <animate attributeName="opacity" from="0" to="1" dur="0.5s" begin={`${begin}s`} fill="freeze" />
+                      <g transform={`translate(${position.x} ${position.y}) rotate(${position.rotate} 116 66)`} filter="url(#proposal-shadow-dark)">
+                        <path d="M14 18 L196 0 L236 26 L236 124 L54 146 L14 120 Z" fill="#e6e3de" stroke="#bdb7af" strokeWidth="1" />
+                        <path d="M14 18 L196 0 L236 26 L54 46 Z" fill="url(#proposal-top-dark)" stroke="#c9c3ba" strokeWidth="1" />
+                        <path d="M54 46 L236 26 L236 124 L54 146 Z" fill="#f6f3ef" stroke="#c9c3ba" strokeWidth="1" />
+                        <path d="M14 18 L54 46 L54 146 L14 120 Z" fill="#ddd8d0" stroke="#c9c3ba" strokeWidth="1" />
+                        <path d="M72 52 L214 38" stroke="rgba(47, 163, 127, 0.24)" strokeWidth="1" strokeDasharray="4 5" />
+                        <text x="74" y="66" fill="#2fa37f" fontFamily="DM Mono, monospace" fontSize="10" fontWeight="600" letterSpacing="2">
                           WORKSTREAM {String(index + 1).padStart(2, "0")}
                         </text>
-                        <text x="70" y="86" fill="#1a1a1a" fontFamily="Inter, sans-serif" fontSize="13" fontWeight="650">
-                          {lines.map((line, lineIndex) => (
-                            <tspan key={line} x="70" dy={lineIndex === 0 ? 0 : 16}>
+                        <text x="74" y="92" fill="#111111" fontFamily="Inter, sans-serif" fontSize="15" fontWeight="750">
+                          {titleLines.map((line, lineIndex) => (
+                            <tspan key={line} x="74" dy={lineIndex === 0 ? 0 : 18}>
                               {line}
                             </tspan>
                           ))}
                         </text>
-                        <circle cx="36" cy="42" r="10" fill="rgba(47, 163, 127, 0.13)" stroke="#2fa37f" strokeWidth="1" />
-                        <circle cx="36" cy="42" r="3" fill="#2fa37f" />
+                        <text x="74" y="128" fill="#555555" fontFamily="Inter, sans-serif" fontSize="10.5" fontWeight="600">
+                          {splitSvgLines(bullet, 31, 1).map((line) => line)}
+                        </text>
+                        <circle cx="38" cy="46" r="10" fill="rgba(47, 163, 127, 0.13)" stroke="#2fa37f" strokeWidth="1" />
+                        <circle cx="38" cy="46" r="3" fill="#2fa37f" />
                       </g>
-                    );
-                  })}
-                </svg>
 
-                <div className="relative z-10 grid gap-3 md:hidden mt-4">
-                  {page.recommendedEngagement.bullets.map((bullet, index) => (
-                    <div key={bullet} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-                      <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-bold mb-2">Workstream {index + 1}</p>
-                      <p className="text-sm text-foreground leading-relaxed m-0">{bullet}</p>
+                      {workstream.details.map((detail, detailIndex) => {
+                        const offset = detailOffsets[index]?.[detailIndex] || { dx: 0, dy: 0 };
+                        const cardX = position.x + offset.dx;
+                        const cardY = position.y + offset.dy;
+                        const cardBegin = begin + 0.25 + detailIndex * 0.08;
+
+                        return (
+                          <g key={`${detail}-${detailIndex}`} opacity="0">
+                            <animate attributeName="opacity" from="0" to="1" dur="0.35s" begin={`${cardBegin}s`} fill="freeze" />
+                            <path d={`M ${position.x + 116} ${position.y + 134} C ${position.x + 116} ${cardY - 18}, ${cardX + 62} ${cardY - 18}, ${cardX + 62} ${cardY}`} fill="none" stroke="rgba(47, 163, 127, 0.34)" strokeWidth="1" strokeDasharray="4 6" />
+                            <rect x={cardX} y={cardY} width="124" height="40" rx="13" fill="url(#detail-card-dark)" stroke="rgba(255,255,255,0.16)" />
+                            <text x={cardX + 62} y={cardY + 25} textAnchor="middle" fill="rgba(255,255,255,0.78)" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="650">
+                              {detail}
+                            </text>
+                          </g>
+                        );
+                      })}
+                    </g>
+                  );
+                })}
+              </svg>
+
+              <div className="relative z-10 grid gap-4 md:hidden">
+                {proposalWorkstreamDetails.map((workstream, index) => (
+                  <div key={workstream.title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-sm">
+                    <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-bold mb-2">Workstream {index + 1}</p>
+                    <h3 className="text-white font-display text-xl font-extrabold mb-3">{workstream.title}</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {workstream.details.map((detail) => (
+                        <span key={detail} className="rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-xs text-white/75">
+                          {detail}
+                        </span>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             </div>
 
             {additionalProposalNodes.length ? (
-              <div className="grid md:grid-cols-2 gap-4 mb-12">
+              <div className="grid md:grid-cols-2 gap-4 mt-8">
                 {additionalProposalNodes.map((bullet, index) => (
-                  <div key={bullet} className="rounded-2xl bg-background border border-border p-5 text-foreground leading-relaxed">
+                  <div key={bullet} className="rounded-2xl bg-white/[0.04] border border-white/10 p-5 text-white/75 leading-relaxed">
                     <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-bold mb-2">Additional workstream {index + 7}</p>
                     {bullet}
                   </div>
                 ))}
               </div>
             ) : null}
-
-            {proposal?.phases?.length ? (
-              <div>
-                <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Engagement structure</p>
-                <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-8">
-                  How the engagement would work.
-                </h2>
-                <div className="grid md:grid-cols-3 gap-4">
-                  {proposal.phases.map((phase, index) => (
-                    <div key={phase.title} className="rounded-3xl border border-border bg-background p-6 shadow-sm">
-                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mb-5">
-                        {index + 1}
-                      </div>
-                      <p className="text-[11px] tracking-[0.16em] uppercase text-primary font-semibold mb-2">{phase.duration}</p>
-                      <h3 className="font-display text-2xl font-extrabold text-foreground mb-3">{phase.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed">{phase.description}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : null}
           </div>
         </section>
+
+        {proposal?.phases?.length ? (
+          <section className="px-6 md:px-20 py-16 md:py-20 bg-background border-y border-border">
+            <div className="max-w-6xl mx-auto">
+              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Engagement structure</p>
+              <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-8">
+                How the engagement would work.
+              </h2>
+              <div className="grid md:grid-cols-3 gap-4">
+                {proposal.phases.map((phase, index) => (
+                  <div key={phase.title} className="rounded-3xl border border-border bg-background p-6 shadow-sm">
+                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mb-5">
+                      {index + 1}
+                    </div>
+                    <p className="text-[11px] tracking-[0.16em] uppercase text-primary font-semibold mb-2">{phase.duration}</p>
+                    <h3 className="font-display text-2xl font-extrabold text-foreground mb-3">{phase.title}</h3>
+                    <p className="text-muted-foreground leading-relaxed">{phase.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        ) : null}
 
         {proposal?.outcomes?.length ? (
           <section className="px-6 md:px-20 py-16 md:py-20">
