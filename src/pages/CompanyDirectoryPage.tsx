@@ -4,8 +4,45 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { companyLandingPages } from "@/data/companyLandingPages";
 
+type OutreachContact = {
+  name: string;
+  title: string;
+  linkedinUrl: string;
+  email?: string;
+};
+
 const COMPANY_DIRECTORY_PASSWORD = "cp634841!";
 const COMPANY_DIRECTORY_AUTH_KEY = "company-directory-authenticated";
+
+const getFirstName = (name: string) => name.split(" ")[0] || name;
+
+const getProposalUrl = (slug: string) => {
+  if (typeof window === "undefined") return `/company/${slug}`;
+  return `${window.location.origin}/company/${slug}`;
+};
+
+const buildEmailHref = (page: (typeof companyLandingPages)[string], contact: OutreachContact) => {
+  const proposalUrl = getProposalUrl(page.slug);
+  const subject = encodeURIComponent(`Potential fit with ${page.companyName}`);
+  const body = encodeURIComponent(
+    [
+      `Hi ${getFirstName(contact.name)},`,
+      "",
+      `I came across ${page.companyName} and wanted to share a concise proposal-style point of view on where I may be able to create value.`,
+      "",
+      `The proposal is tailored here: ${proposalUrl}`,
+      "",
+      "In short, my background is strongest where growth strategy, revenue operations, lifecycle marketing, customer data, and executive reporting need to operate as one system. I have built enterprise marketing infrastructure from the ground up, including funnel architecture, CDP activation, segmentation, attribution, and cross-functional growth operations.",
+      "",
+      "I would welcome the chance to discuss whether this maps to any current priorities on your team.",
+      "",
+      "Best,",
+      "Chad Parker",
+    ].join("\n"),
+  );
+
+  return `mailto:${contact.email ?? ""}?subject=${subject}&body=${body}`;
+};
 
 const CompanyDirectoryPage = () => {
   const [password, setPassword] = useState("");
@@ -120,37 +157,81 @@ const CompanyDirectoryPage = () => {
             </div>
 
             <div className="grid gap-4">
-              {pages.map((page) => (
-                <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
-                  <div className="grid gap-5 lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)_auto] lg:items-center">
-                    <div>
-                      <div className="mb-3 flex flex-wrap items-center gap-3">
-                        <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-                          {page.companyName}
-                        </h3>
-                        {page.status ? (
-                          <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                            {page.status}
-                          </span>
-                        ) : null}
+              {pages.map((page) => {
+                const outreachContacts = ((page as typeof page & { outreachContacts?: OutreachContact[] }).outreachContacts ?? []).slice(0, 3);
+
+                return (
+                  <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
+                    <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
+                      <div>
+                        <div className="mb-3 flex flex-wrap items-center gap-3">
+                          <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
+                            {page.companyName}
+                          </h3>
+                          {page.status ? (
+                            <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                              {page.status}
+                            </span>
+                          ) : null}
+                        </div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
                       </div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
+
+                      <div>
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Engagement</p>
+                        <p className="leading-relaxed text-foreground">{page.recommendedEngagement.title}</p>
+                      </div>
+
+                      <Link
+                        to={`/company/${page.slug}`}
+                        className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90"
+                      >
+                        View page
+                      </Link>
                     </div>
 
-                    <div>
-                      <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Engagement</p>
-                      <p className="leading-relaxed text-foreground">{page.recommendedEngagement.title}</p>
-                    </div>
+                    <div className="mt-6 border-t border-border pt-5">
+                      <div className="mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Potential hiring managers</p>
+                          <p className="text-sm text-muted-foreground">LinkedIn lookup and pre-written email outreach tied to this proposal page.</p>
+                        </div>
+                      </div>
 
-                    <Link
-                      to={`/company/${page.slug}`}
-                      className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90"
-                    >
-                      View page
-                    </Link>
-                  </div>
-                </article>
-              ))}
+                      {outreachContacts.length ? (
+                        <div className="grid gap-3 md:grid-cols-3">
+                          {outreachContacts.map((contact) => (
+                            <div key={`${page.slug}-${contact.name}`} className="rounded-2xl border border-border p-4">
+                              <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.name}</p>
+                              <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{contact.title}</p>
+                              <div className="flex flex-col gap-2">
+                                <a
+                                  href={contact.linkedinUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-foreground no-underline transition-colors hover:border-primary hover:text-primary"
+                                >
+                                  LinkedIn
+                                </a>
+                                <a
+                                  href={buildEmailHref(page, contact)}
+                                  className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90"
+                                >
+                                  Draft email
+                                </a>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="rounded-2xl border border-dashed border-border p-4 text-sm leading-relaxed text-muted-foreground">
+                          No verified hiring manager contacts have been added yet. When contacts are added, this section will show up to three people with LinkedIn and auto-drafted email actions.
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
             </div>
           </div>
         </section>
