@@ -74,6 +74,15 @@ const loopLayers = [
   },
 ];
 
+const nodePositions = [
+  { cx: 400, cy: 140, nameX: 400, nameY: 68, descX: 400, descY: 88, anchor: "middle" as const, descLines: ["Clean, trusted revenue data"] },
+  { cx: 591, cy: 250, nameX: 660, nameY: 220, descX: 660, descY: 240, anchor: "start" as const, descLines: ["Connected definitions,", "workflows & ownership"] },
+  { cx: 591, cy: 470, nameX: 660, nameY: 466, descX: 660, descY: 486, anchor: "start" as const, descLines: ["Signals that reveal", "behavior & opportunity"] },
+  { cx: 400, cy: 580, nameX: 400, nameY: 650, descX: 400, descY: 670, anchor: "middle" as const, descLines: ["Frameworks for where to focus first"] },
+  { cx: 209, cy: 470, nameX: 140, nameY: 466, descX: 140, descY: 486, anchor: "end" as const, descLines: ["Campaigns, workflows,", "routing & plays"] },
+  { cx: 209, cy: 250, nameX: 140, nameY: 220, descX: 140, descY: 240, anchor: "end" as const, descLines: ["Closed-loop reporting", "tied to revenue outcomes"] },
+];
+
 const CompanyLandingPage = () => {
   const { slug } = useParams();
   const page = slug ? companyLandingPages[slug] : undefined;
@@ -206,43 +215,21 @@ const CompanyLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-6 md:px-20 py-14 md:py-18 bg-muted/40 border-y border-border">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-[0.85fr_1.15fr] gap-8 md:gap-14 items-start">
-            <div>
-              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Opportunity</p>
-              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
-                Where I believe I can create leverage.
-              </h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {proposal?.opportunity || page.fitSummary}
-              </p>
+        <section id="opportunity" className="approach-section">
+          <div className="wrap">
+            <div className="section-head">
+              <div className="eyebrow">Opportunity</div>
+              <h2>Where I believe I can create leverage.</h2>
+              <p>{proposal?.opportunity || page.fitSummary}</p>
             </div>
-            <div className="grid gap-4">
+
+            <div className="opportunity-card-grid">
               {page.likelyPriorities.map((priority) => (
-                <div key={priority} className="rounded-2xl border border-border bg-background p-5 shadow-sm">
-                  <p className="text-foreground font-medium leading-relaxed">{priority}</p>
+                <div key={priority} className="opportunity-card">
+                  <p>{priority}</p>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        <section id="approach" className="approach-section">
-          <div className="wrap">
-            <div className="section-head">
-              <div className="eyebrow">Our approach</div>
-              <h2>
-                Six Layers.
-                <small>One Closed-Loop Revenue Intelligence Stack.</small>
-              </h2>
-              <p>
-                I build revenue systems as a connected operating model — one that links data,
-                customer intelligence, go-to-market execution, and measurement into a closed loop.
-                These six layers form the architecture behind that model.
-              </p>
-            </div>
-
-            <p className="loop-instruction">Click a layer to learn more about what happens inside that part of the system.</p>
 
             <div className="loop-wrap">
               <svg viewBox="0 0 800 720" xmlns="http://www.w3.org/2000/svg" className="closed-loop" aria-label="Closed-loop revenue intelligence stack with six connected layers">
@@ -266,15 +253,6 @@ const CompanyLandingPage = () => {
                 <text x="400" y="410" textAnchor="middle" className="loop-title">Intelligence</text>
 
                 {loopLayers.map((layer, index) => {
-                  const nodePositions = [
-                    { cx: 400, cy: 140, nameX: 400, nameY: 68, descX: 400, descY: 88, anchor: "middle", descLines: [layer.shortDescription] },
-                    { cx: 591, cy: 250, nameX: 660, nameY: 220, descX: 660, descY: 240, anchor: "start", descLines: ["Connected definitions,", "workflows & ownership"] },
-                    { cx: 591, cy: 470, nameX: 660, nameY: 466, descX: 660, descY: 486, anchor: "start", descLines: ["Signals that reveal", "behavior & opportunity"] },
-                    { cx: 400, cy: 580, nameX: 400, nameY: 650, descX: 400, descY: 670, anchor: "middle", descLines: [layer.shortDescription] },
-                    { cx: 209, cy: 470, nameX: 140, nameY: 466, descX: 140, descY: 486, anchor: "end", descLines: ["Campaigns, workflows,", "routing & plays"] },
-                    { cx: 209, cy: 250, nameX: 140, nameY: 220, descX: 140, descY: 240, anchor: "end", descLines: ["Closed-loop reporting", "tied to revenue outcomes"] },
-                  ] as const;
-
                   const position = nodePositions[index];
 
                   return (
