@@ -222,7 +222,7 @@ const CompanyLandingPage = () => {
 
             <div
               className="approach-loop-intro"
-              style={{ gridTemplateColumns: "minmax(0, 1fr) 150px", marginBottom: "-6px" }}
+              style={{ gridTemplateColumns: "minmax(0, 1fr)", marginBottom: "-6px" }}
             >
               <div>
                 <span>Approach system</span>
@@ -230,31 +230,6 @@ const CompanyLandingPage = () => {
                   Six steps that account for the full picture: data, alignment, customer signals, prioritization, activation, and measurement — moving from diagnosis to revenue accountability.
                 </p>
               </div>
-              <svg
-                className="hidden md:block"
-                viewBox="0 0 150 82"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-                style={{ width: "150px", transform: "rotate(7deg)", overflow: "visible" }}
-                aria-hidden="true"
-              >
-                <path
-                  d="M12 14C42 10 61 18 72 34C82 49 97 57 130 55"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeDasharray="5 5"
-                  className="text-primary"
-                />
-                <path
-                  d="M116 42C124 50 132 54 142 55C133 59 126 65 121 74"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-primary"
-                />
-              </svg>
             </div>
 
             <div className="loop-wrap">
