@@ -282,6 +282,7 @@ const CompanyLandingPage = () => {
               </svg>
 
               <div className="loop-detail" aria-live="polite">
+                <p className="loop-instruction">Click on the layers to the left to learn more.</p>
                 <div className="loop-detail-card">
                   <span className="num">{activeLoopLayer.num}</span>
                   <div className="text">
