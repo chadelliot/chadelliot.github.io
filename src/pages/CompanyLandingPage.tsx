@@ -2,7 +2,7 @@ import { type FormEvent, type KeyboardEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { companyLandingPages } from "@/data/companyLandingPages";
+import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
 
 const fallbackProofPoints = [
   "Built enterprise marketing infrastructure from zero, including funnel architecture, CDP activation, segmentation, attribution, and cross-functional growth operations.",
@@ -147,7 +147,7 @@ const getCommercialModel = (investment?: string) => {
 
 const CompanyLandingPage = () => {
   const { slug } = useParams();
-  const page = slug ? companyLandingPages[slug] : undefined;
+  const page = slug ? allCompanyLandingPages[slug] : undefined;
   const [selectedLayerIndex, setSelectedLayerIndex] = useState<number | null>(null);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const selectedLayer = selectedLayerIndex !== null ? loopLayers[selectedLayerIndex] : null;
