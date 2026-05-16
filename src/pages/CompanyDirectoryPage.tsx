@@ -4,7 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { companyLandingPages } from "@/data/companyLandingPages";
 
-const COMPANY_DIRECTORY_PASSWORD = "CP634841!";
+const COMPANY_DIRECTORY_PASSWORD = "cp634841!";
 const COMPANY_DIRECTORY_AUTH_KEY = "company-directory-authenticated";
 
 const CompanyDirectoryPage = () => {
