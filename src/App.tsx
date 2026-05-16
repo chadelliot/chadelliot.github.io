@@ -8,6 +8,7 @@ import ApproachPage from "./pages/ApproachPage";
 import CareerPage from "./pages/CareerPage";
 import SkillsPage from "./pages/SkillsPage";
 import ContactPage from "./pages/ContactPage";
+import CompanyLandingPage from "./pages/CompanyLandingPage";
 import NotFound from "./pages/NotFound";
 import ContactSlideout from "./components/ContactSlideout";
 import ScrollToTop from "./components/ScrollToTop";
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/career" element={<CareerPage />} />
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/company/:slug" element={<CompanyLandingPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </HashRouter>
