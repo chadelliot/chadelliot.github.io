@@ -9,6 +9,7 @@ type OutreachContact = {
   title: string;
   linkedinUrl: string;
   email?: string;
+  selectionRationale?: string;
 };
 
 const COMPANY_DIRECTORY_PASSWORD = "cp634841!";
@@ -203,7 +204,13 @@ const CompanyDirectoryPage = () => {
                           {outreachContacts.map((contact) => (
                             <div key={`${page.slug}-${contact.name}`} className="rounded-2xl border border-border p-4">
                               <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.name}</p>
-                              <p className="mb-4 text-sm leading-relaxed text-muted-foreground">{contact.title}</p>
+                              <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{contact.title}</p>
+                              {contact.selectionRationale ? (
+                                <div className="mb-4 rounded-2xl bg-muted/40 p-3">
+                                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Why selected</p>
+                                  <p className="m-0 text-sm leading-relaxed text-muted-foreground">{contact.selectionRationale}</p>
+                                </div>
+                              ) : null}
                               <div className="flex flex-col gap-2">
                                 <a
                                   href={contact.linkedinUrl}
@@ -225,7 +232,7 @@ const CompanyDirectoryPage = () => {
                         </div>
                       ) : (
                         <div className="rounded-2xl border border-dashed border-border p-4 text-sm leading-relaxed text-muted-foreground">
-                          No verified hiring manager contacts have been added yet. When contacts are added, this section will show up to three people with LinkedIn and auto-drafted email actions.
+                          No verified hiring manager contacts have been added yet. When contacts are added, this section will show up to three people with LinkedIn, selection rationale, and auto-drafted email actions.
                         </div>
                       )}
                     </div>
