@@ -1,3 +1,4 @@
+import { type KeyboardEvent, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -14,31 +15,37 @@ const loopLayers = [
   {
     num: "01",
     title: "Data Foundation",
+    shortDescription: "Clean, trusted revenue data",
     description: "We assess CRM structure, field usage, source-of-truth logic, data hygiene, and the quality of the information powering funnel, pipeline, and customer reporting.",
   },
   {
     num: "02",
     title: "System Alignment",
+    shortDescription: "Connected definitions, workflows & ownership",
     description: "We align lifecycle definitions, handoff points, stakeholder ownership, and operating rhythms across marketing, sales, RevOps, and leadership.",
   },
   {
     num: "03",
     title: "Customer Intelligence",
+    shortDescription: "Signals that reveal behavior & opportunity",
     description: "We identify the customer, account, and engagement signals that reveal intent, fit, expansion potential, and buying behavior.",
   },
   {
     num: "04",
     title: "Segmentation & Prioritization",
+    shortDescription: "Frameworks for where to focus first",
     description: "We build segmentation and scoring logic to surface priority accounts, high-value opportunities, and the areas where teams should focus first.",
   },
   {
     num: "05",
     title: "GTM Activation",
+    shortDescription: "Campaigns, workflows, routing & plays",
     description: "We translate insights into practical GTM motions, including workflows, sequences, routing logic, campaigns, and sales plays tied to defined signals.",
   },
   {
     num: "06",
     title: "Measurement & Optimization",
+    shortDescription: "Closed-loop reporting tied to revenue outcomes",
     description: "We establish the reporting foundation needed to understand funnel conversion, pipeline movement, campaign performance, and future optimization opportunities.",
   },
 ];
@@ -46,6 +53,17 @@ const loopLayers = [
 const CompanyLandingPage = () => {
   const { slug } = useParams();
   const page = slug ? companyLandingPages[slug] : undefined;
+  const [activeLayerIndex, setActiveLayerIndex] = useState(0);
+  const activeLoopLayer = loopLayers[activeLayerIndex];
+
+  const handleLayerKeyDown = (event: KeyboardEvent<SVGGElement>, index: number) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      setActiveLayerIndex(index);
+    }
+  };
+
+  const layerNodeClass = (index: number) => `layer-node ${activeLayerIndex === index ? "is-active" : ""}`;
 
   if (!page) {
     return (
@@ -203,7 +221,7 @@ const CompanyLandingPage = () => {
                 <text x="400" y="380" textAnchor="middle" className="loop-title">Revenue</text>
                 <text x="400" y="410" textAnchor="middle" className="loop-title">Intelligence</text>
 
-                <g className="layer-node" data-layer="1" tabIndex={0} role="button" aria-label="Layer 01: Data Foundation">
+                <g className={layerNodeClass(0)} data-layer="1" tabIndex={0} role="button" aria-pressed={activeLayerIndex === 0} aria-label="Layer 01: Data Foundation" onClick={() => setActiveLayerIndex(0)} onKeyDown={(event) => handleLayerKeyDown(event, 0)}>
                   <circle cx="400" cy="140" r="44" className="node-bg" />
                   <text x="400" y="135" textAnchor="middle" className="node-tag">LAYER</text>
                   <text x="400" y="160" textAnchor="middle" className="node-num">01</text>
@@ -211,7 +229,7 @@ const CompanyLandingPage = () => {
                 <text x="400" y="68" textAnchor="middle" className="layer-name">Data Foundation</text>
                 <text x="400" y="88" textAnchor="middle" className="layer-desc">Clean, trusted revenue data</text>
 
-                <g className="layer-node" data-layer="2" tabIndex={0} role="button" aria-label="Layer 02: System Alignment">
+                <g className={layerNodeClass(1)} data-layer="2" tabIndex={0} role="button" aria-pressed={activeLayerIndex === 1} aria-label="Layer 02: System Alignment" onClick={() => setActiveLayerIndex(1)} onKeyDown={(event) => handleLayerKeyDown(event, 1)}>
                   <circle cx="591" cy="250" r="44" className="node-bg" />
                   <text x="591" y="245" textAnchor="middle" className="node-tag">LAYER</text>
                   <text x="591" y="270" textAnchor="middle" className="node-num">02</text>
@@ -220,7 +238,7 @@ const CompanyLandingPage = () => {
                 <text x="660" y="240" textAnchor="start" className="layer-desc">Connected definitions,</text>
                 <text x="660" y="256" textAnchor="start" className="layer-desc">workflows &amp; ownership</text>
 
-                <g className="layer-node" data-layer="3" tabIndex={0} role="button" aria-label="Layer 03: Customer Intelligence">
+                <g className={layerNodeClass(2)} data-layer="3" tabIndex={0} role="button" aria-pressed={activeLayerIndex === 2} aria-label="Layer 03: Customer Intelligence" onClick={() => setActiveLayerIndex(2)} onKeyDown={(event) => handleLayerKeyDown(event, 2)}>
                   <circle cx="591" cy="470" r="44" className="node-bg" />
                   <text x="591" y="465" textAnchor="middle" className="node-tag">LAYER</text>
                   <text x="591" y="490" textAnchor="middle" className="node-num">03</text>
@@ -229,7 +247,7 @@ const CompanyLandingPage = () => {
                 <text x="660" y="486" textAnchor="start" className="layer-desc">Signals that reveal</text>
                 <text x="660" y="502" textAnchor="start" className="layer-desc">behavior &amp; opportunity</text>
 
-                <g className="layer-node" data-layer="4" tabIndex={0} role="button" aria-label="Layer 04: Segmentation and Prioritization">
+                <g className={layerNodeClass(3)} data-layer="4" tabIndex={0} role="button" aria-pressed={activeLayerIndex === 3} aria-label="Layer 04: Segmentation and Prioritization" onClick={() => setActiveLayerIndex(3)} onKeyDown={(event) => handleLayerKeyDown(event, 3)}>
                   <circle cx="400" cy="580" r="44" className="node-bg" />
                   <text x="400" y="575" textAnchor="middle" className="node-tag">LAYER</text>
                   <text x="400" y="600" textAnchor="middle" className="node-num">04</text>
@@ -237,7 +255,7 @@ const CompanyLandingPage = () => {
                 <text x="400" y="650" textAnchor="middle" className="layer-name">Segmentation &amp; Prioritization</text>
                 <text x="400" y="670" textAnchor="middle" className="layer-desc">Frameworks for where to focus first</text>
 
-                <g className="layer-node" data-layer="5" tabIndex={0} role="button" aria-label="Layer 05: GTM Activation">
+                <g className={layerNodeClass(4)} data-layer="5" tabIndex={0} role="button" aria-pressed={activeLayerIndex === 4} aria-label="Layer 05: GTM Activation" onClick={() => setActiveLayerIndex(4)} onKeyDown={(event) => handleLayerKeyDown(event, 4)}>
                   <circle cx="209" cy="470" r="44" className="node-bg" />
                   <text x="209" y="465" textAnchor="middle" className="node-tag">LAYER</text>
                   <text x="209" y="490" textAnchor="middle" className="node-num">05</text>
@@ -246,7 +264,7 @@ const CompanyLandingPage = () => {
                 <text x="140" y="486" textAnchor="end" className="layer-desc">Campaigns, workflows,</text>
                 <text x="140" y="502" textAnchor="end" className="layer-desc">routing &amp; plays</text>
 
-                <g className="layer-node" data-layer="6" tabIndex={0} role="button" aria-label="Layer 06: Measurement and Optimization">
+                <g className={layerNodeClass(5)} data-layer="6" tabIndex={0} role="button" aria-pressed={activeLayerIndex === 5} aria-label="Layer 06: Measurement and Optimization" onClick={() => setActiveLayerIndex(5)} onKeyDown={(event) => handleLayerKeyDown(event, 5)}>
                   <circle cx="209" cy="250" r="44" className="node-bg" />
                   <text x="209" y="245" textAnchor="middle" className="node-tag">LAYER</text>
                   <text x="209" y="270" textAnchor="middle" className="node-num">06</text>
@@ -263,17 +281,30 @@ const CompanyLandingPage = () => {
                 </circle>
               </svg>
 
-              <ul className="loop-fallback" role="list">
-                {loopLayers.map((layer) => (
-                  <li key={layer.num}>
-                    <span className="num">{layer.num}</span>
-                    <div className="text">
-                      <strong>{layer.title}</strong>
-                      {layer.description}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+              <div className="loop-detail" aria-live="polite">
+                <div className="loop-detail-card">
+                  <span className="num">{activeLoopLayer.num}</span>
+                  <div className="text">
+                    <p className="detail-eyebrow">Selected layer</p>
+                    <strong>{activeLoopLayer.title}</strong>
+                    <p>{activeLoopLayer.description}</p>
+                  </div>
+                </div>
+
+                <div className="loop-mobile-controls" aria-label="Select revenue intelligence layer">
+                  {loopLayers.map((layer, index) => (
+                    <button
+                      key={layer.num}
+                      type="button"
+                      className={activeLayerIndex === index ? "is-active" : ""}
+                      onClick={() => setActiveLayerIndex(index)}
+                      aria-pressed={activeLayerIndex === index}
+                    >
+                      {layer.num}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </section>
