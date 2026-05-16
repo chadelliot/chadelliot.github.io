@@ -17,6 +17,9 @@ type SortMode = "targeted" | "newest" | "oldest" | "company";
 type ContactFilter = "all" | "with-targets" | "needs-targets";
 
 const POSTED_DATES: Record<string, string> = {
+  "who-gives-a-crap": "2026-05-16",
+  attest: "2026-05-16",
+  enmacc: "2026-05-16",
   "speridian-technologies": "2026-05-16",
   neolytix: "2026-05-16",
   farlinium: "2026-05-16",
@@ -29,6 +32,9 @@ const POSTED_DATES: Record<string, string> = {
 };
 
 const POSTED_ROLE_TITLES: Record<string, string> = {
+  "who-gives-a-crap": "Fractional Head of Marketing Operations & Planning",
+  attest: "Interim Senior Growth Marketing Manager",
+  enmacc: "Interim Business Manager Revenue",
   "speridian-technologies": "Principal GTM Strategy Lead",
   neolytix: "Fractional Healthcare Growth Program Architect",
   farlinium: "B2B Growth Marketing Manager",
