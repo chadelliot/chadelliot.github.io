@@ -97,6 +97,15 @@ const buildOutcomeContent = (outcome: string, index: number) => ({
   description: outcome,
 });
 
+const currencyFormatter = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+const parseMoney = (amount: string) => Number(amount.replace(/[$,\s]/g, ""));
+const formatMoney = (amount: number) => currencyFormatter.format(amount);
+
 const getTimelineForCompletion = (phases?: { duration: string }[]) => {
   const explicitTimelines = phases
     ?.map((phase) => phase.duration.trim())
@@ -113,7 +122,27 @@ const getCommercialModel = (investment?: string) => {
   const isAnnualSalary = /annual|salary|full-time/i.test(investment);
   if (isAnnualSalary) return null;
 
-  return investment;
+  const rangeMatch = investment.match(/\$?\s*([\d,]+(?:\.\d+)?)\s*(?:-|–|—|to)\s*\$?\s*([\d,]+(?:\.\d+)?)/i);
+  if (!rangeMatch) return investment;
+
+  const low = parseMoney(rangeMatch[1]);
+  const high = parseMoney(rangeMatch[2]);
+  if (!Number.isFinite(low) || !Number.isFinite(high)) return investment;
+
+  const max = Math.max(low, high);
+  const min = Math.min(low, high);
+  const isHourly = /hour|hourly|\shr\b|\/hr/i.test(investment);
+  const isMonthly = /month|monthly|retainer/i.test(investment);
+  const unit = isHourly ? "/hour" : isMonthly ? "/month" : "";
+  const thresholdNote = isHourly
+    ? max < 150
+      ? "max of posted range"
+      : "upper end of posted range"
+    : max < 4000
+      ? "max of posted range"
+      : "upper end of posted range";
+
+  return `Recommended: ${formatMoney(max)}${unit} (${thresholdNote}; posted range ${formatMoney(min)}–${formatMoney(max)}${unit})`;
 };
 
 const CompanyLandingPage = () => {
