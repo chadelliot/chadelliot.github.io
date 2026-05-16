@@ -133,7 +133,7 @@
 }
 
 .approach-section .wrap {
-  width: min(1120px, 100%);
+  width: min(1180px, 100%);
   margin: 0 auto;
 }
 
@@ -183,13 +183,14 @@
 
 .loop-wrap {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
-  gap: 36px;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  gap: clamp(32px, 5vw, 64px);
   align-items: center;
 }
 
 .closed-loop {
   width: 100%;
+  max-width: 760px;
   height: auto;
   display: block;
   overflow: visible;
@@ -272,19 +273,38 @@
 
 .loop-detail {
   align-self: center;
+  width: 100%;
+  min-width: 0;
 }
 
 .loop-detail-card {
+  position: relative;
   display: grid;
-  grid-template-columns: 58px 1fr;
+  grid-template-columns: 58px minmax(0, 1fr);
   gap: 18px;
   align-items: start;
-  min-height: 270px;
+  min-height: 280px;
+  width: 100%;
   padding: 28px;
-  background: hsl(var(--card));
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.92) 100%);
   border: 1px solid hsl(var(--border));
   border-radius: 28px;
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.055);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.075);
+  overflow: hidden;
+}
+
+.loop-detail-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at top right, rgba(94, 209, 174, 0.16), transparent 42%);
+  pointer-events: none;
+}
+
+.loop-detail-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .loop-detail-card .num {
@@ -308,14 +328,18 @@
   line-height: 1.75;
 }
 
+.loop-detail-card .detail-eyebrow {
+  margin: 0 0 12px;
+}
+
 .loop-detail-card strong {
   display: block;
   color: hsl(var(--foreground));
   font-family: 'Manrope', sans-serif;
-  font-size: clamp(28px, 3vw, 40px);
+  font-size: clamp(26px, 2.4vw, 36px);
   font-weight: 800;
   letter-spacing: -0.045em;
-  line-height: 1;
+  line-height: 1.04;
   margin: 0 0 14px;
 }
 
@@ -353,6 +377,11 @@
   }
 
   .closed-loop {
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .loop-detail {
     max-width: 720px;
     margin: 0 auto;
   }
