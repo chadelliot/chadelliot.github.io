@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
+import { proposalContactOverrides } from "@/data/proposalContactOverrides";
 
 type OutreachContact = {
   name: string;
@@ -12,7 +13,9 @@ type OutreachContact = {
   selectionRationale?: string;
 };
 
-type SortMode = "newest" | "oldest" | "company";
+type SortMode = "targeted" | "newest" | "oldest" | "company";
+
+type ContactFilter = "all" | "with-targets" | "needs-targets";
 
 const POSTED_DATES: Record<string, string> = {
   "speridian-technologies": "2026-05-16",
@@ -85,9 +88,22 @@ const getInitialContactedTargets = () => {
   }
 };
 
+const getOutreachContacts = (page: (typeof allCompanyLandingPages)[string]) => {
+  const savedContacts = ((page as typeof page & { outreachContacts?: OutreachContact[] }).outreachContacts ?? []).slice(0, 3);
+  const overrideContacts = proposalContactOverrides[page.slug] ?? [];
+  return savedContacts.length ? savedContacts : overrideContacts.slice(0, 3);
+};
+
+const getTargetConfidenceScore = (page: (typeof allCompanyLandingPages)[string]) => {
+  const contacts = getOutreachContacts(page);
+  if (!contacts.length) return 0;
+  return contacts.some((contact) => /reports to|states|interview panel|chief brand officer|co-founder/i.test(contact.selectionRationale ?? "")) ? 2 : 1;
+};
+
 const CompanyDirectoryPageV3 = () => {
-  const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [sortMode, setSortMode] = useState<SortMode>("targeted");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [contactFilter, setContactFilter] = useState<ContactFilter>("all");
   const [showContacted, setShowContacted] = useState(true);
   const [contactedTargets, setContactedTargets] = useState<string[]>(getInitialContactedTargets);
 
@@ -110,18 +126,32 @@ const CompanyDirectoryPageV3 = () => {
       page,
       postedDate: POSTED_DATES[page.slug],
       opportunityType: getOpportunityType(page),
+      contacts: getOutreachContacts(page),
+      targetConfidenceScore: getTargetConfidenceScore(page),
     }));
 
     return records
       .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
+      .filter((record) => {
+        if (contactFilter === "with-targets") return record.contacts.length > 0;
+        if (contactFilter === "needs-targets") return record.contacts.length === 0;
+        return true;
+      })
       .sort((a, b) => {
         if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
 
         const aTime = a.postedDate ? new Date(a.postedDate).getTime() : 0;
         const bTime = b.postedDate ? new Date(b.postedDate).getTime() : 0;
+
+        if (sortMode === "targeted") {
+          if (b.targetConfidenceScore !== a.targetConfidenceScore) return b.targetConfidenceScore - a.targetConfidenceScore;
+          if (b.contacts.length !== a.contacts.length) return b.contacts.length - a.contacts.length;
+          return bTime - aTime;
+        }
+
         return sortMode === "newest" ? bTime - aTime : aTime - bTime;
       });
-  }, [sortMode, typeFilter]);
+  }, [sortMode, typeFilter, contactFilter]);
 
   const opportunityTypes = useMemo(() => {
     const types = new Set(Object.values(allCompanyLandingPages).map(getOpportunityType));
@@ -146,11 +176,12 @@ const CompanyDirectoryPageV3 = () => {
         </section>
 
         <section className="px-6 py-8 md:px-20 md:py-10">
-          <div className="mx-auto max-w-6xl rounded-[1.5rem] border border-border bg-muted/30 p-5 md:p-6">
-            <div className="grid gap-4 md:grid-cols-3 md:items-end">
+          <div className="mx-auto max-w-6xl rounded-[1.5rem] border border-border bg-background p-5 shadow-sm md:p-6">
+            <div className="grid gap-4 md:grid-cols-4 md:items-end">
               <label className="grid gap-2 text-sm font-semibold text-foreground">
                 Sort proposals
                 <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary">
+                  <option value="targeted">Best target confidence first</option>
                   <option value="newest">Newest posted first</option>
                   <option value="oldest">Oldest posted first</option>
                   <option value="company">Company A-Z</option>
@@ -163,6 +194,15 @@ const CompanyDirectoryPageV3 = () => {
                   {opportunityTypes.map((type) => (
                     <option key={type} value={type}>{type === "all" ? "All types" : type}</option>
                   ))}
+                </select>
+              </label>
+
+              <label className="grid gap-2 text-sm font-semibold text-foreground">
+                Contact status
+                <select value={contactFilter} onChange={(event) => setContactFilter(event.target.value as ContactFilter)} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary">
+                  <option value="all">All proposals</option>
+                  <option value="with-targets">Has named/inferred targets</option>
+                  <option value="needs-targets">Needs target research</option>
                 </select>
               </label>
 
@@ -185,78 +225,75 @@ const CompanyDirectoryPageV3 = () => {
             </div>
 
             <div className="grid gap-4">
-              {pages.map(({ page, postedDate, opportunityType }) => {
-                const outreachContacts = ((page as typeof page & { outreachContacts?: OutreachContact[] }).outreachContacts ?? []).slice(0, 3);
-
-                return (
-                  <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
-                    <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
-                      <div>
-                        <div className="mb-3 flex flex-wrap items-center gap-3">
-                          <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">{page.companyName}</h3>
-                          <span className="rounded-full bg-muted/60 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{opportunityType}</span>
-                          {page.status ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{page.status}</span> : null}
-                        </div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
-                        <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Posted: {formatPostedDate(postedDate)}</p>
+              {pages.map(({ page, postedDate, opportunityType, contacts, targetConfidenceScore }) => (
+                <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
+                  <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
+                    <div>
+                      <div className="mb-3 flex flex-wrap items-center gap-3">
+                        <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">{page.companyName}</h3>
+                        <span className="rounded-full bg-background border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{opportunityType}</span>
+                        {targetConfidenceScore > 0 ? <span className="rounded-full border border-primary/50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Target path found</span> : null}
+                        {page.status ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{page.status}</span> : null}
                       </div>
-
-                      <div>
-                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Engagement</p>
-                        <p className="leading-relaxed text-foreground">{page.recommendedEngagement.title}</p>
-                      </div>
-
-                      <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
+                      <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
+                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Posted: {formatPostedDate(postedDate)}</p>
                     </div>
 
-                    <div className="mt-6 border-t border-border pt-5">
-                      <div className="mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
-                        <div>
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Potential hiring managers</p>
-                          <p className="text-sm text-muted-foreground">Named targets only. Use the checkbox after you send the proposal.</p>
-                        </div>
+                    <div>
+                      <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Engagement</p>
+                      <p className="leading-relaxed text-foreground">{page.recommendedEngagement.title}</p>
+                    </div>
+
+                    <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
+                  </div>
+
+                  <div className="mt-6 border-t border-border pt-5">
+                    <div className="mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+                      <div>
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Potential hiring managers</p>
+                        <p className="text-sm text-muted-foreground">Top three likely door-openers based on job-post evidence, reporting lines, functional ownership, or talent-process fit.</p>
                       </div>
+                    </div>
 
-                      {outreachContacts.length ? (
-                        <div className="grid gap-3 md:grid-cols-3">
-                          {outreachContacts
-                            .filter((contact) => showContacted || !contactedTargets.includes(`${page.slug}:${contact.name}`))
-                            .map((contact) => {
-                              const targetKey = `${page.slug}:${contact.name}`;
-                              const isContacted = contactedTargets.includes(targetKey);
+                    {contacts.length ? (
+                      <div className="grid gap-3 md:grid-cols-3">
+                        {contacts
+                          .filter((contact) => showContacted || !contactedTargets.includes(`${page.slug}:${contact.name}`))
+                          .map((contact) => {
+                            const targetKey = `${page.slug}:${contact.name}`;
+                            const isContacted = contactedTargets.includes(targetKey);
 
-                              return (
-                                <div key={targetKey} className={`rounded-2xl border p-4 ${isContacted ? "border-primary/40 bg-primary/5" : "border-border"}`}>
-                                  <label className="mb-3 flex items-start gap-3 text-sm font-semibold text-foreground">
-                                    <input type="checkbox" checked={isContacted} onChange={() => toggleContactedTarget(targetKey)} className="mt-1" />
-                                    <span>{isContacted ? "Proposal sent" : "Mark proposal sent"}</span>
-                                  </label>
-                                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Potential target</p>
-                                  <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.name}</p>
-                                  <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{contact.title}</p>
-                                  {contact.selectionRationale ? (
-                                    <div className="mb-4 rounded-2xl bg-muted/40 p-3">
-                                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Why selected</p>
-                                      <p className="m-0 text-sm leading-relaxed text-muted-foreground">{contact.selectionRationale}</p>
-                                    </div>
-                                  ) : null}
-                                  <div className="flex flex-col gap-2">
-                                    <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-foreground no-underline transition-colors hover:border-primary hover:text-primary">LinkedIn profile</a>
-                                    <a href={buildEmailHref(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">Draft email</a>
+                            return (
+                              <div key={targetKey} className={`rounded-2xl border p-4 ${isContacted ? "border-primary/40 bg-primary/5" : "border-border bg-background"}`}>
+                                <label className="mb-3 flex items-start gap-3 text-sm font-semibold text-foreground">
+                                  <input type="checkbox" checked={isContacted} onChange={() => toggleContactedTarget(targetKey)} className="mt-1" />
+                                  <span>{isContacted ? "Proposal sent" : "Mark proposal sent"}</span>
+                                </label>
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Potential target</p>
+                                <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.name}</p>
+                                <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{contact.title}</p>
+                                {contact.selectionRationale ? (
+                                  <div className="mb-4 rounded-2xl border border-border bg-background p-3">
+                                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Why selected</p>
+                                    <p className="m-0 text-sm leading-relaxed text-muted-foreground">{contact.selectionRationale}</p>
                                   </div>
+                                ) : null}
+                                <div className="flex flex-col gap-2">
+                                  <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-foreground no-underline transition-colors hover:border-primary hover:text-primary">LinkedIn profile</a>
+                                  <a href={buildEmailHref(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">Draft email</a>
                                 </div>
-                              );
-                            })}
-                        </div>
-                      ) : (
-                        <div className="rounded-2xl border border-dashed border-border p-4 text-sm leading-relaxed text-muted-foreground">
-                          Target contacts have not been validated for this opportunity yet. Add three named contacts to this page before outreach.
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+                              </div>
+                            );
+                          })}
+                      </div>
+                    ) : (
+                      <div className="rounded-2xl border border-dashed border-border p-4 text-sm leading-relaxed text-muted-foreground">
+                        Target contacts have not been validated for this opportunity yet. Add three named contacts to this page before outreach.
+                      </div>
+                    )}
+                  </div>
+                </article>
+              ))}
             </div>
           </div>
         </section>
