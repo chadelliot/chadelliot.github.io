@@ -1,6 +1,7 @@
 import { companyLandingPages } from "./companyLandingPages";
 import { goFractionalCompanyLandingPages } from "./goFractionalCompanyLandingPages";
 import { goFractionalWave2CompanyLandingPages } from "./goFractionalWave2CompanyLandingPages";
+import { goFractionalWave3CompanyLandingPages } from "./goFractionalWave3CompanyLandingPages";
 
 const currencyFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
@@ -44,5 +45,6 @@ export const allCompanyLandingPages = Object.fromEntries(
     ...companyLandingPages,
     ...goFractionalCompanyLandingPages,
     ...goFractionalWave2CompanyLandingPages,
+    ...goFractionalWave3CompanyLandingPages,
   }).map(([slug, page]) => [slug, normalizePage(page)]),
 );
