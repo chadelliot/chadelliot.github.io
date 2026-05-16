@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useEffect, useState } from "react";
+import { type FormEvent, type KeyboardEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -83,10 +83,25 @@ const nodePositions = [
   { cx: 209, cy: 250, nameX: 140, nameY: 220, descX: 140, descY: 240, anchor: "end" as const, descLines: ["Closed-loop reporting", "tied to revenue outcomes"] },
 ];
 
+const outcomeHeadlineFallbacks = [
+  "Decision visibility",
+  "Prioritized roadmap",
+  "Stakeholder alignment",
+  "Executive-ready package",
+  "Measurement clarity",
+  "Next-step confidence",
+];
+
+const buildOutcomeContent = (outcome: string, index: number) => ({
+  headline: outcomeHeadlineFallbacks[index] || "Decision-ready output",
+  description: outcome,
+});
+
 const CompanyLandingPage = () => {
   const { slug } = useParams();
   const page = slug ? companyLandingPages[slug] : undefined;
   const [selectedLayerIndex, setSelectedLayerIndex] = useState<number | null>(null);
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const selectedLayer = selectedLayerIndex !== null ? loopLayers[selectedLayerIndex] : null;
 
   useEffect(() => {
@@ -106,6 +121,22 @@ const CompanyLandingPage = () => {
       document.body.style.overflow = "";
     };
   }, [selectedLayerIndex]);
+
+  useEffect(() => {
+    if (!isContactOpen) return;
+
+    const handleEscape = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") setIsContactOpen(false);
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "";
+    };
+  }, [isContactOpen]);
 
   const handleLayerKeyDown = (event: KeyboardEvent<SVGGElement>, index: number) => {
     if (event.key === "Enter" || event.key === " ") {
@@ -143,6 +174,7 @@ const CompanyLandingPage = () => {
   const proofPoints = page.proofPoints?.length ? page.proofPoints : fallbackProofPoints;
   const proposal = page.proposal;
   const engagementBullets = page.recommendedEngagement.bullets;
+  const shouldOpenContactDrawer = page.ctaLabel.toLowerCase().includes("discuss") && page.ctaLabel.toLowerCase().includes("fit");
   const phaseDetails = proposal?.phases.map((phase, index) => {
     const detailGroups = [
       engagementBullets.slice(0, 2),
@@ -155,6 +187,45 @@ const CompanyLandingPage = () => {
       details: detailGroups[index] || engagementBullets.slice(0, 2),
     };
   }) || [];
+
+  const handleContactSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const subject = encodeURIComponent(`${page.companyName} project fit`);
+    const body = encodeURIComponent(
+      [
+        `Name: ${formData.get("name") || ""}`,
+        `Email: ${formData.get("email") || ""}`,
+        `Company: ${formData.get("company") || page.companyName}`,
+        "",
+        "Project context:",
+        `${formData.get("message") || ""}`,
+      ].join("\n"),
+    );
+
+    window.location.href = `mailto:cparker@audaption.com?subject=${subject}&body=${body}`;
+  };
+
+  const renderPrimaryCta = (variant: "hero" | "footer" = "hero") => {
+    const className =
+      variant === "footer"
+        ? "inline-flex items-center justify-center rounded-full bg-background px-6 py-3 text-sm font-semibold tracking-[0.08em] uppercase text-foreground no-underline transition-opacity hover:opacity-90"
+        : "inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold tracking-[0.08em] uppercase text-primary-foreground no-underline transition-opacity hover:opacity-90";
+
+    if (shouldOpenContactDrawer) {
+      return (
+        <button type="button" onClick={() => setIsContactOpen(true)} className={className}>
+          {page.ctaLabel}
+        </button>
+      );
+    }
+
+    return (
+      <a href={page.ctaHref} className={className}>
+        {page.ctaLabel}
+      </a>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -171,12 +242,7 @@ const CompanyLandingPage = () => {
                 {page.subheadline}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
-                <a
-                  href={page.ctaHref}
-                  className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold tracking-[0.08em] uppercase text-primary-foreground no-underline transition-opacity hover:opacity-90"
-                >
-                  {page.ctaLabel}
-                </a>
+                {renderPrimaryCta()}
                 <Link
                   to="/career"
                   className="inline-flex items-center justify-center rounded-full border border-border px-6 py-3 text-sm font-semibold tracking-[0.08em] uppercase text-foreground no-underline transition-colors hover:border-primary hover:text-primary"
@@ -321,15 +387,11 @@ const CompanyLandingPage = () => {
               </div>
 
               <div className="border-y border-white/15">
-                {phaseDetails.map((phase, index) => (
+                {phaseDetails.map((phase) => (
                   <div key={phase.title} className="py-7 md:py-9 border-b border-white/15 last:border-b-0">
-                    <div className="grid md:grid-cols-[190px_minmax(0,1fr)] gap-6 md:gap-10 items-start">
+                    <div className="grid md:grid-cols-[220px_minmax(0,1fr)] gap-6 md:gap-10 items-start">
                       <div>
-                        <div className="inline-flex items-center gap-3 mb-4">
-                          <span className="text-5xl md:text-6xl font-display font-extrabold leading-none text-white">0{index + 1}</span>
-                          <span className="h-px w-12 bg-primary" aria-hidden="true" />
-                        </div>
-                        <p className="text-[11px] tracking-[0.16em] uppercase text-primary font-semibold mb-2">{phase.duration}</p>
+                        <p className="text-[12px] tracking-[0.16em] uppercase text-primary font-semibold mb-3">{phase.duration}</p>
                         <h3 className="font-display text-2xl md:text-3xl font-extrabold text-white leading-tight">{phase.title}</h3>
                       </div>
 
@@ -371,16 +433,21 @@ const CompanyLandingPage = () => {
 
               <div className="border border-border rounded-[2rem] overflow-hidden bg-background">
                 <div className="grid md:grid-cols-2">
-                  {proposal.outcomes.map((outcome, index) => (
-                    <div key={outcome} className="p-6 md:p-7 border-b md:border-r border-border md:[&:nth-child(2n)]:border-r-0 last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0">
-                      <p className="text-[11px] tracking-[0.18em] uppercase text-primary font-semibold mb-4">
-                        KPI / Result {String(index + 1).padStart(2, "0")}
-                      </p>
-                      <p className="font-display text-xl md:text-2xl font-extrabold tracking-tight text-foreground leading-snug m-0">
-                        {outcome}
-                      </p>
-                    </div>
-                  ))}
+                  {proposal.outcomes.map((outcome, index) => {
+                    const outcomeContent = buildOutcomeContent(outcome, index);
+
+                    return (
+                      <div key={outcome} className="p-6 md:p-7 border-b md:border-r border-border md:[&:nth-child(2n)]:border-r-0 last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0">
+                        <p className="text-[11px] tracking-[0.18em] uppercase text-primary font-semibold mb-4">
+                          KPI / Result {String(index + 1).padStart(2, "0")}
+                        </p>
+                        <h3 className="font-display text-xl md:text-2xl font-extrabold tracking-tight text-foreground leading-snug mb-3">
+                          {outcomeContent.headline}
+                        </h3>
+                        <p className="text-muted-foreground leading-relaxed m-0">{outcomeContent.description}</p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -389,17 +456,25 @@ const CompanyLandingPage = () => {
 
         <section className="px-6 md:px-20 py-16 md:py-20 bg-black text-white border-y border-black">
           <div className="max-w-6xl mx-auto">
-            <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Relevant proof</p>
-            <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-8">
-              Built for complex, cross-functional revenue environments.
-            </h2>
-            <div className="grid md:grid-cols-2 border border-white/15 rounded-[2rem] overflow-hidden">
-              {proofPoints.map((point, index) => (
-                <div key={point} className="p-6 border-b md:border-r border-white/15 md:[&:nth-child(2n)]:border-r-0 md:[&:nth-last-child(-n+2)]:border-b-0 last:border-b-0">
-                  <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-semibold mb-3">Proof {String(index + 1).padStart(2, "0")}</p>
-                  <p className="text-white/78 leading-relaxed m-0">{point}</p>
-                </div>
-              ))}
+            <div className="grid lg:grid-cols-[0.78fr_1.22fr] gap-10 lg:gap-14 items-start">
+              <div className="lg:sticky lg:top-28">
+                <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">QXO reference engagement</p>
+                <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-5">
+                  Proof from a complex revenue environment.
+                </h2>
+                <p className="text-white/62 leading-relaxed">
+                  A concise reference for the kind of operating model, revenue infrastructure, and executive reporting discipline this engagement is designed to create.
+                </p>
+              </div>
+
+              <div className="border-y border-white/15">
+                {proofPoints.map((point, index) => (
+                  <div key={point} className="grid md:grid-cols-[150px_minmax(0,1fr)] gap-5 md:gap-8 py-6 border-b border-white/15 last:border-b-0">
+                    <p className="text-[11px] tracking-[0.18em] uppercase text-primary font-semibold m-0">Reference {String(index + 1).padStart(2, "0")}</p>
+                    <p className="text-white/80 leading-relaxed m-0">{point}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </section>
@@ -410,12 +485,7 @@ const CompanyLandingPage = () => {
             <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
               {page.outreachAngle}
             </h2>
-            <a
-              href={page.ctaHref}
-              className="inline-flex items-center justify-center rounded-full bg-background px-6 py-3 text-sm font-semibold tracking-[0.08em] uppercase text-foreground no-underline transition-opacity hover:opacity-90"
-            >
-              {page.ctaLabel}
-            </a>
+            {renderPrimaryCta("footer")}
           </div>
         </section>
       </main>
@@ -436,6 +506,54 @@ const CompanyLandingPage = () => {
                   <li key={example}>{example}</li>
                 ))}
               </ul>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isContactOpen ? (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="contact-drawer-title" onClick={() => setIsContactOpen(false)}>
+          <div className="absolute right-0 top-0 h-full w-full max-w-xl bg-background text-foreground shadow-2xl" onClick={(event) => event.stopPropagation()}>
+            <div className="flex h-full flex-col">
+              <div className="flex items-start justify-between gap-6 border-b border-border p-6 md:p-8">
+                <div>
+                  <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Contact Chad</p>
+                  <h2 id="contact-drawer-title" className="font-display text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-3">
+                    Discuss project fit.
+                  </h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Share a little context and I’ll route the message into an email so we can continue the conversation directly.
+                  </p>
+                </div>
+                <button type="button" onClick={() => setIsContactOpen(false)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" aria-label="Close contact form">
+                  Close
+                </button>
+              </div>
+
+              <form onSubmit={handleContactSubmit} className="flex-1 overflow-y-auto p-6 md:p-8">
+                <div className="grid gap-5">
+                  <label className="grid gap-2 text-sm font-semibold text-foreground">
+                    Name
+                    <input name="name" required className="rounded-2xl border border-border bg-background px-4 py-3 text-base font-normal outline-none transition-colors focus:border-primary" />
+                  </label>
+                  <label className="grid gap-2 text-sm font-semibold text-foreground">
+                    Email
+                    <input name="email" type="email" required className="rounded-2xl border border-border bg-background px-4 py-3 text-base font-normal outline-none transition-colors focus:border-primary" />
+                  </label>
+                  <label className="grid gap-2 text-sm font-semibold text-foreground">
+                    Company
+                    <input name="company" defaultValue={page.companyName} className="rounded-2xl border border-border bg-background px-4 py-3 text-base font-normal outline-none transition-colors focus:border-primary" />
+                  </label>
+                  <label className="grid gap-2 text-sm font-semibold text-foreground">
+                    Project context
+                    <textarea name="message" rows={6} required placeholder="What are you trying to solve, assess, or build?" className="rounded-2xl border border-border bg-background px-4 py-3 text-base font-normal outline-none transition-colors focus:border-primary" />
+                  </label>
+                </div>
+
+                <button type="submit" className="mt-8 inline-flex w-full items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold tracking-[0.08em] uppercase text-primary-foreground transition-opacity hover:opacity-90">
+                  Open email draft
+                </button>
+              </form>
             </div>
           </div>
         </div>
