@@ -22,76 +22,76 @@ export const proposalContactOverrides: Record<string, ProposalContactOverride[]>
       selectionRationale: "This replaces the Product Owner Chief placeholder with the likely named person surfaced from the LinkedIn profile search path."
     },
     {
-      name: "Speridian DHCS Division Chief",
-      title: "Likely DHCS division leadership / interview stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Speridian%20DHCS%20Division%20Chief%20MESMD%20Behavioral%20Health",
-      selectionRationale: "The job post names a Division Chief as part of the interview panel, so this is a likely authority path for the engagement."
+      name: "Priyaanka Shil",
+      title: "Product Owner / Product Lead",
+      linkedinUrl: "https://www.linkedin.com/in/priyaanka-shil-46a5b233a/",
+      selectionRationale: "Clay returned Priyaanka as a named Speridian Product Owner / Product Lead, making her a practical product-side target to test before outreach."
     },
     {
-      name: "Speridian HCD Lead",
-      title: "Likely HCD / adoption stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Speridian%20DHCS%20HCD%20Lead%20MESMD",
-      selectionRationale: "The job post identifies the HCD Lead as part of the interview panel and the role works closely with HCD on readiness and adoption."
+      name: "Kyle Donovan",
+      title: "Senior Technical Product Owner",
+      linkedinUrl: "https://www.linkedin.com/in/kyle-donovan-60983153/",
+      selectionRationale: "Clay returned Kyle as a named Speridian Senior Technical Product Owner, making him a reasonable technical/product stakeholder path."
     }
   ],
   neolytix: [
     {
-      name: "Neolytix CEO",
-      title: "CEO / executive sponsor for Growth Services",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Neolytix%20CEO%20Growth%20Services",
-      selectionRationale: "The job post says the role reports to the CEO / Head of NGS, making the CEO a high-confidence executive sponsor path."
+      name: "Ritu Kalsi Bhatnagar",
+      title: "President & COO",
+      linkedinUrl: "https://www.linkedin.com/in/ritu-kalsi-bhatnagar-54135a29/",
+      selectionRationale: "Clay returned Ritu as Neolytix President & COO, making her the strongest named executive sponsor path for the Growth Services opportunity."
     },
     {
-      name: "Head of Neolytix Growth Services",
-      title: "Likely NGS business owner",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Neolytix%20Growth%20Services%20NGS%20Head",
-      selectionRationale: "The role is specifically for Neolytix Growth Services and reports to the CEO / Head of NGS, making this the closest functional buyer."
+      name: "Garvit Chouhan",
+      title: "Head - Operations and Process Excellence",
+      linkedinUrl: "https://www.linkedin.com/in/chouhangarvit/",
+      selectionRationale: "Clay returned Garvit as Head of Operations and Process Excellence, making him a logical operating-model stakeholder for the proposed growth architecture work."
     },
     {
-      name: "Neolytix Healthcare Business Development Lead",
-      title: "Likely provider growth / referral-development stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Neolytix%20healthcare%20business%20development%20physician%20relations",
-      selectionRationale: "The scope centers on referral development and healthcare business development, so this function likely influences the need."
+      name: "Aashi Singh",
+      title: "Assistant Marketing Manager",
+      linkedinUrl: "https://www.linkedin.com/in/aashi-singh-983116193/",
+      selectionRationale: "Clay returned Aashi as a named Neolytix marketing contact, making her a practical marketing-side path while higher-level growth ownership is validated."
     }
   ],
   farlinium: [
     {
-      name: "Farlinium Sales Leadership",
-      title: "Likely sales / pipeline stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Farlinium%20sales%20leadership%20pipeline%20growth",
-      selectionRationale: "The role partners with sales and is measured on pipeline contribution, making sales leadership a practical door-opener."
+      name: "Yusuf Abediyeh",
+      title: "Director of Sales",
+      linkedinUrl: "https://www.linkedin.com/in/yabediyeh/",
+      selectionRationale: "Clay returned Yusuf as Farlinium Director of Sales, which aligns with the role's sales partnership and pipeline contribution focus."
     },
     {
-      name: "Farlinium Marketing Leadership",
-      title: "Likely growth marketing stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Farlinium%20marketing%20growth%20marketing%20leader",
-      selectionRationale: "The role owns B2B growth marketing execution, HubSpot workflows, and campaign reporting, pointing to marketing leadership as a likely buyer."
+      name: "Jed Hamilton",
+      title: "Marketing Specialist",
+      linkedinUrl: "https://www.linkedin.com/in/jed-hamilton/",
+      selectionRationale: "Clay returned Jed as a named Farlinium marketing contact, making him a relevant path for the growth marketing and HubSpot workflow scope."
     },
     {
-      name: "Farlinium Talent Acquisition",
-      title: "Likely recruiting / hiring process contact",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Farlinium%20talent%20acquisition%20recruiter",
-      selectionRationale: "When the functional hiring manager is not named, a talent acquisition or recruiter profile can still open the process conversation."
+      name: "John Palazzolo",
+      title: "Solution Sales Executive",
+      linkedinUrl: "https://www.linkedin.com/in/john-palazzolo-7260a98/",
+      selectionRationale: "Clay returned John as a Farlinium Solution Sales Executive, making him a secondary commercial stakeholder if sales leadership is the right entry point."
     }
   ],
   "logic20-20": [
     {
-      name: "Logic20/20 Digital Strategy & Transformation Leader",
-      title: "Likely practice-area hiring stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Logic20%2F20%20Digital%20Strategy%20Transformation%20leader",
-      selectionRationale: "The job post places the role in Digital Strategy & Transformation, making practice leadership the closest likely buyer."
+      name: "Lionel Bodin",
+      title: "Senior Director - Digital Strategy and Transformation",
+      linkedinUrl: "https://www.linkedin.com/in/lionel-bodin/",
+      selectionRationale: "Clay returned Lionel as a senior Logic20/20 Digital Strategy and Transformation leader, matching the practice area tied to the opportunity."
     },
     {
-      name: "Logic20/20 Talent Acquisition",
-      title: "Likely recruiter / talent process contact",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Logic20%2F20%20talent%20acquisition%20solution%20architect",
-      selectionRationale: "The role is posted through a recruiting workflow, so talent acquisition is a reasonable process owner to engage."
+      name: "Melanie Tran",
+      title: "Senior Manager, Digital Strategy & Transformation Practice Area Lead",
+      linkedinUrl: "https://www.linkedin.com/in/melanie-tran-97b19855/",
+      selectionRationale: "Clay returned Melanie as a Digital Strategy & Transformation practice area lead, making her a strong functional stakeholder path."
     },
     {
-      name: "Logic20/20 Engineering Delivery Leader",
-      title: "Likely solution delivery stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Logic20%2F20%20engineering%20delivery%20solution%20architect",
-      selectionRationale: "The role owns implementation architecture and delivery support, so engineering or delivery leadership could influence selection."
+      name: "Anna Emmett",
+      title: "Solution Architect",
+      linkedinUrl: "https://www.linkedin.com/in/annaemmett/",
+      selectionRationale: "Clay returned Anna as a Logic20/20 Solution Architect, making her a relevant peer or delivery stakeholder for the Solution Architect opportunity."
     }
   ]
 };
