@@ -27,6 +27,12 @@ export type CompanyLandingPage = {
   outreachAngle: string;
   ctaLabel: string;
   ctaHref: string;
+  outreachContacts?: {
+    name: string;
+    title: string;
+    linkedinUrl: string;
+    email?: string;
+  }[];
   status?: "draft" | "ready";
 };
 
