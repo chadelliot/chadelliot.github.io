@@ -12,6 +12,17 @@ export type CompanyLandingPage = {
     description: string;
     bullets: string[];
   };
+  proposal?: {
+    situation: string;
+    opportunity: string;
+    investment?: string;
+    phases: {
+      title: string;
+      duration: string;
+      description: string;
+    }[];
+    outcomes: string[];
+  };
   proofPoints: string[];
   outreachAngle: string;
   ctaLabel: string;
@@ -32,27 +43,55 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     companyName: "Business Talent Group",
     industry: "Independent consulting / on-demand executive talent",
     eyebrow: "Business Talent Group × Chad Parker",
-    headline: "A revenue systems operator for high-impact consulting engagements.",
-    subheadline: "I help leadership teams turn disconnected CRM, marketing automation, customer data, segmentation, and reporting workflows into measurable revenue operating systems.",
+    headline: "A senior revenue systems operator for BTG client engagements.",
+    subheadline: "A proposal-style point of view for supporting high-impact consulting projects where growth strategy, GTM operations, customer data, and executive reporting need to work as one system.",
     fitSummary: "Business Talent Group engagements often require senior operators who can step into ambiguous environments, diagnose the commercial system, and create practical execution paths. My strongest value is connecting strategy, marketing operations, data, technology, and executive reporting into a system teams can actually run.",
     likelyPriorities: [
-      "Revenue marketing and GTM systems diagnostics for clients with disconnected tools, unclear funnel visibility, or weak attribution.",
-      "Customer segmentation and lifecycle strategy for teams trying to prioritize accounts, audiences, offers, and next-best actions.",
-      "Executive-ready reporting that connects marketing activity, sales motion, pipeline quality, and revenue outcomes.",
-      "Practical operating models that help marketing, sales, data, and technology teams align around shared definitions and measurable growth."
+      "Diagnose fragmented CRM, marketing automation, campaign operations, funnel reporting, and attribution models.",
+      "Translate executive growth priorities into a practical GTM operating model across marketing, sales, analytics, and technology.",
+      "Build segmentation and lifecycle frameworks that help clients prioritize audiences, accounts, offers, and next-best actions.",
+      "Create executive-ready reporting that connects marketing activity, sales motion, pipeline quality, and revenue outcomes."
     ],
     recommendedEngagement: {
-      title: "Fractional Revenue Systems Diagnostic",
-      description: "A focused advisory engagement designed for companies that need senior-level GTM clarity without adding permanent headcount.",
+      title: "Revenue Systems Diagnostic for BTG Clients",
+      description: "A focused consulting engagement designed for companies that need senior-level GTM clarity without adding permanent headcount.",
       bullets: [
-        "Assess CRM, marketing automation, CDP, funnel reporting, campaign operations, and attribution gaps.",
-        "Identify where process, data quality, segmentation, or tool utilization is slowing revenue decisions.",
-        "Deliver an executive roadmap with prioritized fixes, quick wins, and longer-term operating model recommendations.",
-        "Support knowledge transfer so internal teams can maintain and evolve the system after the engagement."
+        "Audit the current-state revenue system across CRM, automation, CDP, campaign workflows, funnel reporting, and attribution.",
+        "Identify where process, data quality, segmentation, ownership, or technology utilization is slowing decision-making.",
+        "Build a prioritized roadmap with immediate fixes, operating-model recommendations, and longer-term revenue infrastructure improvements.",
+        "Equip internal teams with a practical path to maintain and evolve the system after the engagement."
+      ]
+    },
+    proposal: {
+      situation: "BTG clients often come to an engagement with a real business goal already defined — accelerate growth, improve sales efficiency, prepare for scale, stabilize reporting, or unlock more value from existing systems. The friction usually sits between departments: marketing has activity, sales has pipeline pressure, analytics has partial visibility, and technology has tools that are not fully translated into a shared operating model.",
+      opportunity: "The opportunity is to provide a senior operator who can move quickly from diagnosis to decision-ready recommendations. My work would help BTG clients understand what is happening across the commercial system, what is creating drag, and where targeted changes to segmentation, workflows, reporting, or platform utilization can unlock measurable progress.",
+      investment: "Project-based, fractional, or monthly advisory depending on client need",
+      phases: [
+        {
+          title: "Diagnose",
+          duration: "Weeks 1–2",
+          description: "Interview key stakeholders, review current funnel definitions, platform usage, reporting outputs, campaign workflows, and decision gaps."
+        },
+        {
+          title: "Design",
+          duration: "Weeks 3–4",
+          description: "Translate findings into a practical revenue systems model covering segmentation, attribution, lifecycle workflows, reporting, and ownership."
+        },
+        {
+          title: "Activate",
+          duration: "Weeks 5–8",
+          description: "Prioritize quick wins, define implementation steps, and support knowledge transfer so the client team can execute with clarity."
+        }
+      ],
+      outcomes: [
+        "A clear view of what is limiting funnel visibility, sales efficiency, campaign performance, or executive confidence.",
+        "A practical roadmap that connects business priorities to systems, data, workflows, and reporting improvements.",
+        "A stronger bridge between marketing, sales, analytics, technology, and executive stakeholders.",
+        "A deliverable package BTG can position as senior, outcome-based consulting rather than tactical marketing support."
       ]
     },
     proofPoints: defaultProofPoints,
-    outreachAngle: "I bring the combination of strategy, operating discipline, and hands-on revenue systems architecture that consulting clients often need when the problem sits between marketing, sales, data, and technology.",
+    outreachAngle: "If a BTG client needs someone who can move between executive strategy and hands-on revenue systems design, I can help turn complexity into a practical operating plan.",
     ctaLabel: "Discuss fit",
     ctaHref: "mailto:cparker@audaption.com?subject=Business%20Talent%20Group%20Consulting%20Fit",
     status: "ready"
@@ -62,14 +101,14 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     companyName: "Catalant",
     industry: "Independent consulting marketplace / enterprise talent platform",
     eyebrow: "Catalant × Chad Parker",
-    headline: "Enterprise-ready GTM, lifecycle, and revenue operations support.",
-    subheadline: "I help companies build clearer revenue systems across funnel visibility, segmentation, attribution, AI-enabled marketing operations, and executive reporting.",
+    headline: "A project-ready GTM systems proposal for Catalant clients.",
+    subheadline: "A practical consulting model for companies that need stronger revenue visibility, better segmentation, cleaner lifecycle workflows, and more usable executive reporting.",
     fitSummary: "Catalant project work is a strong match for packaged, outcome-based consulting. My background fits projects where companies need an operator who can diagnose revenue friction, translate business priorities into system requirements, and create decision-grade reporting and activation models.",
     likelyPriorities: [
-      "Marketing operations transformation for teams with underutilized Salesforce, HubSpot, CDP, analytics, or campaign infrastructure.",
-      "Segmentation and lifecycle models that help companies prioritize growth, retention, expansion, and customer-value opportunities.",
-      "Attribution and performance measurement frameworks that leadership teams can trust for investment decisions.",
-      "AI-assisted workflow design that improves campaign planning, content operations, decisioning, and execution speed without losing governance."
+      "Assess underutilized Salesforce, HubSpot, CDP, analytics, campaign, or attribution infrastructure.",
+      "Build lifecycle and customer segmentation models that prioritize growth, retention, expansion, and value creation.",
+      "Create decision-grade reporting frameworks leadership can use to evaluate performance and investment.",
+      "Design AI-assisted workflows that improve planning, personalization, execution speed, and operational consistency."
     ],
     recommendedEngagement: {
       title: "Revenue Marketing Systems Roadmap",
@@ -81,8 +120,36 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
         "Create executive-ready recommendations that can be owned by marketing, sales, RevOps, analytics, and IT."
       ]
     },
+    proposal: {
+      situation: "Many Catalant clients are not missing tools — they are missing a connected revenue operating model. The CRM may not reflect the actual sales motion, marketing automation may be campaign-led but not lifecycle-led, analytics may be descriptive but not decision-grade, and segmentation may exist in theory but not in activation.",
+      opportunity: "The opportunity is to package senior revenue marketing systems expertise into a clear, scoped project that turns ambiguity into a practical roadmap. I can help clients identify the highest-leverage improvements across data, workflows, attribution, segmentation, automation, and executive reporting.",
+      investment: "Fixed-fee diagnostic, scoped roadmap, or fractional implementation support",
+      phases: [
+        {
+          title: "Current-state review",
+          duration: "Weeks 1–2",
+          description: "Review platform architecture, data flow, funnel definitions, lifecycle workflows, dashboard outputs, and stakeholder decision needs."
+        },
+        {
+          title: "Opportunity model",
+          duration: "Weeks 3–4",
+          description: "Identify priority gaps and rank opportunities by revenue impact, implementation effort, ownership, and speed to value."
+        },
+        {
+          title: "Roadmap delivery",
+          duration: "Weeks 5–6",
+          description: "Deliver an executive-ready roadmap with governance, measurement, activation, and implementation recommendations."
+        }
+      ],
+      outcomes: [
+        "A sharper understanding of how GTM systems are enabling or limiting growth.",
+        "A prioritized roadmap leadership can use to fund, sequence, or resource the work.",
+        "Cleaner alignment between business strategy, customer data, lifecycle activation, and reporting.",
+        "A consulting deliverable that is practical enough for operators and clear enough for executives."
+      ]
+    },
     proofPoints: defaultProofPoints,
-    outreachAngle: "I am strongest in consulting situations where the client does not just need a recommendation — they need a senior operator who understands how to turn growth strategy into systems, workflows, dashboards, and adoption.",
+    outreachAngle: "For Catalant clients, I can operate as the translator between executive growth goals and the revenue systems required to make those goals measurable and executable.",
     ctaLabel: "Start a conversation",
     ctaHref: "mailto:cparker@audaption.com?subject=Catalant%20Consulting%20Fit",
     status: "ready"
@@ -92,14 +159,14 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     companyName: "Right Side Up",
     industry: "Growth marketing consulting network",
     eyebrow: "Right Side Up × Chad Parker",
-    headline: "A senior growth systems partner for companies scaling beyond campaign execution.",
-    subheadline: "I help growth teams connect acquisition, lifecycle marketing, segmentation, experimentation, analytics, and revenue attribution into one operating model.",
+    headline: "A growth systems proposal for companies scaling beyond channel execution.",
+    subheadline: "A senior advisory model for teams that need acquisition, lifecycle, segmentation, experimentation, analytics, and attribution connected into one growth operating system.",
     fitSummary: "Right Side Up is a natural fit when companies need senior growth guidance that goes deeper than channel management. My value is strongest when the growth challenge requires better systems, cleaner segmentation, measurable lifecycle strategy, and executive visibility across the full customer journey.",
     likelyPriorities: [
-      "Lifecycle and retention strategy for growth teams trying to move beyond acquisition-only performance marketing.",
-      "Segmentation models that improve audience prioritization, campaign relevance, and conversion quality.",
-      "Marketing operations systems that help lean teams scale campaigns, tests, reporting, and personalization.",
-      "Performance narratives that connect channel activity to pipeline, revenue, margin, retention, and customer value."
+      "Move growth strategy beyond channel execution into lifecycle, retention, segmentation, and customer-value planning.",
+      "Design audience and account prioritization models that improve relevance, conversion quality, and growth efficiency.",
+      "Create marketing operations systems that let lean teams scale campaigns, testing, reporting, and personalization.",
+      "Develop performance narratives that connect activity to pipeline, revenue, margin, retention, and customer value."
     ],
     recommendedEngagement: {
       title: "Growth Systems Advisory Sprint",
@@ -109,6 +176,34 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
         "Identify gaps between campaign execution and measurable business outcomes.",
         "Build a prioritization model for segments, channels, tests, and lifecycle opportunities.",
         "Create a repeatable operating rhythm for experimentation, reporting, and optimization."
+      ]
+    },
+    proposal: {
+      situation: "Many growth teams can execute campaigns, but the next stage of scale requires a better operating layer. Teams need sharper segmentation, clearer lifecycle motions, more consistent experimentation, and reporting that connects channel activity to business outcomes rather than isolated metrics.",
+      opportunity: "The opportunity is to bring senior growth systems support to Right Side Up clients that need to connect channel execution with retention, lifecycle automation, CRM workflows, experimentation, and revenue measurement.",
+      investment: "Monthly advisory, fixed-fee growth audit, or sprint-based consulting",
+      phases: [
+        {
+          title: "Growth audit",
+          duration: "Weeks 1–2",
+          description: "Review the growth motion across acquisition, lifecycle, CRM, reporting, testing, segmentation, and customer-value signals."
+        },
+        {
+          title: "Prioritization model",
+          duration: "Weeks 3–4",
+          description: "Define where growth work should focus based on revenue potential, audience readiness, channel leverage, and operational feasibility."
+        },
+        {
+          title: "Operating rhythm",
+          duration: "Weeks 5–6",
+          description: "Build a repeatable cadence for campaign planning, testing, reporting, insight generation, and optimization."
+        }
+      ],
+      outcomes: [
+        "A more connected view of growth performance across acquisition, lifecycle, retention, and customer value.",
+        "A clearer prioritization model for campaigns, tests, segments, and channel investments.",
+        "A stronger operating layer for lean teams that need speed without losing measurement discipline.",
+        "A senior advisory option for Right Side Up clients that need systems-level growth support."
       ]
     },
     proofPoints: defaultProofPoints,
@@ -123,13 +218,13 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     industry: "Interim and fractional executive network",
     eyebrow: "Cerius Executives × Chad Parker",
     headline: "Fractional revenue marketing leadership for companies that need operating clarity fast.",
-    subheadline: "I help executive teams stabilize and scale marketing operations, GTM systems, segmentation, lifecycle strategy, and revenue reporting without adding permanent leadership overhead.",
+    subheadline: "A proposal for interim or fractional support across marketing operations, GTM systems, segmentation, lifecycle strategy, revenue reporting, and cross-functional execution.",
     fitSummary: "Cerius is a strong fit for interim or fractional leadership assignments where the business needs an experienced operator to clarify priorities, organize the system, and create momentum across marketing, sales, analytics, and technology teams.",
     likelyPriorities: [
-      "Interim marketing operations or revenue marketing leadership during transition, transformation, or scale-up periods.",
-      "Executive alignment around funnel definitions, campaign governance, segmentation, attribution, and reporting standards.",
-      "MarTech and CRM operating-model improvements that reduce friction between strategy and execution.",
-      "Team structure, workflow design, and cross-functional rhythms that help internal teams move faster with clearer ownership."
+      "Stabilize marketing operations or revenue marketing leadership during transition, transformation, or scale-up periods.",
+      "Align leaders around funnel definitions, campaign governance, segmentation, attribution, and reporting standards.",
+      "Improve MarTech and CRM operating models that currently create friction between strategy and execution.",
+      "Clarify team structure, workflow design, ownership, and cross-functional rhythms."
     ],
     recommendedEngagement: {
       title: "Fractional Revenue Marketing Executive Engagement",
@@ -139,6 +234,34 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
         "Establish priorities across lifecycle marketing, segmentation, campaign governance, and revenue measurement.",
         "Create a practical operating cadence between marketing, sales, analytics, technology, and finance stakeholders.",
         "Support leadership-level decision-making while building internal capability and reducing dependency."
+      ]
+    },
+    proposal: {
+      situation: "Companies seeking fractional leadership often have business urgency before they have the internal structure to absorb it. Marketing may need to influence revenue, but the operating model, data, governance, reporting, or team design may not yet support the expectation.",
+      opportunity: "The opportunity is to provide fractional executive support that brings structure quickly: clarify the revenue marketing strategy, organize workflows, align stakeholders, and build the systems required to make growth measurable and repeatable.",
+      investment: "Monthly fractional retainer or scoped interim leadership assignment",
+      phases: [
+        {
+          title: "Stabilize",
+          duration: "First 30 days",
+          description: "Assess leadership needs, team capacity, platform utilization, reporting quality, campaign governance, and immediate business priorities."
+        },
+        {
+          title: "Structure",
+          duration: "Days 31–60",
+          description: "Define the operating model, stakeholder cadence, workflow ownership, reporting standards, and priority revenue initiatives."
+        },
+        {
+          title: "Scale",
+          duration: "Days 61–90",
+          description: "Support execution, build internal capability, and transition the operating rhythm into a sustainable model."
+        }
+      ],
+      outcomes: [
+        "Clear leadership direction across marketing operations, lifecycle, GTM systems, and revenue reporting.",
+        "A more disciplined operating cadence between marketing, sales, analytics, technology, and finance.",
+        "Reduced ambiguity around ownership, priorities, metrics, and platform usage.",
+        "A stronger bridge between interim leadership needs and long-term internal capability."
       ]
     },
     proofPoints: defaultProofPoints,
@@ -152,14 +275,14 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     companyName: "Graphite",
     industry: "Independent consulting and expert marketplace",
     eyebrow: "Graphite × Chad Parker",
-    headline: "Project-based GTM and revenue systems consulting for complex growth environments.",
-    subheadline: "I support companies that need strategic clarity and practical execution across marketing operations, segmentation, attribution, lifecycle workflows, and AI-enabled GTM systems.",
+    headline: "A project-based GTM systems proposal for Graphite clients.",
+    subheadline: "A structured consulting offer for companies that need clearer revenue operations, segmentation, lifecycle activation, attribution, and executive decision support.",
     fitSummary: "Graphite is a fit for focused project work where clients need independent expertise and clear deliverables. My background maps well to projects involving revenue operations diagnostics, marketing technology optimization, customer segmentation, funnel analytics, and executive reporting.",
     likelyPriorities: [
-      "GTM systems diagnostics for teams with unclear ownership, fragmented tooling, or inconsistent reporting.",
-      "CDP, CRM, and marketing automation strategy that turns customer data into audience activation and decisioning.",
-      "Segmentation and lifecycle frameworks that help companies prioritize growth, retention, and expansion opportunities.",
-      "Executive dashboards and operating narratives that make performance easier to understand and act on."
+      "Diagnose unclear GTM ownership, fragmented tooling, inconsistent reporting, or underperforming workflows.",
+      "Connect CDP, CRM, and marketing automation strategy to audience activation and decisioning.",
+      "Build segmentation and lifecycle frameworks that prioritize growth, retention, and expansion opportunities.",
+      "Create executive dashboards and operating narratives that make performance easier to understand and act on."
     ],
     recommendedEngagement: {
       title: "GTM Systems Diagnostic and Roadmap",
@@ -169,6 +292,34 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
         "Identify process gaps, data gaps, reporting gaps, and underutilized technology investments.",
         "Define a practical roadmap across quick wins, operating-model improvements, and platform optimization.",
         "Package findings in a format that leadership can use for prioritization, budget, and team alignment."
+      ]
+    },
+    proposal: {
+      situation: "Graphite clients may need targeted expertise without creating a permanent role. The need is often specific but complex: clarify reporting, clean up the funnel, improve platform utilization, build segmentation, or define a roadmap for better revenue visibility.",
+      opportunity: "The opportunity is to package senior GTM systems expertise into a clear project that gives leadership a practical answer: what is broken, what matters most, what should be done first, and what outcomes the business can expect.",
+      investment: "Fixed-fee project, diagnostic sprint, or advisory extension",
+      phases: [
+        {
+          title: "Discovery",
+          duration: "Weeks 1–2",
+          description: "Review the client’s GTM motion, platform usage, reporting stack, data flow, lifecycle programs, and stakeholder priorities."
+        },
+        {
+          title: "Systems map",
+          duration: "Weeks 3–4",
+          description: "Document gaps across tools, definitions, workflows, data, governance, segmentation, and reporting."
+        },
+        {
+          title: "Roadmap",
+          duration: "Weeks 5–6",
+          description: "Deliver a sequenced roadmap with quick wins, operating-model updates, and platform or workflow recommendations."
+        }
+      ],
+      outcomes: [
+        "A clear diagnosis of current GTM system friction.",
+        "A sequenced roadmap leadership can use to prioritize resources and next steps.",
+        "More actionable segmentation, lifecycle, reporting, and automation recommendations.",
+        "A practical consulting deliverable designed for immediate decision-making."
       ]
     },
     proofPoints: defaultProofPoints,
@@ -182,14 +333,14 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     companyName: "Contra",
     industry: "Independent work and portfolio platform",
     eyebrow: "Contra × Chad Parker",
-    headline: "Premium revenue marketing consulting packaged for independent project work.",
-    subheadline: "I help companies improve GTM systems, lifecycle marketing, segmentation, CRM/CDP activation, AI decisioning, and revenue reporting through focused advisory and buildout engagements.",
+    headline: "A premium consulting storefront for revenue marketing systems work.",
+    subheadline: "A proposal-led landing page for packaging GTM systems audits, segmentation strategy, lifecycle activation, AI marketing operations, and fractional advisory services.",
     fitSummary: "Contra is best used as a polished storefront for premium independent consulting, not commodity freelance work. This page positions my services as packaged, executive-level offers built around revenue systems outcomes rather than hourly marketing tasks.",
     likelyPriorities: [
-      "Clear service packaging for revenue systems audits, GTM diagnostics, segmentation strategy, and AI marketing operations roadmaps.",
-      "A premium positioning layer that communicates executive value, not task-based freelance support.",
-      "Project scopes that can be sold as fixed-fee diagnostics, monthly retainers, or targeted advisory engagements.",
-      "Proof-driven messaging that connects enterprise outcomes to practical deliverables for smaller or scaling companies."
+      "Package services around revenue systems audits, GTM diagnostics, segmentation strategy, and AI marketing operations roadmaps.",
+      "Position the work as executive value, not task-based freelance marketing support.",
+      "Create fixed-fee, monthly retainer, and advisory scopes that are easy for buyers to understand.",
+      "Use proof-driven messaging that connects enterprise outcomes to practical deliverables for smaller or scaling companies."
     ],
     recommendedEngagement: {
       title: "Packaged Revenue Systems Consulting Offers",
@@ -201,8 +352,36 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
         "Fractional Advisory Retainer for ongoing executive guidance across GTM systems, analytics, and campaign operations."
       ]
     },
+    proposal: {
+      situation: "Independent consulting platforms can easily pull premium operators into commodity pricing unless the offer is packaged clearly. The page needs to position the work as a business outcome: clearer revenue systems, better segmentation, smarter activation, and more trusted reporting.",
+      opportunity: "The opportunity is to use Contra as a storefront for packaged offers that are easy to buy and hard to commoditize. Each offer should define the problem, the scope, the deliverable, and the business value before an hourly conversation begins.",
+      investment: "Fixed-fee offers, monthly retainers, or scoped advisory packages",
+      phases: [
+        {
+          title: "Package",
+          duration: "Offer setup",
+          description: "Define the core consulting offers, outcomes, deliverables, pricing logic, and buyer-facing positioning."
+        },
+        {
+          title: "Qualify",
+          duration: "Inquiry stage",
+          description: "Use a short intake process to understand the buyer’s systems, stage, business goals, and urgency."
+        },
+        {
+          title: "Deliver",
+          duration: "Project or retainer",
+          description: "Execute the agreed audit, roadmap, advisory, or activation support with clear deliverables and decision-ready outputs."
+        }
+      ],
+      outcomes: [
+        "A stronger premium positioning layer for independent consulting work.",
+        "Clear service offers that reduce scope ambiguity and protect pricing power.",
+        "A better path from portfolio interest to project discussion.",
+        "A structure that supports fixed-fee and retainer conversations rather than commodity hourly work."
+      ]
+    },
     proofPoints: defaultProofPoints,
-    outreachAngle: "I use Contra as a way to package executive-level consulting into clear project offers, making it easier for companies to understand the outcome, scope, and value before we begin.",
+    outreachAngle: "Contra should function as a polished consulting storefront — with aboutchad.com providing the proposal-style proof layer behind each premium offer.",
     ctaLabel: "Request consulting scope",
     ctaHref: "mailto:cparker@audaption.com?subject=Contra%20Consulting%20Scope",
     status: "ready"
@@ -212,14 +391,14 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     companyName: "LinkedIn Services",
     industry: "Professional services marketplace / owned consulting channel",
     eyebrow: "LinkedIn Services × Chad Parker",
-    headline: "A direct consulting channel for revenue marketing, GTM systems, and AI-enabled operations.",
-    subheadline: "I help companies diagnose and improve the operating layer between marketing strategy, sales execution, customer data, automation, attribution, and executive decision-making.",
+    headline: "A direct consulting funnel for revenue marketing, GTM systems, and AI-enabled operations.",
+    subheadline: "A proposal-style page that turns LinkedIn interest into a clear next step for project-based consulting, fractional advisory, and monthly retainer work.",
     fitSummary: "LinkedIn Services is the strongest owned-channel path because it lets me control the positioning, pricing, service packaging, and audience. The goal is to present a clear, premium consulting offer for companies that need senior revenue marketing systems expertise without a full-time hire.",
     likelyPriorities: [
-      "A services profile that clearly positions revenue marketing operations, GTM systems, segmentation, CDP activation, and AI decisioning.",
-      "Direct inquiry flow for fractional advisory, project-based diagnostics, and monthly retainer work.",
-      "Messaging that appeals to founders, CMOs, CROs, RevOps leaders, and PE-backed operators with complex growth systems.",
-      "A consistent bridge between LinkedIn outreach, resume proof, and personalized company landing pages on aboutchad.com."
+      "Position services around revenue marketing operations, GTM systems, segmentation, CDP activation, and AI decisioning.",
+      "Create a direct inquiry flow for fractional advisory, project-based diagnostics, and monthly retainer work.",
+      "Speak to founders, CMOs, CROs, RevOps leaders, and PE-backed operators with complex growth systems.",
+      "Bridge LinkedIn outreach, resume proof, and personalized company landing pages on aboutchad.com."
     ],
     recommendedEngagement: {
       title: "Owned-Channel Consulting Funnel",
@@ -229,6 +408,34 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
         "Use company-specific landing pages to support outbound messages and application follow-up.",
         "Package services into fixed-fee audits, 6–8 week diagnostics, and monthly advisory retainers.",
         "Keep positioning senior, strategic, and outcome-based to avoid commodity marketing support inquiries."
+      ]
+    },
+    proposal: {
+      situation: "LinkedIn is likely to be the most direct path to premium advisory work, but it needs to be more than a profile. The services page should act as the front door, while aboutchad.com becomes the deeper proposal layer that demonstrates the thinking behind the offer.",
+      opportunity: "The opportunity is to create an owned consulting funnel: LinkedIn generates interest, company-specific pages show relevance, and the offer structure moves prospects toward fixed-fee diagnostics, fractional advisory, or monthly retainer conversations.",
+      investment: "Owned-channel setup, outbound support, and retainer-based consulting offers",
+      phases: [
+        {
+          title: "Position",
+          duration: "Setup",
+          description: "Define the consulting categories, profile language, proof points, and offer architecture for LinkedIn Services."
+        },
+        {
+          title: "Personalize",
+          duration: "Outreach",
+          description: "Build company-specific proposal pages that connect the buyer’s likely needs to a tailored consulting point of view."
+        },
+        {
+          title: "Convert",
+          duration: "Inquiry to scope",
+          description: "Move interested companies into a scoped diagnostic, advisory retainer, or project-based consulting engagement."
+        }
+      ],
+      outcomes: [
+        "A stronger direct channel for premium consulting opportunities.",
+        "Clearer positioning around revenue marketing operations, GTM systems, segmentation, and AI-enabled operations.",
+        "A repeatable way to support outreach with tailored landing pages.",
+        "A better path from profile view to consulting conversation."
       ]
     },
     proofPoints: defaultProofPoints,
