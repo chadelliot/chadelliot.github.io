@@ -310,34 +310,38 @@ const CompanyLandingPage = () => {
         </section>
 
         {proposal?.phases?.length ? (
-          <section className="px-6 md:px-20 py-16 md:py-20 bg-muted/40 border-y border-border">
+          <section className="px-6 md:px-20 py-16 md:py-20 bg-black text-white border-y border-black">
             <div className="max-w-6xl mx-auto">
               <div className="max-w-4xl mb-10">
                 <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Recommended proposal</p>
-                <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+                <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-5">
                   {page.recommendedEngagement.title}
                 </h2>
-                <p className="text-muted-foreground leading-relaxed">{page.recommendedEngagement.description}</p>
+                <p className="text-white/65 leading-relaxed">{page.recommendedEngagement.description}</p>
               </div>
 
-              <div className="grid gap-5">
+              <div className="border-y border-white/15">
                 {phaseDetails.map((phase, index) => (
-                  <div key={phase.title} className="rounded-[2rem] border border-border bg-background p-5 md:p-7 shadow-sm overflow-hidden">
-                    <div className="grid md:grid-cols-[180px_minmax(0,1fr)] gap-5 md:gap-8 items-start">
+                  <div key={phase.title} className="py-7 md:py-9 border-b border-white/15 last:border-b-0">
+                    <div className="grid md:grid-cols-[190px_minmax(0,1fr)] gap-6 md:gap-10 items-start">
                       <div>
-                        <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mb-4">
-                          {index + 1}
+                        <div className="inline-flex items-center gap-3 mb-4">
+                          <span className="text-5xl md:text-6xl font-display font-extrabold leading-none text-white">0{index + 1}</span>
+                          <span className="h-px w-12 bg-primary" aria-hidden="true" />
                         </div>
                         <p className="text-[11px] tracking-[0.16em] uppercase text-primary font-semibold mb-2">{phase.duration}</p>
-                        <h3 className="font-display text-2xl md:text-3xl font-extrabold text-foreground leading-tight">{phase.title}</h3>
+                        <h3 className="font-display text-2xl md:text-3xl font-extrabold text-white leading-tight">{phase.title}</h3>
                       </div>
 
                       <div>
-                        <p className="text-muted-foreground leading-relaxed mb-5">{phase.description}</p>
-                        <div className="grid md:grid-cols-2 gap-3">
-                          {phase.details.map((detail) => (
-                            <div key={detail} className="rounded-2xl border border-border bg-muted/40 p-4">
-                              <p className="text-foreground leading-relaxed m-0">{detail}</p>
+                        <p className="text-white/72 leading-relaxed text-base md:text-lg mb-6">{phase.description}</p>
+                        <div className="grid md:grid-cols-2 gap-x-6 gap-y-4">
+                          {phase.details.map((detail, detailIndex) => (
+                            <div key={detail} className="border-t border-white/15 pt-4">
+                              <p className="text-[10px] tracking-[0.16em] uppercase text-white/35 font-semibold mb-2">
+                                Focus {String(detailIndex + 1).padStart(2, "0")}
+                              </p>
+                              <p className="text-white/84 leading-relaxed m-0">{detail}</p>
                             </div>
                           ))}
                         </div>
@@ -351,35 +355,49 @@ const CompanyLandingPage = () => {
         ) : null}
 
         {proposal?.outcomes?.length ? (
-          <section className="px-6 md:px-20 py-16 md:py-20">
-            <div className="max-w-6xl mx-auto grid md:grid-cols-[0.85fr_1.15fr] gap-8 md:gap-14 items-start">
-              <div>
-                <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Expected outcomes</p>
-                <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
-                  What the engagement should make clearer.
-                </h2>
+          <section className="px-6 md:px-20 py-16 md:py-20 bg-background">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid md:grid-cols-[0.85fr_1.15fr] gap-8 md:gap-14 items-end mb-10">
+                <div>
+                  <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Expected outcomes</p>
+                  <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-0">
+                    What the engagement should make clearer.
+                  </h2>
+                </div>
+                <p className="text-muted-foreground leading-relaxed m-0">
+                  The goal is to leave leadership with decision-ready visibility: where friction exists, what should be prioritized, and how the next phase of work should be measured.
+                </p>
               </div>
-              <div className="grid gap-4">
-                {proposal.outcomes.map((outcome) => (
-                  <div key={outcome} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-                    <p className="text-foreground font-medium leading-relaxed">{outcome}</p>
-                  </div>
-                ))}
+
+              <div className="border border-border rounded-[2rem] overflow-hidden bg-background">
+                <div className="grid md:grid-cols-2">
+                  {proposal.outcomes.map((outcome, index) => (
+                    <div key={outcome} className="p-6 md:p-7 border-b md:border-r border-border md:[&:nth-child(2n)]:border-r-0 last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0">
+                      <p className="text-[11px] tracking-[0.18em] uppercase text-primary font-semibold mb-4">
+                        KPI / Result {String(index + 1).padStart(2, "0")}
+                      </p>
+                      <p className="font-display text-xl md:text-2xl font-extrabold tracking-tight text-foreground leading-snug m-0">
+                        {outcome}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
         ) : null}
 
-        <section className="px-6 md:px-20 py-16 md:py-20 bg-muted/40 border-y border-border">
+        <section className="px-6 md:px-20 py-16 md:py-20 bg-black text-white border-y border-black">
           <div className="max-w-6xl mx-auto">
             <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Relevant proof</p>
-            <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-8">
+            <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-8">
               Built for complex, cross-functional revenue environments.
             </h2>
-            <div className="grid md:grid-cols-2 gap-4">
-              {proofPoints.map((point) => (
-                <div key={point} className="rounded-2xl border border-border bg-background p-6 shadow-sm">
-                  <p className="text-foreground leading-relaxed">{point}</p>
+            <div className="grid md:grid-cols-2 border border-white/15 rounded-[2rem] overflow-hidden">
+              {proofPoints.map((point, index) => (
+                <div key={point} className="p-6 border-b md:border-r border-white/15 md:[&:nth-child(2n)]:border-r-0 md:[&:nth-last-child(-n+2)]:border-b-0 last:border-b-0">
+                  <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-semibold mb-3">Proof {String(index + 1).padStart(2, "0")}</p>
+                  <p className="text-white/78 leading-relaxed m-0">{point}</p>
                 </div>
               ))}
             </div>
