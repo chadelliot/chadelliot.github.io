@@ -32,6 +32,7 @@ export type CompanyLandingPage = {
     title: string;
     linkedinUrl: string;
     email?: string;
+    selectionRationale?: string;
   }[];
   status?: "draft" | "ready";
 };
