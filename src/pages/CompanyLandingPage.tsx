@@ -83,58 +83,6 @@ const nodePositions = [
   { cx: 209, cy: 250, nameX: 140, nameY: 220, descX: 140, descY: 240, anchor: "end" as const, descLines: ["Closed-loop reporting", "tied to revenue outcomes"] },
 ];
 
-const proposalWorkstreamDetails = [
-  { title: "Foundation audit", details: ["Review CRM", "Marketing automation", "Analytics", "Attribution fields"] },
-  { title: "Operating model", details: ["Lifecycle stages", "Handoff points", "Team ownership", "Decision cadence"] },
-  { title: "Signal map", details: ["Buyer behavior", "Account intent", "Content signals", "Revenue triggers"] },
-  { title: "Prioritization", details: ["Segment logic", "Scoring rules", "ICP fit", "Focus markets"] },
-  { title: "Activation plays", details: ["Campaign flows", "Sales plays", "Landing pages", "Routing logic"] },
-  { title: "Closed-loop reporting", details: ["Funnel movement", "Pipeline impact", "EBITDA return", "Optimization queue"] },
-];
-
-const proposalNodePositions = [
-  { x: 70, y: 220 },
-  { x: 330, y: 80 },
-  { x: 330, y: 360 },
-  { x: 590, y: 80 },
-  { x: 590, y: 360 },
-  { x: 850, y: 220 },
-];
-
-const proposalConnections = [
-  [0, 1],
-  [0, 2],
-  [1, 3],
-  [2, 4],
-  [3, 5],
-  [4, 5],
-];
-
-const splitSvgLines = (text: string, maxChars = 24, maxLines = 2) => {
-  const words = text.replace(/\s+/g, " ").trim().split(" ");
-  const lines: string[] = [];
-  let current = "";
-
-  words.forEach((word) => {
-    const next = current ? `${current} ${word}` : word;
-
-    if (next.length > maxChars && current) {
-      lines.push(current);
-      current = word;
-    } else {
-      current = next;
-    }
-  });
-
-  if (current) lines.push(current);
-
-  if (lines.length <= maxLines) return lines;
-
-  const trimmed = lines.slice(0, maxLines);
-  trimmed[maxLines - 1] = `${trimmed[maxLines - 1].replace(/[.,;:]?$/, "")}…`;
-  return trimmed;
-};
-
 const CompanyLandingPage = () => {
   const { slug } = useParams();
   const page = slug ? companyLandingPages[slug] : undefined;
@@ -194,7 +142,19 @@ const CompanyLandingPage = () => {
 
   const proofPoints = page.proofPoints?.length ? page.proofPoints : fallbackProofPoints;
   const proposal = page.proposal;
-  const additionalProposalNodes = page.recommendedEngagement.bullets.slice(proposalWorkstreamDetails.length);
+  const engagementBullets = page.recommendedEngagement.bullets;
+  const phaseDetails = proposal?.phases.map((phase, index) => {
+    const detailGroups = [
+      engagementBullets.slice(0, 2),
+      engagementBullets.slice(1, 3),
+      engagementBullets.slice(2, 4),
+    ];
+
+    return {
+      ...phase,
+      details: detailGroups[index] || engagementBullets.slice(0, 2),
+    };
+  }) || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -349,178 +309,40 @@ const CompanyLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-6 md:px-20 py-16 md:py-20 bg-[#050505] text-white border-y border-black overflow-hidden">
-          <div className="max-w-6xl mx-auto">
-            <div className="max-w-4xl mx-auto text-center mb-10 md:mb-12">
-              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Recommended proposal</p>
-              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-5">
-                {page.recommendedEngagement.title}
-              </h2>
-              <p className="text-white/70 leading-relaxed mb-4">{page.recommendedEngagement.description}</p>
-              <p className="text-sm text-white/55 leading-relaxed max-w-3xl mx-auto">
-                The work is organized as connected workstreams instead of isolated tasks, so strategy, systems, activation, and measurement stay tied together from the beginning.
-              </p>
-            </div>
-
-            <div className="relative rounded-[2rem] border border-white/10 bg-white/[0.03] p-3 md:p-5 shadow-2xl overflow-hidden">
-              <div className="absolute inset-0 opacity-35" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(47, 163, 127, 0.42) 1px, transparent 0)", backgroundSize: "24px 24px" }} />
-              <div className="absolute -top-32 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
-              <svg viewBox="0 0 1120 650" xmlns="http://www.w3.org/2000/svg" className="relative z-10 hidden md:block w-full h-auto" aria-label="Connected proposal workstreams diagram">
-                <defs>
-                  <filter id="proposal-shadow-clean" x="-25%" y="-25%" width="150%" height="160%">
-                    <feDropShadow dx="0" dy="18" stdDeviation="10" floodColor="#000000" floodOpacity="0.35" />
-                  </filter>
-                  <linearGradient id="proposal-node-clean" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#ffffff" />
-                    <stop offset="100%" stopColor="#edf1ec" />
-                  </linearGradient>
-                  <linearGradient id="proposal-pill-clean" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#171717" />
-                    <stop offset="100%" stopColor="#0c0c0c" />
-                  </linearGradient>
-                </defs>
-
-                <path d="M42 78 C250 24 374 96 548 58 C730 18 868 82 1078 42" fill="none" stroke="rgba(47, 163, 127, 0.2)" strokeWidth="1.2" strokeDasharray="7 10" />
-                <path d="M44 596 C262 538 378 612 548 574 C734 532 882 604 1078 548" fill="none" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="1.2" strokeDasharray="7 10" />
-
-                {proposalConnections.map(([fromIndex, toIndex], index) => {
-                  const from = proposalNodePositions[fromIndex];
-                  const to = proposalNodePositions[toIndex];
-                  const fromX = from.x + 214;
-                  const fromY = from.y + 56;
-                  const toX = to.x - 18;
-                  const toY = to.y + 56;
-                  const elbowX = fromX + (toX - fromX) * 0.5;
-
-                  return (
-                    <path
-                      key={`proposal-flow-${fromIndex}-${toIndex}`}
-                      d={`M ${fromX} ${fromY} C ${elbowX} ${fromY}, ${elbowX} ${toY}, ${toX} ${toY}`}
-                      fill="none"
-                      stroke="rgba(47, 163, 127, 0.5)"
-                      strokeWidth="1.8"
-                      strokeDasharray="7 8"
-                      strokeDashoffset="80"
-                      strokeLinecap="round"
-                      opacity="0"
-                    >
-                      <animate attributeName="opacity" from="0" to="1" dur="0.25s" begin={`${0.45 + index * 0.12}s`} fill="freeze" />
-                      <animate attributeName="stroke-dashoffset" from="80" to="0" dur="0.7s" begin={`${0.45 + index * 0.12}s`} fill="freeze" />
-                    </path>
-                  );
-                })}
-
-                {proposalWorkstreamDetails.map((workstream, index) => {
-                  const position = proposalNodePositions[index];
-                  const begin = 0.08 + index * 0.16;
-                  const titleLines = splitSvgLines(workstream.title, 22, 2);
-
-                  return (
-                    <g key={workstream.title} opacity="0" transform={`translate(${position.x} ${position.y})`} filter="url(#proposal-shadow-clean)">
-                      <animate attributeName="opacity" from="0" to="1" dur="0.4s" begin={`${begin}s`} fill="freeze" />
-                      <animateTransform
-                        attributeName="transform"
-                        type="translate"
-                        from={`${position.x - 26} ${position.y + 14}`}
-                        to={`${position.x} ${position.y}`}
-                        dur="0.55s"
-                        begin={`${begin}s`}
-                        fill="freeze"
-                      />
-
-                      <path d="M16 18 L178 0 L214 22 L214 102 L52 122 L16 100 Z" fill="#ded9d0" stroke="#b9b2a9" strokeWidth="1" />
-                      <path d="M16 18 L178 0 L214 22 L52 40 Z" fill="url(#proposal-node-clean)" stroke="#c8c1b8" strokeWidth="1" />
-                      <path d="M52 40 L214 22 L214 102 L52 122 Z" fill="#f7f4ef" stroke="#c8c1b8" strokeWidth="1" />
-                      <path d="M16 18 L52 40 L52 122 L16 100 Z" fill="#d8d2c8" stroke="#c8c1b8" strokeWidth="1" />
-
-                      <text x="70" y="58" fill="#2fa37f" fontFamily="DM Mono, monospace" fontSize="10" fontWeight="700" letterSpacing="2">
-                        WS {String(index + 1).padStart(2, "0")}
-                      </text>
-                      <text x="70" y="82" fill="#111111" fontFamily="Inter, sans-serif" fontSize="16" fontWeight="800">
-                        {titleLines.map((line, lineIndex) => (
-                          <tspan key={line} x="70" dy={lineIndex === 0 ? 0 : 18}>
-                            {line}
-                          </tspan>
-                        ))}
-                      </text>
-                      <circle cx="36" cy="40" r="10" fill="rgba(47, 163, 127, 0.14)" stroke="#2fa37f" strokeWidth="1" />
-                      <circle cx="36" cy="40" r="3" fill="#2fa37f" />
-
-                      {workstream.details.map((detail, detailIndex) => {
-                        const pillX = detailIndex % 2 === 0 ? 18 : 118;
-                        const pillY = 144 + Math.floor(detailIndex / 2) * 46;
-                        const pillBegin = begin + 0.2 + detailIndex * 0.06;
-
-                        return (
-                          <g key={detail} opacity="0" transform={`translate(${pillX} ${pillY})`}>
-                            <animate attributeName="opacity" from="0" to="1" dur="0.28s" begin={`${pillBegin}s`} fill="freeze" />
-                            <animateTransform
-                              attributeName="transform"
-                              type="translate"
-                              from={`${pillX} ${pillY + 10}`}
-                              to={`${pillX} ${pillY}`}
-                              dur="0.35s"
-                              begin={`${pillBegin}s`}
-                              fill="freeze"
-                            />
-                            <rect width="92" height="34" rx="12" fill="url(#proposal-pill-clean)" stroke="rgba(255,255,255,0.16)" />
-                            <text x="46" y="21.5" textAnchor="middle" fill="rgba(255,255,255,0.78)" fontFamily="Inter, sans-serif" fontSize="9.5" fontWeight="650">
-                              {detail}
-                            </text>
-                          </g>
-                        );
-                      })}
-                    </g>
-                  );
-                })}
-              </svg>
-
-              <div className="relative z-10 grid gap-4 md:hidden">
-                {proposalWorkstreamDetails.map((workstream, index) => (
-                  <div key={workstream.title} className="rounded-2xl border border-white/10 bg-white/[0.04] p-4 shadow-sm">
-                    <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-bold mb-2">Workstream {index + 1}</p>
-                    <h3 className="text-white font-display text-xl font-extrabold mb-3">{workstream.title}</h3>
-                    <div className="grid grid-cols-2 gap-2">
-                      {workstream.details.map((detail) => (
-                        <span key={detail} className="rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-xs text-white/75">
-                          {detail}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {additionalProposalNodes.length ? (
-              <div className="grid md:grid-cols-2 gap-4 mt-8">
-                {additionalProposalNodes.map((bullet, index) => (
-                  <div key={bullet} className="rounded-2xl bg-white/[0.04] border border-white/10 p-5 text-white/75 leading-relaxed">
-                    <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-bold mb-2">Additional workstream {index + 7}</p>
-                    {bullet}
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        </section>
-
         {proposal?.phases?.length ? (
-          <section className="px-6 md:px-20 py-16 md:py-20 bg-background border-y border-border">
+          <section className="px-6 md:px-20 py-16 md:py-20 bg-muted/40 border-y border-border">
             <div className="max-w-6xl mx-auto">
-              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Engagement structure</p>
-              <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-8">
-                How the engagement would work.
-              </h2>
-              <div className="grid md:grid-cols-3 gap-4">
-                {proposal.phases.map((phase, index) => (
-                  <div key={phase.title} className="rounded-3xl border border-border bg-background p-6 shadow-sm">
-                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mb-5">
-                      {index + 1}
+              <div className="max-w-4xl mb-10">
+                <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Recommended proposal</p>
+                <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+                  {page.recommendedEngagement.title}
+                </h2>
+                <p className="text-muted-foreground leading-relaxed">{page.recommendedEngagement.description}</p>
+              </div>
+
+              <div className="grid gap-5">
+                {phaseDetails.map((phase, index) => (
+                  <div key={phase.title} className="rounded-[2rem] border border-border bg-background p-5 md:p-7 shadow-sm overflow-hidden">
+                    <div className="grid md:grid-cols-[180px_minmax(0,1fr)] gap-5 md:gap-8 items-start">
+                      <div>
+                        <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mb-4">
+                          {index + 1}
+                        </div>
+                        <p className="text-[11px] tracking-[0.16em] uppercase text-primary font-semibold mb-2">{phase.duration}</p>
+                        <h3 className="font-display text-2xl md:text-3xl font-extrabold text-foreground leading-tight">{phase.title}</h3>
+                      </div>
+
+                      <div>
+                        <p className="text-muted-foreground leading-relaxed mb-5">{phase.description}</p>
+                        <div className="grid md:grid-cols-2 gap-3">
+                          {phase.details.map((detail) => (
+                            <div key={detail} className="rounded-2xl border border-border bg-muted/40 p-4">
+                              <p className="text-foreground leading-relaxed m-0">{detail}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-[11px] tracking-[0.16em] uppercase text-primary font-semibold mb-2">{phase.duration}</p>
-                    <h3 className="font-display text-2xl font-extrabold text-foreground mb-3">{phase.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{phase.description}</p>
                   </div>
                 ))}
               </div>
