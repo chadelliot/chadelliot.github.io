@@ -83,6 +83,40 @@ const nodePositions = [
   { cx: 209, cy: 250, nameX: 140, nameY: 220, descX: 140, descY: 240, anchor: "end" as const, descLines: ["Closed-loop reporting", "tied to revenue outcomes"] },
 ];
 
+const proposalNodePositions = [
+  { x: 58, y: 70, rotate: -4 },
+  { x: 368, y: 34, rotate: 3 },
+  { x: 670, y: 82, rotate: -2 },
+  { x: 174, y: 248, rotate: 3 },
+  { x: 486, y: 244, rotate: -3 },
+  { x: 742, y: 258, rotate: 2 },
+];
+
+const splitSvgLines = (text: string, maxChars = 34, maxLines = 3) => {
+  const words = text.replace(/\s+/g, " ").trim().split(" ");
+  const lines: string[] = [];
+  let current = "";
+
+  words.forEach((word) => {
+    const next = current ? `${current} ${word}` : word;
+
+    if (next.length > maxChars && current) {
+      lines.push(current);
+      current = word;
+    } else {
+      current = next;
+    }
+  });
+
+  if (current) lines.push(current);
+
+  if (lines.length <= maxLines) return lines;
+
+  const trimmed = lines.slice(0, maxLines);
+  trimmed[maxLines - 1] = `${trimmed[maxLines - 1].replace(/[.,;:]?$/, "")}…`;
+  return trimmed;
+};
+
 const CompanyLandingPage = () => {
   const { slug } = useParams();
   const page = slug ? companyLandingPages[slug] : undefined;
@@ -142,6 +176,8 @@ const CompanyLandingPage = () => {
 
   const proofPoints = page.proofPoints?.length ? page.proofPoints : fallbackProofPoints;
   const proposal = page.proposal;
+  const proposalDiagramNodes = page.recommendedEngagement.bullets.slice(0, proposalNodePositions.length);
+  const additionalProposalNodes = page.recommendedEngagement.bullets.slice(proposalNodePositions.length);
 
   return (
     <div className="min-h-screen bg-background">
@@ -298,22 +334,105 @@ const CompanyLandingPage = () => {
 
         <section className="px-6 md:px-20 py-16 md:py-20 bg-muted/40 border-y border-border">
           <div className="max-w-6xl mx-auto">
-            <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-8 md:gap-14 items-start mb-10">
+            <div className="grid lg:grid-cols-[0.82fr_1.18fr] gap-8 md:gap-12 items-center mb-12">
               <div>
                 <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Recommended proposal</p>
                 <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
                   {page.recommendedEngagement.title}
                 </h2>
-                <p className="text-muted-foreground leading-relaxed">{page.recommendedEngagement.description}</p>
+                <p className="text-muted-foreground leading-relaxed mb-5">{page.recommendedEngagement.description}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  The work is organized as connected workstreams instead of isolated tasks, so strategy, systems, activation, and measurement stay tied together from the beginning.
+                </p>
               </div>
-              <ul className="grid gap-4 list-none p-0 m-0">
-                {page.recommendedEngagement.bullets.map((bullet) => (
-                  <li key={bullet} className="rounded-2xl bg-background border border-border p-5 text-foreground leading-relaxed">
-                    {bullet}
-                  </li>
-                ))}
-              </ul>
+
+              <div className="relative rounded-[2rem] border border-border bg-background/80 p-4 md:p-5 shadow-sm overflow-hidden">
+                <div className="absolute inset-0 opacity-50" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(47, 163, 127, 0.18) 1px, transparent 0)", backgroundSize: "22px 22px" }} />
+                <svg viewBox="0 0 980 440" xmlns="http://www.w3.org/2000/svg" className="relative z-10 w-full h-auto" aria-label="Connected proposal workstreams diagram">
+                  <defs>
+                    <filter id="proposal-shadow" x="-20%" y="-20%" width="140%" height="150%">
+                      <feDropShadow dx="0" dy="18" stdDeviation="10" floodColor="#0f1d19" floodOpacity="0.13" />
+                    </filter>
+                    <linearGradient id="proposal-top" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#ffffff" />
+                      <stop offset="100%" stopColor="#f4f6f3" />
+                    </linearGradient>
+                  </defs>
+
+                  <path d="M24 50 C250 -30 430 112 602 72 C744 40 830 84 952 38" fill="none" stroke="rgba(47, 163, 127, 0.24)" strokeWidth="1.5" strokeDasharray="7 8" />
+                  <path d="M20 330 C206 246 316 396 490 310 C638 238 762 378 946 294" fill="none" stroke="rgba(0, 0, 0, 0.12)" strokeWidth="1.5" strokeDasharray="7 8" />
+
+                  {proposalDiagramNodes.slice(0, -1).map((_, index) => {
+                    const from = proposalNodePositions[index];
+                    const to = proposalNodePositions[index + 1];
+                    const fromX = from.x + 220;
+                    const fromY = from.y + 62;
+                    const toX = to.x;
+                    const toY = to.y + 62;
+                    const midX = (fromX + toX) / 2;
+
+                    return (
+                      <path
+                        key={`connector-${index}`}
+                        d={`M ${fromX} ${fromY} C ${midX} ${fromY - 38}, ${midX} ${toY + 38}, ${toX} ${toY}`}
+                        fill="none"
+                        stroke="rgba(47, 163, 127, 0.36)"
+                        strokeWidth="1.75"
+                        strokeDasharray="6 7"
+                        strokeLinecap="round"
+                      />
+                    );
+                  })}
+
+                  {proposalDiagramNodes.map((bullet, index) => {
+                    const position = proposalNodePositions[index];
+                    const lines = splitSvgLines(bullet, 32, 4);
+
+                    return (
+                      <g key={bullet} transform={`translate(${position.x} ${position.y}) rotate(${position.rotate} 110 64)`} filter="url(#proposal-shadow)">
+                        <path d="M14 18 L186 0 L222 24 L222 116 L50 136 L14 112 Z" fill="#e6e3de" stroke="#bdb7af" strokeWidth="1" />
+                        <path d="M14 18 L186 0 L222 24 L50 42 Z" fill="url(#proposal-top)" stroke="#c9c3ba" strokeWidth="1" />
+                        <path d="M50 42 L222 24 L222 116 L50 136 Z" fill="#f6f3ef" stroke="#c9c3ba" strokeWidth="1" />
+                        <path d="M14 18 L50 42 L50 136 L14 112 Z" fill="#ddd8d0" stroke="#c9c3ba" strokeWidth="1" />
+                        <path d="M68 49 L202 35" stroke="rgba(47, 163, 127, 0.24)" strokeWidth="1" strokeDasharray="4 5" />
+                        <text x="70" y="62" fill="#2fa37f" fontFamily="DM Mono, monospace" fontSize="10" fontWeight="600" letterSpacing="2">
+                          WORKSTREAM {String(index + 1).padStart(2, "0")}
+                        </text>
+                        <text x="70" y="86" fill="#1a1a1a" fontFamily="Inter, sans-serif" fontSize="13" fontWeight="650">
+                          {lines.map((line, lineIndex) => (
+                            <tspan key={line} x="70" dy={lineIndex === 0 ? 0 : 16}>
+                              {line}
+                            </tspan>
+                          ))}
+                        </text>
+                        <circle cx="36" cy="42" r="10" fill="rgba(47, 163, 127, 0.13)" stroke="#2fa37f" strokeWidth="1" />
+                        <circle cx="36" cy="42" r="3" fill="#2fa37f" />
+                      </g>
+                    );
+                  })}
+                </svg>
+
+                <div className="relative z-10 grid gap-3 md:hidden mt-4">
+                  {page.recommendedEngagement.bullets.map((bullet, index) => (
+                    <div key={bullet} className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+                      <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-bold mb-2">Workstream {index + 1}</p>
+                      <p className="text-sm text-foreground leading-relaxed m-0">{bullet}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
+
+            {additionalProposalNodes.length ? (
+              <div className="grid md:grid-cols-2 gap-4 mb-12">
+                {additionalProposalNodes.map((bullet, index) => (
+                  <div key={bullet} className="rounded-2xl bg-background border border-border p-5 text-foreground leading-relaxed">
+                    <p className="text-[10px] tracking-[0.16em] uppercase text-primary font-bold mb-2">Additional workstream {index + 7}</p>
+                    {bullet}
+                  </div>
+                ))}
+              </div>
+            ) : null}
 
             {proposal?.phases?.length ? (
               <div>
