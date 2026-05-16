@@ -16,22 +16,40 @@ export const proposalContactOverrides: Record<string, ProposalContactOverride[]>
   ],
   "speridian-technologies": [
     {
-      name: "Namrata Nagaraj",
-      title: "Product Owner Chief / likely DHCS product leadership stakeholder",
-      linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Namrata%20Nagaraj%20Speridian%20DHCS%20Product%20Owner%20Chief",
-      selectionRationale: "This replaces the Product Owner Chief placeholder with the likely named person surfaced from the LinkedIn profile search path."
-    },
-    {
-      name: "Priyaanka Shil",
-      title: "Product Owner / Product Lead",
-      linkedinUrl: "https://www.linkedin.com/in/priyaanka-shil-46a5b233a/",
-      selectionRationale: "Clay returned Priyaanka as a named Speridian Product Owner / Product Lead, making her a practical product-side target to test before outreach."
+      name: "Namratha Nagaraj",
+      title: "Product Owner",
+      linkedinUrl: "https://www.linkedin.com/in/namms/",
+      selectionRationale: "Clay confirmed Namratha as a U.S.-based Speridian Product Owner in Plano, making her the strongest named replacement for the product-owner stakeholder path."
     },
     {
       name: "Kyle Donovan",
       title: "Senior Technical Product Owner",
       linkedinUrl: "https://www.linkedin.com/in/kyle-donovan-60983153/",
-      selectionRationale: "Clay returned Kyle as a named Speridian Senior Technical Product Owner, making him a reasonable technical/product stakeholder path."
+      selectionRationale: "Clay returned Kyle as a U.S.-based Senior Technical Product Owner with prior senior product experience, making him a strong technical/product stakeholder."
+    },
+    {
+      name: "May Oyairo",
+      title: "Digital Product Owner",
+      linkedinUrl: "https://www.linkedin.com/in/mayoyairo/",
+      selectionRationale: "Clay returned May as a U.S.-based Digital Product Owner, giving the outreach path another direct product-side stakeholder."
+    },
+    {
+      name: "Amitoj Singh",
+      title: "Product Owner",
+      linkedinUrl: "https://www.linkedin.com/in/amitoj-singh-09206b18a/",
+      selectionRationale: "Clay returned Amitoj as a U.S.-based Speridian Product Owner with enterprise systems experience, making him a practical secondary product contact."
+    },
+    {
+      name: "Venkata Jitendra Chevuru",
+      title: "Sr Technical Program Manager / Managing Principal",
+      linkedinUrl: "https://www.linkedin.com/in/jitendra-kumar-30663a19/",
+      selectionRationale: "Clay returned Venkata as a U.S.-based senior technical program leader and managing principal, making him a stronger leadership path than a generic division placeholder."
+    },
+    {
+      name: "Veronica Barajas",
+      title: "Agile Delivery Manager",
+      linkedinUrl: "https://www.linkedin.com/in/veronicabarajas/",
+      selectionRationale: "Clay returned Veronica as a U.S.-based Agile Delivery Manager with delivery and transformation credentials, making her a useful adoption/delivery stakeholder."
     }
   ],
   neolytix: [
@@ -59,19 +77,19 @@ export const proposalContactOverrides: Record<string, ProposalContactOverride[]>
       name: "Yusuf Abediyeh",
       title: "Director of Sales",
       linkedinUrl: "https://www.linkedin.com/in/yabediyeh/",
-      selectionRationale: "Clay returned Yusuf as Farlinium Director of Sales, which aligns with the role's sales partnership and pipeline contribution focus."
+      selectionRationale: "Clay's role comparison kept Yusuf as the strongest commercial target because the opportunity is tied to sales partnership and pipeline contribution."
     },
     {
       name: "Jed Hamilton",
       title: "Marketing Specialist",
       linkedinUrl: "https://www.linkedin.com/in/jed-hamilton/",
-      selectionRationale: "Clay returned Jed as a named Farlinium marketing contact, making him a relevant path for the growth marketing and HubSpot workflow scope."
+      selectionRationale: "Clay returned Jed as a named Farlinium marketing contact, making him a practical supporting contact for the growth marketing and HubSpot workflow scope."
     },
     {
       name: "John Palazzolo",
       title: "Solution Sales Executive",
       linkedinUrl: "https://www.linkedin.com/in/john-palazzolo-7260a98/",
-      selectionRationale: "Clay returned John as a Farlinium Solution Sales Executive, making him a secondary commercial stakeholder if sales leadership is the right entry point."
+      selectionRationale: "Clay returned John as a Farlinium Solution Sales Executive, making him a secondary commercial path if sales leadership is the right entry point."
     }
   ],
   "logic20-20": [
@@ -79,13 +97,25 @@ export const proposalContactOverrides: Record<string, ProposalContactOverride[]>
       name: "Lionel Bodin",
       title: "Senior Director - Digital Strategy and Transformation",
       linkedinUrl: "https://www.linkedin.com/in/lionel-bodin/",
-      selectionRationale: "Clay returned Lionel as a senior Logic20/20 Digital Strategy and Transformation leader, matching the practice area tied to the opportunity."
+      selectionRationale: "Clay returned Lionel as a senior Digital Strategy and Transformation leader, making him the clearest practice-area target for the opportunity."
+    },
+    {
+      name: "Tejan Gabisi",
+      title: "Director, Digital Strategy & Transformation | AI",
+      linkedinUrl: "https://www.linkedin.com/in/tejangabisi/",
+      selectionRationale: "Clay returned Tejan as a Digital Strategy & Transformation director with AI focus, making him a strong strategic stakeholder for the role."
     },
     {
       name: "Melanie Tran",
       title: "Senior Manager, Digital Strategy & Transformation Practice Area Lead",
       linkedinUrl: "https://www.linkedin.com/in/melanie-tran-97b19855/",
       selectionRationale: "Clay returned Melanie as a Digital Strategy & Transformation practice area lead, making her a strong functional stakeholder path."
+    },
+    {
+      name: "Mick Wagner",
+      title: "Sr. Solutions Architect of Advanced Analytics Practice",
+      linkedinUrl: "https://www.linkedin.com/in/mick-wagner-0814065/",
+      selectionRationale: "Clay returned Mick as a senior solutions architect in the advanced analytics practice, making him a relevant architecture-side stakeholder."
     },
     {
       name: "Anna Emmett",
