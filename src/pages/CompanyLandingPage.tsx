@@ -97,6 +97,25 @@ const buildOutcomeContent = (outcome: string, index: number) => ({
   description: outcome,
 });
 
+const getTimelineForCompletion = (phases?: { duration: string }[]) => {
+  const explicitTimelines = phases
+    ?.map((phase) => phase.duration.trim())
+    .filter((duration) => duration && !/^phase\s+\d+$/i.test(duration));
+
+  return explicitTimelines?.length
+    ? explicitTimelines.join(" / ")
+    : "Timeline to be confirmed during scoping.";
+};
+
+const getCommercialModel = (investment?: string) => {
+  if (!investment) return null;
+
+  const isAnnualSalary = /annual|salary|full-time/i.test(investment);
+  if (isAnnualSalary) return null;
+
+  return investment;
+};
+
 const CompanyLandingPage = () => {
   const { slug } = useParams();
   const page = slug ? companyLandingPages[slug] : undefined;
@@ -187,6 +206,8 @@ const CompanyLandingPage = () => {
       details: detailGroups[index] || engagementBullets.slice(0, 2),
     };
   }) || [];
+  const timelineForCompletion = getTimelineForCompletion(proposal?.phases);
+  const commercialModel = getCommercialModel(proposal?.investment);
 
   const handleContactSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -260,17 +281,17 @@ const CompanyLandingPage = () => {
                   <p className="text-foreground font-semibold leading-snug">{page.companyName}</p>
                 </div>
                 <div className="pb-4 border-b border-border">
-                  <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Category</p>
-                  <p className="text-foreground font-semibold leading-snug">{page.industry}</p>
+                  <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Timeline for completion</p>
+                  <p className="text-foreground font-semibold leading-snug">{timelineForCompletion}</p>
                 </div>
                 <div className="pb-4 border-b border-border">
                   <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Engagement</p>
                   <p className="text-foreground font-semibold leading-snug">{page.recommendedEngagement.title}</p>
                 </div>
-                {proposal?.investment && (
+                {commercialModel && (
                   <div>
                     <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Commercial model</p>
-                    <p className="text-foreground font-semibold leading-snug">{proposal.investment}</p>
+                    <p className="text-foreground font-semibold leading-snug">{commercialModel}</p>
                   </div>
                 )}
               </div>
