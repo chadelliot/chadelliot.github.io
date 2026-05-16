@@ -142,7 +142,8 @@
   margin-bottom: 42px;
 }
 
-.approach-section .eyebrow {
+.approach-section .eyebrow,
+.loop-detail .detail-eyebrow {
   color: hsl(var(--primary));
   font-family: 'Inter', sans-serif;
   font-size: 11px;
@@ -211,7 +212,7 @@
 }
 
 .layer-node {
-  cursor: default;
+  cursor: pointer;
   outline: none;
 }
 
@@ -220,13 +221,20 @@
   stroke: hsl(var(--primary));
   stroke-width: 1.5;
   filter: drop-shadow(0 14px 24px rgba(31, 138, 94, 0.14));
-  transition: fill 180ms ease, stroke 180ms ease, transform 180ms ease;
+  transition: fill 180ms ease, stroke 180ms ease, stroke-width 180ms ease, filter 180ms ease;
 }
 
 .layer-node:hover .node-bg,
-.layer-node:focus .node-bg {
-  fill: rgba(94, 209, 174, 0.12);
+.layer-node:focus .node-bg,
+.layer-node.is-active .node-bg {
+  fill: rgba(94, 209, 174, 0.15);
   stroke: #1f8a5e;
+  stroke-width: 2.5;
+  filter: drop-shadow(0 18px 30px rgba(31, 138, 94, 0.22));
+}
+
+.layer-node.is-active .node-num {
+  fill: #1f8a5e;
 }
 
 .node-tag {
@@ -234,6 +242,7 @@
   font-family: 'DM Mono', monospace;
   font-size: 9px;
   letter-spacing: 0.18em;
+  pointer-events: none;
 }
 
 .node-num {
@@ -242,6 +251,8 @@
   font-size: 24px;
   font-weight: 800;
   letter-spacing: -0.04em;
+  pointer-events: none;
+  transition: fill 180ms ease;
 }
 
 .layer-name {
@@ -259,29 +270,26 @@
   font-weight: 400;
 }
 
-.loop-fallback {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: grid;
-  gap: 12px;
+.loop-detail {
+  align-self: center;
 }
 
-.loop-fallback li {
+.loop-detail-card {
   display: grid;
-  grid-template-columns: 48px 1fr;
-  gap: 14px;
+  grid-template-columns: 58px 1fr;
+  gap: 18px;
   align-items: start;
-  padding: 18px;
+  min-height: 270px;
+  padding: 28px;
   background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
-  border-radius: 22px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.035);
+  border-radius: 28px;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.055);
 }
 
-.loop-fallback .num {
-  width: 42px;
-  height: 42px;
+.loop-detail-card .num {
+  width: 52px;
+  height: 52px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -289,24 +297,54 @@
   background: rgba(47, 163, 127, 0.1);
   color: hsl(var(--primary));
   font-family: 'Manrope', sans-serif;
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgba(47, 163, 127, 0.18);
 }
 
-.loop-fallback .text {
+.loop-detail-card .text {
   color: hsl(var(--muted-foreground));
-  font-size: 13px;
-  line-height: 1.65;
+  font-size: 15px;
+  line-height: 1.75;
 }
 
-.loop-fallback strong {
+.loop-detail-card strong {
   display: block;
   color: hsl(var(--foreground));
   font-family: 'Manrope', sans-serif;
-  font-size: 16px;
+  font-size: clamp(28px, 3vw, 40px);
   font-weight: 800;
-  letter-spacing: -0.02em;
-  margin-bottom: 3px;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  margin: 0 0 14px;
+}
+
+.loop-detail-card p {
+  margin: 0;
+}
+
+.loop-mobile-controls {
+  display: none;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.loop-mobile-controls button {
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-family: 'Manrope', sans-serif;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.loop-mobile-controls button.is-active {
+  border-color: hsl(var(--primary));
+  background: rgba(47, 163, 127, 0.1);
+  color: hsl(var(--primary));
 }
 
 @media (max-width: 980px) {
@@ -317,6 +355,10 @@
   .closed-loop {
     max-width: 720px;
     margin: 0 auto;
+  }
+
+  .loop-detail-card {
+    min-height: unset;
   }
 }
 
@@ -329,9 +371,18 @@
     display: none;
   }
 
-  .loop-fallback li {
-    grid-template-columns: 42px 1fr;
-    padding: 16px;
+  .loop-mobile-controls {
+    display: grid;
+  }
+
+  .loop-detail-card {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+
+  .loop-detail-card .num {
+    width: 46px;
+    height: 46px;
   }
 
   .approach-section .section-head h2 {
