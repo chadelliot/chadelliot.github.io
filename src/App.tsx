@@ -8,7 +8,7 @@ import ApproachPage from "./pages/ApproachPage";
 import CareerPage from "./pages/CareerPage";
 import SkillsPage from "./pages/SkillsPage";
 import ContactPage from "./pages/ContactPage";
-import CompanyDirectoryPageV2 from "./pages/CompanyDirectoryPageV2";
+import CompanyDirectoryPageV3 from "./pages/CompanyDirectoryPageV3";
 import CompanyLandingPage from "./pages/CompanyLandingPage";
 import NotFound from "./pages/NotFound";
 import ContactSlideout from "./components/ContactSlideout";
@@ -30,7 +30,7 @@ const App = () => (
           <Route path="/career" element={<CareerPage />} />
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/company" element={<CompanyDirectoryPageV2 />} />
+          <Route path="/company" element={<CompanyDirectoryPageV3 />} />
           <Route path="/company/:slug" element={<CompanyLandingPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
