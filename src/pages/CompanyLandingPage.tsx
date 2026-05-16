@@ -220,14 +220,12 @@ const CompanyLandingPage = () => {
               </div>
             </div>
 
-            <div className="loop-wrap">
-              <div className="approach-callout" aria-hidden="true">
-                <span className="approach-callout-icon">↳</span>
-                <span className="approach-callout-kicker">My approach</span>
-                <strong>Six connected layers</strong>
-                <p>Click each layer to see how the system moves from diagnosis to measurable execution.</p>
-              </div>
+            <div className="approach-loop-intro" aria-hidden="true">
+              <span>Approach system</span>
+              <i />
+            </div>
 
+            <div className="loop-wrap">
               <svg viewBox="0 0 800 720" xmlns="http://www.w3.org/2000/svg" className="closed-loop" aria-label="Closed-loop revenue intelligence stack with six connected layers">
                 <defs>
                   <path id="loop-path" d="M 400,140 A 220,220 0 1 1 399.99,140" fill="none" />
