@@ -10,30 +10,36 @@ const fallbackProofPoints = [
   "Delivered measurable incremental return: $1.82 EBITDA for every $1 spent.",
 ];
 
-const revenueIntelligenceLayers = [
+const loopLayers = [
   {
-    title: "Business Objective",
-    description: "Clarify the growth, retention, pipeline, efficiency, or executive visibility goal the system needs to support.",
+    num: "01",
+    title: "Data Foundation",
+    description: "We assess CRM structure, field usage, source-of-truth logic, data hygiene, and the quality of the information powering funnel, pipeline, and customer reporting.",
   },
   {
-    title: "Customer & Account Signals",
-    description: "Identify the behavioral, firmographic, lifecycle, engagement, and commercial signals that should shape prioritization.",
+    num: "02",
+    title: "System Alignment",
+    description: "We align lifecycle definitions, handoff points, stakeholder ownership, and operating rhythms across marketing, sales, RevOps, and leadership.",
   },
   {
-    title: "Segmentation Logic",
-    description: "Translate raw signals into usable audience, account, lifecycle, value, and opportunity segments.",
+    num: "03",
+    title: "Customer Intelligence",
+    description: "We identify the customer, account, and engagement signals that reveal intent, fit, expansion potential, and buying behavior.",
   },
   {
-    title: "Workflow Activation",
-    description: "Connect segmentation to CRM, automation, sales motions, campaigns, reporting, and follow-up paths.",
+    num: "04",
+    title: "Segmentation & Prioritization",
+    description: "We build segmentation and scoring logic to surface priority accounts, high-value opportunities, and the areas where teams should focus first.",
   },
   {
-    title: "Measurement Layer",
-    description: "Define the dashboards, funnel views, attribution logic, and operating metrics leadership can trust.",
+    num: "05",
+    title: "GTM Activation",
+    description: "We translate insights into practical GTM motions, including workflows, sequences, routing logic, campaigns, and sales plays tied to defined signals.",
   },
   {
-    title: "Optimization Loop",
-    description: "Use performance feedback to refine targeting, workflows, campaigns, content, and next-best-action logic.",
+    num: "06",
+    title: "Measurement & Optimization",
+    description: "We establish the reporting foundation needed to understand funnel conversion, pipeline movement, campaign performance, and future optimization opportunities.",
   },
 ];
 
@@ -161,29 +167,113 @@ const CompanyLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-6 md:px-20 py-16 md:py-20">
-          <div className="max-w-6xl mx-auto">
-            <div className="max-w-3xl mb-10">
-              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Our approach</p>
-              <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
-                Six layers. One closed-loop revenue intelligence stack.
+        <section id="approach" className="approach-section">
+          <div className="wrap">
+            <div className="section-head">
+              <div className="eyebrow">Our approach</div>
+              <h2>
+                Six Layers.
+                <small>One Closed-Loop Revenue Intelligence Stack.</small>
               </h2>
-              <p className="text-muted-foreground leading-relaxed text-base md:text-lg">
-                The goal is not to add more marketing activity. The goal is to connect business priorities, customer signals, segmentation, activation, measurement, and optimization into one system that can keep improving.
+              <p>
+                I build revenue systems as a connected operating model — one that links data,
+                customer intelligence, go-to-market execution, and measurement into a closed loop.
+                These six layers form the architecture behind that model.
               </p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {revenueIntelligenceLayers.map((layer, index) => (
-                <div key={layer.title} className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-                      {index + 1}
+
+            <div className="loop-wrap">
+              <svg viewBox="0 0 800 720" xmlns="http://www.w3.org/2000/svg" className="closed-loop" aria-label="Closed-loop revenue intelligence stack with six connected layers">
+                <defs>
+                  <path id="loop-path" d="M 400,140 A 220,220 0 1 1 399.99,140" fill="none" />
+                  <linearGradient id="loop-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#1f8a5e" stopOpacity="0.55" />
+                    <stop offset="100%" stopColor="#5ed1ae" stopOpacity="0.55" />
+                  </linearGradient>
+                </defs>
+
+                <circle cx="400" cy="360" r="246" fill="none" stroke="#e3e6e1" strokeWidth="1" strokeDasharray="2 8" opacity="0.5" />
+                <circle cx="400" cy="360" r="220" fill="none" stroke="#e3e6e1" strokeWidth="2" />
+                <circle cx="400" cy="360" r="220" fill="none" stroke="url(#loop-grad)" strokeWidth="2.5" strokeDasharray="4 26" strokeLinecap="round">
+                  <animate attributeName="stroke-dashoffset" from="0" to="-1382" dur="40s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="400" cy="360" r="194" fill="none" stroke="#e3e6e1" strokeWidth="1" opacity="0.35" />
+
+                <text x="400" y="346" textAnchor="middle" className="loop-eyebrow">CLOSED-LOOP</text>
+                <text x="400" y="380" textAnchor="middle" className="loop-title">Revenue</text>
+                <text x="400" y="410" textAnchor="middle" className="loop-title">Intelligence</text>
+
+                <g className="layer-node" data-layer="1" tabIndex={0} role="button" aria-label="Layer 01: Data Foundation">
+                  <circle cx="400" cy="140" r="44" className="node-bg" />
+                  <text x="400" y="135" textAnchor="middle" className="node-tag">LAYER</text>
+                  <text x="400" y="160" textAnchor="middle" className="node-num">01</text>
+                </g>
+                <text x="400" y="68" textAnchor="middle" className="layer-name">Data Foundation</text>
+                <text x="400" y="88" textAnchor="middle" className="layer-desc">Clean, trusted revenue data</text>
+
+                <g className="layer-node" data-layer="2" tabIndex={0} role="button" aria-label="Layer 02: System Alignment">
+                  <circle cx="591" cy="250" r="44" className="node-bg" />
+                  <text x="591" y="245" textAnchor="middle" className="node-tag">LAYER</text>
+                  <text x="591" y="270" textAnchor="middle" className="node-num">02</text>
+                </g>
+                <text x="660" y="220" textAnchor="start" className="layer-name">System Alignment</text>
+                <text x="660" y="240" textAnchor="start" className="layer-desc">Connected definitions,</text>
+                <text x="660" y="256" textAnchor="start" className="layer-desc">workflows &amp; ownership</text>
+
+                <g className="layer-node" data-layer="3" tabIndex={0} role="button" aria-label="Layer 03: Customer Intelligence">
+                  <circle cx="591" cy="470" r="44" className="node-bg" />
+                  <text x="591" y="465" textAnchor="middle" className="node-tag">LAYER</text>
+                  <text x="591" y="490" textAnchor="middle" className="node-num">03</text>
+                </g>
+                <text x="660" y="466" textAnchor="start" className="layer-name">Customer Intelligence</text>
+                <text x="660" y="486" textAnchor="start" className="layer-desc">Signals that reveal</text>
+                <text x="660" y="502" textAnchor="start" className="layer-desc">behavior &amp; opportunity</text>
+
+                <g className="layer-node" data-layer="4" tabIndex={0} role="button" aria-label="Layer 04: Segmentation and Prioritization">
+                  <circle cx="400" cy="580" r="44" className="node-bg" />
+                  <text x="400" y="575" textAnchor="middle" className="node-tag">LAYER</text>
+                  <text x="400" y="600" textAnchor="middle" className="node-num">04</text>
+                </g>
+                <text x="400" y="650" textAnchor="middle" className="layer-name">Segmentation &amp; Prioritization</text>
+                <text x="400" y="670" textAnchor="middle" className="layer-desc">Frameworks for where to focus first</text>
+
+                <g className="layer-node" data-layer="5" tabIndex={0} role="button" aria-label="Layer 05: GTM Activation">
+                  <circle cx="209" cy="470" r="44" className="node-bg" />
+                  <text x="209" y="465" textAnchor="middle" className="node-tag">LAYER</text>
+                  <text x="209" y="490" textAnchor="middle" className="node-num">05</text>
+                </g>
+                <text x="140" y="466" textAnchor="end" className="layer-name">GTM Activation</text>
+                <text x="140" y="486" textAnchor="end" className="layer-desc">Campaigns, workflows,</text>
+                <text x="140" y="502" textAnchor="end" className="layer-desc">routing &amp; plays</text>
+
+                <g className="layer-node" data-layer="6" tabIndex={0} role="button" aria-label="Layer 06: Measurement and Optimization">
+                  <circle cx="209" cy="250" r="44" className="node-bg" />
+                  <text x="209" y="245" textAnchor="middle" className="node-tag">LAYER</text>
+                  <text x="209" y="270" textAnchor="middle" className="node-num">06</text>
+                </g>
+                <text x="140" y="220" textAnchor="end" className="layer-name">Measurement &amp; Optimization</text>
+                <text x="140" y="240" textAnchor="end" className="layer-desc">Closed-loop reporting</text>
+                <text x="140" y="256" textAnchor="end" className="layer-desc">tied to revenue outcomes</text>
+
+                <circle r="6" fill="#5ed1ae" opacity="0.95">
+                  <animateMotion dur="14s" repeatCount="indefinite">
+                    <mpath href="#loop-path" />
+                  </animateMotion>
+                  <animate attributeName="opacity" values="0.5;1;0.5" dur="2s" repeatCount="indefinite" />
+                </circle>
+              </svg>
+
+              <ul className="loop-fallback" role="list">
+                {loopLayers.map((layer) => (
+                  <li key={layer.num}>
+                    <span className="num">{layer.num}</span>
+                    <div className="text">
+                      <strong>{layer.title}</strong>
+                      {layer.description}
                     </div>
-                    <h3 className="font-display text-xl font-extrabold text-foreground">{layer.title}</h3>
-                  </div>
-                  <p className="text-muted-foreground leading-relaxed text-sm md:text-base">{layer.description}</p>
-                </div>
-              ))}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </section>
