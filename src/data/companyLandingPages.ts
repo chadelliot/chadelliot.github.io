@@ -69,17 +69,17 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
       phases: [
         {
           title: "Diagnose",
-          duration: "Weeks 1–2",
+          duration: "Phase 1",
           description: "Interview key stakeholders, review current funnel definitions, platform usage, reporting outputs, campaign workflows, and decision gaps."
         },
         {
           title: "Design",
-          duration: "Weeks 3–4",
+          duration: "Phase 2",
           description: "Translate findings into a practical revenue systems model covering segmentation, attribution, lifecycle workflows, reporting, and ownership."
         },
         {
           title: "Activate",
-          duration: "Weeks 5–8",
+          duration: "Phase 3",
           description: "Prioritize quick wins, define implementation steps, and support knowledge transfer so the client team can execute with clarity."
         }
       ],
@@ -127,17 +127,17 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
       phases: [
         {
           title: "Current-state review",
-          duration: "Weeks 1–2",
+          duration: "Phase 1",
           description: "Review platform architecture, data flow, funnel definitions, lifecycle workflows, dashboard outputs, and stakeholder decision needs."
         },
         {
           title: "Opportunity model",
-          duration: "Weeks 3–4",
+          duration: "Phase 2",
           description: "Identify priority gaps and rank opportunities by revenue impact, implementation effort, ownership, and speed to value."
         },
         {
           title: "Roadmap delivery",
-          duration: "Weeks 5–6",
+          duration: "Phase 3",
           description: "Deliver an executive-ready roadmap with governance, measurement, activation, and implementation recommendations."
         }
       ],
@@ -170,7 +170,7 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     ],
     recommendedEngagement: {
       title: "Growth Systems Advisory Sprint",
-      description: "A focused sprint for teams that have growth ambition but need better infrastructure, segmentation, and performance visibility to scale efficiently.",
+      description: "A focused advisory model for teams that have growth ambition but need better infrastructure, segmentation, and performance visibility to scale efficiently.",
       bullets: [
         "Audit current acquisition, lifecycle, CRM, automation, and reporting motions.",
         "Identify gaps between campaign execution and measurable business outcomes.",
@@ -181,21 +181,21 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
     proposal: {
       situation: "Many growth teams can execute campaigns, but the next stage of scale requires a better operating layer. Teams need sharper segmentation, clearer lifecycle motions, more consistent experimentation, and reporting that connects channel activity to business outcomes rather than isolated metrics.",
       opportunity: "The opportunity is to bring senior growth systems support to Right Side Up clients that need to connect channel execution with retention, lifecycle automation, CRM workflows, experimentation, and revenue measurement.",
-      investment: "Monthly advisory, fixed-fee growth audit, or sprint-based consulting",
+      investment: "Monthly advisory, fixed-fee growth audit, or scoped consulting",
       phases: [
         {
           title: "Growth audit",
-          duration: "Weeks 1–2",
+          duration: "Phase 1",
           description: "Review the growth motion across acquisition, lifecycle, CRM, reporting, testing, segmentation, and customer-value signals."
         },
         {
           title: "Prioritization model",
-          duration: "Weeks 3–4",
+          duration: "Phase 2",
           description: "Define where growth work should focus based on revenue potential, audience readiness, channel leverage, and operational feasibility."
         },
         {
           title: "Operating rhythm",
-          duration: "Weeks 5–6",
+          duration: "Phase 3",
           description: "Build a repeatable cadence for campaign planning, testing, reporting, insight generation, and optimization."
         }
       ],
@@ -243,17 +243,17 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
       phases: [
         {
           title: "Stabilize",
-          duration: "First 30 days",
+          duration: "Phase 1",
           description: "Assess leadership needs, team capacity, platform utilization, reporting quality, campaign governance, and immediate business priorities."
         },
         {
           title: "Structure",
-          duration: "Days 31–60",
+          duration: "Phase 2",
           description: "Define the operating model, stakeholder cadence, workflow ownership, reporting standards, and priority revenue initiatives."
         },
         {
           title: "Scale",
-          duration: "Days 61–90",
+          duration: "Phase 3",
           description: "Support execution, build internal capability, and transition the operating rhythm into a sustainable model."
         }
       ],
@@ -301,17 +301,17 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
       phases: [
         {
           title: "Discovery",
-          duration: "Weeks 1–2",
+          duration: "Phase 1",
           description: "Review the client’s GTM motion, platform usage, reporting stack, data flow, lifecycle programs, and stakeholder priorities."
         },
         {
           title: "Systems map",
-          duration: "Weeks 3–4",
+          duration: "Phase 2",
           description: "Document gaps across tools, definitions, workflows, data, governance, segmentation, and reporting."
         },
         {
           title: "Roadmap",
-          duration: "Weeks 5–6",
+          duration: "Phase 3",
           description: "Deliver a sequenced roadmap with quick wins, operating-model updates, and platform or workflow recommendations."
         }
       ],
@@ -359,17 +359,17 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
       phases: [
         {
           title: "Package",
-          duration: "Offer setup",
+          duration: "Phase 1",
           description: "Define the core consulting offers, outcomes, deliverables, pricing logic, and buyer-facing positioning."
         },
         {
           title: "Qualify",
-          duration: "Inquiry stage",
+          duration: "Phase 2",
           description: "Use a short intake process to understand the buyer’s systems, stage, business goals, and urgency."
         },
         {
           title: "Deliver",
-          duration: "Project or retainer",
+          duration: "Phase 3",
           description: "Execute the agreed audit, roadmap, advisory, or activation support with clear deliverables and decision-ready outputs."
         }
       ],
@@ -406,7 +406,7 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
       bullets: [
         "Create clear LinkedIn service categories around revenue marketing operations, GTM systems, segmentation, and AI marketing automation.",
         "Use company-specific landing pages to support outbound messages and application follow-up.",
-        "Package services into fixed-fee audits, 6–8 week diagnostics, and monthly advisory retainers.",
+        "Package services into fixed-fee audits, scoped diagnostics, and monthly advisory retainers.",
         "Keep positioning senior, strategic, and outcome-based to avoid commodity marketing support inquiries."
       ]
     },
@@ -417,17 +417,17 @@ export const companyLandingPages: Record<string, CompanyLandingPage> = {
       phases: [
         {
           title: "Position",
-          duration: "Setup",
+          duration: "Phase 1",
           description: "Define the consulting categories, profile language, proof points, and offer architecture for LinkedIn Services."
         },
         {
           title: "Personalize",
-          duration: "Outreach",
+          duration: "Phase 2",
           description: "Build company-specific proposal pages that connect the buyer’s likely needs to a tailored consulting point of view."
         },
         {
           title: "Convert",
-          duration: "Inquiry to scope",
+          duration: "Phase 3",
           description: "Move interested companies into a scoped diagnostic, advisory retainer, or project-based consulting engagement."
         }
       ],
