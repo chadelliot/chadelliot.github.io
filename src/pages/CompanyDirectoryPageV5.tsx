@@ -28,6 +28,18 @@ const POSTED_DATES: Record<string, string> = {
   "software-solutions-firm-vp-sales": "2026-05-15",
 };
 
+const POSTED_ROLE_TITLES: Record<string, string> = {
+  "speridian-technologies": "Principal GTM Strategy Lead",
+  neolytix: "Fractional Healthcare Growth Program Architect",
+  farlinium: "B2B Growth Marketing Manager",
+  "logic20-20": "Solution Architect — Palantir Foundry",
+  acuvance: "Director of Revenue Operations",
+  "town-web": "Fractional CPQ and RevOps Architect",
+  everist: "Fractional VP Marketing",
+  turtl: "Fractional VP of Customer Success",
+  "software-solutions-firm-vp-sales": "Fractional VP of Sales",
+};
+
 const getOpportunityType = (page: (typeof allCompanyLandingPages)[string]) => {
   const industry = page.industry.toLowerCase();
 
@@ -61,6 +73,8 @@ const formatPostedDate = (date?: string) => {
   const parsed = new Date(`${date}T12:00:00`);
   return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
+
+const getPostedRoleTitle = (page: (typeof allCompanyLandingPages)[string]) => POSTED_ROLE_TITLES[page.slug] ?? page.recommendedEngagement.title;
 
 const getOutreachContacts = (page: (typeof allCompanyLandingPages)[string]) => {
   const savedContacts = ((page as typeof page & { outreachContacts?: OutreachContact[] }).outreachContacts ?? []);
@@ -204,8 +218,8 @@ const CompanyDirectoryPageV5 = () => {
                       </div>
 
                       <div>
-                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Engagement</p>
-                        <p className="leading-relaxed text-foreground">{page.recommendedEngagement.title}</p>
+                        <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Posted role</p>
+                        <p className="leading-relaxed text-foreground">{getPostedRoleTitle(page)}</p>
                       </div>
 
                       <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
