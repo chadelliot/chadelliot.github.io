@@ -480,11 +480,14 @@ const CompanyLandingPage = () => {
         </section>
 
         <section className="px-6 md:px-20 py-16 md:py-20 bg-primary text-primary-foreground">
-          <div className="max-w-5xl mx-auto text-center">
+          <div className="max-w-4xl mx-auto text-center">
             <p className="text-xs tracking-[0.2em] uppercase font-semibold opacity-80 mb-4">Next step</p>
-            <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight mb-6">
-              {page.outreachAngle}
+            <h2 className="font-display text-3xl md:text-4xl font-extrabold tracking-tight mb-5">
+              Let’s pressure-test the fit.
             </h2>
+            <p className="text-base md:text-lg leading-relaxed opacity-85 max-w-3xl mx-auto mb-8">
+              {page.outreachAngle}
+            </p>
             {renderPrimaryCta("footer")}
           </div>
         </section>
