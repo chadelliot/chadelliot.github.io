@@ -93,54 +93,24 @@ const proposalWorkstreamDetails = [
 ];
 
 const proposalNodePositions = [
-  { x: 64, y: 74, rotate: -3 },
-  { x: 378, y: 54, rotate: 2 },
-  { x: 692, y: 78, rotate: -2 },
-  { x: 112, y: 344, rotate: 2 },
-  { x: 426, y: 326, rotate: -3 },
-  { x: 736, y: 350, rotate: 2 },
+  { x: 70, y: 220 },
+  { x: 330, y: 80 },
+  { x: 330, y: 360 },
+  { x: 590, y: 80 },
+  { x: 590, y: 360 },
+  { x: 850, y: 220 },
 ];
 
-const detailOffsets = [
-  [
-    { dx: -10, dy: 158 },
-    { dx: 126, dy: 172 },
-    { dx: 10, dy: 222 },
-    { dx: 146, dy: 238 },
-  ],
-  [
-    { dx: -18, dy: 162 },
-    { dx: 120, dy: 152 },
-    { dx: 6, dy: 224 },
-    { dx: 144, dy: 214 },
-  ],
-  [
-    { dx: -18, dy: 156 },
-    { dx: 124, dy: 168 },
-    { dx: 4, dy: 220 },
-    { dx: 140, dy: 236 },
-  ],
-  [
-    { dx: -4, dy: 154 },
-    { dx: 136, dy: 164 },
-    { dx: 18, dy: 218 },
-    { dx: 154, dy: 230 },
-  ],
-  [
-    { dx: -16, dy: 158 },
-    { dx: 122, dy: 148 },
-    { dx: 0, dy: 222 },
-    { dx: 138, dy: 214 },
-  ],
-  [
-    { dx: -8, dy: 154 },
-    { dx: 130, dy: 168 },
-    { dx: 10, dy: 218 },
-    { dx: 146, dy: 232 },
-  ],
+const proposalConnections = [
+  [0, 1],
+  [0, 2],
+  [1, 3],
+  [2, 4],
+  [3, 5],
+  [4, 5],
 ];
 
-const splitSvgLines = (text: string, maxChars = 34, maxLines = 3) => {
+const splitSvgLines = (text: string, maxChars = 24, maxLines = 2) => {
   const words = text.replace(/\s+/g, " ").trim().split(" ");
   const lines: string[] = [];
   let current = "";
@@ -224,8 +194,7 @@ const CompanyLandingPage = () => {
 
   const proofPoints = page.proofPoints?.length ? page.proofPoints : fallbackProofPoints;
   const proposal = page.proposal;
-  const proposalDiagramNodes = page.recommendedEngagement.bullets.slice(0, proposalNodePositions.length);
-  const additionalProposalNodes = page.recommendedEngagement.bullets.slice(proposalNodePositions.length);
+  const additionalProposalNodes = page.recommendedEngagement.bullets.slice(proposalWorkstreamDetails.length);
 
   return (
     <div className="min-h-screen bg-background">
@@ -396,94 +365,106 @@ const CompanyLandingPage = () => {
             <div className="relative rounded-[2rem] border border-white/10 bg-white/[0.03] p-3 md:p-5 shadow-2xl overflow-hidden">
               <div className="absolute inset-0 opacity-35" style={{ backgroundImage: "radial-gradient(circle at 1px 1px, rgba(47, 163, 127, 0.42) 1px, transparent 0)", backgroundSize: "24px 24px" }} />
               <div className="absolute -top-32 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/20 blur-3xl" />
-              <svg viewBox="0 0 1120 710" xmlns="http://www.w3.org/2000/svg" className="relative z-10 hidden md:block w-full h-auto" aria-label="Connected proposal workstreams diagram">
+              <svg viewBox="0 0 1120 650" xmlns="http://www.w3.org/2000/svg" className="relative z-10 hidden md:block w-full h-auto" aria-label="Connected proposal workstreams diagram">
                 <defs>
-                  <filter id="proposal-shadow-dark" x="-25%" y="-25%" width="150%" height="160%">
-                    <feDropShadow dx="0" dy="22" stdDeviation="12" floodColor="#000000" floodOpacity="0.35" />
+                  <filter id="proposal-shadow-clean" x="-25%" y="-25%" width="150%" height="160%">
+                    <feDropShadow dx="0" dy="18" stdDeviation="10" floodColor="#000000" floodOpacity="0.35" />
                   </filter>
-                  <linearGradient id="proposal-top-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="proposal-node-clean" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#ffffff" />
-                    <stop offset="100%" stopColor="#eef1ec" />
+                    <stop offset="100%" stopColor="#edf1ec" />
                   </linearGradient>
-                  <linearGradient id="detail-card-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <linearGradient id="proposal-pill-clean" x1="0%" y1="0%" x2="100%" y2="100%">
                     <stop offset="0%" stopColor="#171717" />
-                    <stop offset="100%" stopColor="#0f0f0f" />
+                    <stop offset="100%" stopColor="#0c0c0c" />
                   </linearGradient>
                 </defs>
 
-                <path d="M42 82 C246 -16 434 118 596 82 C754 48 878 90 1082 42" fill="none" stroke="rgba(47, 163, 127, 0.26)" strokeWidth="1.3" strokeDasharray="7 9" />
-                <path d="M38 610 C256 508 404 660 582 566 C760 470 900 628 1080 540" fill="none" stroke="rgba(255, 255, 255, 0.12)" strokeWidth="1.3" strokeDasharray="7 9" />
+                <path d="M42 78 C250 24 374 96 548 58 C730 18 868 82 1078 42" fill="none" stroke="rgba(47, 163, 127, 0.2)" strokeWidth="1.2" strokeDasharray="7 10" />
+                <path d="M44 596 C262 538 378 612 548 574 C734 532 882 604 1078 548" fill="none" stroke="rgba(255, 255, 255, 0.1)" strokeWidth="1.2" strokeDasharray="7 10" />
 
-                {proposalDiagramNodes.slice(0, -1).map((_, index) => {
-                  const from = proposalNodePositions[index];
-                  const to = proposalNodePositions[index + 1];
-                  const fromX = from.x + 236;
-                  const fromY = from.y + 72;
-                  const toX = to.x + 8;
-                  const toY = to.y + 72;
-                  const midX = (fromX + toX) / 2;
+                {proposalConnections.map(([fromIndex, toIndex], index) => {
+                  const from = proposalNodePositions[fromIndex];
+                  const to = proposalNodePositions[toIndex];
+                  const fromX = from.x + 214;
+                  const fromY = from.y + 56;
+                  const toX = to.x - 18;
+                  const toY = to.y + 56;
+                  const elbowX = fromX + (toX - fromX) * 0.5;
 
                   return (
                     <path
-                      key={`connector-${index}`}
-                      d={`M ${fromX} ${fromY} C ${midX} ${fromY - 42}, ${midX} ${toY + 42}, ${toX} ${toY}`}
+                      key={`proposal-flow-${fromIndex}-${toIndex}`}
+                      d={`M ${fromX} ${fromY} C ${elbowX} ${fromY}, ${elbowX} ${toY}, ${toX} ${toY}`}
                       fill="none"
-                      stroke="rgba(47, 163, 127, 0.48)"
-                      strokeWidth="1.7"
-                      strokeDasharray="6 8"
-                      strokeDashoffset="36"
+                      stroke="rgba(47, 163, 127, 0.5)"
+                      strokeWidth="1.8"
+                      strokeDasharray="7 8"
+                      strokeDashoffset="80"
                       strokeLinecap="round"
+                      opacity="0"
                     >
-                      <animate attributeName="opacity" from="0" to="1" dur="0.45s" begin={`${0.2 + index * 0.16}s`} fill="freeze" />
-                      <animate attributeName="stroke-dashoffset" from="36" to="0" dur="0.65s" begin={`${0.2 + index * 0.16}s`} fill="freeze" />
+                      <animate attributeName="opacity" from="0" to="1" dur="0.25s" begin={`${0.45 + index * 0.12}s`} fill="freeze" />
+                      <animate attributeName="stroke-dashoffset" from="80" to="0" dur="0.7s" begin={`${0.45 + index * 0.12}s`} fill="freeze" />
                     </path>
                   );
                 })}
 
-                {proposalDiagramNodes.map((bullet, index) => {
+                {proposalWorkstreamDetails.map((workstream, index) => {
                   const position = proposalNodePositions[index];
-                  const workstream = proposalWorkstreamDetails[index] || proposalWorkstreamDetails[proposalWorkstreamDetails.length - 1];
+                  const begin = 0.08 + index * 0.16;
                   const titleLines = splitSvgLines(workstream.title, 22, 2);
-                  const begin = index * 0.18;
 
                   return (
-                    <g key={bullet} opacity="0">
-                      <animate attributeName="opacity" from="0" to="1" dur="0.5s" begin={`${begin}s`} fill="freeze" />
-                      <g transform={`translate(${position.x} ${position.y}) rotate(${position.rotate} 116 66)`} filter="url(#proposal-shadow-dark)">
-                        <path d="M14 18 L196 0 L236 26 L236 124 L54 146 L14 120 Z" fill="#e6e3de" stroke="#bdb7af" strokeWidth="1" />
-                        <path d="M14 18 L196 0 L236 26 L54 46 Z" fill="url(#proposal-top-dark)" stroke="#c9c3ba" strokeWidth="1" />
-                        <path d="M54 46 L236 26 L236 124 L54 146 Z" fill="#f6f3ef" stroke="#c9c3ba" strokeWidth="1" />
-                        <path d="M14 18 L54 46 L54 146 L14 120 Z" fill="#ddd8d0" stroke="#c9c3ba" strokeWidth="1" />
-                        <path d="M72 52 L214 38" stroke="rgba(47, 163, 127, 0.24)" strokeWidth="1" strokeDasharray="4 5" />
-                        <text x="74" y="66" fill="#2fa37f" fontFamily="DM Mono, monospace" fontSize="10" fontWeight="600" letterSpacing="2">
-                          WORKSTREAM {String(index + 1).padStart(2, "0")}
-                        </text>
-                        <text x="74" y="92" fill="#111111" fontFamily="Inter, sans-serif" fontSize="15" fontWeight="750">
-                          {titleLines.map((line, lineIndex) => (
-                            <tspan key={line} x="74" dy={lineIndex === 0 ? 0 : 18}>
-                              {line}
-                            </tspan>
-                          ))}
-                        </text>
-                        <text x="74" y="128" fill="#555555" fontFamily="Inter, sans-serif" fontSize="10.5" fontWeight="600">
-                          {splitSvgLines(bullet, 31, 1).map((line) => line)}
-                        </text>
-                        <circle cx="38" cy="46" r="10" fill="rgba(47, 163, 127, 0.13)" stroke="#2fa37f" strokeWidth="1" />
-                        <circle cx="38" cy="46" r="3" fill="#2fa37f" />
-                      </g>
+                    <g key={workstream.title} opacity="0" transform={`translate(${position.x} ${position.y})`} filter="url(#proposal-shadow-clean)">
+                      <animate attributeName="opacity" from="0" to="1" dur="0.4s" begin={`${begin}s`} fill="freeze" />
+                      <animateTransform
+                        attributeName="transform"
+                        type="translate"
+                        from={`${position.x - 26} ${position.y + 14}`}
+                        to={`${position.x} ${position.y}`}
+                        dur="0.55s"
+                        begin={`${begin}s`}
+                        fill="freeze"
+                      />
+
+                      <path d="M16 18 L178 0 L214 22 L214 102 L52 122 L16 100 Z" fill="#ded9d0" stroke="#b9b2a9" strokeWidth="1" />
+                      <path d="M16 18 L178 0 L214 22 L52 40 Z" fill="url(#proposal-node-clean)" stroke="#c8c1b8" strokeWidth="1" />
+                      <path d="M52 40 L214 22 L214 102 L52 122 Z" fill="#f7f4ef" stroke="#c8c1b8" strokeWidth="1" />
+                      <path d="M16 18 L52 40 L52 122 L16 100 Z" fill="#d8d2c8" stroke="#c8c1b8" strokeWidth="1" />
+
+                      <text x="70" y="58" fill="#2fa37f" fontFamily="DM Mono, monospace" fontSize="10" fontWeight="700" letterSpacing="2">
+                        WS {String(index + 1).padStart(2, "0")}
+                      </text>
+                      <text x="70" y="82" fill="#111111" fontFamily="Inter, sans-serif" fontSize="16" fontWeight="800">
+                        {titleLines.map((line, lineIndex) => (
+                          <tspan key={line} x="70" dy={lineIndex === 0 ? 0 : 18}>
+                            {line}
+                          </tspan>
+                        ))}
+                      </text>
+                      <circle cx="36" cy="40" r="10" fill="rgba(47, 163, 127, 0.14)" stroke="#2fa37f" strokeWidth="1" />
+                      <circle cx="36" cy="40" r="3" fill="#2fa37f" />
 
                       {workstream.details.map((detail, detailIndex) => {
-                        const offset = detailOffsets[index]?.[detailIndex] || { dx: 0, dy: 0 };
-                        const cardX = position.x + offset.dx;
-                        const cardY = position.y + offset.dy;
-                        const cardBegin = begin + 0.25 + detailIndex * 0.08;
+                        const pillX = detailIndex % 2 === 0 ? 18 : 118;
+                        const pillY = 144 + Math.floor(detailIndex / 2) * 46;
+                        const pillBegin = begin + 0.2 + detailIndex * 0.06;
 
                         return (
-                          <g key={`${detail}-${detailIndex}`} opacity="0">
-                            <animate attributeName="opacity" from="0" to="1" dur="0.35s" begin={`${cardBegin}s`} fill="freeze" />
-                            <path d={`M ${position.x + 116} ${position.y + 134} C ${position.x + 116} ${cardY - 18}, ${cardX + 62} ${cardY - 18}, ${cardX + 62} ${cardY}`} fill="none" stroke="rgba(47, 163, 127, 0.34)" strokeWidth="1" strokeDasharray="4 6" />
-                            <rect x={cardX} y={cardY} width="124" height="40" rx="13" fill="url(#detail-card-dark)" stroke="rgba(255,255,255,0.16)" />
-                            <text x={cardX + 62} y={cardY + 25} textAnchor="middle" fill="rgba(255,255,255,0.78)" fontFamily="Inter, sans-serif" fontSize="11" fontWeight="650">
+                          <g key={detail} opacity="0" transform={`translate(${pillX} ${pillY})`}>
+                            <animate attributeName="opacity" from="0" to="1" dur="0.28s" begin={`${pillBegin}s`} fill="freeze" />
+                            <animateTransform
+                              attributeName="transform"
+                              type="translate"
+                              from={`${pillX} ${pillY + 10}`}
+                              to={`${pillX} ${pillY}`}
+                              dur="0.35s"
+                              begin={`${pillBegin}s`}
+                              fill="freeze"
+                            />
+                            <rect width="92" height="34" rx="12" fill="url(#proposal-pill-clean)" stroke="rgba(255,255,255,0.16)" />
+                            <text x="46" y="21.5" textAnchor="middle" fill="rgba(255,255,255,0.78)" fontFamily="Inter, sans-serif" fontSize="9.5" fontWeight="650">
                               {detail}
                             </text>
                           </g>
