@@ -200,32 +200,29 @@ const CompanyLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-6 md:px-20 py-14 md:py-18">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-[0.8fr_1.2fr] gap-8 md:gap-14 items-start">
-            <div>
-              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Situation</p>
-              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
-                Why this conversation may be worth having.
-              </h2>
-            </div>
-            <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm">
-              <p className="text-muted-foreground leading-relaxed text-base md:text-lg">
-                {proposal?.situation || page.fitSummary}
-              </p>
-            </div>
-          </div>
-        </section>
-
         <section id="opportunity" className="approach-section">
           <div className="wrap">
-            <div className="section-head">
-              <div className="eyebrow">Opportunity</div>
+            <div className="section-head section-head-wide">
+              <div className="eyebrow">Situation → Opportunity</div>
               <h2>Where I believe I can create leverage.</h2>
-              <p>{proposal?.opportunity || page.fitSummary}</p>
+              <p>
+                A concise read on the friction, the opportunity, and the closed-loop system I would use to turn that opportunity into measurable execution.
+              </p>
+            </div>
+
+            <div className="opportunity-bridge">
+              <div className="opportunity-brief-card">
+                <span>What I see</span>
+                <p>{proposal?.situation || page.fitSummary}</p>
+              </div>
+              <div className="opportunity-brief-card is-resolution">
+                <span>How I’d resolve it</span>
+                <p>{proposal?.opportunity || page.fitSummary}</p>
+              </div>
             </div>
 
             <div className="opportunity-card-grid" style={{ gridTemplateColumns: `repeat(${opportunityColumnCount}, minmax(0, 1fr))` }}>
-              {page.likelyPriorities.map((priority, index) => (
+              {page.likelyPriorities.map((priority) => (
                 <div key={priority} className="opportunity-card">
                   <span className="opportunity-card-dot" aria-hidden="true" />
                   <p>{priority}</p>
