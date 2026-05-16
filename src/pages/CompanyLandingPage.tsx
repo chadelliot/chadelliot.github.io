@@ -10,6 +10,33 @@ const fallbackProofPoints = [
   "Delivered measurable incremental return: $1.82 EBITDA for every $1 spent.",
 ];
 
+const revenueIntelligenceLayers = [
+  {
+    title: "Business Objective",
+    description: "Clarify the growth, retention, pipeline, efficiency, or executive visibility goal the system needs to support.",
+  },
+  {
+    title: "Customer & Account Signals",
+    description: "Identify the behavioral, firmographic, lifecycle, engagement, and commercial signals that should shape prioritization.",
+  },
+  {
+    title: "Segmentation Logic",
+    description: "Translate raw signals into usable audience, account, lifecycle, value, and opportunity segments.",
+  },
+  {
+    title: "Workflow Activation",
+    description: "Connect segmentation to CRM, automation, sales motions, campaigns, reporting, and follow-up paths.",
+  },
+  {
+    title: "Measurement Layer",
+    description: "Define the dashboards, funnel views, attribution logic, and operating metrics leadership can trust.",
+  },
+  {
+    title: "Optimization Loop",
+    description: "Use performance feedback to refine targeting, workflows, campaigns, content, and next-best-action logic.",
+  },
+];
+
 const CompanyLandingPage = () => {
   const { slug } = useParams();
   const page = slug ? companyLandingPages[slug] : undefined;
@@ -45,14 +72,14 @@ const CompanyLandingPage = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <main>
-        <section className="px-6 md:px-20 pt-36 pb-20 border-b border-border">
-          <div className="max-w-6xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-10 lg:gap-16 items-start">
+        <section className="px-6 md:px-20 pt-32 md:pt-36 pb-16 md:pb-20 border-b border-border">
+          <div className="max-w-6xl mx-auto grid lg:grid-cols-[minmax(0,2fr)_minmax(300px,1fr)] gap-8 lg:gap-12 items-start">
             <div>
               <p className="text-xs tracking-[0.22em] uppercase text-primary font-semibold mb-4">{page.eyebrow}</p>
-              <h1 className="font-display text-4xl md:text-7xl font-extrabold tracking-tight text-foreground max-w-5xl mb-6">
+              <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground max-w-4xl mb-6 leading-[0.98]">
                 {page.headline}
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed mb-8">
+              <p className="text-base md:text-lg text-muted-foreground max-w-3xl leading-relaxed mb-8">
                 {page.subheadline}
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
@@ -71,25 +98,25 @@ const CompanyLandingPage = () => {
               </div>
             </div>
 
-            <aside className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm">
-              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-4">Proposal Snapshot</p>
-              <div className="space-y-5">
-                <div>
+            <aside className="rounded-3xl border border-border bg-card p-5 md:p-6 shadow-sm lg:sticky lg:top-28">
+              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-5">Proposal Snapshot</p>
+              <div className="space-y-4">
+                <div className="pb-4 border-b border-border">
                   <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Company</p>
-                  <p className="text-foreground font-semibold">{page.companyName}</p>
+                  <p className="text-foreground font-semibold leading-snug">{page.companyName}</p>
                 </div>
-                <div>
+                <div className="pb-4 border-b border-border">
                   <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Category</p>
-                  <p className="text-foreground font-semibold">{page.industry}</p>
+                  <p className="text-foreground font-semibold leading-snug">{page.industry}</p>
                 </div>
-                <div>
-                  <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Recommended engagement</p>
-                  <p className="text-foreground font-semibold">{page.recommendedEngagement.title}</p>
+                <div className="pb-4 border-b border-border">
+                  <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Engagement</p>
+                  <p className="text-foreground font-semibold leading-snug">{page.recommendedEngagement.title}</p>
                 </div>
                 {proposal?.investment && (
                   <div>
                     <p className="text-[11px] tracking-[0.16em] uppercase text-muted-foreground mb-1">Commercial model</p>
-                    <p className="text-foreground font-semibold">{proposal.investment}</p>
+                    <p className="text-foreground font-semibold leading-snug">{proposal.investment}</p>
                   </div>
                 )}
               </div>
@@ -97,27 +124,27 @@ const CompanyLandingPage = () => {
           </div>
         </section>
 
-        <section className="px-6 md:px-20 py-16 md:py-20">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-[0.85fr_1.15fr] gap-10 md:gap-16 items-start">
+        <section className="px-6 md:px-20 py-14 md:py-18">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-[0.8fr_1.2fr] gap-8 md:gap-14 items-start">
             <div>
               <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Situation</p>
-              <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
                 Why this conversation may be worth having.
               </h2>
             </div>
             <div className="rounded-3xl border border-border bg-card p-6 md:p-8 shadow-sm">
-              <p className="text-muted-foreground leading-relaxed text-lg">
+              <p className="text-muted-foreground leading-relaxed text-base md:text-lg">
                 {proposal?.situation || page.fitSummary}
               </p>
             </div>
           </div>
         </section>
 
-        <section className="px-6 md:px-20 py-16 md:py-20 bg-muted/40 border-y border-border">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-[0.9fr_1.1fr] gap-10 md:gap-16 items-start">
+        <section className="px-6 md:px-20 py-14 md:py-18 bg-muted/40 border-y border-border">
+          <div className="max-w-6xl mx-auto grid md:grid-cols-[0.85fr_1.15fr] gap-8 md:gap-14 items-start">
             <div>
               <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Opportunity</p>
-              <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+              <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
                 Where I believe I can create leverage.
               </h2>
               <p className="text-muted-foreground leading-relaxed">
@@ -135,53 +162,80 @@ const CompanyLandingPage = () => {
         </section>
 
         <section className="px-6 md:px-20 py-16 md:py-20">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 md:gap-16">
-            <div>
-              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Recommended proposal</p>
+          <div className="max-w-6xl mx-auto">
+            <div className="max-w-3xl mb-10">
+              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Our approach</p>
               <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
-                {page.recommendedEngagement.title}
+                Six layers. One closed-loop revenue intelligence stack.
               </h2>
-              <p className="text-muted-foreground leading-relaxed">{page.recommendedEngagement.description}</p>
+              <p className="text-muted-foreground leading-relaxed text-base md:text-lg">
+                The goal is not to add more marketing activity. The goal is to connect business priorities, customer signals, segmentation, activation, measurement, and optimization into one system that can keep improving.
+              </p>
             </div>
-            <ul className="grid gap-4 list-none p-0 m-0">
-              {page.recommendedEngagement.bullets.map((bullet) => (
-                <li key={bullet} className="rounded-2xl bg-card border border-border p-5 text-foreground leading-relaxed">
-                  {bullet}
-                </li>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {revenueIntelligenceLayers.map((layer, index) => (
+                <div key={layer.title} className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </div>
+                    <h3 className="font-display text-xl font-extrabold text-foreground">{layer.title}</h3>
+                  </div>
+                  <p className="text-muted-foreground leading-relaxed text-sm md:text-base">{layer.description}</p>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </section>
 
-        {proposal?.phases?.length ? (
-          <section className="px-6 md:px-20 py-16 md:py-20 bg-muted/40 border-y border-border">
-            <div className="max-w-6xl mx-auto">
-              <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Execution plan</p>
-              <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-8">
-                A phased path from diagnosis to usable operating system.
-              </h2>
-              <div className="grid md:grid-cols-3 gap-4">
-                {proposal.phases.map((phase, index) => (
-                  <div key={phase.title} className="rounded-3xl border border-border bg-background p-6 shadow-sm">
-                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mb-5">
-                      {index + 1}
-                    </div>
-                    <p className="text-[11px] tracking-[0.16em] uppercase text-primary font-semibold mb-2">{phase.duration}</p>
-                    <h3 className="font-display text-2xl font-extrabold text-foreground mb-3">{phase.title}</h3>
-                    <p className="text-muted-foreground leading-relaxed">{phase.description}</p>
-                  </div>
-                ))}
+        <section className="px-6 md:px-20 py-16 md:py-20 bg-muted/40 border-y border-border">
+          <div className="max-w-6xl mx-auto">
+            <div className="grid md:grid-cols-[0.9fr_1.1fr] gap-8 md:gap-14 items-start mb-10">
+              <div>
+                <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Recommended proposal</p>
+                <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+                  {page.recommendedEngagement.title}
+                </h2>
+                <p className="text-muted-foreground leading-relaxed">{page.recommendedEngagement.description}</p>
               </div>
+              <ul className="grid gap-4 list-none p-0 m-0">
+                {page.recommendedEngagement.bullets.map((bullet) => (
+                  <li key={bullet} className="rounded-2xl bg-background border border-border p-5 text-foreground leading-relaxed">
+                    {bullet}
+                  </li>
+                ))}
+              </ul>
             </div>
-          </section>
-        ) : null}
+
+            {proposal?.phases?.length ? (
+              <div>
+                <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Engagement structure</p>
+                <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-8">
+                  How the engagement would work.
+                </h2>
+                <div className="grid md:grid-cols-3 gap-4">
+                  {proposal.phases.map((phase, index) => (
+                    <div key={phase.title} className="rounded-3xl border border-border bg-background p-6 shadow-sm">
+                      <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold mb-5">
+                        {index + 1}
+                      </div>
+                      <p className="text-[11px] tracking-[0.16em] uppercase text-primary font-semibold mb-2">{phase.duration}</p>
+                      <h3 className="font-display text-2xl font-extrabold text-foreground mb-3">{phase.title}</h3>
+                      <p className="text-muted-foreground leading-relaxed">{phase.description}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </section>
 
         {proposal?.outcomes?.length ? (
           <section className="px-6 md:px-20 py-16 md:py-20">
-            <div className="max-w-6xl mx-auto grid md:grid-cols-[0.9fr_1.1fr] gap-10 md:gap-16 items-start">
+            <div className="max-w-6xl mx-auto grid md:grid-cols-[0.85fr_1.15fr] gap-8 md:gap-14 items-start">
               <div>
                 <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Expected outcomes</p>
-                <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
+                <h2 className="font-display text-3xl md:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground mb-5">
                   What the engagement should make clearer.
                 </h2>
               </div>
