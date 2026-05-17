@@ -1,3 +1,10 @@
+const styleProposalDirectoryHero = () => {
+  if (window.location.pathname !== "/company") return;
+  const hero = document.querySelector("main > section:first-of-type") as HTMLElement | null;
+  if (!hero) return;
+  hero.classList.add("proposal-directory-hero");
+};
+
 const removeProposalHeaderContactButton = () => {
   if (window.location.pathname !== "/company") return;
 
@@ -13,6 +20,7 @@ const createFloatingProposalFilter = () => {
   if (window.location.pathname !== "/company") return;
   if (document.querySelector(".proposal-floating-filter")) return;
 
+  styleProposalDirectoryHero();
   removeProposalHeaderContactButton();
 
   const sourceSortSelect = document.querySelector("main section select") as HTMLSelectElement | null;
@@ -102,6 +110,8 @@ const createFloatingProposalFilter = () => {
 };
 
 const bootFloatingProposalFilter = () => {
+  window.setTimeout(styleProposalDirectoryHero, 100);
+  window.setTimeout(styleProposalDirectoryHero, 600);
   window.setTimeout(removeProposalHeaderContactButton, 250);
   window.setTimeout(removeProposalHeaderContactButton, 800);
   window.setTimeout(removeProposalHeaderContactButton, 1800);
