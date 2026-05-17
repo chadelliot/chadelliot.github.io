@@ -35,6 +35,9 @@ jobs:
 
       - name: Build
         run: npm run build
+        env:
+          VITE_PROPOSAL_DB_URL: ${{ vars.VITE_PROPOSAL_DB_URL }}
+          VITE_PROPOSAL_DB_PUBLIC: ${{ vars.VITE_PROPOSAL_DB_PUBLIC }}
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v4
