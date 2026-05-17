@@ -113,6 +113,34 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
     roleContext: "Interim senior growth marketing role for a B2B SaaS / consumer insights platform. The role emphasizes UK/US growth strategy, AI-enhanced customer acquisition, self-service conversion paths, predictive scoring with Revenue Operations, retention campaigns, marketing automation, attribution, forecasting, Product Marketing partnership, and Marketing Director partnership.",
     contacts: [
       {
+        name: "Jennifer Armstrong",
+        title: "Marketing Director",
+        company: "Attest",
+        linkedinUrl: "https://www.linkedin.com/in/jennifer-armstrong-50572236/",
+        relationshipToOpportunity: "High-confidence senior marketing stakeholder and likely hiring-path contact for an interim senior growth marketing role.",
+        confidence: "high",
+        emailStatus: "not_available",
+        hubspotStatus: "created",
+        hubspotContactId: "487073401558",
+        selectionRationale: "Her Marketing Director title is directly aligned to the role's stated partnership with marketing leadership and growth execution priorities.",
+        outreachTone: "Senior, concise, and outcome-led. Treat as a likely decision-maker or close sponsor; lead with growth operating systems, lifecycle execution, RevOps partnership, and measurable pipeline impact.",
+        suggestedAngle: "I can help Attest connect growth marketing ambition to the operating system underneath it — lifecycle, segmentation, attribution, automation, AI workflows, and RevOps partnership that make growth measurable."
+      },
+      {
+        name: "Morgan Tilling",
+        title: "People Partner",
+        company: "Attest",
+        linkedinUrl: "https://www.linkedin.com/in/morgan-tilling/",
+        relationshipToOpportunity: "Medium-confidence people/recruiting path who may be connected to the hiring process or able to route the inquiry.",
+        confidence: "medium",
+        emailStatus: "not_available",
+        hubspotStatus: "created",
+        hubspotContactId: "487062131442",
+        selectionRationale: "People Partner role may support hiring logistics or point to the internal owner if the marketing leader is not directly reachable.",
+        outreachTone: "Respectful and routing-oriented. Do not assume ownership; ask whether they can point you to the person managing the interim growth marketing search.",
+        suggestedAngle: "I saw the interim senior growth marketing role and would appreciate guidance on the right person to discuss fit with."
+      },
+      {
         name: "Katherine Millar",
         title: "Senior Product Marketing Manager",
         company: "Attest",
@@ -121,10 +149,26 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
         relationshipToOpportunity: "Visible adjacent stakeholder; Product Marketing is explicitly part of the role's partnership model.",
         confidence: "medium",
         emailStatus: "not_available",
-        hubspotStatus: "not_loaded_email_unavailable",
-        selectionRationale: "The role references partnership with Product Marketing for feature launches, market research, competitive intelligence, and strategic positioning. Clay surfaced Katherine as the clearest visible PMM contact, though not necessarily the hiring manager.",
-        outreachTone: "GTM and product-marketing aligned. Keep the note consultative and focused on lifecycle-to-launch alignment, AI-enhanced growth programs, attribution, and funnel conversion rather than a generic job application tone.",
+        hubspotStatus: "created",
+        hubspotContactId: "487067779812",
+        hubspotNoteId: "369873593034",
+        selectionRationale: "The role references partnership with Product Marketing for feature launches, market research, competitive intelligence, and strategic positioning. She may not own hiring, but is a relevant GTM stakeholder.",
+        outreachTone: "GTM and product-marketing aligned. Keep the note consultative and focused on lifecycle-to-launch alignment, AI-enhanced growth programs, attribution, and funnel conversion rather than generic job-application language.",
         suggestedAngle: "I can help bridge product marketing, growth marketing, RevOps, lifecycle automation, and attribution into a connected growth operating system."
+      },
+      {
+        name: "O’Brien Sharjeel",
+        title: "Digital Marketing Manager",
+        company: "Attest",
+        linkedinUrl: "https://www.linkedin.com/in/obrien-sharjeel-673846318/",
+        relationshipToOpportunity: "Medium-confidence adjacent marketing execution stakeholder who may understand growth marketing priorities or route to the hiring owner.",
+        confidence: "medium",
+        emailStatus: "not_available",
+        hubspotStatus: "created",
+        hubspotContactId: "487057433276",
+        selectionRationale: "Digital Marketing Manager is relevant to growth marketing execution, campaign operations, funnel conversion, and activation work tied to the role.",
+        outreachTone: "Peer-level and practical. Do not assume hiring ownership; ask for context or direction while referencing shared growth marketing execution priorities.",
+        suggestedAngle: "I can help connect campaign execution, lifecycle workflows, and RevOps measurement into a cleaner growth operating system."
       }
     ]
   },
@@ -145,7 +189,9 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
         relationshipToOpportunity: "Direct executive sponsor; the role is designed to act as an impact multiplier for the CRO.",
         confidence: "high",
         emailStatus: "not_available",
-        hubspotStatus: "not_loaded_email_unavailable",
+        hubspotStatus: "created",
+        hubspotContactId: "487079927538",
+        hubspotNoteId: "369877824218",
         selectionRationale: "The job description directly states the role partners with and supports the Chief Revenue Officer.",
         outreachTone: "Executive, concise, and outcome-led. Lead with operating cadence, OKR execution, strategic initiative throughput, decision-ready reporting, and revenue leadership leverage.",
         suggestedAngle: "I can help turn CRO priorities into a practical revenue operating system with clearer ownership, metrics, reporting, and cross-functional accountability."
@@ -159,7 +205,9 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
         relationshipToOpportunity: "Direct functional partner; the role explicitly works with the Head of RevOps.",
         confidence: "high",
         emailStatus: "not_available",
-        hubspotStatus: "not_loaded_email_unavailable",
+        hubspotStatus: "created",
+        hubspotContactId: "487077999318",
+        hubspotNoteId: "369887738558",
         selectionRationale: "The job description names Head of RevOps as a close partner, making Isa one of the strongest target-path stakeholders.",
         outreachTone: "RevOps peer/operator-to-operator. Speak in terms of cadence, OKRs, pipeline visibility, project governance, reporting architecture, and making revenue priorities executable.",
         suggestedAngle: "I can help strengthen the operating rhythm between CRO priorities, RevOps execution, OKR governance, and executive reporting."
@@ -173,7 +221,9 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
         relationshipToOpportunity: "RevOps execution stakeholder and adjacent influencer.",
         confidence: "medium",
         emailStatus: "not_available",
-        hubspotStatus: "not_loaded_email_unavailable",
+        hubspotStatus: "created",
+        hubspotContactId: "487069569750",
+        hubspotNoteId: "369877969626",
         selectionRationale: "Senior RevOps manager likely has context on reporting, process, revenue cadence, project execution, and operating friction the role is meant to solve.",
         outreachTone: "Execution-oriented and practical. Lead with dashboards, cadence, project governance, clean handoffs, and reducing operational drag across revenue teams.",
         suggestedAngle: "I can help translate revenue leadership priorities into cleaner operating rhythms, project trackers, dashboards, and follow-through mechanisms."
@@ -187,7 +237,9 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
         relationshipToOpportunity: "Adjacent revenue stakeholder across marketing alignment.",
         confidence: "medium",
         emailStatus: "not_available",
-        hubspotStatus: "not_loaded_email_unavailable",
+        hubspotStatus: "created",
+        hubspotContactId: "487059273458",
+        hubspotNoteId: "369877845693",
         selectionRationale: "The role aligns Sales, Marketing, RevOps, and Customer Success around the revenue organization's OKRs and strategic initiatives.",
         outreachTone: "Marketing/revenue alignment tone. Emphasize GTM visibility, OKR alignment, campaign-to-revenue reporting, and cross-functional execution.",
         suggestedAngle: "I can help connect marketing priorities into the broader revenue operating cadence so campaigns, pipeline, OKRs, and leadership reporting stay aligned."
