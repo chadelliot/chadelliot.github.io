@@ -4,15 +4,22 @@ import type { CompanyLandingPage } from "@/data/companyLandingPages";
 
 type SocialContact = Pick<ProposalOutreachResearchContact, "name" | "title" | "linkedinUrl"> & Partial<ProposalOutreachResearchContact>;
 
+const hasEmailManagedPath = (contact: SocialContact) => {
+  if (contact.email) return true;
+  return contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo";
+};
+
 const getContacts = (page: CompanyLandingPage): SocialContact[] => {
   const researchContacts = proposalOutreachResearch[page.slug]?.contacts ?? [];
   const pageContacts = (page.outreachContacts ?? []).map((contact) => ({
     name: contact.name,
     title: contact.title,
     linkedinUrl: contact.linkedinUrl,
+    email: contact.email,
     selectionRationale: contact.selectionRationale,
     relationshipToOpportunity: contact.selectionRationale || "Previously researched outreach contact.",
     confidence: "medium" as const,
+    emailStatus: contact.email ? "exact" as const : "not_available" as const,
     outreachTone: "Use a concise, professional note that references the role and asks whether they are the right contact or can point you to the right person.",
     suggestedAngle: page.outreachAngle,
   }));
@@ -59,6 +66,8 @@ const buildDraft = (contact: SocialContact, page: CompanyLandingPage) => {
 
 const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
   const contacts = useMemo(() => getContacts(page), [page]);
+  const socialOnlyContacts = useMemo(() => contacts.filter((contact) => !hasEmailManagedPath(contact)), [contacts]);
+  const privateHubSpotContacts = useMemo(() => contacts.filter(hasEmailManagedPath), [contacts]);
   const [selectedContact, setSelectedContact] = useState<SocialContact | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy message");
   const draft = selectedContact ? buildDraft(selectedContact, page) : "";
@@ -88,41 +97,53 @@ const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
             <div>
               <p className="text-xs tracking-[0.2em] uppercase text-primary font-semibold mb-3">Social outreach path</p>
               <h2 className="font-display text-3xl md:text-5xl font-extrabold tracking-tight text-foreground mb-5">
-                Public contacts to approach on LinkedIn.
+                Public LinkedIn contacts.
               </h2>
             </div>
             <p className="text-muted-foreground leading-relaxed m-0">
-              These are public profile paths for social outreach. Email outreach remains managed through HubSpot; this page gives you LinkedIn links and tailored draft messages for each contact.
+              Only social-only contacts are shown publicly. Contacts with email paths stay hidden and are managed through HubSpot.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            {contacts.map((contact) => (
-              <article key={`${contact.linkedinUrl}-${contact.name}`} className="rounded-[1.5rem] border border-border bg-card p-5 md:p-6 shadow-sm">
-                <div className="mb-5 flex items-start justify-between gap-4">
-                  <div>
-                    <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group no-underline">
-                      <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                        {contact.name}
-                      </h3>
-                      <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
-                    </a>
-                    {contact.location ? <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">{contact.location}</p> : null}
-                  </div>
-                  {contact.confidence ? (
+          {privateHubSpotContacts.length ? (
+            <div className="mb-6 rounded-[1.25rem] border border-dashed border-border bg-card p-5">
+              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Private HubSpot path</p>
+              <p className="m-0 text-sm leading-relaxed text-foreground">
+                {privateHubSpotContacts.length} researched {privateHubSpotContacts.length === 1 ? "contact is" : "contacts are"} hidden from this page because an email-managed path exists in HubSpot.
+              </p>
+            </div>
+          ) : null}
+
+          {socialOnlyContacts.length ? (
+            <div className="grid md:grid-cols-2 gap-4">
+              {socialOnlyContacts.map((contact) => (
+                <article key={`${contact.linkedinUrl}-${contact.name}`} className="rounded-[1.5rem] border border-border bg-card p-5 md:p-6 shadow-sm">
+                  <div className="mb-5 flex items-start justify-between gap-4">
+                    <div>
+                      <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group no-underline">
+                        <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                          {contact.name}
+                        </h3>
+                        <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
+                      </a>
+                    </div>
                     <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      {contact.confidence} confidence
+                      Social only
                     </span>
-                  ) : null}
-                </div>
-                {contact.relationshipToOpportunity ? <p className="mb-3 text-sm leading-relaxed text-foreground">{contact.relationshipToOpportunity}</p> : null}
-                {contact.selectionRationale ? <p className="mb-5 text-sm leading-relaxed text-muted-foreground">{contact.selectionRationale}</p> : null}
-                <button type="button" onClick={() => openDraft(contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
-                  Draft message
-                </button>
-              </article>
-            ))}
-          </div>
+                  </div>
+                  <button type="button" onClick={() => openDraft(contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
+                    Draft message
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[1.25rem] border border-border bg-card p-5">
+              <p className="m-0 text-sm leading-relaxed text-muted-foreground">
+                No public social-only contacts are currently needed for this proposal page.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
