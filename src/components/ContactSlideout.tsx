@@ -29,7 +29,14 @@ const ContactSlideout = () => {
 
       event.preventDefault();
       event.stopPropagation();
+      event.stopImmediatePropagation();
+
       openContact();
+
+      window.setTimeout(() => {
+        document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+        openContact();
+      }, 25);
     };
 
     window.addEventListener("open-contact-slideout", handleOpenContact);
