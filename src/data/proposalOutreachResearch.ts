@@ -7,6 +7,7 @@ export type ProposalOutreachResearchContact = {
   title: string;
   company: string;
   linkedinUrl: string;
+  email?: string;
   location?: string;
   relationshipToOpportunity: string;
   confidence: OutreachConfidence;
@@ -29,79 +30,46 @@ export type ProposalOutreachResearchRecord = {
   contacts: ProposalOutreachResearchContact[];
 };
 
+const makeHubSpotContact = ({ name, title, company, linkedinUrl, email, hubspotContactId, confidence = "medium" as OutreachConfidence, relationshipToOpportunity, selectionRationale, suggestedAngle }: {
+  name: string;
+  title: string;
+  company: string;
+  linkedinUrl: string;
+  email?: string;
+  hubspotContactId: string;
+  confidence?: OutreachConfidence;
+  relationshipToOpportunity?: string;
+  selectionRationale?: string;
+  suggestedAngle?: string;
+}): ProposalOutreachResearchContact => ({
+  name,
+  title,
+  company,
+  linkedinUrl,
+  email,
+  relationshipToOpportunity: relationshipToOpportunity || "HubSpot contact with a LinkedIn profile and/or email associated with this proposal company.",
+  confidence,
+  emailStatus: email ? "exact" : "not_available",
+  hubspotStatus: "created",
+  hubspotContactId,
+  selectionRationale: selectionRationale || "Added from HubSpot because the contact has usable outreach details for this proposal company.",
+  outreachTone: "Concise, professional, and role-relevant. Use LinkedIn for short context and email for a more complete introduction when an email address is available.",
+  suggestedAngle: suggestedAngle || "I can help connect strategy, operating rhythm, automation, reporting, and GTM execution into a clearer system tied to measurable outcomes."
+});
+
 export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRecord> = {
   "who-gives-a-crap": {
     slug: "who-gives-a-crap",
     companyName: "Who Gives A Crap",
     opportunityTitle: "Fractional Head of Marketing Operations & Planning",
     sourceTools: ["GoFractional", "Clay", "HubSpot"],
-    lastResearched: "2026-05-16",
+    lastResearched: "2026-05-17",
     roleContext: "Marketing operations and planning role for a distributed, multi-market consumer goods/eCommerce brand. The core need appears to be planning cadence, campaign governance, resourcing clarity, cross-functional alignment, budget visibility, and operating rhythm across brand, growth, lifecycle, creative, analytics, and commercial stakeholders.",
     contacts: [
-      {
-        name: "Victoria Ortega",
-        title: "Head of Marketing Operations",
-        company: "Who Gives A Crap",
-        linkedinUrl: "https://www.linkedin.com/in/victoria-ortega/",
-        location: "Melbourne, Victoria, Australia",
-        relationshipToOpportunity: "Likely direct functional stakeholder or hiring-path contact.",
-        confidence: "high",
-        emailStatus: "pattern_supported",
-        hubspotStatus: "created",
-        hubspotContactId: "487057202915",
-        hubspotNoteId: "369873521373",
-        selectionRationale: "Her title directly matches the marketing operations, planning, resourcing, process, and campaign governance scope of the role.",
-        outreachTone: "Direct, operator-to-operator, and practical. Lead with marketing operations systems, planning cadence, resourcing clarity, and cross-functional execution. Avoid generic brand/growth language.",
-        suggestedAngle: "I can help build the operating layer underneath marketing so priorities, resourcing, campaign execution, and reporting move as one system."
-      },
-      {
-        name: "Taryn Morais",
-        title: "Director of Lifecycle Marketing",
-        company: "Who Gives A Crap",
-        linkedinUrl: "https://www.linkedin.com/in/taryn-morais-316aa369/",
-        location: "Greater Melbourne Area, Australia",
-        relationshipToOpportunity: "Strong adjacent lifecycle stakeholder.",
-        confidence: "high",
-        emailStatus: "pattern_supported",
-        hubspotStatus: "created",
-        hubspotContactId: "487056770769",
-        hubspotNoteId: "369875374799",
-        selectionRationale: "Lifecycle marketing will likely be impacted by planning, prioritization, campaign governance, segmentation, and operating cadence decisions.",
-        outreachTone: "Collaborative and lifecycle-oriented. Lead with relevance, customer journey visibility, retention and activation workflows, and cross-functional alignment.",
-        suggestedAngle: "I can help connect lifecycle planning, campaign intake, reporting, and growth priorities into a clearer operating rhythm."
-      },
-      {
-        name: "Kat Kearney",
-        title: "Senior Director, Global Brand Marketing",
-        company: "Who Gives A Crap",
-        linkedinUrl: "https://www.linkedin.com/in/kat-kearney-1406893a/",
-        location: "Greater Melbourne Area, Australia",
-        relationshipToOpportunity: "Senior brand stakeholder and possible executive sponsor or influencer.",
-        confidence: "medium",
-        emailStatus: "pattern_supported",
-        hubspotStatus: "created",
-        hubspotContactId: "487052448505",
-        hubspotNoteId: "369861675766",
-        selectionRationale: "Relevant if the role supports global campaign prioritization, resourcing, brand/growth handoffs, or planning governance.",
-        outreachTone: "Strategic and brand-sensitive. Lead with preserving creative momentum while improving planning clarity, decision visibility, and execution discipline.",
-        suggestedAngle: "I can help create the operating model that lets brand, growth, lifecycle, and commercial teams move faster without losing clarity or cohesion."
-      },
-      {
-        name: "Jason Brain",
-        title: "Director of Growth Marketing UK & EU",
-        company: "Who Gives A Crap",
-        linkedinUrl: "https://www.linkedin.com/in/jason-brain/",
-        location: "London, England, United Kingdom",
-        relationshipToOpportunity: "Regional growth stakeholder and adjacent influencer.",
-        confidence: "medium",
-        emailStatus: "pattern_supported",
-        hubspotStatus: "created",
-        hubspotContactId: "487052722882",
-        hubspotNoteId: "369875374800",
-        selectionRationale: "Relevant if planning work supports UK/EU growth campaigns, creative testing, channel prioritization, or operating cadence.",
-        outreachTone: "Commercial and performance-oriented. Lead with campaign velocity, growth planning, test-and-learn discipline, and better visibility across priorities and outcomes.",
-        suggestedAngle: "I can help align growth marketing execution with a more scalable planning and reporting system across markets."
-      }
+      makeHubSpotContact({ name: "Victoria Ortega", title: "Head of Marketing Operations", company: "Who Gives A Crap", linkedinUrl: "https://www.linkedin.com/in/victoria-ortega/", email: "victoria@whogivesacrap.org", hubspotContactId: "487057202915", confidence: "high", relationshipToOpportunity: "Likely direct functional stakeholder or hiring-path contact.", selectionRationale: "Her title directly matches the marketing operations, planning, resourcing, process, and campaign governance scope of the role.", suggestedAngle: "I can help build the operating layer underneath marketing so priorities, resourcing, campaign execution, and reporting move as one system." }),
+      makeHubSpotContact({ name: "Taryn Morais", title: "Director of Lifecycle Marketing", company: "Who Gives A Crap", linkedinUrl: "https://www.linkedin.com/in/taryn-morais-316aa369/", email: "taryn@whogivesacrap.org", hubspotContactId: "487056770769", confidence: "high", relationshipToOpportunity: "Strong adjacent lifecycle stakeholder.", selectionRationale: "Lifecycle marketing will likely be impacted by planning, prioritization, campaign governance, segmentation, and operating cadence decisions.", suggestedAngle: "I can help connect lifecycle planning, campaign intake, reporting, and growth priorities into a clearer operating rhythm." }),
+      makeHubSpotContact({ name: "Kat Kearney", title: "Senior Director, Global Brand Marketing", company: "Who Gives A Crap", linkedinUrl: "https://www.linkedin.com/in/kat-kearney-1406893a/", email: "kat@whogivesacrap.org", hubspotContactId: "487052448505", confidence: "medium", relationshipToOpportunity: "Senior brand stakeholder and possible executive sponsor or influencer.", selectionRationale: "Relevant if the role supports global campaign prioritization, resourcing, brand/growth handoffs, or planning governance.", suggestedAngle: "I can help create the operating model that lets brand, growth, lifecycle, and commercial teams move faster without losing clarity or cohesion." }),
+      makeHubSpotContact({ name: "Jason Brain", title: "Director of Growth Marketing UK & EU", company: "Who Gives A Crap", linkedinUrl: "https://www.linkedin.com/in/jason-brain/", email: "jason@whogivesacrap.org", hubspotContactId: "487052722882", confidence: "medium", relationshipToOpportunity: "Regional growth stakeholder and adjacent influencer.", selectionRationale: "Relevant if planning work supports UK/EU growth campaigns, creative testing, channel prioritization, or operating cadence.", suggestedAngle: "I can help align growth marketing execution with a more scalable planning and reporting system across markets." })
     ]
   },
   "attest": {
@@ -109,67 +77,13 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
     companyName: "Attest",
     opportunityTitle: "Interim Senior Growth Marketing Manager",
     sourceTools: ["GoFractional", "Clay", "HubSpot", "Apollo"],
-    lastResearched: "2026-05-16",
+    lastResearched: "2026-05-17",
     roleContext: "Interim senior growth marketing role for a B2B SaaS / consumer insights platform. The role emphasizes UK/US growth strategy, AI-enhanced customer acquisition, self-service conversion paths, predictive scoring with Revenue Operations, retention campaigns, marketing automation, attribution, forecasting, Product Marketing partnership, and Marketing Director partnership.",
     contacts: [
-      {
-        name: "Jennifer Armstrong",
-        title: "Marketing Director",
-        company: "Attest",
-        linkedinUrl: "https://www.linkedin.com/in/jennifer-armstrong-50572236/",
-        relationshipToOpportunity: "High-confidence senior marketing stakeholder and likely hiring-path contact for an interim senior growth marketing role.",
-        confidence: "high",
-        emailStatus: "not_available",
-        hubspotStatus: "created",
-        hubspotContactId: "487073401558",
-        selectionRationale: "Her Marketing Director title is directly aligned to the role's stated partnership with marketing leadership and growth execution priorities.",
-        outreachTone: "Senior, concise, and outcome-led. Treat as a likely decision-maker or close sponsor; lead with growth operating systems, lifecycle execution, RevOps partnership, and measurable pipeline impact.",
-        suggestedAngle: "I can help Attest connect growth marketing ambition to the operating system underneath it — lifecycle, segmentation, attribution, automation, AI workflows, and RevOps partnership that make growth measurable."
-      },
-      {
-        name: "Morgan Tilling",
-        title: "People Partner",
-        company: "Attest",
-        linkedinUrl: "https://www.linkedin.com/in/morgan-tilling/",
-        relationshipToOpportunity: "Medium-confidence people/recruiting path who may be connected to the hiring process or able to route the inquiry.",
-        confidence: "medium",
-        emailStatus: "not_available",
-        hubspotStatus: "created",
-        hubspotContactId: "487062131442",
-        selectionRationale: "People Partner role may support hiring logistics or point to the internal owner if the marketing leader is not directly reachable.",
-        outreachTone: "Respectful and routing-oriented. Do not assume ownership; ask whether they can point you to the person managing the interim growth marketing search.",
-        suggestedAngle: "I saw the interim senior growth marketing role and would appreciate guidance on the right person to discuss fit with."
-      },
-      {
-        name: "Katherine Millar",
-        title: "Senior Product Marketing Manager",
-        company: "Attest",
-        linkedinUrl: "https://www.linkedin.com/in/katherinemillar/",
-        location: "United Kingdom",
-        relationshipToOpportunity: "Visible adjacent stakeholder; Product Marketing is explicitly part of the role's partnership model.",
-        confidence: "medium",
-        emailStatus: "not_available",
-        hubspotStatus: "created",
-        hubspotContactId: "487067779812",
-        hubspotNoteId: "369873593034",
-        selectionRationale: "The role references partnership with Product Marketing for feature launches, market research, competitive intelligence, and strategic positioning. She may not own hiring, but is a relevant GTM stakeholder.",
-        outreachTone: "GTM and product-marketing aligned. Keep the note consultative and focused on lifecycle-to-launch alignment, AI-enhanced growth programs, attribution, and funnel conversion rather than generic job-application language.",
-        suggestedAngle: "I can help bridge product marketing, growth marketing, RevOps, lifecycle automation, and attribution into a connected growth operating system."
-      },
-      {
-        name: "O’Brien Sharjeel",
-        title: "Digital Marketing Manager",
-        company: "Attest",
-        linkedinUrl: "https://www.linkedin.com/in/obrien-sharjeel-673846318/",
-        relationshipToOpportunity: "Medium-confidence adjacent marketing execution stakeholder who may understand growth marketing priorities or route to the hiring owner.",
-        confidence: "medium",
-        emailStatus: "not_available",
-        hubspotStatus: "created",
-        hubspotContactId: "487057433276",
-        selectionRationale: "Digital Marketing Manager is relevant to growth marketing execution, campaign operations, funnel conversion, and activation work tied to the role.",
-        outreachTone: "Peer-level and practical. Do not assume hiring ownership; ask for context or direction while referencing shared growth marketing execution priorities.",
-        suggestedAngle: "I can help connect campaign execution, lifecycle workflows, and RevOps measurement into a cleaner growth operating system."
-      }
+      makeHubSpotContact({ name: "Jennifer Armstrong", title: "Marketing Director", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/jennifer-armstrong-50572236/", hubspotContactId: "487073401558", confidence: "high", relationshipToOpportunity: "High-confidence senior marketing stakeholder and likely hiring-path contact for an interim senior growth marketing role.", selectionRationale: "Her Marketing Director title is directly aligned to the role's stated partnership with marketing leadership and growth execution priorities.", suggestedAngle: "I can help Attest connect growth marketing ambition to the operating system underneath it — lifecycle, segmentation, attribution, automation, AI workflows, and RevOps partnership that make growth measurable." }),
+      makeHubSpotContact({ name: "Morgan Tilling", title: "People Partner", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/morgan-tilling/", hubspotContactId: "487062131442", relationshipToOpportunity: "People/recruiting path who may be connected to the hiring process or able to route the inquiry.", selectionRationale: "People Partner role may support hiring logistics or point to the internal owner if the marketing leader is not directly reachable.", suggestedAngle: "I saw the interim senior growth marketing role and would appreciate guidance on the right person to discuss fit with." }),
+      makeHubSpotContact({ name: "Katherine Millar", title: "Senior Product Marketing Manager", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/katherinemillar/", hubspotContactId: "487067779812", relationshipToOpportunity: "Visible adjacent stakeholder; Product Marketing is explicitly part of the role's partnership model.", selectionRationale: "The role references partnership with Product Marketing for feature launches, market research, competitive intelligence, and strategic positioning.", suggestedAngle: "I can help bridge product marketing, growth marketing, RevOps, lifecycle automation, and attribution into a connected growth operating system." }),
+      makeHubSpotContact({ name: "O’Brien Sharjeel", title: "Digital Marketing Manager", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/obrien-sharjeel-673846318/", hubspotContactId: "487057433276", relationshipToOpportunity: "Adjacent marketing execution stakeholder who may understand growth marketing priorities or route to the hiring owner.", selectionRationale: "Digital Marketing Manager is relevant to growth marketing execution, campaign operations, funnel conversion, and activation work tied to the role.", suggestedAngle: "I can help connect campaign execution, lifecycle workflows, and RevOps measurement into a cleaner growth operating system." })
     ]
   },
   "enmacc": {
@@ -177,73 +91,118 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
     companyName: "enmacc",
     opportunityTitle: "Revenue Business Manager / Revenue Chief of Staff",
     sourceTools: ["GoFractional", "Clay", "HubSpot", "Apollo"],
-    lastResearched: "2026-05-16",
-    roleContext: "Revenue Chief of Staff-style contract role for a high-growth B2B energy trading technology company. The role is explicitly described as an impact multiplier for the CRO, working closely with the CRO, Chief of Staff, and Head of RevOps to drive strategic initiatives, OKR management, project execution, stakeholder communication, revenue meeting cadence, and data-driven decision support across Sales, Marketing, Revenue Operations, and Customer Success.",
+    lastResearched: "2026-05-17",
+    roleContext: "Revenue Chief of Staff-style contract role for a high-growth B2B energy trading technology company. The role supports CRO priorities, OKR management, project execution, stakeholder communication, revenue meeting cadence, and data-driven decision support across Sales, Marketing, Revenue Operations, and Customer Success.",
     contacts: [
-      {
-        name: "Jeuel Ventura",
-        title: "Chief Revenue Officer (CRO)",
-        company: "enmacc",
-        linkedinUrl: "https://www.linkedin.com/in/jeuel-ventura-92979038/",
-        location: "London, England, United Kingdom",
-        relationshipToOpportunity: "Direct executive sponsor; the role is designed to act as an impact multiplier for the CRO.",
-        confidence: "high",
-        emailStatus: "not_available",
-        hubspotStatus: "created",
-        hubspotContactId: "487079927538",
-        hubspotNoteId: "369877824218",
-        selectionRationale: "The job description directly states the role partners with and supports the Chief Revenue Officer.",
-        outreachTone: "Executive, concise, and outcome-led. Lead with operating cadence, OKR execution, strategic initiative throughput, decision-ready reporting, and revenue leadership leverage.",
-        suggestedAngle: "I can help turn CRO priorities into a practical revenue operating system with clearer ownership, metrics, reporting, and cross-functional accountability."
-      },
-      {
-        name: "Isa Korn",
-        title: "Head of Revenue Operations",
-        company: "enmacc",
-        linkedinUrl: "https://www.linkedin.com/in/isa-korn-894ba463/",
-        location: "London, England, United Kingdom",
-        relationshipToOpportunity: "Direct functional partner; the role explicitly works with the Head of RevOps.",
-        confidence: "high",
-        emailStatus: "not_available",
-        hubspotStatus: "created",
-        hubspotContactId: "487077999318",
-        hubspotNoteId: "369887738558",
-        selectionRationale: "The job description names Head of RevOps as a close partner, making Isa one of the strongest target-path stakeholders.",
-        outreachTone: "RevOps peer/operator-to-operator. Speak in terms of cadence, OKRs, pipeline visibility, project governance, reporting architecture, and making revenue priorities executable.",
-        suggestedAngle: "I can help strengthen the operating rhythm between CRO priorities, RevOps execution, OKR governance, and executive reporting."
-      },
-      {
-        name: "Michael McBride",
-        title: "Senior Revenue Operations Manager",
-        company: "enmacc",
-        linkedinUrl: "https://www.linkedin.com/in/michaeljohnmcbride/",
-        location: "Tarbes, Occitanie, France",
-        relationshipToOpportunity: "RevOps execution stakeholder and adjacent influencer.",
-        confidence: "medium",
-        emailStatus: "not_available",
-        hubspotStatus: "created",
-        hubspotContactId: "487069569750",
-        hubspotNoteId: "369877969626",
-        selectionRationale: "Senior RevOps manager likely has context on reporting, process, revenue cadence, project execution, and operating friction the role is meant to solve.",
-        outreachTone: "Execution-oriented and practical. Lead with dashboards, cadence, project governance, clean handoffs, and reducing operational drag across revenue teams.",
-        suggestedAngle: "I can help translate revenue leadership priorities into cleaner operating rhythms, project trackers, dashboards, and follow-through mechanisms."
-      },
-      {
-        name: "Simon Blake",
-        title: "Head of Marketing",
-        company: "enmacc",
-        linkedinUrl: "https://www.linkedin.com/in/simon-blake-munich/",
-        location: "Munich, Bavaria, Germany",
-        relationshipToOpportunity: "Adjacent revenue stakeholder across marketing alignment.",
-        confidence: "medium",
-        emailStatus: "not_available",
-        hubspotStatus: "created",
-        hubspotContactId: "487059273458",
-        hubspotNoteId: "369877845693",
-        selectionRationale: "The role aligns Sales, Marketing, RevOps, and Customer Success around the revenue organization's OKRs and strategic initiatives.",
-        outreachTone: "Marketing/revenue alignment tone. Emphasize GTM visibility, OKR alignment, campaign-to-revenue reporting, and cross-functional execution.",
-        suggestedAngle: "I can help connect marketing priorities into the broader revenue operating cadence so campaigns, pipeline, OKRs, and leadership reporting stay aligned."
-      }
+      makeHubSpotContact({ name: "Jeuel Ventura", title: "Chief Revenue Officer (CRO)", company: "enmacc", linkedinUrl: "https://www.linkedin.com/in/jeuel-ventura-92979038/", hubspotContactId: "487079927538", confidence: "high", relationshipToOpportunity: "Direct executive sponsor; the role is designed to act as an impact multiplier for the CRO.", selectionRationale: "The job description directly states the role partners with and supports the Chief Revenue Officer.", suggestedAngle: "I can help turn CRO priorities into a practical revenue operating system with clearer ownership, metrics, reporting, and cross-functional accountability." }),
+      makeHubSpotContact({ name: "Isa Korn", title: "Head of Revenue Operations", company: "enmacc", linkedinUrl: "https://www.linkedin.com/in/isa-korn-894ba463/", hubspotContactId: "487077999318", confidence: "high", relationshipToOpportunity: "Direct functional partner; the role explicitly works with the Head of RevOps.", selectionRationale: "The job description names Head of RevOps as a close partner, making Isa one of the strongest target-path stakeholders.", suggestedAngle: "I can help strengthen the operating rhythm between CRO priorities, RevOps execution, OKR governance, and executive reporting." }),
+      makeHubSpotContact({ name: "Michael McBride", title: "Senior Revenue Operations Manager", company: "enmacc", linkedinUrl: "https://www.linkedin.com/in/michaeljohnmcbride/", hubspotContactId: "487069569750", relationshipToOpportunity: "RevOps execution stakeholder and adjacent influencer.", selectionRationale: "Senior RevOps manager likely has context on reporting, process, revenue cadence, project execution, and operating friction the role is meant to solve.", suggestedAngle: "I can help translate revenue leadership priorities into cleaner operating rhythms, project trackers, dashboards, and follow-through mechanisms." }),
+      makeHubSpotContact({ name: "Simon Blake", title: "Head of Marketing", company: "enmacc", linkedinUrl: "https://www.linkedin.com/in/simon-blake-munich/", hubspotContactId: "487059273458", relationshipToOpportunity: "Adjacent revenue stakeholder across marketing alignment.", selectionRationale: "The role aligns Sales, Marketing, RevOps, and Customer Success around the revenue organization's OKRs and strategic initiatives.", suggestedAngle: "I can help connect marketing priorities into the broader revenue operating cadence so campaigns, pipeline, OKRs, and leadership reporting stay aligned." })
+    ]
+  },
+  "turtl": {
+    slug: "turtl",
+    companyName: "Turtl",
+    opportunityTitle: "Fractional VP of Customer Success",
+    sourceTools: ["HubSpot"],
+    lastResearched: "2026-05-17",
+    roleContext: "Customer success and revenue leadership opportunity where executive operating cadence, customer lifecycle insight, retention, expansion, and cross-functional GTM alignment are likely relevant.",
+    contacts: [
+      makeHubSpotContact({ name: "Claire McNee", title: "Director of Customer Success", company: "Turtl", linkedinUrl: "https://www.linkedin.com/in/clairemcnee/", email: "claire.mcnee@turtl.co", hubspotContactId: "487045534420", confidence: "high", relationshipToOpportunity: "Direct customer success stakeholder for the opportunity.", selectionRationale: "Customer Success leadership is directly connected to the posted fractional VP CS work.", suggestedAngle: "I can help strengthen customer success operating rhythm, lifecycle visibility, retention programs, and executive reporting." }),
+      makeHubSpotContact({ name: "Nick Mason", title: "CEO & Founder | Chief Storytelling Officer", company: "Turtl", linkedinUrl: "https://www.linkedin.com/in/nickmasonsays/", email: "nick@turtl.co", hubspotContactId: "487034561240", relationshipToOpportunity: "Executive stakeholder who may influence or sponsor leadership-level customer success work.", selectionRationale: "CEO/founder contact with email and LinkedIn in HubSpot.", suggestedAngle: "I can help connect customer success, lifecycle insight, and revenue reporting into a scalable operating model." }),
+      makeHubSpotContact({ name: "Francesca Edwards", title: "Head of Revenue Operations", company: "Turtl", linkedinUrl: "https://www.linkedin.com/in/francescamedwards/", email: "francesca.edwards@turtl.co", hubspotContactId: "487049850595", confidence: "high", relationshipToOpportunity: "Revenue operations partner likely relevant to CS metrics, retention, and GTM operating cadence.", selectionRationale: "Head of RevOps role is directly relevant to customer success measurement and operating rhythm.", suggestedAngle: "I can help align CS priorities with RevOps reporting, lifecycle metrics, and revenue leadership cadence." })
+    ]
+  },
+  "town-web": {
+    slug: "town-web",
+    companyName: "Town Web Design",
+    opportunityTitle: "Fractional CPQ and RevOps Architect",
+    sourceTools: ["HubSpot"],
+    lastResearched: "2026-05-17",
+    roleContext: "Fractional CPQ and revenue operations architecture opportunity where operational systems, process design, and implementation discipline are relevant.",
+    contacts: [
+      makeHubSpotContact({ name: "Angela Stănescu", title: "Operations Management", company: "Town Web Design", linkedinUrl: "https://www.linkedin.com/in/angela-stanescu/", email: "angela.stanescu@townweb.com", hubspotContactId: "487048049361", confidence: "high", relationshipToOpportunity: "Operations stakeholder likely connected to process, CPQ, and operating-system improvement.", selectionRationale: "Operations Management title aligns to the CPQ and RevOps architecture scope.", suggestedAngle: "I can help translate process complexity into cleaner CPQ, CRM, reporting, and operational workflows." })
+    ]
+  },
+  "farlinium": {
+    slug: "farlinium",
+    companyName: "Farlinium",
+    opportunityTitle: "B2B Growth Marketing Manager",
+    sourceTools: ["HubSpot"],
+    lastResearched: "2026-05-17",
+    roleContext: "B2B growth marketing opportunity where sales alignment, demand generation, lifecycle execution, and measurement are relevant.",
+    contacts: [
+      makeHubSpotContact({ name: "John Palazzolo", title: "Solution Sales Executive", company: "Farlinium", linkedinUrl: "https://www.linkedin.com/in/john-palazzolo-7260a98/", email: "john@farlinium.com", hubspotContactId: "487041577662", relationshipToOpportunity: "Sales stakeholder adjacent to B2B growth marketing execution.", selectionRationale: "Sales perspective can help connect growth marketing to pipeline needs.", suggestedAngle: "I can help connect demand generation, sales follow-up, and pipeline reporting into a cleaner B2B growth engine." }),
+      makeHubSpotContact({ name: "Jed Hamilton", title: "Marketing Specialist", company: "Farlinium", linkedinUrl: "https://www.linkedin.com/in/jed-hamilton/", email: "jed@farlinium.com", hubspotContactId: "487041645259", confidence: "high", relationshipToOpportunity: "Marketing execution stakeholder likely close to the growth marketing need.", selectionRationale: "Marketing Specialist is directly adjacent to campaign and growth execution.", suggestedAngle: "I can help build the growth marketing operating layer around campaign execution, lifecycle workflows, and reporting." }),
+      makeHubSpotContact({ name: "Yusuf Abediyeh", title: "Director of Sales", company: "Farlinium", linkedinUrl: "https://www.linkedin.com/in/yabediyeh/", email: "yusuf@farlinium.com", hubspotContactId: "487028626166", confidence: "high", relationshipToOpportunity: "Sales leader and likely commercial stakeholder for growth marketing impact.", selectionRationale: "Director of Sales would be directly impacted by B2B demand generation and pipeline quality.", suggestedAngle: "I can help align growth marketing execution with sales pipeline visibility, lead quality, and revenue reporting." })
+    ]
+  },
+  "speridian-technologies": {
+    slug: "speridian-technologies",
+    companyName: "Speridian Technologies",
+    opportunityTitle: "Principal GTM Strategy Lead",
+    sourceTools: ["HubSpot"],
+    lastResearched: "2026-05-17",
+    roleContext: "GTM strategy and technology consulting opportunity where product ownership, program management, and digital transformation execution are relevant.",
+    contacts: [
+      makeHubSpotContact({ name: "Amitoj Singh", title: "Product Owner", company: "Speridian Technologies", linkedinUrl: "https://www.linkedin.com/in/amitoj-singh-09206b18a/", email: "amitoj.singh@speridian.com", hubspotContactId: "487041105612" }),
+      makeHubSpotContact({ name: "Namratha Nagaraj", title: "Product Owner", company: "Speridian Technologies", linkedinUrl: "https://www.linkedin.com/in/namms/", email: "namratha.nagaraj@speridian.com", hubspotContactId: "487040970484" }),
+      makeHubSpotContact({ name: "Veronica Barajas", title: "Agile Delivery Manager", company: "Speridian Technologies", linkedinUrl: "https://www.linkedin.com/in/veronicabarajas/", email: "veronica.barajas@speridian.com", hubspotContactId: "487041575640" }),
+      makeHubSpotContact({ name: "Kyle Donovan", title: "Senior Technical Product Owner", company: "Speridian Technologies", linkedinUrl: "https://www.linkedin.com/in/kyle-donovan-60983153/", email: "kyle.donovan@speridian.com", hubspotContactId: "487028567741" }),
+      makeHubSpotContact({ name: "May Oyairo", title: "Digital Product Owner", company: "Speridian Technologies", linkedinUrl: "https://www.linkedin.com/in/mayoyairo/", email: "may.oyairo@speridian.com", hubspotContactId: "487028567742" }),
+      makeHubSpotContact({ name: "Venkata Jitendra Chevuru", title: "Sr Technical Program Manager / Managing Principal", company: "Speridian Technologies", linkedinUrl: "https://www.linkedin.com/in/jitendra-kumar-30663a19/", email: "venkata.chevuru@speridian.com", hubspotContactId: "487040970487" })
+    ]
+  },
+  "everist": {
+    slug: "everist",
+    companyName: "Everist",
+    opportunityTitle: "Fractional VP Marketing",
+    sourceTools: ["HubSpot"],
+    lastResearched: "2026-05-17",
+    roleContext: "Fractional VP marketing opportunity where brand, growth, customer acquisition, and operating cadence are relevant.",
+    contacts: [
+      makeHubSpotContact({ name: "Jayme Jenkins", title: "Co-Founder & Chief Brand Officer", company: "Everist", linkedinUrl: "https://www.linkedin.com/in/jayme-jenkins-a996a948/", email: "jayme.jenkins@helloeverist.com", hubspotContactId: "487039765224", confidence: "high", relationshipToOpportunity: "Founder/brand executive likely relevant to VP marketing discussions.", selectionRationale: "Chief Brand Officer role is directly adjacent to fractional marketing leadership.", suggestedAngle: "I can help connect brand strategy, growth execution, lifecycle marketing, and performance reporting into one operating system." })
+    ]
+  },
+  "acuvance": {
+    slug: "acuvance",
+    companyName: "Acuvance",
+    opportunityTitle: "Director of Revenue Operations",
+    sourceTools: ["HubSpot"],
+    lastResearched: "2026-05-17",
+    roleContext: "Revenue operations leadership opportunity where CRM architecture, sales process, reporting, and GTM operating cadence are relevant.",
+    contacts: [
+      makeHubSpotContact({ name: "Josh Nazarian", title: "Chief Executive Officer", company: "Acuvance", linkedinUrl: "https://www.linkedin.com/in/josh-nazarian-a804611/", email: "josh.nazarian@acuvance.com", hubspotContactId: "487045534421", confidence: "high", relationshipToOpportunity: "CEO and likely executive sponsor for revenue operations maturity.", selectionRationale: "CEO contact with direct visibility into revenue operations needs.", suggestedAngle: "I can help build the operating system behind revenue growth: CRM process, reporting, segmentation, lifecycle, and executive visibility." })
+    ]
+  },
+  "neolytix": {
+    slug: "neolytix",
+    companyName: "Neolytix",
+    opportunityTitle: "Fractional Healthcare Growth Program Architect",
+    sourceTools: ["HubSpot"],
+    lastResearched: "2026-05-17",
+    roleContext: "Healthcare growth program architecture opportunity involving operations, marketing, process design, and scalable execution.",
+    contacts: [
+      makeHubSpotContact({ name: "Mohit Sharma", title: "Operations Manager", company: "Neolytix", linkedinUrl: "https://www.linkedin.com/in/mohit-sharma-97b24958/", email: "mohit.sharma@neolytix.com", hubspotContactId: "487039975114" }),
+      makeHubSpotContact({ name: "Ritu Kalsi Bhatnagar", title: "President & COO", company: "Neolytix", linkedinUrl: "https://www.linkedin.com/in/ritu-kalsi-bhatnagar-54135a29/", email: "ritu.bhatnagar@neolytix.com", hubspotContactId: "487041575641", confidence: "high" }),
+      makeHubSpotContact({ name: "Mausam Sharma", title: "Operations Team Lead", company: "Neolytix", linkedinUrl: "https://www.linkedin.com/in/mausam-sharma-50a5531b1/", email: "mausam.sharma@neolytix.com", hubspotContactId: "487041960667" }),
+      makeHubSpotContact({ name: "Aashi Singh", title: "Assistant Marketing Manager", company: "Neolytix", linkedinUrl: "https://www.linkedin.com/in/aashi-singh-983116193/", email: "aashi.singh@neolytix.com", hubspotContactId: "487028623084" }),
+      makeHubSpotContact({ name: "Garvit Chouhan", title: "Head - Operations and Process Excellence", company: "Neolytix", linkedinUrl: "https://www.linkedin.com/in/chouhangarvit/", email: "garvit.chouhan@neolytix.com", hubspotContactId: "487040970488" })
+    ]
+  },
+  "logic20-20": {
+    slug: "logic20-20",
+    companyName: "Logic20/20",
+    opportunityTitle: "Solution Architect — Palantir Foundry",
+    sourceTools: ["HubSpot"],
+    lastResearched: "2026-05-17",
+    roleContext: "Solution architecture and digital transformation opportunity where analytics, AI, product, and implementation leadership are relevant.",
+    contacts: [
+      makeHubSpotContact({ name: "Melanie Tran", title: "Senior Manager, Digital Strategy & Transformation Practice Area Lead", company: "Logic20/20", linkedinUrl: "https://www.linkedin.com/in/melanie-tran-97b19855/", email: "melaniet@logic2020.com", hubspotContactId: "487028572868", confidence: "high" }),
+      makeHubSpotContact({ name: "Mick Wagner", title: "Sr. Solutions Architect of Advanced Analytics Practice", company: "Logic20/20", linkedinUrl: "https://www.linkedin.com/in/mick-wagner-0814065/", email: "mickw@logic2020.com", hubspotContactId: "487041109698" }),
+      makeHubSpotContact({ name: "Anna Emmett", title: "Solution Architect", company: "Logic20/20", linkedinUrl: "https://www.linkedin.com/in/annaemmett/", email: "annae@logic2020.com", hubspotContactId: "487040972510" }),
+      makeHubSpotContact({ name: "Lionel Bodin", title: "Senior Director - Digital Strategy and Transformation", company: "Logic20/20", linkedinUrl: "https://www.linkedin.com/in/lionel-bodin/", email: "lionelb@logic2020.com", hubspotContactId: "487041037042" }),
+      makeHubSpotContact({ name: "Tejan Gabisi", title: "Director, Digital Strategy & Transformation | AI", company: "Logic20/20", linkedinUrl: "https://www.linkedin.com/in/tejangabisi/", email: "tejang@logic2020.com", hubspotContactId: "487041037048" })
     ]
   }
 };
