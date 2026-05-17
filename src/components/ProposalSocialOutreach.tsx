@@ -79,12 +79,11 @@ const buildContactEventParams = (page: CompanyLandingPage, contact: SocialContac
 const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
   const contacts = useMemo(() => getContacts(page), [page]);
   const socialOnlyContacts = useMemo(() => contacts.filter((contact) => !hasEmailManagedPath(contact)), [contacts]);
-  const privateHubSpotContacts = useMemo(() => contacts.filter(hasEmailManagedPath), [contacts]);
   const [selectedContact, setSelectedContact] = useState<SocialContact | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy message");
   const draft = selectedContact ? buildDraft(selectedContact, page) : "";
 
-  if (!contacts.length) return null;
+  if (!socialOnlyContacts.length) return null;
 
   const copyDraft = async () => {
     if (!draft || !selectedContact) return;
@@ -115,55 +114,38 @@ const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
               </h2>
             </div>
             <p className="text-muted-foreground leading-relaxed m-0">
-              Only social-only contacts are shown publicly. Contacts with email paths stay hidden and are managed through HubSpot.
+              Social-only contacts from HubSpot are shown here for LinkedIn outreach. Email-managed contacts remain fully hidden.
             </p>
           </div>
 
-          {privateHubSpotContacts.length ? (
-            <div className="mb-6 rounded-[1.25rem] border border-dashed border-border bg-card p-5">
-              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">Private HubSpot path</p>
-              <p className="m-0 text-sm leading-relaxed text-foreground">
-                {privateHubSpotContacts.length} researched {privateHubSpotContacts.length === 1 ? "contact is" : "contacts are"} hidden from this page because an email-managed path exists in HubSpot.
-              </p>
-            </div>
-          ) : null}
-
-          {socialOnlyContacts.length ? (
-            <div className="grid md:grid-cols-2 gap-4">
-              {socialOnlyContacts.map((contact) => (
-                <article key={`${contact.linkedinUrl}-${contact.name}`} className="rounded-[1.5rem] border border-border bg-card p-5 md:p-6 shadow-sm">
-                  <div className="mb-5 flex items-start justify-between gap-4">
-                    <div>
-                      <a
-                        href={contact.linkedinUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="group no-underline"
-                        onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}
-                      >
-                        <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">
-                          {contact.name}
-                        </h3>
-                        <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
-                      </a>
-                    </div>
-                    <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                      Social only
-                    </span>
+          <div className="grid md:grid-cols-2 gap-4">
+            {socialOnlyContacts.map((contact) => (
+              <article key={`${contact.linkedinUrl}-${contact.name}`} className="rounded-[1.5rem] border border-border bg-card p-5 md:p-6 shadow-sm">
+                <div className="mb-5 flex items-start justify-between gap-4">
+                  <div>
+                    <a
+                      href={contact.linkedinUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="group no-underline"
+                      onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}
+                    >
+                      <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                        {contact.name}
+                      </h3>
+                      <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
+                    </a>
                   </div>
-                  <button type="button" onClick={() => openDraft(contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
-                    Draft message
-                  </button>
-                </article>
-              ))}
-            </div>
-          ) : (
-            <div className="rounded-[1.25rem] border border-border bg-card p-5">
-              <p className="m-0 text-sm leading-relaxed text-muted-foreground">
-                No public social-only contacts are currently needed for this proposal page.
-              </p>
-            </div>
-          )}
+                  <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Social only
+                  </span>
+                </div>
+                <button type="button" onClick={() => openDraft(contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
+                  Draft message
+                </button>
+              </article>
+            ))}
+          </div>
         </div>
       </section>
 
