@@ -1,7 +1,19 @@
+const removeProposalHeaderContactButton = () => {
+  if (window.location.pathname !== "/company") return;
+
+  const contactLinks = Array.from(document.querySelectorAll("main section a[href='/contact']")) as HTMLAnchorElement[];
+  contactLinks.forEach((link) => {
+    const label = link.textContent?.trim().toLowerCase() || "";
+    if (label === "contact chad") link.remove();
+  });
+};
+
 const createFloatingProposalFilter = () => {
   if (!window.location.pathname.startsWith("/company")) return;
   if (window.location.pathname !== "/company") return;
   if (document.querySelector(".proposal-floating-filter")) return;
+
+  removeProposalHeaderContactButton();
 
   const sourceSortSelect = document.querySelector("main section select") as HTMLSelectElement | null;
   const sourceCheckbox = document.querySelector("main section input[type='checkbox']") as HTMLInputElement | null;
@@ -90,6 +102,9 @@ const createFloatingProposalFilter = () => {
 };
 
 const bootFloatingProposalFilter = () => {
+  window.setTimeout(removeProposalHeaderContactButton, 250);
+  window.setTimeout(removeProposalHeaderContactButton, 800);
+  window.setTimeout(removeProposalHeaderContactButton, 1800);
   window.setTimeout(createFloatingProposalFilter, 800);
   window.setTimeout(createFloatingProposalFilter, 1800);
   window.setTimeout(createFloatingProposalFilter, 3200);
