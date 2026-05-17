@@ -245,9 +245,10 @@ body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:n
 }
 
 .proposal-contact-detail-block a p:nth-child(2) {
-  margin-top: 4px !important;
-  font-size: 12px !important;
-  line-height: 1.4 !important;
+  margin-top: 7px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
 }
 
 .proposal-contact-detail-block > div:not(.proposal-contact-status-controls) {
