@@ -3,11 +3,15 @@ const createFloatingProposalFilter = () => {
   if (window.location.pathname !== "/company") return;
   if (document.querySelector(".proposal-floating-filter")) return;
 
-  const sourceSelect = document.querySelector("main section select") as HTMLSelectElement | null;
+  const sourceSortSelect = document.querySelector("main section select") as HTMLSelectElement | null;
   const sourceCheckbox = document.querySelector("main section input[type='checkbox']") as HTMLInputElement | null;
-  const sourceSection = sourceSelect?.closest("section") as HTMLElement | null;
+  const sourceSection = sourceSortSelect?.closest("section") as HTMLElement | null;
+  const typeButtons = Array.from(document.querySelectorAll("main section button")).filter((button) => {
+    const label = button.textContent?.trim() || "";
+    return label === "All types" || label.includes("Agency") || label.includes("Marketplace") || label.includes("Company Direct");
+  }) as HTMLButtonElement[];
 
-  if (!sourceSelect || !sourceCheckbox || !sourceSection) return;
+  if (!sourceSortSelect || !sourceCheckbox || !sourceSection || !typeButtons.length) return;
 
   const wrapper = document.createElement("div");
   wrapper.className = "proposal-floating-filter";
@@ -20,11 +24,25 @@ const createFloatingProposalFilter = () => {
   label.className = "proposal-floating-filter__label";
   label.textContent = "Filter proposals";
 
-  const select = sourceSelect.cloneNode(true) as HTMLSelectElement;
-  select.value = sourceSelect.value;
-  select.addEventListener("change", () => {
-    sourceSelect.value = select.value;
-    sourceSelect.dispatchEvent(new Event("change", { bubbles: true }));
+  const typeSelect = document.createElement("select");
+  typeSelect.setAttribute("aria-label", "Filter by job type");
+  typeButtons.forEach((button, index) => {
+    const option = document.createElement("option");
+    option.value = String(index);
+    option.textContent = button.textContent?.trim() || `Type ${index + 1}`;
+    typeSelect.appendChild(option);
+  });
+  typeSelect.addEventListener("change", () => {
+    const button = typeButtons[Number(typeSelect.value)];
+    button?.click();
+  });
+
+  const sortSelect = sourceSortSelect.cloneNode(true) as HTMLSelectElement;
+  sortSelect.setAttribute("aria-label", "Sort proposals");
+  sortSelect.value = sourceSortSelect.value;
+  sortSelect.addEventListener("change", () => {
+    sourceSortSelect.value = sortSelect.value;
+    sourceSortSelect.dispatchEvent(new Event("change", { bubbles: true }));
   });
 
   const checkboxLabel = document.createElement("label");
@@ -41,18 +59,22 @@ const createFloatingProposalFilter = () => {
   checkboxLabel.appendChild(checkboxText);
 
   inner.appendChild(label);
-  inner.appendChild(select);
+  inner.appendChild(typeSelect);
+  inner.appendChild(sortSelect);
   inner.appendChild(checkboxLabel);
   wrapper.appendChild(inner);
   document.body.appendChild(wrapper);
 
   const syncFromSource = () => {
-    select.value = sourceSelect.value;
+    sortSelect.value = sourceSortSelect.value;
     checkbox.checked = sourceCheckbox.checked;
+    const selectedTypeIndex = typeButtons.findIndex((button) => button.className.includes("text-white") || button.className.includes("bg-black"));
+    if (selectedTypeIndex >= 0) typeSelect.value = String(selectedTypeIndex);
   };
 
-  sourceSelect.addEventListener("change", syncFromSource);
+  sourceSortSelect.addEventListener("change", syncFromSource);
   sourceCheckbox.addEventListener("change", syncFromSource);
+  typeButtons.forEach((button) => button.addEventListener("click", () => window.setTimeout(syncFromSource, 0)));
 
   const onScroll = () => {
     const rect = sourceSection.getBoundingClientRect();
@@ -61,6 +83,7 @@ const createFloatingProposalFilter = () => {
     wrapper.setAttribute("aria-hidden", shouldShow ? "false" : "true");
   };
 
+  syncFromSource();
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
   onScroll();
