@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -6,13 +6,30 @@ import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
 import { proposalOutreachResearch, type ProposalOutreachResearchContact } from "@/data/proposalOutreachResearch";
 import { trackEvent } from "@/lib/analytics";
 
-type SortMode = "newest" | "oldest" | "company";
+type SortMode = "social-first" | "newest" | "oldest" | "company";
 type SocialContact = Pick<ProposalOutreachResearchContact, "name" | "title" | "linkedinUrl"> & Partial<ProposalOutreachResearchContact>;
 
-const POSTED_DATES: Record<string, string> = {
-  "who-gives-a-crap": "2026-05-16",
-  attest: "2026-05-16",
-  enmacc: "2026-05-16",
+const CONTACTED_STORAGE_KEY = "aboutchad_contacted_social_contacts_v1";
+
+const JOB_POSTED_DATES: Record<string, string> = {
+  "who-gives-a-crap": "2026-05-07",
+  attest: "2026-05-06",
+  enmacc: "2026-05-11",
+  "speridian-technologies": "2026-05-16",
+  neolytix: "2026-05-16",
+  farlinium: "2026-05-16",
+  "logic20-20": "2026-05-16",
+  acuvance: "2026-05-15",
+  "town-web": "2026-05-15",
+  everist: "2026-05-15",
+  turtl: "2026-05-15",
+  "software-solutions-firm-vp-sales": "2026-05-15",
+};
+
+const ROUND_DATES: Record<string, string> = {
+  "who-gives-a-crap": "2026-05-17",
+  attest: "2026-05-17",
+  enmacc: "2026-05-17",
   "speridian-technologies": "2026-05-16",
   neolytix: "2026-05-16",
   farlinium: "2026-05-16",
@@ -56,7 +73,7 @@ const getOpportunityTypeClass = (opportunityType: string, isSelected = false) =>
   return isSelected ? "border-sky-700 bg-sky-600 text-white" : "border-sky-400 bg-sky-50 text-sky-900 hover:border-sky-700";
 };
 
-const formatPostedDate = (date?: string) => {
+const formatDate = (date?: string) => {
   if (!date) return "Date pending";
   const parsed = new Date(`${date}T12:00:00`);
   return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
@@ -68,6 +85,8 @@ const hasEmailManagedPath = (contact: SocialContact) => {
   if (contact.email) return true;
   return contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo";
 };
+
+const getContactKey = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => `${page.slug}::${contact.linkedinUrl || contact.name}`.toLowerCase();
 
 const getSocialOnlyContacts = (page: (typeof allCompanyLandingPages)[string]): SocialContact[] => {
   const researchContacts = proposalOutreachResearch[page.slug]?.contacts ?? [];
@@ -137,28 +156,76 @@ const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: Soci
 const pillBaseClass = "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors";
 
 const CompanyDirectoryPageV5 = () => {
-  const [sortMode, setSortMode] = useState<SortMode>("newest");
+  const [sortMode, setSortMode] = useState<SortMode>("social-first");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [showContacted, setShowContacted] = useState(false);
+  const [contactedContacts, setContactedContacts] = useState<Record<string, boolean>>({});
   const [selectedDraft, setSelectedDraft] = useState<{ page: (typeof allCompanyLandingPages)[string]; contact: SocialContact } | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy message");
 
+  useEffect(() => {
+    try {
+      const stored = window.localStorage.getItem(CONTACTED_STORAGE_KEY);
+      if (stored) setContactedContacts(JSON.parse(stored));
+    } catch {
+      setContactedContacts({});
+    }
+  }, []);
+
+  const updateContactedStatus = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact, isContacted: boolean) => {
+    const key = getContactKey(page, contact);
+    setContactedContacts((current) => {
+      const next = { ...current };
+      if (isContacted) next[key] = true;
+      else delete next[key];
+
+      try {
+        window.localStorage.setItem(CONTACTED_STORAGE_KEY, JSON.stringify(next));
+      } catch {
+        // localStorage may be unavailable in private browsing contexts.
+      }
+
+      return next;
+    });
+
+    trackEvent("mark_social_contact_contacted", {
+      ...buildContactEventParams(page, contact),
+      contacted_status: isContacted,
+    });
+  };
+
   const pages = useMemo(() => {
-    const records = Object.values(allCompanyLandingPages).map((page) => ({
-      page,
-      postedDate: POSTED_DATES[page.slug],
-      opportunityType: getOpportunityType(page),
-      socialContacts: getSocialOnlyContacts(page),
-    }));
+    const records = Object.values(allCompanyLandingPages).map((page) => {
+      const socialContacts = getSocialOnlyContacts(page);
+      const visibleSocialContacts = socialContacts.filter((contact) => showContacted || !contactedContacts[getContactKey(page, contact)]);
+
+      return {
+        page,
+        jobPostedDate: JOB_POSTED_DATES[page.slug],
+        roundDate: ROUND_DATES[page.slug],
+        opportunityType: getOpportunityType(page),
+        socialContacts,
+        visibleSocialContacts,
+      };
+    });
 
     return records
       .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
       .sort((a, b) => {
         if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
-        const aTime = a.postedDate ? new Date(a.postedDate).getTime() : 0;
-        const bTime = b.postedDate ? new Date(b.postedDate).getTime() : 0;
-        return sortMode === "newest" ? bTime - aTime : aTime - bTime;
+
+        const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
+        const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
+
+        if (sortMode === "social-first") {
+          if (b.visibleSocialContacts.length !== a.visibleSocialContacts.length) return b.visibleSocialContacts.length - a.visibleSocialContacts.length;
+          if (b.socialContacts.length !== a.socialContacts.length) return b.socialContacts.length - a.socialContacts.length;
+          return bJobTime - aJobTime;
+        }
+
+        return sortMode === "newest" ? bJobTime - aJobTime : aJobTime - bJobTime;
       });
-  }, [sortMode, typeFilter]);
+  }, [sortMode, typeFilter, showContacted, contactedContacts]);
 
   const opportunityTypes = useMemo(() => Array.from(new Set(Object.values(allCompanyLandingPages).map(getOpportunityType))).sort(), []);
   const selectedDraftMessage = selectedDraft ? buildDraft(selectedDraft.page, selectedDraft.contact) : "";
@@ -210,14 +277,22 @@ const CompanyDirectoryPageV5 = () => {
               ))}
             </div>
 
-            <label className="grid gap-2 text-sm font-semibold text-foreground md:max-w-md">
-              Sort proposals
-              <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary">
-                <option value="newest">Newest posted first</option>
-                <option value="oldest">Oldest posted first</option>
-                <option value="company">Company A-Z</option>
-              </select>
-            </label>
+            <div className="grid gap-4 md:grid-cols-2 md:items-end">
+              <label className="grid gap-2 text-sm font-semibold text-foreground">
+                Sort proposals
+                <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary">
+                  <option value="social-first">Social contacts first</option>
+                  <option value="newest">Newest job posting first</option>
+                  <option value="oldest">Oldest job posting first</option>
+                  <option value="company">Company A-Z</option>
+                </select>
+              </label>
+
+              <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground">
+                <input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />
+                Show contacts marked as contacted
+              </label>
+            </div>
           </div>
         </section>
 
@@ -232,16 +307,20 @@ const CompanyDirectoryPageV5 = () => {
             </div>
 
             <div className="grid gap-4">
-              {pages.map(({ page, postedDate, opportunityType, socialContacts }) => (
+              {pages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleSocialContacts }) => (
                 <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
                   <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
                     <div>
                       <div className="mb-3 flex flex-wrap items-center gap-3">
                         <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">{page.companyName}</h3>
                         <button type="button" onClick={() => setTypeFilter(opportunityType)} className={`${pillBaseClass} ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>
+                        {visibleSocialContacts.length ? <span className={`${pillBaseClass} border-primary/50 bg-background text-primary`}>Social contacts</span> : null}
                       </div>
                       <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
-                      <p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Posted: {formatPostedDate(postedDate)}</p>
+                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        <span>Job posted: {formatDate(jobPostedDate)}</span>
+                        <span>Round added: {formatDate(roundDate)}</span>
+                      </div>
                     </div>
 
                     <div>
@@ -252,27 +331,41 @@ const CompanyDirectoryPageV5 = () => {
                     <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
                   </div>
 
-                  {socialContacts.length ? (
+                  {visibleSocialContacts.length ? (
                     <div className="mt-6 border-t border-border pt-5">
                       <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Social-only contacts</p>
                       <div className="grid gap-3 md:grid-cols-2">
-                        {socialContacts.map((contact) => (
-                          <div key={`${page.slug}-${contact.linkedinUrl}`} className="rounded-2xl border border-border bg-card p-4">
-                            <a
-                              href={contact.linkedinUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="group block no-underline"
-                              onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}
-                            >
-                              <p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p>
-                              <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
-                            </a>
-                            <button type="button" onClick={() => openDraft(page, contact)} className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
-                              Draft message
-                            </button>
-                          </div>
-                        ))}
+                        {visibleSocialContacts.map((contact) => {
+                          const contactKey = getContactKey(page, contact);
+                          const isContacted = Boolean(contactedContacts[contactKey]);
+
+                          return (
+                            <div key={`${page.slug}-${contact.linkedinUrl}`} className="rounded-2xl border border-border bg-card p-4">
+                              <div className="mb-4 flex items-start justify-between gap-3">
+                                <a
+                                  href={contact.linkedinUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="group block no-underline"
+                                  onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}
+                                >
+                                  <p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p>
+                                  <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
+                                </a>
+                                {isContacted ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-3">
+                                <button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
+                                  Draft message
+                                </button>
+                                <label className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+                                  <input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />
+                                  Mark contacted
+                                </label>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   ) : null}
