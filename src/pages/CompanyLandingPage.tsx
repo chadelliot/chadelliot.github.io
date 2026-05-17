@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProposalSocialOutreach from "@/components/ProposalSocialOutreach";
 import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
+import { trackEvent, trackPageView } from "@/lib/analytics";
 
 const fallbackProofPoints = [
   "Built enterprise marketing infrastructure from zero, including funnel architecture, CDP activation, segmentation, attribution, and cross-functional growth operations.",
@@ -68,6 +69,22 @@ const CompanyLandingPage = () => {
   const selectedLayer = selectedLayerIndex !== null ? loopLayers[selectedLayerIndex] : null;
 
   useEffect(() => {
+    if (!page) return;
+
+    trackEvent("view_proposal_page", {
+      company_slug: page.slug,
+      company_name: page.companyName,
+      engagement_title: page.recommendedEngagement.title,
+    });
+
+    trackPageView({
+      company_slug: page.slug,
+      company_name: page.companyName,
+      engagement_title: page.recommendedEngagement.title,
+    });
+  }, [page]);
+
+  useEffect(() => {
     if (selectedLayerIndex === null) return;
     const handleEscape = (event: globalThis.KeyboardEvent) => { if (event.key === "Escape") setSelectedLayerIndex(null); };
     document.addEventListener("keydown", handleEscape);
@@ -126,7 +143,25 @@ const CompanyLandingPage = () => {
     const className = variant === "footer"
       ? "inline-flex items-center justify-center rounded-full bg-background px-6 py-3 text-sm font-semibold tracking-[0.08em] uppercase text-foreground no-underline transition-opacity hover:opacity-90"
       : "inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-semibold tracking-[0.08em] uppercase text-primary-foreground no-underline transition-opacity hover:opacity-90";
-    if (shouldOpenContactDrawer) return <button type="button" onClick={() => setIsContactOpen(true)} className={className}>{page.ctaLabel}</button>;
+    if (shouldOpenContactDrawer) {
+      return (
+        <button
+          type="button"
+          onClick={() => {
+            trackEvent("click_contact_chad", {
+              company_slug: page.slug,
+              company_name: page.companyName,
+              engagement_title: page.recommendedEngagement.title,
+              cta_label: page.ctaLabel,
+            });
+            setIsContactOpen(true);
+          }}
+          className={className}
+        >
+          {page.ctaLabel}
+        </button>
+      );
+    }
     return <a href={page.ctaHref} className={className}>{page.ctaLabel}</a>;
   };
 
