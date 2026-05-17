@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
-import "./proposal-directory-sticky.css";
+import "./proposal-directory-floating-menu.css";
+import "./proposal-directory-floating-menu";
 
 createRoot(document.getElementById("root")!).render(<App />);
