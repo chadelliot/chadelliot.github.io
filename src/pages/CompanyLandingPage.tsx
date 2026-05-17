@@ -38,8 +38,8 @@ const parseMoney = (amount: string) => Number(amount.replace(/[$,\s]/g, ""));
 const formatMoney = (amount: number) => currencyFormatter.format(amount);
 
 const getTimelineForCompletion = (phases?: { duration: string }[]) => {
-  const explicitTimelines = phases?.map((phase) => phase.duration.trim()).filter((duration) => duration && !/^phase\s+\d+$/i.test(duration));
-  return explicitTimelines?.length ? explicitTimelines.join(" / ") : "Timeline to be confirmed during scoping.";
+  const uniqueTimelines = Array.from(new Set(phases?.map((phase) => phase.duration.trim()).filter((duration) => duration && !/^phase\s+\d+$/i.test(duration)) ?? []));
+  return uniqueTimelines.length ? uniqueTimelines.join(" / ") : "Timeline to be confirmed during scoping.";
 };
 
 const getCommercialModel = (investment?: string) => {
