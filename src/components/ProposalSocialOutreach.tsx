@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { proposalOutreachResearch, type ProposalOutreachResearchContact } from "@/data/proposalOutreachResearch";
 import type { CompanyLandingPage } from "@/data/companyLandingPages";
+import { trackEvent } from "@/lib/analytics";
 
 type SocialContact = Pick<ProposalOutreachResearchContact, "name" | "title" | "linkedinUrl"> & Partial<ProposalOutreachResearchContact>;
 
@@ -64,6 +65,17 @@ const buildDraft = (contact: SocialContact, page: CompanyLandingPage) => {
   ].join("\n");
 };
 
+const buildContactEventParams = (page: CompanyLandingPage, contact: SocialContact) => ({
+  company_slug: page.slug,
+  company_name: page.companyName,
+  engagement_title: proposalOutreachResearch[page.slug]?.opportunityTitle || page.recommendedEngagement.title,
+  contact_name: contact.name,
+  contact_title: contact.title,
+  contact_confidence: contact.confidence || "unknown",
+  outreach_type: "linkedin",
+  has_email_path: hasEmailManagedPath(contact),
+});
+
 const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
   const contacts = useMemo(() => getContacts(page), [page]);
   const socialOnlyContacts = useMemo(() => contacts.filter((contact) => !hasEmailManagedPath(contact)), [contacts]);
@@ -75,9 +87,10 @@ const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
   if (!contacts.length) return null;
 
   const copyDraft = async () => {
-    if (!draft) return;
+    if (!draft || !selectedContact) return;
     try {
       await navigator.clipboard.writeText(draft);
+      trackEvent("copy_draft_message", buildContactEventParams(page, selectedContact));
       setCopyStatus("Copied");
     } catch {
       setCopyStatus("Select and copy text");
@@ -85,6 +98,7 @@ const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
   };
 
   const openDraft = (contact: SocialContact) => {
+    trackEvent("open_draft_message", buildContactEventParams(page, contact));
     setSelectedContact(contact);
     setCopyStatus("Copy message");
   };
@@ -120,7 +134,13 @@ const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
                 <article key={`${contact.linkedinUrl}-${contact.name}`} className="rounded-[1.5rem] border border-border bg-card p-5 md:p-6 shadow-sm">
                   <div className="mb-5 flex items-start justify-between gap-4">
                     <div>
-                      <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group no-underline">
+                      <a
+                        href={contact.linkedinUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="group no-underline"
+                        onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}
+                      >
                         <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">
                           {contact.name}
                         </h3>
@@ -156,7 +176,13 @@ const ProposalSocialOutreach = ({ page }: { page: CompanyLandingPage }) => {
                 <h2 id="social-draft-title" className="font-display text-3xl md:text-4xl font-extrabold tracking-tight text-foreground mb-3">
                   {selectedContact.name}
                 </h2>
-                <a href={selectedContact.linkedinUrl} target="_blank" rel="noreferrer" className="text-sm font-semibold text-primary underline-offset-4 hover:underline">
+                <a
+                  href={selectedContact.linkedinUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm font-semibold text-primary underline-offset-4 hover:underline"
+                  onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, selectedContact))}
+                >
                   Open LinkedIn profile
                 </a>
               </div>
