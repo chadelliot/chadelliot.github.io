@@ -8,7 +8,7 @@ import { trackEvent } from "@/lib/analytics";
 
 type SortMode = "social-first" | "newest" | "oldest" | "company";
 type AuthMode = "login" | "signup";
-type SocialContact = Pick<ProposalOutreachResearchContact, "name" | "title" | "linkedinUrl"> & Partial<ProposalOutreachResearchContact>;
+type DirectoryContact = Pick<ProposalOutreachResearchContact, "name" | "title" | "linkedinUrl"> & Partial<ProposalOutreachResearchContact>;
 type ProposalSession = { access_token: string; user: { id: string; email?: string } };
 
 const CONTACTED_STORAGE_KEY = "aboutchad_contacted_social_contacts_v1";
@@ -62,6 +62,18 @@ const POSTED_ROLE_TITLES: Record<string, string> = {
   "software-solutions-firm-vp-sales": "Fractional VP of Sales",
 };
 
+const ROLE_SKILLS: Record<string, string[]> = {
+  "who-gives-a-crap": ["marketing operations design", "planning cadence", "campaign intake and governance", "capacity and resourcing visibility", "cross-functional operating rhythm", "executive reporting"],
+  attest: ["growth marketing strategy", "lifecycle automation", "RevOps partnership", "segmentation and scoring", "attribution and funnel reporting", "AI-enabled campaign workflows"],
+  enmacc: ["revenue operating cadence", "CRO-level prioritization", "OKR governance", "strategic initiative management", "RevOps reporting", "cross-functional accountability"],
+};
+
+const ROLE_POSITIONING: Record<string, string> = {
+  "who-gives-a-crap": "I build the operating layer behind marketing teams so strategy, resourcing, campaign governance, and reporting move as one system.",
+  attest: "I build growth operating systems that connect lifecycle marketing, RevOps, automation, attribution, and AI-enabled execution to measurable pipeline outcomes.",
+  enmacc: "I build revenue operating systems that turn CRO priorities, OKRs, reporting, and cross-functional execution into a clear leadership cadence.",
+};
+
 const getOpportunityType = (page: (typeof allCompanyLandingPages)[string]) => {
   const industry = page.industry.toLowerCase();
   if (industry.includes("talent") || industry.includes("consulting network") || industry.includes("executive network")) return "Agency / Talent Network";
@@ -77,20 +89,22 @@ const getOpportunityTypeClass = (opportunityType: string, isSelected = false) =>
 
 const formatDate = (date?: string) => {
   if (!date) return "Date pending";
-  const parsed = new Date(`${date}T12:00:00`);
-  return parsed.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return new Date(`${date}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
 const getPostedRoleTitle = (page: (typeof allCompanyLandingPages)[string]) => POSTED_ROLE_TITLES[page.slug] ?? page.recommendedEngagement.title;
 
-const hasEmailManagedPath = (contact: SocialContact) => {
-  if (contact.email) return true;
-  return contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo";
+const getCommitmentLength = (page: (typeof allCompanyLandingPages)[string]) => {
+  const phaseDurations = Array.from(new Set(page.proposal?.phases?.map((phase) => phase.duration.trim()).filter(Boolean) ?? []));
+  if (phaseDurations.length) return phaseDurations.join(" / ");
+  const investment = page.proposal?.investment || "";
+  const match = investment.match(/(?:remote;\s*)?([^;]*(?:contract|engagement|month|week|hour)[^;]*)/i);
+  return match?.[1]?.trim() || "Length not listed";
 };
 
-const getContactKey = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => `${page.slug}::${contact.linkedinUrl || contact.name}`.toLowerCase();
+const getContactKey = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => `${page.slug}::${contact.linkedinUrl || contact.name}`.toLowerCase();
 
-const getSocialOnlyContacts = (page: (typeof allCompanyLandingPages)[string]): SocialContact[] => {
+const getDirectoryContacts = (page: (typeof allCompanyLandingPages)[string]): DirectoryContact[] => {
   const researchContacts = proposalOutreachResearch[page.slug]?.contacts ?? [];
   const pageContacts = (page.outreachContacts ?? []).map((contact) => ({
     name: contact.name,
@@ -104,9 +118,9 @@ const getSocialOnlyContacts = (page: (typeof allCompanyLandingPages)[string]): S
     suggestedAngle: page.outreachAngle,
   }));
 
-  const deduped = new Map<string, SocialContact>();
+  const deduped = new Map<string, DirectoryContact>();
   [...researchContacts, ...pageContacts]
-    .filter((contact) => contact.name && contact.title && contact.linkedinUrl && !hasEmailManagedPath(contact))
+    .filter((contact) => contact.name && contact.title && contact.linkedinUrl)
     .forEach((contact) => {
       const key = `${contact.linkedinUrl || contact.name}`.toLowerCase();
       if (!deduped.has(key)) deduped.set(key, contact);
@@ -141,32 +155,21 @@ const saveStoredSession = (session: ProposalSession) => window.localStorage.setI
 const clearStoredSession = () => window.localStorage.removeItem(SESSION_STORAGE_KEY);
 
 const signIn = async (email: string, password: string) => {
-  const response = await fetch(`${DB_URL}/auth/v1/${"token"}?grant_type=password`, {
-    method: "POST",
-    headers: apiHeaders(),
-    body: JSON.stringify({ email, password }),
-  });
+  const response = await fetch(`${DB_URL}/auth/v1/${"token"}?grant_type=password`, { method: "POST", headers: apiHeaders(), body: JSON.stringify({ email, password }) });
   const session = await readApiJson<ProposalSession>(response);
   saveStoredSession(session);
   return session;
 };
 
 const signUp = async (email: string, password: string) => {
-  const response = await fetch(`${DB_URL}/auth/v1/signup`, {
-    method: "POST",
-    headers: apiHeaders(),
-    body: JSON.stringify({ email, password }),
-  });
+  const response = await fetch(`${DB_URL}/auth/v1/signup`, { method: "POST", headers: apiHeaders(), body: JSON.stringify({ email, password }) });
   const session = await readApiJson<ProposalSession>(response);
   if (session?.access_token) saveStoredSession(session);
   return session;
 };
 
 const loadContactedFromDb = async (session: ProposalSession) => {
-  const response = await fetch(`${DB_URL}/rest/v1/proposal_contact_status?select=contact_key,contacted&contacted=eq.true`, {
-    method: "GET",
-    headers: apiHeaders(session),
-  });
+  const response = await fetch(`${DB_URL}/rest/v1/proposal_contact_status?select=contact_key,contacted&contacted=eq.true`, { method: "GET", headers: apiHeaders(session) });
   const rows = await readApiJson<Array<{ contact_key: string; contacted: boolean }>>(response);
   return rows.reduce<Record<string, boolean>>((acc, row) => {
     if (row.contacted) acc[row.contact_key] = true;
@@ -174,32 +177,25 @@ const loadContactedFromDb = async (session: ProposalSession) => {
   }, {});
 };
 
-const saveContactedToDb = async (session: ProposalSession, page: (typeof allCompanyLandingPages)[string], contact: SocialContact, isContacted: boolean) => {
-  const contactKey = getContactKey(page, contact);
-  const payload = {
-    user_id: session.user.id,
-    company_slug: page.slug,
-    contact_key: contactKey,
-    contact_name: contact.name,
-    contact_title: contact.title,
-    linkedin_url: contact.linkedinUrl,
-    contacted: isContacted,
-    contacted_at: isContacted ? new Date().toISOString() : null,
-  };
-
+const saveContactedToDb = async (session: ProposalSession, page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact, isContacted: boolean) => {
   const response = await fetch(`${DB_URL}/rest/v1/proposal_contact_status?on_conflict=user_id,contact_key`, {
     method: "POST",
-    headers: {
-      ...apiHeaders(session),
-      Prefer: "resolution=merge-duplicates,return=minimal",
-    },
-    body: JSON.stringify(payload),
+    headers: { ...apiHeaders(session), Prefer: "resolution=merge-duplicates,return=minimal" },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      company_slug: page.slug,
+      contact_key: getContactKey(page, contact),
+      contact_name: contact.name,
+      contact_title: contact.title,
+      linkedin_url: contact.linkedinUrl,
+      contacted: isContacted,
+      contacted_at: isContacted ? new Date().toISOString() : null,
+    }),
   });
-
   await readApiJson<null>(response);
 };
 
-const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => ({
+const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => ({
   company_slug: page.slug,
   company_name: page.companyName,
   engagement_title: proposalOutreachResearch[page.slug]?.opportunityTitle || page.recommendedEngagement.title,
@@ -207,22 +203,40 @@ const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], 
   contact_title: contact.title,
   contact_confidence: contact.confidence || "unknown",
   outreach_type: "linkedin",
-  has_email_path: false,
+  has_email_path: Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo"),
 });
 
-const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => {
+const getRoleSkills = (page: (typeof allCompanyLandingPages)[string]) => ROLE_SKILLS[page.slug] ?? ["revenue operations", "marketing operations", "lifecycle strategy", "CRM workflows", "segmentation", "executive reporting"];
+const getRolePositioning = (page: (typeof allCompanyLandingPages)[string]) => ROLE_POSITIONING[page.slug] ?? "I build practical revenue and marketing operating systems that connect strategy, data, workflows, and reporting to measurable execution.";
+
+const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => {
   const firstName = contact.name.split(" ")[0] || contact.name;
   const roleTitle = proposalOutreachResearch[page.slug]?.opportunityTitle || getPostedRoleTitle(page);
   const relationship = `${contact.relationshipToOpportunity || ""} ${contact.selectionRationale || ""}`.toLowerCase();
   const isDirect = /direct|executive sponsor|cro|head of revenue operations|head of marketing operations|functional partner|marketing director/.test(relationship);
   const isAdjacent = /adjacent|influencer|stakeholder|possible|not necessarily|people partner|route/.test(relationship);
   const opening = isDirect
-    ? `I saw the ${roleTitle} opportunity with ${page.companyName} and wanted to reach out directly given your role as ${contact.title}.`
+    ? `I saw the ${roleTitle} opportunity with ${page.companyName} and wanted to reach out because your role as ${contact.title} looks closely connected to the work.`
     : isAdjacent
-      ? `I saw the ${roleTitle} opportunity with ${page.companyName}. I’m not sure whether you own this conversation, but given your role as ${contact.title}, I thought you may have useful context or be able to point me in the right direction.`
+      ? `I saw the ${roleTitle} opportunity with ${page.companyName}. I’m not sure whether you own this directly, but your role as ${contact.title} looks connected enough that I thought you may have useful context or be able to point me in the right direction.`
       : `I saw the ${roleTitle} opportunity with ${page.companyName} and wanted to reach out in case you are connected to the team evaluating the role.`;
 
-  return [`Hi ${firstName},`, "", opening, "", "By way of background, I’m Chad Parker. I build revenue, lifecycle, marketing operations, CRM/CDP, segmentation, and executive reporting systems that help teams turn GTM strategy into measurable execution.", "", contact.suggestedAngle || page.outreachAngle, "", "If you’re the right person to discuss this, I’d welcome the chance to connect. If not, I’d appreciate any direction on who owns the conversation internally.", "", "Best,", "Chad"].join("\n");
+  return [
+    `Hi ${firstName},`,
+    "",
+    opening,
+    "",
+    `A quick way to describe my work: ${getRolePositioning(page)}`,
+    "",
+    `The parts of my background that seem most relevant here are: ${getRoleSkills(page).join(", ")}.`,
+    "",
+    contact.suggestedAngle || page.outreachAngle,
+    "",
+    "If you’re the right person to discuss this, I’d welcome the chance to connect. If not, I’d appreciate any direction on who owns the conversation internally.",
+    "",
+    "Best,",
+    "Chad",
+  ].join("\n");
 };
 
 const pillBaseClass = "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors";
@@ -239,7 +253,7 @@ const CompanyDirectoryPageV5 = () => {
   const [authMessage, setAuthMessage] = useState("");
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [isStatusLoading, setIsStatusLoading] = useState(false);
-  const [selectedDraft, setSelectedDraft] = useState<{ page: (typeof allCompanyLandingPages)[string]; contact: SocialContact } | null>(null);
+  const [selectedDraft, setSelectedDraft] = useState<{ page: (typeof allCompanyLandingPages)[string]; contact: DirectoryContact } | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy message");
 
   useEffect(() => {
@@ -252,19 +266,14 @@ const CompanyDirectoryPageV5 = () => {
       }
       return;
     }
-
     setIsStatusLoading(true);
-    loadContactedFromDb(session)
-      .then(setContactedContacts)
-      .catch((error) => setAuthMessage(error.message || "Could not load saved contact status."))
-      .finally(() => setIsStatusLoading(false));
+    loadContactedFromDb(session).then(setContactedContacts).catch((error) => setAuthMessage(error.message || "Could not load saved contact status.")).finally(() => setIsStatusLoading(false));
   }, [session]);
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsAuthLoading(true);
     setAuthMessage("");
-
     try {
       const nextSession = authMode === "signup" ? await signUp(authEmail, authPassword) : await signIn(authEmail, authPassword);
       if (nextSession?.access_token) {
@@ -280,52 +289,44 @@ const CompanyDirectoryPageV5 = () => {
     }
   };
 
-  const updateContactedStatus = async (page: (typeof allCompanyLandingPages)[string], contact: SocialContact, isContacted: boolean) => {
+  const updateContactedStatus = async (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact, isContacted: boolean) => {
     const key = getContactKey(page, contact);
     const next = { ...contactedContacts };
     if (isContacted) next[key] = true;
     else delete next[key];
     setContactedContacts(next);
-
     try {
-      if (IS_DB_READY && session) {
-        await saveContactedToDb(session, page, contact, isContacted);
-      } else {
-        window.localStorage.setItem(CONTACTED_STORAGE_KEY, JSON.stringify(next));
-      }
+      if (IS_DB_READY && session) await saveContactedToDb(session, page, contact, isContacted);
+      else window.localStorage.setItem(CONTACTED_STORAGE_KEY, JSON.stringify(next));
     } catch (error) {
       setAuthMessage(error instanceof Error ? error.message : "Could not save contact status.");
     }
-
     trackEvent("mark_social_contact_contacted", { ...buildContactEventParams(page, contact), contacted_status: isContacted });
   };
 
   const pages = useMemo(() => {
     const records = Object.values(allCompanyLandingPages).map((page) => {
-      const socialContacts = getSocialOnlyContacts(page);
-      const visibleSocialContacts = socialContacts.filter((contact) => showContacted || !contactedContacts[getContactKey(page, contact)]);
-      return { page, jobPostedDate: JOB_POSTED_DATES[page.slug], roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), socialContacts, visibleSocialContacts };
+      const contacts = getDirectoryContacts(page);
+      const visibleContacts = contacts.filter((contact) => showContacted || !contactedContacts[getContactKey(page, contact)]);
+      return { page, jobPostedDate: JOB_POSTED_DATES[page.slug], roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), contacts, visibleContacts };
     });
-
-    return records
-      .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
-      .sort((a, b) => {
-        if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
-        const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
-        const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
-        if (sortMode === "social-first") {
-          if (b.visibleSocialContacts.length !== a.visibleSocialContacts.length) return b.visibleSocialContacts.length - a.visibleSocialContacts.length;
-          if (b.socialContacts.length !== a.socialContacts.length) return b.socialContacts.length - a.socialContacts.length;
-          return bJobTime - aJobTime;
-        }
-        return sortMode === "newest" ? bJobTime - aJobTime : aJobTime - bJobTime;
-      });
+    return records.filter((record) => typeFilter === "all" || record.opportunityType === typeFilter).sort((a, b) => {
+      if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
+      const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
+      const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
+      if (sortMode === "social-first") {
+        if (b.visibleContacts.length !== a.visibleContacts.length) return b.visibleContacts.length - a.visibleContacts.length;
+        if (b.contacts.length !== a.contacts.length) return b.contacts.length - a.contacts.length;
+        return bJobTime - aJobTime;
+      }
+      return sortMode === "newest" ? bJobTime - aJobTime : aJobTime - bJobTime;
+    });
   }, [sortMode, typeFilter, showContacted, contactedContacts]);
 
   const opportunityTypes = useMemo(() => Array.from(new Set(Object.values(allCompanyLandingPages).map(getOpportunityType))).sort(), []);
   const selectedDraftMessage = selectedDraft ? buildDraft(selectedDraft.page, selectedDraft.contact) : "";
 
-  const openDraft = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => {
+  const openDraft = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => {
     trackEvent("open_draft_message", buildContactEventParams(page, contact));
     setSelectedDraft({ page, contact });
     setCopyStatus("Copy message");
@@ -352,21 +353,11 @@ const CompanyDirectoryPageV5 = () => {
             <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Sign in to continue.</h1>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Create your account or sign in to save contacted statuses permanently across browsers and devices.</p>
             <form onSubmit={handleAuthSubmit} className="mt-6 grid gap-4">
-              <label className="grid gap-2 text-sm font-semibold text-foreground">
-                Email
-                <input type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} required className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" />
-              </label>
-              <label className="grid gap-2 text-sm font-semibold text-foreground">
-                Password
-                <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" />
-              </label>
-              <button type="submit" disabled={isAuthLoading} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
-                {isAuthLoading ? "Working..." : authMode === "signup" ? "Create account" : "Sign in"}
-              </button>
+              <label className="grid gap-2 text-sm font-semibold text-foreground">Email<input type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} required className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" /></label>
+              <label className="grid gap-2 text-sm font-semibold text-foreground">Password<input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" /></label>
+              <button type="submit" disabled={isAuthLoading} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">{isAuthLoading ? "Working..." : authMode === "signup" ? "Create account" : "Sign in"}</button>
             </form>
-            <button type="button" onClick={() => setAuthMode(authMode === "signup" ? "login" : "signup")} className="mt-4 text-sm font-semibold text-primary underline-offset-4 hover:underline">
-              {authMode === "signup" ? "Already have an account? Sign in" : "Need an account? Create one"}
-            </button>
+            <button type="button" onClick={() => setAuthMode(authMode === "signup" ? "login" : "signup")} className="mt-4 text-sm font-semibold text-primary underline-offset-4 hover:underline">{authMode === "signup" ? "Already have an account? Sign in" : "Need an account? Create one"}</button>
             {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm leading-relaxed text-muted-foreground">{authMessage}</p> : null}
           </section>
         </main>
@@ -400,19 +391,8 @@ const CompanyDirectoryPageV5 = () => {
               {opportunityTypes.map((type) => <button key={type} type="button" onClick={() => setTypeFilter(type)} className={`${pillBaseClass} ${getOpportunityTypeClass(type, typeFilter === type)}`}>{type}</button>)}
             </div>
             <div className="grid gap-4 md:grid-cols-2 md:items-end">
-              <label className="grid gap-2 text-sm font-semibold text-foreground">
-                Sort proposals
-                <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary">
-                  <option value="social-first">Social contacts first</option>
-                  <option value="newest">Newest job posting first</option>
-                  <option value="oldest">Oldest job posting first</option>
-                  <option value="company">Company A-Z</option>
-                </select>
-              </label>
-              <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground">
-                <input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />
-                Show contacts marked as contacted
-              </label>
+              <label className="grid gap-2 text-sm font-semibold text-foreground">Sort proposals<select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary"><option value="social-first">Social contacts first</option><option value="newest">Newest job posting first</option><option value="oldest">Oldest job posting first</option><option value="company">Company A-Z</option></select></label>
+              <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground"><input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />Show contacts marked as contacted</label>
             </div>
             {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm text-muted-foreground">{authMessage}</p> : null}
           </div>
@@ -421,46 +401,38 @@ const CompanyDirectoryPageV5 = () => {
         <section className="px-6 pb-14 md:px-20 md:pb-16">
           <div className="mx-auto max-w-6xl">
             <div className="mb-8 flex flex-col gap-2 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p>
-                <h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">{pages.length} proposal pages</h2>
-              </div>
-              <p className="text-sm text-muted-foreground">{isStatusLoading ? "Loading saved contact status..." : "Social-only contacts appear below each matching proposal. Email-managed contacts remain private inside HubSpot."}</p>
+              <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p><h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">{pages.length} proposal pages</h2></div>
+              <p className="text-sm text-muted-foreground">{isStatusLoading ? "Loading saved contact status..." : "LinkedIn contacts appear below each matching proposal. Email details remain private inside HubSpot."}</p>
             </div>
+
             <div className="grid gap-4">
-              {pages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleSocialContacts }) => (
-                <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
+              {pages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleContacts }) => (
+                <article key={page.slug} className="rounded-[1.5rem] border border-border bg-white p-5 shadow-sm transition-colors hover:border-primary md:p-6">
                   <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
                     <div>
-                      <div className="mb-3 flex flex-wrap items-center gap-3">
-                        <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">{page.companyName}</h3>
-                        <button type="button" onClick={() => setTypeFilter(opportunityType)} className={`${pillBaseClass} ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>
-                        {visibleSocialContacts.length ? <span className={`${pillBaseClass} border-primary/50 bg-background text-primary`}>Social contacts</span> : null}
-                      </div>
+                      <div className="mb-3 flex flex-wrap items-center gap-3"><h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">{page.companyName}</h3><button type="button" onClick={() => setTypeFilter(opportunityType)} className={`${pillBaseClass} ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>{visibleContacts.length ? <span className={`${pillBaseClass} border-primary/50 bg-background text-primary`}>LinkedIn contacts</span> : null}</div>
                       <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
                       <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>Job posted: {formatDate(jobPostedDate)}</span><span>Round added: {formatDate(roundDate)}</span></div>
                     </div>
-                    <div><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Posted role</p><p className="leading-relaxed text-foreground">{getPostedRoleTitle(page)}</p></div>
+                    <div><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Posted role</p><p className="leading-relaxed text-foreground">{getPostedRoleTitle(page)}</p><p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment: {getCommitmentLength(page)}</p></div>
                     <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
                   </div>
 
-                  {visibleSocialContacts.length ? (
+                  {visibleContacts.length ? (
                     <div className="mt-6 border-t border-border pt-5">
-                      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Social-only contacts</p>
+                      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">LinkedIn outreach contacts</p>
                       <div className="grid gap-3 md:grid-cols-2">
-                        {visibleSocialContacts.map((contact) => {
+                        {visibleContacts.map((contact) => {
                           const contactKey = getContactKey(page, contact);
                           const isContacted = Boolean(contactedContacts[contactKey]);
+                          const hasEmailPath = Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo");
                           return (
                             <div key={`${page.slug}-${contact.linkedinUrl}`} className="rounded-2xl border border-border bg-card p-4">
                               <div className="mb-4 flex items-start justify-between gap-3">
                                 <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}><p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p><p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></a>
-                                {isContacted ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}
+                                <div className="flex flex-col items-end gap-2">{isContacted ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}{hasEmailPath ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Email path</span> : null}</div>
                               </div>
-                              <div className="flex flex-wrap items-center gap-3">
-                                <button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft message</button>
-                                <label className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label>
-                              </div>
+                              <div className="flex flex-wrap items-center gap-3"><button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft message</button><label className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label></div>
                             </div>
                           );
                         })}
