@@ -245,6 +245,7 @@ const setDraftModalContent = (details: ReturnType<typeof getContactDetails>, mod
   textarea.value = message;
   textarea.dispatchEvent(new Event("input", { bubbles: true }));
   textarea.dataset.currentDraft = message;
+  textarea.dataset.currentChannel = mode;
   if (title) title.textContent = mode === "email" ? "Draft email message" : "Draft LinkedIn message";
 };
 
@@ -253,20 +254,27 @@ const enhanceDraftModal = (details: ReturnType<typeof getContactDetails>) => {
   if (!modal || modal.dataset.enhancedOutreach === "true") return;
   modal.dataset.enhancedOutreach = "true";
 
-  const actionRow = modal.querySelector("textarea")?.nextElementSibling as HTMLElement | null;
+  const textarea = modal.querySelector("textarea") as HTMLTextAreaElement | null;
+  const actionRow = textarea?.nextElementSibling as HTMLElement | null;
   const originalCopyButton = actionRow?.querySelector("button") as HTMLButtonElement | null;
-  if (!actionRow || !originalCopyButton) return;
+  if (!textarea || !actionRow || !originalCopyButton) return;
 
   const switcher = document.createElement("div");
   switcher.className = "proposal-draft-switcher";
+  switcher.setAttribute("role", "tablist");
+  switcher.setAttribute("aria-label", "Draft message channel");
 
   const linkedinButton = document.createElement("button");
   linkedinButton.type = "button";
   linkedinButton.className = "proposal-draft-channel-button is-active";
-  linkedinButton.textContent = "LinkedIn draft";
+  linkedinButton.textContent = "LinkedIn";
+  linkedinButton.setAttribute("role", "tab");
+  linkedinButton.setAttribute("aria-selected", "true");
   linkedinButton.addEventListener("click", () => {
     linkedinButton.classList.add("is-active");
+    linkedinButton.setAttribute("aria-selected", "true");
     emailButton?.classList.remove("is-active");
+    emailButton?.setAttribute("aria-selected", "false");
     setDraftModalContent(details, "linkedin");
   });
   switcher.appendChild(linkedinButton);
@@ -276,28 +284,35 @@ const enhanceDraftModal = (details: ReturnType<typeof getContactDetails>) => {
     emailButton = document.createElement("button");
     emailButton.type = "button";
     emailButton.className = "proposal-draft-channel-button";
-    emailButton.innerHTML = "<span aria-hidden='true'>✉</span> Email draft";
+    emailButton.innerHTML = "<span aria-hidden='true'>✉</span> Email";
+    emailButton.setAttribute("role", "tab");
+    emailButton.setAttribute("aria-selected", "false");
     emailButton.addEventListener("click", () => {
       emailButton?.classList.add("is-active");
+      emailButton?.setAttribute("aria-selected", "true");
       linkedinButton.classList.remove("is-active");
+      linkedinButton.setAttribute("aria-selected", "false");
       setDraftModalContent(details, "email");
     });
     switcher.appendChild(emailButton);
+  }
 
+  textarea.parentElement?.insertBefore(switcher, textarea);
+
+  if (details.email) {
     const mailtoButton = document.createElement("a");
     mailtoButton.href = `mailto:${details.email}?subject=${encodeURIComponent(`${ROLE_CONTEXT[details.slug]?.role || "Opportunity"} — quick introduction`)}&body=${encodeURIComponent(buildEmailDraft(details).replace(/^Subject:.*\n\n/, ""))}`;
     mailtoButton.className = "proposal-email-open-button";
     mailtoButton.innerHTML = "<span aria-hidden='true'>✉</span> Open email";
     mailtoButton.setAttribute("aria-label", `Open email to ${details.name}`);
-    switcher.appendChild(mailtoButton);
+    actionRow.insertBefore(mailtoButton, actionRow.firstChild);
   }
 
-  actionRow.parentElement?.insertBefore(switcher, actionRow);
   setDraftModalContent(details, "linkedin");
 
   originalCopyButton.addEventListener("click", (event) => {
-    const textarea = modal.querySelector("textarea") as HTMLTextAreaElement | null;
-    const message = textarea?.value || textarea?.dataset.currentDraft || "";
+    const currentTextarea = modal.querySelector("textarea") as HTMLTextAreaElement | null;
+    const message = currentTextarea?.value || currentTextarea?.dataset.currentDraft || "";
     if (!message) return;
     event.preventDefault();
     event.stopPropagation();
