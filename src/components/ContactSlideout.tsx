@@ -14,13 +14,31 @@ const ContactSlideout = () => {
   };
 
   useEffect(() => {
-    const handleOpenContact = () => {
+    const openContact = () => {
       resetForm();
       setOpen(true);
     };
 
+    const handleOpenContact = () => openContact();
+    const handleProjectFitClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null;
+      const button = target?.closest("button");
+      const label = button?.textContent?.trim().toLowerCase() || "";
+
+      if (!button || !label.includes("discuss project fit")) return;
+
+      event.preventDefault();
+      event.stopPropagation();
+      openContact();
+    };
+
     window.addEventListener("open-contact-slideout", handleOpenContact);
-    return () => window.removeEventListener("open-contact-slideout", handleOpenContact);
+    document.addEventListener("click", handleProjectFitClick, true);
+
+    return () => {
+      window.removeEventListener("open-contact-slideout", handleOpenContact);
+      document.removeEventListener("click", handleProjectFitClick, true);
+    };
   }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
