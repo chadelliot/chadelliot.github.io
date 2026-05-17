@@ -15,11 +15,23 @@ const removeProposalHeaderContactButton = () => {
   });
 };
 
+const cleanExpiredSessionNotice = () => {
+  if (window.location.pathname !== "/company") return;
+  const messages = Array.from(document.querySelectorAll("main p")) as HTMLParagraphElement[];
+  messages.forEach((message) => {
+    const text = message.textContent?.toLowerCase() || "";
+    if (text.includes("jwt") || text.includes("token") || text.includes("expired")) {
+      message.remove();
+      window.localStorage.removeItem("aboutchad_proposal_directory_session_v1");
+    }
+  });
+};
+
 const getMainFilterElements = () => {
-  const sourceSortSelect = document.querySelector("main section select") as HTMLSelectElement | null;
-  const sourceCheckbox = document.querySelector("main section input[type='checkbox']") as HTMLInputElement | null;
-  const sourceSection = sourceSortSelect?.closest("section") as HTMLElement | null;
-  const typeButtons = Array.from(document.querySelectorAll("main section button")).filter((button) => {
+  const sourceSection = document.querySelector("main > section:nth-of-type(2)") as HTMLElement | null;
+  const sourceSortSelect = sourceSection?.querySelector("select") as HTMLSelectElement | null;
+  const sourceCheckbox = sourceSection?.querySelector("input[type='checkbox']") as HTMLInputElement | null;
+  const typeButtons = Array.from(sourceSection?.querySelectorAll("button") ?? []).filter((button) => {
     const label = button.textContent?.trim() || "";
     return label === "All types" || label.includes("Agency") || label.includes("Marketplace") || label.includes("Company Direct");
   }) as HTMLButtonElement[];
@@ -31,12 +43,18 @@ const createTypeSelect = (typeButtons: HTMLButtonElement[], className: string) =
   const typeSelect = document.createElement("select");
   typeSelect.className = className;
   typeSelect.setAttribute("aria-label", "Filter by job type");
+
+  const seen = new Set<string>();
   typeButtons.forEach((button, index) => {
+    const label = button.textContent?.trim() || `Type ${index + 1}`;
+    if (seen.has(label)) return;
+    seen.add(label);
     const option = document.createElement("option");
     option.value = String(index);
-    option.textContent = button.textContent?.trim() || `Type ${index + 1}`;
+    option.textContent = label;
     typeSelect.appendChild(option);
   });
+
   typeSelect.addEventListener("change", () => {
     const button = typeButtons[Number(typeSelect.value)];
     button?.click();
@@ -76,93 +94,18 @@ const transformMainProposalFilter = () => {
   typeButtons.forEach((button) => button.addEventListener("click", () => window.setTimeout(() => syncTypeSelect(typeButtons, typeSelect), 0)));
 };
 
-const createFloatingProposalFilter = () => {
-  if (!window.location.pathname.startsWith("/company")) return;
-  if (window.location.pathname !== "/company") return;
-  if (document.querySelector(".proposal-floating-filter")) return;
-
+const bootProposalDirectoryEnhancements = () => {
   styleProposalDirectoryHero();
   removeProposalHeaderContactButton();
+  cleanExpiredSessionNotice();
   transformMainProposalFilter();
-
-  const { sourceSortSelect, sourceCheckbox, sourceSection, typeButtons } = getMainFilterElements();
-  if (!sourceSortSelect || !sourceCheckbox || !sourceSection || !typeButtons.length) return;
-
-  const wrapper = document.createElement("div");
-  wrapper.className = "proposal-floating-filter";
-  wrapper.setAttribute("aria-hidden", "true");
-
-  const inner = document.createElement("div");
-  inner.className = "proposal-floating-filter__inner";
-
-  const label = document.createElement("div");
-  label.className = "proposal-floating-filter__label";
-  label.textContent = "Filter proposals";
-
-  const typeSelect = createTypeSelect(typeButtons, "");
-
-  const sortSelect = sourceSortSelect.cloneNode(true) as HTMLSelectElement;
-  sortSelect.setAttribute("aria-label", "Sort proposals");
-  sortSelect.value = sourceSortSelect.value;
-  sortSelect.addEventListener("change", () => {
-    sourceSortSelect.value = sortSelect.value;
-    sourceSortSelect.dispatchEvent(new Event("change", { bubbles: true }));
-  });
-
-  const checkboxLabel = document.createElement("label");
-  checkboxLabel.className = "proposal-floating-filter__toggle";
-  const checkbox = sourceCheckbox.cloneNode(true) as HTMLInputElement;
-  checkbox.checked = sourceCheckbox.checked;
-  checkbox.addEventListener("change", () => {
-    sourceCheckbox.checked = checkbox.checked;
-    sourceCheckbox.dispatchEvent(new Event("change", { bubbles: true }));
-  });
-  const checkboxText = document.createElement("span");
-  checkboxText.textContent = "Show contacted";
-  checkboxLabel.appendChild(checkbox);
-  checkboxLabel.appendChild(checkboxText);
-
-  inner.appendChild(label);
-  inner.appendChild(typeSelect);
-  inner.appendChild(sortSelect);
-  inner.appendChild(checkboxLabel);
-  wrapper.appendChild(inner);
-  document.body.appendChild(wrapper);
-
-  const syncFromSource = () => {
-    sortSelect.value = sourceSortSelect.value;
-    checkbox.checked = sourceCheckbox.checked;
-    syncTypeSelect(typeButtons, typeSelect);
-  };
-
-  sourceSortSelect.addEventListener("change", syncFromSource);
-  sourceCheckbox.addEventListener("change", syncFromSource);
-  typeButtons.forEach((button) => button.addEventListener("click", () => window.setTimeout(syncFromSource, 0)));
-
-  const onScroll = () => {
-    const rect = sourceSection.getBoundingClientRect();
-    const shouldShow = rect.bottom < 0;
-    wrapper.classList.toggle("is-visible", shouldShow);
-    wrapper.setAttribute("aria-hidden", shouldShow ? "false" : "true");
-  };
-
-  syncFromSource();
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", onScroll);
-  onScroll();
 };
 
 const bootFloatingProposalFilter = () => {
-  window.setTimeout(styleProposalDirectoryHero, 100);
-  window.setTimeout(styleProposalDirectoryHero, 600);
-  window.setTimeout(removeProposalHeaderContactButton, 250);
-  window.setTimeout(removeProposalHeaderContactButton, 800);
-  window.setTimeout(removeProposalHeaderContactButton, 1800);
-  window.setTimeout(transformMainProposalFilter, 500);
-  window.setTimeout(transformMainProposalFilter, 1200);
-  window.setTimeout(createFloatingProposalFilter, 800);
-  window.setTimeout(createFloatingProposalFilter, 1800);
-  window.setTimeout(createFloatingProposalFilter, 3200);
+  window.setTimeout(bootProposalDirectoryEnhancements, 100);
+  window.setTimeout(bootProposalDirectoryEnhancements, 500);
+  window.setTimeout(bootProposalDirectoryEnhancements, 1200);
+  window.setTimeout(bootProposalDirectoryEnhancements, 2200);
 };
 
 if (document.readyState === "loading") {
