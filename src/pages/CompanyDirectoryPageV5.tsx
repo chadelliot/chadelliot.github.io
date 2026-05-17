@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
+import { proposalOutreachResearch, type ProposalOutreachResearchContact } from "@/data/proposalOutreachResearch";
+import { trackEvent } from "@/lib/analytics";
 
 type SortMode = "newest" | "oldest" | "company";
+type SocialContact = Pick<ProposalOutreachResearchContact, "name" | "title" | "linkedinUrl"> & Partial<ProposalOutreachResearchContact>;
 
 const POSTED_DATES: Record<string, string> = {
   "who-gives-a-crap": "2026-05-16",
@@ -38,7 +41,6 @@ const POSTED_ROLE_TITLES: Record<string, string> = {
 
 const getOpportunityType = (page: (typeof allCompanyLandingPages)[string]) => {
   const industry = page.industry.toLowerCase();
-
   if (industry.includes("talent") || industry.includes("consulting network") || industry.includes("executive network")) return "Agency / Talent Network";
   if (industry.includes("marketplace") || industry.includes("platform") || industry.includes("owned consulting channel")) return "Marketplace / Platform";
   return "Company Direct / Fractional";
@@ -46,20 +48,12 @@ const getOpportunityType = (page: (typeof allCompanyLandingPages)[string]) => {
 
 const getOpportunityTypeClass = (opportunityType: string, isSelected = false) => {
   if (opportunityType.includes("Agency")) {
-    return isSelected
-      ? "border-amber-700 bg-amber-600 text-white"
-      : "border-amber-400 bg-amber-50 text-amber-900 hover:border-amber-700";
+    return isSelected ? "border-amber-700 bg-amber-600 text-white" : "border-amber-400 bg-amber-50 text-amber-900 hover:border-amber-700";
   }
-
   if (opportunityType.includes("Marketplace")) {
-    return isSelected
-      ? "border-violet-700 bg-violet-600 text-white"
-      : "border-violet-400 bg-violet-50 text-violet-900 hover:border-violet-700";
+    return isSelected ? "border-violet-700 bg-violet-600 text-white" : "border-violet-400 bg-violet-50 text-violet-900 hover:border-violet-700";
   }
-
-  return isSelected
-    ? "border-sky-700 bg-sky-600 text-white"
-    : "border-sky-400 bg-sky-50 text-sky-900 hover:border-sky-700";
+  return isSelected ? "border-sky-700 bg-sky-600 text-white" : "border-sky-400 bg-sky-50 text-sky-900 hover:border-sky-700";
 };
 
 const formatPostedDate = (date?: string) => {
@@ -70,34 +64,121 @@ const formatPostedDate = (date?: string) => {
 
 const getPostedRoleTitle = (page: (typeof allCompanyLandingPages)[string]) => POSTED_ROLE_TITLES[page.slug] ?? page.recommendedEngagement.title;
 
+const hasEmailManagedPath = (contact: SocialContact) => {
+  if (contact.email) return true;
+  return contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo";
+};
+
+const getSocialOnlyContacts = (page: (typeof allCompanyLandingPages)[string]): SocialContact[] => {
+  const researchContacts = proposalOutreachResearch[page.slug]?.contacts ?? [];
+  const pageContacts = (page.outreachContacts ?? []).map((contact) => ({
+    name: contact.name,
+    title: contact.title,
+    linkedinUrl: contact.linkedinUrl,
+    email: contact.email,
+    selectionRationale: contact.selectionRationale,
+    relationshipToOpportunity: contact.selectionRationale || "Previously researched outreach contact.",
+    confidence: "medium" as const,
+    emailStatus: contact.email ? "exact" as const : "not_available" as const,
+    suggestedAngle: page.outreachAngle,
+  }));
+
+  const deduped = new Map<string, SocialContact>();
+  [...researchContacts, ...pageContacts]
+    .filter((contact) => contact.name && contact.title && contact.linkedinUrl && !hasEmailManagedPath(contact))
+    .forEach((contact) => {
+      const key = `${contact.linkedinUrl || contact.name}`.toLowerCase();
+      if (!deduped.has(key)) deduped.set(key, contact);
+    });
+
+  return Array.from(deduped.values());
+};
+
+const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => ({
+  company_slug: page.slug,
+  company_name: page.companyName,
+  engagement_title: proposalOutreachResearch[page.slug]?.opportunityTitle || page.recommendedEngagement.title,
+  contact_name: contact.name,
+  contact_title: contact.title,
+  contact_confidence: contact.confidence || "unknown",
+  outreach_type: "linkedin",
+  has_email_path: false,
+});
+
+const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => {
+  const firstName = contact.name.split(" ")[0] || contact.name;
+  const roleTitle = proposalOutreachResearch[page.slug]?.opportunityTitle || getPostedRoleTitle(page);
+  const relationship = `${contact.relationshipToOpportunity || ""} ${contact.selectionRationale || ""}`.toLowerCase();
+  const isDirect = /direct|executive sponsor|cro|head of revenue operations|head of marketing operations|functional partner|marketing director/.test(relationship);
+  const isAdjacent = /adjacent|influencer|stakeholder|possible|not necessarily|people partner|route/.test(relationship);
+
+  const opening = isDirect
+    ? `I saw the ${roleTitle} opportunity with ${page.companyName} and wanted to reach out directly given your role as ${contact.title}.`
+    : isAdjacent
+      ? `I saw the ${roleTitle} opportunity with ${page.companyName}. I’m not sure whether you own this conversation, but given your role as ${contact.title}, I thought you may have useful context or be able to point me in the right direction.`
+      : `I saw the ${roleTitle} opportunity with ${page.companyName} and wanted to reach out in case you are connected to the team evaluating the role.`;
+
+  return [
+    `Hi ${firstName},`,
+    "",
+    opening,
+    "",
+    "By way of background, I’m Chad Parker. I build revenue, lifecycle, marketing operations, CRM/CDP, segmentation, and executive reporting systems that help teams turn GTM strategy into measurable execution.",
+    "",
+    contact.suggestedAngle || page.outreachAngle,
+    "",
+    "If you’re the right person to discuss this, I’d welcome the chance to connect. If not, I’d appreciate any direction on who owns the conversation internally.",
+    "",
+    "Best,",
+    "Chad",
+  ].join("\n");
+};
+
 const pillBaseClass = "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors";
 
 const CompanyDirectoryPageV5 = () => {
   const [sortMode, setSortMode] = useState<SortMode>("newest");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [selectedDraft, setSelectedDraft] = useState<{ page: (typeof allCompanyLandingPages)[string]; contact: SocialContact } | null>(null);
+  const [copyStatus, setCopyStatus] = useState("Copy message");
 
   const pages = useMemo(() => {
     const records = Object.values(allCompanyLandingPages).map((page) => ({
       page,
       postedDate: POSTED_DATES[page.slug],
       opportunityType: getOpportunityType(page),
+      socialContacts: getSocialOnlyContacts(page),
     }));
 
     return records
       .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
       .sort((a, b) => {
         if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
-
         const aTime = a.postedDate ? new Date(a.postedDate).getTime() : 0;
         const bTime = b.postedDate ? new Date(b.postedDate).getTime() : 0;
         return sortMode === "newest" ? bTime - aTime : aTime - bTime;
       });
   }, [sortMode, typeFilter]);
 
-  const opportunityTypes = useMemo(() => {
-    const types = new Set(Object.values(allCompanyLandingPages).map(getOpportunityType));
-    return Array.from(types).sort();
-  }, []);
+  const opportunityTypes = useMemo(() => Array.from(new Set(Object.values(allCompanyLandingPages).map(getOpportunityType))).sort(), []);
+  const selectedDraftMessage = selectedDraft ? buildDraft(selectedDraft.page, selectedDraft.contact) : "";
+
+  const openDraft = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => {
+    trackEvent("open_draft_message", buildContactEventParams(page, contact));
+    setSelectedDraft({ page, contact });
+    setCopyStatus("Copy message");
+  };
+
+  const copyDraft = async () => {
+    if (!selectedDraftMessage || !selectedDraft) return;
+    try {
+      await navigator.clipboard.writeText(selectedDraftMessage);
+      trackEvent("copy_draft_message", buildContactEventParams(selectedDraft.page, selectedDraft.contact));
+      setCopyStatus("Copied");
+    } catch {
+      setCopyStatus("Select and copy text");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -147,11 +228,11 @@ const CompanyDirectoryPageV5 = () => {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p>
                 <h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">{pages.length} proposal pages</h2>
               </div>
-              <p className="text-sm text-muted-foreground">Email-managed contact details remain private inside HubSpot.</p>
+              <p className="text-sm text-muted-foreground">Social-only contacts appear below each matching proposal. Email-managed contacts remain private inside HubSpot.</p>
             </div>
 
             <div className="grid gap-4">
-              {pages.map(({ page, postedDate, opportunityType }) => (
+              {pages.map(({ page, postedDate, opportunityType, socialContacts }) => (
                 <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
                   <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
                     <div>
@@ -170,12 +251,64 @@ const CompanyDirectoryPageV5 = () => {
 
                     <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
                   </div>
+
+                  {socialContacts.length ? (
+                    <div className="mt-6 border-t border-border pt-5">
+                      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Social-only contacts</p>
+                      <div className="grid gap-3 md:grid-cols-2">
+                        {socialContacts.map((contact) => (
+                          <div key={`${page.slug}-${contact.linkedinUrl}`} className="rounded-2xl border border-border bg-card p-4">
+                            <a
+                              href={contact.linkedinUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="group block no-underline"
+                              onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}
+                            >
+                              <p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p>
+                              <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
+                            </a>
+                            <button type="button" onClick={() => openDraft(page, contact)} className="mt-4 inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
+                              Draft message
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                 </article>
               ))}
             </div>
           </div>
         </section>
       </main>
+
+      {selectedDraft ? (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="directory-social-draft-title" onClick={() => setSelectedDraft(null)}>
+          <div className="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-[2rem] bg-background p-6 text-foreground shadow-2xl md:p-8" onClick={(event) => event.stopPropagation()}>
+            <div className="mb-6 flex items-start justify-between gap-6">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Draft LinkedIn message</p>
+                <h2 id="directory-social-draft-title" className="mt-3 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{selectedDraft.contact.name}</h2>
+                <a href={selectedDraft.contact.linkedinUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(selectedDraft.page, selectedDraft.contact))}>
+                  Open LinkedIn profile
+                </a>
+              </div>
+              <button type="button" onClick={() => setSelectedDraft(null)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" aria-label="Close draft message">
+                Close
+              </button>
+            </div>
+            <textarea readOnly value={selectedDraftMessage} className="h-72 w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm leading-relaxed text-foreground outline-none" />
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs leading-relaxed text-muted-foreground sm:max-w-md">Copy this message, open the LinkedIn profile, and personalize the final line if needed before sending.</p>
+              <button type="button" onClick={copyDraft} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
+                {copyStatus}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <Footer />
     </div>
   );
