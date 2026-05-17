@@ -1,3 +1,47 @@
+.proposal-directory-hero {
+  background: #050505 !important;
+  border-bottom-color: rgba(255, 255, 255, 0.16) !important;
+  color: #ffffff !important;
+  position: relative;
+  overflow: hidden;
+}
+
+.proposal-directory-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 18% 22%, rgba(94, 209, 174, 0.22), transparent 34%), radial-gradient(circle at 86% 18%, rgba(47, 163, 127, 0.16), transparent 28%);
+  pointer-events: none;
+}
+
+.proposal-directory-hero > div {
+  position: relative;
+  z-index: 1;
+}
+
+.proposal-directory-hero p:first-child {
+  color: #5ed1ae !important;
+}
+
+.proposal-directory-hero h1 {
+  color: #ffffff !important;
+}
+
+.proposal-directory-hero p:not(:first-child) {
+  color: rgba(255, 255, 255, 0.72) !important;
+}
+
+.proposal-directory-hero button {
+  border-color: rgba(255, 255, 255, 0.34) !important;
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.proposal-directory-hero button:hover {
+  border-color: #5ed1ae !important;
+  color: #5ed1ae !important;
+}
+
 .proposal-floating-filter {
   position: fixed;
   left: 50%;
