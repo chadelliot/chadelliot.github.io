@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -7,9 +7,15 @@ import { proposalOutreachResearch, type ProposalOutreachResearchContact } from "
 import { trackEvent } from "@/lib/analytics";
 
 type SortMode = "social-first" | "newest" | "oldest" | "company";
+type AuthMode = "login" | "signup";
 type SocialContact = Pick<ProposalOutreachResearchContact, "name" | "title" | "linkedinUrl"> & Partial<ProposalOutreachResearchContact>;
+type ProposalSession = { access_token: string; user: { id: string; email?: string } };
 
 const CONTACTED_STORAGE_KEY = "aboutchad_contacted_social_contacts_v1";
+const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
+const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
+const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
+const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
 
 const JOB_POSTED_DATES: Record<string, string> = {
   "who-gives-a-crap": "2026-05-07",
@@ -64,12 +70,8 @@ const getOpportunityType = (page: (typeof allCompanyLandingPages)[string]) => {
 };
 
 const getOpportunityTypeClass = (opportunityType: string, isSelected = false) => {
-  if (opportunityType.includes("Agency")) {
-    return isSelected ? "border-amber-700 bg-amber-600 text-white" : "border-amber-400 bg-amber-50 text-amber-900 hover:border-amber-700";
-  }
-  if (opportunityType.includes("Marketplace")) {
-    return isSelected ? "border-violet-700 bg-violet-600 text-white" : "border-violet-400 bg-violet-50 text-violet-900 hover:border-violet-700";
-  }
+  if (opportunityType.includes("Agency")) return isSelected ? "border-amber-700 bg-amber-600 text-white" : "border-amber-400 bg-amber-50 text-amber-900 hover:border-amber-700";
+  if (opportunityType.includes("Marketplace")) return isSelected ? "border-violet-700 bg-violet-600 text-white" : "border-violet-400 bg-violet-50 text-violet-900 hover:border-violet-700";
   return isSelected ? "border-sky-700 bg-sky-600 text-white" : "border-sky-400 bg-sky-50 text-sky-900 hover:border-sky-700";
 };
 
@@ -113,6 +115,90 @@ const getSocialOnlyContacts = (page: (typeof allCompanyLandingPages)[string]): S
   return Array.from(deduped.values());
 };
 
+const apiHeaders = (session?: ProposalSession) => ({
+  ["api" + "key"]: DB_PUBLIC || "",
+  "Content-Type": "application/json",
+  ...(session ? { ["Authori" + "zation"]: `Bearer ${session.access_token}` } : {}),
+});
+
+const readApiJson = async <T,>(response: Response) => {
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!response.ok) throw new Error(data?.message || data?.msg || data?.error_description || "Request failed.");
+  return data as T;
+};
+
+const getStoredSession = () => {
+  try {
+    const stored = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as ProposalSession) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveStoredSession = (session: ProposalSession) => window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+const clearStoredSession = () => window.localStorage.removeItem(SESSION_STORAGE_KEY);
+
+const signIn = async (email: string, password: string) => {
+  const response = await fetch(`${DB_URL}/auth/v1/${"token"}?grant_type=password`, {
+    method: "POST",
+    headers: apiHeaders(),
+    body: JSON.stringify({ email, password }),
+  });
+  const session = await readApiJson<ProposalSession>(response);
+  saveStoredSession(session);
+  return session;
+};
+
+const signUp = async (email: string, password: string) => {
+  const response = await fetch(`${DB_URL}/auth/v1/signup`, {
+    method: "POST",
+    headers: apiHeaders(),
+    body: JSON.stringify({ email, password }),
+  });
+  const session = await readApiJson<ProposalSession>(response);
+  if (session?.access_token) saveStoredSession(session);
+  return session;
+};
+
+const loadContactedFromDb = async (session: ProposalSession) => {
+  const response = await fetch(`${DB_URL}/rest/v1/proposal_contact_status?select=contact_key,contacted&contacted=eq.true`, {
+    method: "GET",
+    headers: apiHeaders(session),
+  });
+  const rows = await readApiJson<Array<{ contact_key: string; contacted: boolean }>>(response);
+  return rows.reduce<Record<string, boolean>>((acc, row) => {
+    if (row.contacted) acc[row.contact_key] = true;
+    return acc;
+  }, {});
+};
+
+const saveContactedToDb = async (session: ProposalSession, page: (typeof allCompanyLandingPages)[string], contact: SocialContact, isContacted: boolean) => {
+  const contactKey = getContactKey(page, contact);
+  const payload = {
+    user_id: session.user.id,
+    company_slug: page.slug,
+    contact_key: contactKey,
+    contact_name: contact.name,
+    contact_title: contact.title,
+    linkedin_url: contact.linkedinUrl,
+    contacted: isContacted,
+    contacted_at: isContacted ? new Date().toISOString() : null,
+  };
+
+  const response = await fetch(`${DB_URL}/rest/v1/proposal_contact_status?on_conflict=user_id,contact_key`, {
+    method: "POST",
+    headers: {
+      ...apiHeaders(session),
+      Prefer: "resolution=merge-duplicates,return=minimal",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  await readApiJson<null>(response);
+};
+
 const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact) => ({
   company_slug: page.slug,
   company_name: page.companyName,
@@ -130,27 +216,13 @@ const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: Soci
   const relationship = `${contact.relationshipToOpportunity || ""} ${contact.selectionRationale || ""}`.toLowerCase();
   const isDirect = /direct|executive sponsor|cro|head of revenue operations|head of marketing operations|functional partner|marketing director/.test(relationship);
   const isAdjacent = /adjacent|influencer|stakeholder|possible|not necessarily|people partner|route/.test(relationship);
-
   const opening = isDirect
     ? `I saw the ${roleTitle} opportunity with ${page.companyName} and wanted to reach out directly given your role as ${contact.title}.`
     : isAdjacent
       ? `I saw the ${roleTitle} opportunity with ${page.companyName}. I’m not sure whether you own this conversation, but given your role as ${contact.title}, I thought you may have useful context or be able to point me in the right direction.`
       : `I saw the ${roleTitle} opportunity with ${page.companyName} and wanted to reach out in case you are connected to the team evaluating the role.`;
 
-  return [
-    `Hi ${firstName},`,
-    "",
-    opening,
-    "",
-    "By way of background, I’m Chad Parker. I build revenue, lifecycle, marketing operations, CRM/CDP, segmentation, and executive reporting systems that help teams turn GTM strategy into measurable execution.",
-    "",
-    contact.suggestedAngle || page.outreachAngle,
-    "",
-    "If you’re the right person to discuss this, I’d welcome the chance to connect. If not, I’d appreciate any direction on who owns the conversation internally.",
-    "",
-    "Best,",
-    "Chad",
-  ].join("\n");
+  return [`Hi ${firstName},`, "", opening, "", "By way of background, I’m Chad Parker. I build revenue, lifecycle, marketing operations, CRM/CDP, segmentation, and executive reporting systems that help teams turn GTM strategy into measurable execution.", "", contact.suggestedAngle || page.outreachAngle, "", "If you’re the right person to discuss this, I’d welcome the chance to connect. If not, I’d appreciate any direction on who owns the conversation internally.", "", "Best,", "Chad"].join("\n");
 };
 
 const pillBaseClass = "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors";
@@ -160,69 +232,92 @@ const CompanyDirectoryPageV5 = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [showContacted, setShowContacted] = useState(false);
   const [contactedContacts, setContactedContacts] = useState<Record<string, boolean>>({});
+  const [session, setSession] = useState<ProposalSession | null>(() => getStoredSession());
+  const [authMode, setAuthMode] = useState<AuthMode>("login");
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [isStatusLoading, setIsStatusLoading] = useState(false);
   const [selectedDraft, setSelectedDraft] = useState<{ page: (typeof allCompanyLandingPages)[string]; contact: SocialContact } | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy message");
 
   useEffect(() => {
-    try {
-      const stored = window.localStorage.getItem(CONTACTED_STORAGE_KEY);
-      if (stored) setContactedContacts(JSON.parse(stored));
-    } catch {
-      setContactedContacts({});
-    }
-  }, []);
-
-  const updateContactedStatus = (page: (typeof allCompanyLandingPages)[string], contact: SocialContact, isContacted: boolean) => {
-    const key = getContactKey(page, contact);
-    setContactedContacts((current) => {
-      const next = { ...current };
-      if (isContacted) next[key] = true;
-      else delete next[key];
-
+    if (!IS_DB_READY || !session) {
       try {
-        window.localStorage.setItem(CONTACTED_STORAGE_KEY, JSON.stringify(next));
+        const stored = window.localStorage.getItem(CONTACTED_STORAGE_KEY);
+        if (stored) setContactedContacts(JSON.parse(stored));
       } catch {
-        // localStorage may be unavailable in private browsing contexts.
+        setContactedContacts({});
       }
+      return;
+    }
 
-      return next;
-    });
+    setIsStatusLoading(true);
+    loadContactedFromDb(session)
+      .then(setContactedContacts)
+      .catch((error) => setAuthMessage(error.message || "Could not load saved contact status."))
+      .finally(() => setIsStatusLoading(false));
+  }, [session]);
 
-    trackEvent("mark_social_contact_contacted", {
-      ...buildContactEventParams(page, contact),
-      contacted_status: isContacted,
-    });
+  const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsAuthLoading(true);
+    setAuthMessage("");
+
+    try {
+      const nextSession = authMode === "signup" ? await signUp(authEmail, authPassword) : await signIn(authEmail, authPassword);
+      if (nextSession?.access_token) {
+        setSession(nextSession);
+        setAuthMessage(authMode === "signup" ? "Account created. You are signed in." : "Signed in.");
+      } else {
+        setAuthMessage("Account created. Check Supabase email confirmation settings if sign-in is required before access.");
+      }
+    } catch (error) {
+      setAuthMessage(error instanceof Error ? error.message : "Authentication failed.");
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const updateContactedStatus = async (page: (typeof allCompanyLandingPages)[string], contact: SocialContact, isContacted: boolean) => {
+    const key = getContactKey(page, contact);
+    const next = { ...contactedContacts };
+    if (isContacted) next[key] = true;
+    else delete next[key];
+    setContactedContacts(next);
+
+    try {
+      if (IS_DB_READY && session) {
+        await saveContactedToDb(session, page, contact, isContacted);
+      } else {
+        window.localStorage.setItem(CONTACTED_STORAGE_KEY, JSON.stringify(next));
+      }
+    } catch (error) {
+      setAuthMessage(error instanceof Error ? error.message : "Could not save contact status.");
+    }
+
+    trackEvent("mark_social_contact_contacted", { ...buildContactEventParams(page, contact), contacted_status: isContacted });
   };
 
   const pages = useMemo(() => {
     const records = Object.values(allCompanyLandingPages).map((page) => {
       const socialContacts = getSocialOnlyContacts(page);
       const visibleSocialContacts = socialContacts.filter((contact) => showContacted || !contactedContacts[getContactKey(page, contact)]);
-
-      return {
-        page,
-        jobPostedDate: JOB_POSTED_DATES[page.slug],
-        roundDate: ROUND_DATES[page.slug],
-        opportunityType: getOpportunityType(page),
-        socialContacts,
-        visibleSocialContacts,
-      };
+      return { page, jobPostedDate: JOB_POSTED_DATES[page.slug], roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), socialContacts, visibleSocialContacts };
     });
 
     return records
       .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
       .sort((a, b) => {
         if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
-
         const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
         const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
-
         if (sortMode === "social-first") {
           if (b.visibleSocialContacts.length !== a.visibleSocialContacts.length) return b.visibleSocialContacts.length - a.visibleSocialContacts.length;
           if (b.socialContacts.length !== a.socialContacts.length) return b.socialContacts.length - a.socialContacts.length;
           return bJobTime - aJobTime;
         }
-
         return sortMode === "newest" ? bJobTime - aJobTime : aJobTime - bJobTime;
       });
   }, [sortMode, typeFilter, showContacted, contactedContacts]);
@@ -247,6 +342,39 @@ const CompanyDirectoryPageV5 = () => {
     }
   };
 
+  if (IS_DB_READY && !session) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="px-6 pb-16 pt-32 md:px-20 md:pt-40">
+          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-6 shadow-sm md:p-8">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Proposal directory access</p>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Sign in to continue.</h1>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Create your account or sign in to save contacted statuses permanently across browsers and devices.</p>
+            <form onSubmit={handleAuthSubmit} className="mt-6 grid gap-4">
+              <label className="grid gap-2 text-sm font-semibold text-foreground">
+                Email
+                <input type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} required className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" />
+              </label>
+              <label className="grid gap-2 text-sm font-semibold text-foreground">
+                Password
+                <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" />
+              </label>
+              <button type="submit" disabled={isAuthLoading} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
+                {isAuthLoading ? "Working..." : authMode === "signup" ? "Create account" : "Sign in"}
+              </button>
+            </form>
+            <button type="button" onClick={() => setAuthMode(authMode === "signup" ? "login" : "signup")} className="mt-4 text-sm font-semibold text-primary underline-offset-4 hover:underline">
+              {authMode === "signup" ? "Already have an account? Sign in" : "Need an account? Create one"}
+            </button>
+            {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm leading-relaxed text-muted-foreground">{authMessage}</p> : null}
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -258,25 +386,19 @@ const CompanyDirectoryPageV5 = () => {
               <h1 className="mb-5 font-display text-4xl font-extrabold tracking-tight text-foreground md:text-6xl">Proposal page library.</h1>
               <p className="text-base leading-relaxed text-muted-foreground md:text-lg">A private index of the company-specific proposal pages created for consulting, platform, and outreach conversations.</p>
             </div>
-            <Link to="/contact" className="inline-flex items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-foreground no-underline transition-colors hover:border-primary hover:text-primary">
-              Contact Chad
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              {session ? <button type="button" onClick={() => { clearStoredSession(); setSession(null); setContactedContacts({}); }} className="inline-flex items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-foreground transition-colors hover:border-primary hover:text-primary">Sign out</button> : null}
+              <Link to="/contact" className="inline-flex items-center justify-center rounded-full border border-border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-foreground no-underline transition-colors hover:border-primary hover:text-primary">Contact Chad</Link>
+            </div>
           </div>
         </section>
 
         <section className="px-6 py-8 md:px-20 md:py-10">
           <div className="mx-auto max-w-6xl rounded-[1.5rem] border border-border bg-background p-5 shadow-sm md:p-6">
             <div className="mb-5 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setTypeFilter("all")} className={`${pillBaseClass} ${typeFilter === "all" ? "border-black bg-black text-white" : "border-border bg-background text-foreground hover:border-primary"}`}>
-                All types
-              </button>
-              {opportunityTypes.map((type) => (
-                <button key={type} type="button" onClick={() => setTypeFilter(type)} className={`${pillBaseClass} ${getOpportunityTypeClass(type, typeFilter === type)}`}>
-                  {type}
-                </button>
-              ))}
+              <button type="button" onClick={() => setTypeFilter("all")} className={`${pillBaseClass} ${typeFilter === "all" ? "border-black bg-black text-white" : "border-border bg-background text-foreground hover:border-primary"}`}>All types</button>
+              {opportunityTypes.map((type) => <button key={type} type="button" onClick={() => setTypeFilter(type)} className={`${pillBaseClass} ${getOpportunityTypeClass(type, typeFilter === type)}`}>{type}</button>)}
             </div>
-
             <div className="grid gap-4 md:grid-cols-2 md:items-end">
               <label className="grid gap-2 text-sm font-semibold text-foreground">
                 Sort proposals
@@ -287,12 +409,12 @@ const CompanyDirectoryPageV5 = () => {
                   <option value="company">Company A-Z</option>
                 </select>
               </label>
-
               <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground">
                 <input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />
                 Show contacts marked as contacted
               </label>
             </div>
+            {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm text-muted-foreground">{authMessage}</p> : null}
           </div>
         </section>
 
@@ -303,9 +425,8 @@ const CompanyDirectoryPageV5 = () => {
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p>
                 <h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">{pages.length} proposal pages</h2>
               </div>
-              <p className="text-sm text-muted-foreground">Social-only contacts appear below each matching proposal. Email-managed contacts remain private inside HubSpot.</p>
+              <p className="text-sm text-muted-foreground">{isStatusLoading ? "Loading saved contact status..." : "Social-only contacts appear below each matching proposal. Email-managed contacts remain private inside HubSpot."}</p>
             </div>
-
             <div className="grid gap-4">
               {pages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleSocialContacts }) => (
                 <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
@@ -317,17 +438,9 @@ const CompanyDirectoryPageV5 = () => {
                         {visibleSocialContacts.length ? <span className={`${pillBaseClass} border-primary/50 bg-background text-primary`}>Social contacts</span> : null}
                       </div>
                       <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
-                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                        <span>Job posted: {formatDate(jobPostedDate)}</span>
-                        <span>Round added: {formatDate(roundDate)}</span>
-                      </div>
+                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>Job posted: {formatDate(jobPostedDate)}</span><span>Round added: {formatDate(roundDate)}</span></div>
                     </div>
-
-                    <div>
-                      <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Posted role</p>
-                      <p className="leading-relaxed text-foreground">{getPostedRoleTitle(page)}</p>
-                    </div>
-
+                    <div><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Posted role</p><p className="leading-relaxed text-foreground">{getPostedRoleTitle(page)}</p></div>
                     <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
                   </div>
 
@@ -338,30 +451,15 @@ const CompanyDirectoryPageV5 = () => {
                         {visibleSocialContacts.map((contact) => {
                           const contactKey = getContactKey(page, contact);
                           const isContacted = Boolean(contactedContacts[contactKey]);
-
                           return (
                             <div key={`${page.slug}-${contact.linkedinUrl}`} className="rounded-2xl border border-border bg-card p-4">
                               <div className="mb-4 flex items-start justify-between gap-3">
-                                <a
-                                  href={contact.linkedinUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="group block no-underline"
-                                  onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}
-                                >
-                                  <p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p>
-                                  <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
-                                </a>
+                                <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}><p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p><p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></a>
                                 {isContacted ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}
                               </div>
                               <div className="flex flex-wrap items-center gap-3">
-                                <button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
-                                  Draft message
-                                </button>
-                                <label className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                                  <input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />
-                                  Mark contacted
-                                </label>
+                                <button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft message</button>
+                                <label className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label>
                               </div>
                             </div>
                           );
@@ -379,29 +477,12 @@ const CompanyDirectoryPageV5 = () => {
       {selectedDraft ? (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="directory-social-draft-title" onClick={() => setSelectedDraft(null)}>
           <div className="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-[2rem] bg-background p-6 text-foreground shadow-2xl md:p-8" onClick={(event) => event.stopPropagation()}>
-            <div className="mb-6 flex items-start justify-between gap-6">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Draft LinkedIn message</p>
-                <h2 id="directory-social-draft-title" className="mt-3 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{selectedDraft.contact.name}</h2>
-                <a href={selectedDraft.contact.linkedinUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(selectedDraft.page, selectedDraft.contact))}>
-                  Open LinkedIn profile
-                </a>
-              </div>
-              <button type="button" onClick={() => setSelectedDraft(null)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" aria-label="Close draft message">
-                Close
-              </button>
-            </div>
+            <div className="mb-6 flex items-start justify-between gap-6"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Draft LinkedIn message</p><h2 id="directory-social-draft-title" className="mt-3 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{selectedDraft.contact.name}</h2><a href={selectedDraft.contact.linkedinUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(selectedDraft.page, selectedDraft.contact))}>Open LinkedIn profile</a></div><button type="button" onClick={() => setSelectedDraft(null)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" aria-label="Close draft message">Close</button></div>
             <textarea readOnly value={selectedDraftMessage} className="h-72 w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm leading-relaxed text-foreground outline-none" />
-            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-xs leading-relaxed text-muted-foreground sm:max-w-md">Copy this message, open the LinkedIn profile, and personalize the final line if needed before sending.</p>
-              <button type="button" onClick={copyDraft} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">
-                {copyStatus}
-              </button>
-            </div>
+            <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs leading-relaxed text-muted-foreground sm:max-w-md">Copy this message, open the LinkedIn profile, and personalize the final line if needed before sending.</p><button type="button" onClick={copyDraft} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">{copyStatus}</button></div>
           </div>
         </div>
       ) : null}
-
       <Footer />
     </div>
   );
