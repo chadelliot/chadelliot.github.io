@@ -46,7 +46,10 @@ const getAnonContext = (article: HTMLElement) => {
   };
 };
 
-const getAnonProposalUrl = (article: HTMLElement) => `${ANON_PROPOSAL_BASE_URL}/${getAnonSlug(article)}`;
+const getAnonProposalUrl = (article: HTMLElement) => {
+  const slug = getAnonSlug(article);
+  return `${ANON_PROPOSAL_BASE_URL}/${slug}?utm_content=${encodeURIComponent(slug)}`;
+};
 
 const hasRealContacts = (article: HTMLElement) => {
   const contactSections = Array.from(article.querySelectorAll(":scope > div")) as HTMLElement[];
