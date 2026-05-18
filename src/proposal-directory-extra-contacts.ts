@@ -22,6 +22,7 @@ const EXTRA_PROPOSAL_CONTACTS: ExtraProposalContact[] = [
 ];
 
 const EXTRA_STATUS_KEY = "aboutchad_proposal_extra_contact_status_v1";
+const getExtraProposalUrl = (slug: string) => `https://www.aboutchad.com/company/${slug}?utm_content=${encodeURIComponent(slug)}`;
 
 const getExtraStatuses = () => {
   try {
@@ -70,8 +71,7 @@ const trimLinkedIn = (message: string) => message.length <= 300 ? message : `${m
 
 const buildLinkedInDraft = (contact: ExtraProposalContact) => {
   const context = getRoleContext(contact.slug);
-  const emailLine = contact.email ? " I also sent a short email with more context." : "";
-  return trimLinkedIn(`Hi ${getFirstName(contact.name)} — I saw the ${context.role} opportunity with ${contact.company}. ${context.positioning}${emailLine} Would welcome the chance to connect if relevant to your team.`);
+  return trimLinkedIn(`Hi ${getFirstName(contact.name)} — I saw the ${context.role} opportunity with ${contact.company}. ${context.positioning} Would welcome the chance to connect.\n\nProposal page: ${getExtraProposalUrl(contact.slug)}`);
 };
 
 const buildEmailDraft = (contact: ExtraProposalContact) => {
@@ -86,6 +86,8 @@ const buildEmailDraft = (contact: ExtraProposalContact) => {
     context.positioning,
     "",
     `The parts of my background that seem most relevant are ${context.skills}.`,
+    "",
+    `I put together a short proposal page here: ${getExtraProposalUrl(contact.slug)}`,
     "",
     "If this is something you are connected to, I’d welcome the chance to compare notes. If someone else owns the conversation internally, I’d appreciate any direction on the right person to contact.",
     "",
