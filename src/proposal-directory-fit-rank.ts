@@ -38,13 +38,14 @@ const addFitRankBadges = () => {
 
   const articles = Array.from(document.querySelectorAll("main > section:nth-of-type(3) article")) as HTMLElement[];
   articles.forEach((article) => {
-    if (article.dataset.fitRankEnhanced === "true") return;
     const slug = getSlugFromArticle(article);
     const rank = FIT_RANKS[slug];
     if (!rank) return;
 
-    article.dataset.fitRankEnhanced = "true";
     article.dataset.fitScore = String(rank.score);
+
+    if (article.dataset.fitRankEnhanced === "true") return;
+    article.dataset.fitRankEnhanced = "true";
 
     const companyBlock = article.querySelector(":scope > div:first-child > div:first-child") as HTMLElement | null;
     if (!companyBlock) return;
@@ -56,11 +57,45 @@ const addFitRankBadges = () => {
   });
 };
 
+const sortByFitRank = () => {
+  addFitRankBadges();
+  const grid = document.querySelector("main > section:nth-of-type(3) .grid.gap-4") as HTMLElement | null;
+  if (!grid) return;
+
+  const cards = Array.from(grid.querySelectorAll(":scope > article")) as HTMLElement[];
+  cards
+    .sort((a, b) => Number(b.dataset.fitScore || 0) - Number(a.dataset.fitScore || 0))
+    .forEach((card) => grid.appendChild(card));
+};
+
+const addFitRankSortOption = () => {
+  if (window.location.pathname !== "/company") return;
+  const sortSelects = Array.from(document.querySelectorAll("main > section:nth-of-type(2) select")) as HTMLSelectElement[];
+  sortSelects.forEach((select) => {
+    if (Array.from(select.options).some((option) => option.value === "fit-rank")) return;
+    const option = document.createElement("option");
+    option.value = "fit-rank";
+    option.textContent = "Fit rank — highest first";
+    select.insertBefore(option, select.firstChild);
+
+    select.addEventListener("change", (event) => {
+      const target = event.target as HTMLSelectElement;
+      if (target.value !== "fit-rank") return;
+      window.setTimeout(sortByFitRank, 0);
+      window.setTimeout(sortByFitRank, 250);
+    });
+  });
+};
+
 const bootFitRank = () => {
   window.setTimeout(addFitRankBadges, 300);
+  window.setTimeout(addFitRankSortOption, 500);
   window.setTimeout(addFitRankBadges, 1000);
+  window.setTimeout(addFitRankSortOption, 1200);
   window.setTimeout(addFitRankBadges, 2200);
+  window.setTimeout(addFitRankSortOption, 2400);
   window.setTimeout(addFitRankBadges, 4000);
+  window.setTimeout(addFitRankSortOption, 4200);
 };
 
 if (document.readyState === "loading") {
