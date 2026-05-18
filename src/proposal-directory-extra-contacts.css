@@ -1,0 +1,123 @@
+.proposal-contact-detail-block a {
+  position: relative;
+  z-index: 2;
+  cursor: pointer;
+}
+
+.proposal-extra-draft-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.proposal-extra-draft-modal__panel {
+  width: min(760px, 100%);
+  max-height: calc(100vh - 48px);
+  overflow: auto;
+  border-radius: 32px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.36);
+  padding: 28px;
+}
+
+.proposal-extra-draft-modal__header,
+.proposal-extra-draft-modal__actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.proposal-extra-draft-modal__header {
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.proposal-extra-draft-modal__actions {
+  align-items: center;
+  margin-top: 18px;
+}
+
+.proposal-extra-draft-modal__eyebrow {
+  margin: 0 0 12px;
+  color: hsl(var(--primary));
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.proposal-extra-draft-modal__header h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.proposal-extra-draft-modal__header a {
+  display: inline-block;
+  margin-top: 10px;
+  color: hsl(var(--primary));
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.proposal-extra-draft-modal__close,
+.proposal-extra-draft-modal__copy {
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 10px 16px;
+  text-transform: uppercase;
+}
+
+.proposal-extra-draft-modal__close {
+  border: 1px solid hsl(var(--border));
+  background: transparent;
+  color: hsl(var(--foreground));
+}
+
+.proposal-extra-draft-modal__copy {
+  border: 0;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+}
+
+.proposal-extra-draft-modal__textarea {
+  width: 100%;
+  min-height: 280px;
+  resize: vertical;
+  border: 1px solid hsl(var(--border));
+  border-radius: 20px;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-size: 14px;
+  line-height: 1.6;
+  outline: none;
+  padding: 16px;
+}
+
+.proposal-extra-draft-modal__actions p {
+  max-width: 430px;
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.proposal-extra-draft-modal__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+}
