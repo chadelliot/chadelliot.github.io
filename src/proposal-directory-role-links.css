@@ -1,0 +1,11 @@
+.proposal-original-role-link {
+  color: hsl(var(--foreground)) !important;
+  font-weight: 800 !important;
+  text-decoration: underline !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 4px !important;
+}
+
+.proposal-original-role-link:hover {
+  color: hsl(var(--primary)) !important;
+}
