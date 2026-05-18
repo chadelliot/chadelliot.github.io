@@ -1,0 +1,64 @@
+.proposal-directory-card-with-tools {
+  position: relative !important;
+}
+
+.proposal-linkedin-search-button {
+  position: absolute !important;
+  top: 18px !important;
+  right: 18px !important;
+  z-index: 4 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  color: hsl(var(--foreground)) !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.09em !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06) !important;
+}
+
+.proposal-linkedin-search-button:hover {
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+.proposal-contact-hidden-by-limit {
+  display: none !important;
+}
+
+.proposal-view-all-contacts-button {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin-top: 12px !important;
+  min-height: 36px !important;
+  padding: 0 14px !important;
+  border: 1px solid hsl(var(--border)) !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  color: hsl(var(--foreground)) !important;
+  cursor: pointer !important;
+  font-size: 11px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.proposal-view-all-contacts-button:hover {
+  border-color: hsl(var(--primary)) !important;
+  color: hsl(var(--primary)) !important;
+}
+
+@media (max-width: 760px) {
+  .proposal-linkedin-search-button {
+    position: static !important;
+    margin-bottom: 12px !important;
+  }
+}
