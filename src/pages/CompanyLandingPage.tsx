@@ -65,11 +65,25 @@ const getCommercialModel = (investment?: string) => {
 const getMaxEngagementMonths = (source: string) => {
   const rangeMatch = source.match(/(\d+)\s*(?:-|–|—|to)\s*(\d+)\s*months?/i);
   if (rangeMatch) return Number(rangeMatch[2]);
-  const monthMatch = source.match(/(?:for\s*)?(\d+)\s*months?/i);
+  const monthMatch = source.match(/(?:for\s*)?(\d+)\s*(?:month|months|mo\.?)/i);
   if (monthMatch) return Number(monthMatch[1]);
   const weekMatch = source.match(/(\d+)\s*(?:-|–|—|to)\s*(\d+)\s*weeks?/i);
   if (weekMatch) return Math.max(1, Math.ceil(Number(weekMatch[2]) / 4));
   return null;
+};
+
+const arePhaseDurationsRepeated = (phases: ProposalPhase[]) => {
+  const durations = phases.map((item) => item.duration.trim().toLowerCase()).filter(Boolean);
+  return durations.length > 1 && new Set(durations).size === 1;
+};
+
+const fallbackDurationByIndex = (index: number, total: number, monthCount: number | null) => {
+  if (monthCount && monthCount >= 12) return index === 0 ? "Weeks 1–4" : index === 1 ? "Months 2–4" : "Months 5–12";
+  if (monthCount && monthCount >= 6) return index === 0 ? "Weeks 1–3" : index === 1 ? "Months 2–3" : "Months 4–6";
+  if (monthCount && monthCount >= 4) return index === 0 ? "Weeks 1–2" : index === 1 ? "Weeks 3–8" : "Weeks 9–16";
+  if (monthCount && monthCount >= 3) return index === 0 ? "Weeks 1–2" : index === 1 ? "Weeks 3–6" : "Weeks 7–12";
+  if (total >= 3) return index === 0 ? "Week 1" : index === 1 ? "Weeks 2–3" : "Ongoing cadence";
+  return index === 0 ? "Initial sprint" : "Ongoing cadence";
 };
 
 const getBelievablePhaseDuration = (phase: ProposalPhase, index: number, phases: ProposalPhase[], investment?: string) => {
@@ -77,10 +91,13 @@ const getBelievablePhaseDuration = (phase: ProposalPhase, index: number, phases:
   if (/annual|salary|full-time/i.test(source)) return phase.duration;
 
   const monthCount = getMaxEngagementMonths(source);
+  const repeatedDurations = arePhaseDurationsRepeated(phases);
   const shortTitle = phase.title.toLowerCase();
   const isDiagnostic = /diagnostic|assessment|review|audit|current-state|input|research|visibility/.test(shortTitle);
   const isBuild = /build|design|framework|roadmap|playbook|model|pilot design|development/.test(shortTitle);
   const isExecution = /execution|activation|launch|support|optimization|enablement|transfer|roadmap/.test(shortTitle);
+
+  if (repeatedDurations) return fallbackDurationByIndex(index, phases.length, monthCount);
 
   if (monthCount && monthCount >= 12) {
     if (isDiagnostic || index === 0) return "Weeks 1–4";
