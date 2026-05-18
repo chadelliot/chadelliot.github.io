@@ -57,45 +57,68 @@ const addFitRankBadges = () => {
   });
 };
 
-const sortByFitRank = () => {
+const getProposalGrid = () => document.querySelector("main > section:nth-of-type(3) .grid.gap-4") as HTMLElement | null;
+
+const sortByFitRank = (direction: "high" | "low") => {
   addFitRankBadges();
-  const grid = document.querySelector("main > section:nth-of-type(3) .grid.gap-4") as HTMLElement | null;
+  const grid = getProposalGrid();
   if (!grid) return;
 
   const cards = Array.from(grid.querySelectorAll(":scope > article")) as HTMLElement[];
   cards
-    .sort((a, b) => Number(b.dataset.fitScore || 0) - Number(a.dataset.fitScore || 0))
+    .sort((a, b) => {
+      const aScore = Number(a.dataset.fitScore || 0);
+      const bScore = Number(b.dataset.fitScore || 0);
+      return direction === "low" ? aScore - bScore : bScore - aScore;
+    })
     .forEach((card) => grid.appendChild(card));
 };
 
-const addFitRankSortOption = () => {
-  if (window.location.pathname !== "/company") return;
+const removeFitRankFromMainSort = () => {
   const sortSelects = Array.from(document.querySelectorAll("main > section:nth-of-type(2) select")) as HTMLSelectElement[];
   sortSelects.forEach((select) => {
-    if (Array.from(select.options).some((option) => option.value === "fit-rank")) return;
-    const option = document.createElement("option");
-    option.value = "fit-rank";
-    option.textContent = "Fit rank — highest first";
-    select.insertBefore(option, select.firstChild);
-
-    select.addEventListener("change", (event) => {
-      const target = event.target as HTMLSelectElement;
-      if (target.value !== "fit-rank") return;
-      window.setTimeout(sortByFitRank, 0);
-      window.setTimeout(sortByFitRank, 250);
+    Array.from(select.options).forEach((option) => {
+      if (option.value === "fit-rank" || option.textContent?.toLowerCase().includes("fit rank")) option.remove();
     });
   });
 };
 
+const addFitRankSortControl = () => {
+  if (window.location.pathname !== "/company") return;
+  if (document.querySelector(".proposal-fit-rank-sort-label")) return;
+
+  const controlGrid = document.querySelector(".proposal-main-filter-section > div > div:nth-child(2)") as HTMLElement | null;
+  if (!controlGrid) return;
+
+  const label = document.createElement("label");
+  label.className = "proposal-fit-rank-sort-label grid gap-2 text-sm font-semibold text-foreground";
+  label.textContent = "Fit rank";
+
+  const select = document.createElement("select");
+  select.className = "proposal-fit-rank-sort-select rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary";
+  select.setAttribute("aria-label", "Sort by fit rank");
+  select.innerHTML = `<option value="none">No fit-rank sort</option><option value="high">Highest first</option><option value="low">Lowest first</option>`;
+  select.addEventListener("change", () => {
+    if (select.value === "high" || select.value === "low") sortByFitRank(select.value);
+  });
+
+  label.appendChild(select);
+  controlGrid.insertBefore(label, controlGrid.firstChild);
+};
+
 const bootFitRank = () => {
   window.setTimeout(addFitRankBadges, 300);
-  window.setTimeout(addFitRankSortOption, 500);
+  window.setTimeout(removeFitRankFromMainSort, 400);
+  window.setTimeout(addFitRankSortControl, 500);
   window.setTimeout(addFitRankBadges, 1000);
-  window.setTimeout(addFitRankSortOption, 1200);
+  window.setTimeout(removeFitRankFromMainSort, 1100);
+  window.setTimeout(addFitRankSortControl, 1200);
   window.setTimeout(addFitRankBadges, 2200);
-  window.setTimeout(addFitRankSortOption, 2400);
+  window.setTimeout(removeFitRankFromMainSort, 2300);
+  window.setTimeout(addFitRankSortControl, 2400);
   window.setTimeout(addFitRankBadges, 4000);
-  window.setTimeout(addFitRankSortOption, 4200);
+  window.setTimeout(removeFitRankFromMainSort, 4100);
+  window.setTimeout(addFitRankSortControl, 4200);
 };
 
 if (document.readyState === "loading") {
