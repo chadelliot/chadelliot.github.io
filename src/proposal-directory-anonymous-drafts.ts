@@ -75,7 +75,7 @@ const buildAnonEmailDraft = (article: HTMLElement) => {
     "",
     context.value,
     "",
-    `I put together a short proposal page here: ${getAnonProposalUrl(article)}`,
+    `Here are some details on how I think I can help: ${getAnonProposalUrl(article)}`,
     "",
     "If you are the right person to discuss this, I’d welcome the chance to connect. If not, I’d appreciate any direction on who owns the conversation internally.",
     "",
