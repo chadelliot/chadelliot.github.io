@@ -25,21 +25,18 @@ const getPostedRole = (article: HTMLElement) => {
   return role || "marketing leadership";
 };
 
-const getLeadershipSearchTerms = (role: string) => {
+const getBroadLeaderTerms = (role: string) => {
   const normalized = role.toLowerCase();
-  const baseTerms = ["VP", "Head", "Senior Director", "Director", "Hiring Manager"];
-
-  if (/revenue|revops|sales|gtm|go-to-market/i.test(normalized)) return [...baseTerms, "Revenue", "Revenue Operations", "GTM", "Growth", "Sales"];
-  if (/product marketing|physician|channel|partnership|business development/i.test(normalized)) return [...baseTerms, "Product Marketing", "Partnerships", "Business Development", "Channel", "Growth"];
-  if (/seo|growth|analytics|search|content/i.test(normalized)) return [...baseTerms, "Growth", "SEO", "Marketing", "Analytics", "Client Strategy"];
-  if (/brand|strategy|strategist/i.test(normalized)) return [...baseTerms, "Brand Strategy", "Strategy", "Marketing", "Client Strategy"];
-  if (/healthcare|clinic|patient|digital marketing/i.test(normalized)) return [...baseTerms, "Marketing", "Growth", "Digital Marketing", "Operations", "Patient Acquisition"];
-  return [...baseTerms, "Marketing", "Growth", "Revenue Operations", "Talent Acquisition"];
+  if (/sales|revenue|revops|gtm|go-to-market/.test(normalized)) return "revenue OR sales OR growth";
+  if (/product marketing|channel|partnership|business development|physician/.test(normalized)) return "marketing OR growth OR partnerships";
+  if (/seo|search|analytics|growth|content/.test(normalized)) return "growth OR marketing OR strategy";
+  if (/brand|strategy|strategist/.test(normalized)) return "strategy OR marketing";
+  if (/healthcare|clinic|patient|digital marketing/.test(normalized)) return "marketing OR growth OR operations";
+  return "marketing OR growth OR revenue";
 };
 
 const getLinkedInPeopleSearchUrl = (company: string, role: string) => {
-  const leadershipTerms = getLeadershipSearchTerms(role).join(" OR ");
-  const keywords = encodeURIComponent(`"${company}" (${leadershipTerms}) "${role}"`);
+  const keywords = encodeURIComponent(`"${company}" ${getBroadLeaderTerms(role)}`);
   return `https://www.linkedin.com/search/results/people/?keywords=${keywords}`;
 };
 
