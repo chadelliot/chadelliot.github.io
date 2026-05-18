@@ -1,0 +1,18 @@
+.proposal-anonymous-contact-card {
+  border-style: dashed !important;
+  background: #fffdf8 !important;
+}
+
+.proposal-anonymous-card-note,
+.proposal-anonymous-draft-context {
+  margin: 10px 0 0 !important;
+  color: hsl(var(--muted-foreground)) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  line-height: 1.45 !important;
+}
+
+.proposal-anonymous-draft-context {
+  margin-top: 12px !important;
+  color: hsl(var(--primary)) !important;
+}
