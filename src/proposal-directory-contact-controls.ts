@@ -25,6 +25,33 @@ const getPostedRole = (article: HTMLElement) => {
   return role || "marketing leadership";
 };
 
+const getLeadershipSearchTerms = (role: string) => {
+  const normalized = role.toLowerCase();
+  const baseTerms = ["VP", "Head", "Senior Director", "Director", "Hiring Manager"];
+
+  if (/revenue|revops|sales|gtm|go-to-market/i.test(normalized)) {
+    return [...baseTerms, "Revenue", "Revenue Operations", "GTM", "Growth", "Sales"];
+  }
+
+  if (/product marketing|physician|channel|partnership|business development/i.test(normalized)) {
+    return [...baseTerms, "Product Marketing", "Partnerships", "Business Development", "Channel", "Growth"];
+  }
+
+  if (/seo|growth|analytics|search|content/i.test(normalized)) {
+    return [...baseTerms, "Growth", "SEO", "Marketing", "Analytics", "Client Strategy"];
+  }
+
+  if (/brand|strategy|strategist/i.test(normalized)) {
+    return [...baseTerms, "Brand Strategy", "Strategy", "Marketing", "Client Strategy"];
+  }
+
+  if (/healthcare|clinic|patient|digital marketing/i.test(normalized)) {
+    return [...baseTerms, "Marketing", "Growth", "Digital Marketing", "Operations", "Patient Acquisition"];
+  }
+
+  return [...baseTerms, "Marketing", "Growth", "Revenue Operations", "Talent Acquisition"];
+};
+
 const getContactTitle = (card: HTMLElement) => {
   return card.querySelector(".proposal-contact-detail-block a p:nth-child(2)")?.textContent?.trim()
     || card.querySelector("a p:nth-child(2)")?.textContent?.trim()
@@ -35,14 +62,15 @@ const addLinkedInSearchButton = (article: HTMLElement) => {
   if (article.querySelector(".proposal-linkedin-search-button")) return;
   const company = getCompanyName(article);
   const role = getPostedRole(article);
-  const query = encodeURIComponent(`site:linkedin.com/in ${company} ${role} marketing growth revenue operations`);
+  const leadershipTerms = getLeadershipSearchTerms(role).join(" OR ");
+  const keywords = encodeURIComponent(`"${company}" (${leadershipTerms}) "${role}"`);
   const button = document.createElement("a");
   button.className = "proposal-linkedin-search-button";
-  button.href = `https://www.google.com/search?q=${query}`;
+  button.href = `https://www.linkedin.com/search/results/people/?keywords=${keywords}`;
   button.target = "_blank";
   button.rel = "noreferrer";
-  button.textContent = "Search LinkedIn";
-  button.setAttribute("aria-label", `Search LinkedIn for contacts at ${company}`);
+  button.textContent = "Find leaders";
+  button.setAttribute("aria-label", `Search LinkedIn people for likely leaders at ${company}`);
   article.appendChild(button);
 };
 
