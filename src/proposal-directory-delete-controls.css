@@ -1,0 +1,77 @@
+.proposal-directory-card-with-delete {
+  position: relative !important;
+}
+
+.proposal-delete-button {
+  position: absolute !important;
+  right: 18px !important;
+  bottom: 18px !important;
+  z-index: 5 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 32px !important;
+  padding: 0 12px !important;
+  border: 1px solid rgba(185, 28, 28, 0.28) !important;
+  border-radius: 999px !important;
+  background: #fff5f5 !important;
+  color: #991b1b !important;
+  cursor: pointer !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.09em !important;
+  text-transform: uppercase !important;
+}
+
+.proposal-delete-button:hover {
+  border-color: #991b1b !important;
+  background: #fee2e2 !important;
+}
+
+.proposal-deleted-page-notice {
+  min-height: 72vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  max-width: 760px !important;
+  margin: 0 auto !important;
+  padding: 140px 24px 80px !important;
+}
+
+.proposal-deleted-page-notice p {
+  margin: 0 0 16px !important;
+  color: hsl(var(--primary)) !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.2em !important;
+  text-transform: uppercase !important;
+}
+
+.proposal-deleted-page-notice h1 {
+  margin: 0 0 28px !important;
+  color: hsl(var(--foreground)) !important;
+  font-size: clamp(36px, 6vw, 72px) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.05em !important;
+  line-height: 0.96 !important;
+}
+
+.proposal-deleted-page-notice a {
+  width: fit-content !important;
+  border-radius: 999px !important;
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  padding: 12px 18px !important;
+  font-size: 12px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.08em !important;
+  text-decoration: none !important;
+  text-transform: uppercase !important;
+}
+
+@media (max-width: 760px) {
+  .proposal-delete-button {
+    position: static !important;
+    margin-top: 14px !important;
+  }
+}
