@@ -85,7 +85,11 @@ const removeFitRankFromMainSort = () => {
 
 const addFitRankSortControl = () => {
   if (window.location.pathname !== "/company") return;
-  if (document.querySelector(".proposal-fit-rank-sort-label")) return;
+  const existing = document.querySelector(".proposal-fit-rank-sort-select") as HTMLSelectElement | null;
+  if (existing) {
+    if (existing.value !== "high") existing.value = "high";
+    return;
+  }
 
   const controlGrid = document.querySelector(".proposal-main-filter-section > div > div:nth-child(2)") as HTMLElement | null;
   if (!controlGrid) return;
@@ -97,7 +101,8 @@ const addFitRankSortControl = () => {
   const select = document.createElement("select");
   select.className = "proposal-fit-rank-sort-select rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary";
   select.setAttribute("aria-label", "Sort by fit rank");
-  select.innerHTML = `<option value="none">No fit-rank sort</option><option value="high">Highest first</option><option value="low">Lowest first</option>`;
+  select.innerHTML = `<option value="high">Highest first</option><option value="low">Lowest first</option><option value="none">No fit-rank sort</option>`;
+  select.value = "high";
   select.addEventListener("change", () => {
     if (select.value === "high" || select.value === "low") sortByFitRank(select.value);
   });
@@ -107,16 +112,16 @@ const addFitRankSortControl = () => {
 };
 
 const bootFitRank = () => {
-  window.setTimeout(addFitRankBadges, 300);
+  window.setTimeout(() => { addFitRankBadges(); sortByFitRank("high"); }, 300);
   window.setTimeout(removeFitRankFromMainSort, 400);
   window.setTimeout(addFitRankSortControl, 500);
-  window.setTimeout(addFitRankBadges, 1000);
+  window.setTimeout(() => { addFitRankBadges(); sortByFitRank("high"); }, 1000);
   window.setTimeout(removeFitRankFromMainSort, 1100);
   window.setTimeout(addFitRankSortControl, 1200);
-  window.setTimeout(addFitRankBadges, 2200);
+  window.setTimeout(() => { addFitRankBadges(); sortByFitRank("high"); }, 2200);
   window.setTimeout(removeFitRankFromMainSort, 2300);
   window.setTimeout(addFitRankSortControl, 2400);
-  window.setTimeout(addFitRankBadges, 4000);
+  window.setTimeout(() => { addFitRankBadges(); sortByFitRank("high"); }, 4000);
   window.setTimeout(removeFitRankFromMainSort, 4100);
   window.setTimeout(addFitRankSortControl, 4200);
 };
