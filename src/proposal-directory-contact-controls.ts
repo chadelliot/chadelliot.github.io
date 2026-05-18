@@ -29,27 +29,18 @@ const getLeadershipSearchTerms = (role: string) => {
   const normalized = role.toLowerCase();
   const baseTerms = ["VP", "Head", "Senior Director", "Director", "Hiring Manager"];
 
-  if (/revenue|revops|sales|gtm|go-to-market/i.test(normalized)) {
-    return [...baseTerms, "Revenue", "Revenue Operations", "GTM", "Growth", "Sales"];
-  }
-
-  if (/product marketing|physician|channel|partnership|business development/i.test(normalized)) {
-    return [...baseTerms, "Product Marketing", "Partnerships", "Business Development", "Channel", "Growth"];
-  }
-
-  if (/seo|growth|analytics|search|content/i.test(normalized)) {
-    return [...baseTerms, "Growth", "SEO", "Marketing", "Analytics", "Client Strategy"];
-  }
-
-  if (/brand|strategy|strategist/i.test(normalized)) {
-    return [...baseTerms, "Brand Strategy", "Strategy", "Marketing", "Client Strategy"];
-  }
-
-  if (/healthcare|clinic|patient|digital marketing/i.test(normalized)) {
-    return [...baseTerms, "Marketing", "Growth", "Digital Marketing", "Operations", "Patient Acquisition"];
-  }
-
+  if (/revenue|revops|sales|gtm|go-to-market/i.test(normalized)) return [...baseTerms, "Revenue", "Revenue Operations", "GTM", "Growth", "Sales"];
+  if (/product marketing|physician|channel|partnership|business development/i.test(normalized)) return [...baseTerms, "Product Marketing", "Partnerships", "Business Development", "Channel", "Growth"];
+  if (/seo|growth|analytics|search|content/i.test(normalized)) return [...baseTerms, "Growth", "SEO", "Marketing", "Analytics", "Client Strategy"];
+  if (/brand|strategy|strategist/i.test(normalized)) return [...baseTerms, "Brand Strategy", "Strategy", "Marketing", "Client Strategy"];
+  if (/healthcare|clinic|patient|digital marketing/i.test(normalized)) return [...baseTerms, "Marketing", "Growth", "Digital Marketing", "Operations", "Patient Acquisition"];
   return [...baseTerms, "Marketing", "Growth", "Revenue Operations", "Talent Acquisition"];
+};
+
+const getLinkedInPeopleSearchUrl = (company: string, role: string) => {
+  const leadershipTerms = getLeadershipSearchTerms(role).join(" OR ");
+  const keywords = encodeURIComponent(`"${company}" (${leadershipTerms}) "${role}"`);
+  return `https://www.linkedin.com/search/results/people/?keywords=${keywords}`;
 };
 
 const getContactTitle = (card: HTMLElement) => {
@@ -59,19 +50,19 @@ const getContactTitle = (card: HTMLElement) => {
 };
 
 const addLinkedInSearchButton = (article: HTMLElement) => {
-  if (article.querySelector(".proposal-linkedin-search-button")) return;
   const company = getCompanyName(article);
   const role = getPostedRole(article);
-  const leadershipTerms = getLeadershipSearchTerms(role).join(" OR ");
-  const keywords = encodeURIComponent(`"${company}" (${leadershipTerms}) "${role}"`);
-  const button = document.createElement("a");
-  button.className = "proposal-linkedin-search-button";
-  button.href = `https://www.linkedin.com/search/results/people/?keywords=${keywords}`;
+  let button = article.querySelector(".proposal-linkedin-search-button") as HTMLAnchorElement | null;
+  if (!button) {
+    button = document.createElement("a");
+    button.className = "proposal-linkedin-search-button";
+    article.appendChild(button);
+  }
+  button.href = getLinkedInPeopleSearchUrl(company, role);
   button.target = "_blank";
   button.rel = "noreferrer";
   button.textContent = "Find leaders";
   button.setAttribute("aria-label", `Search LinkedIn people for likely leaders at ${company}`);
-  article.appendChild(button);
 };
 
 const getContactGrids = (article: HTMLElement) => {
@@ -145,6 +136,7 @@ const addLinkedInClickFallback = () => {
 
 const bootContactControls = () => {
   addLinkedInClickFallback();
+  window.setTimeout(addContactControls, 300);
   window.setTimeout(addContactControls, 900);
   window.setTimeout(addContactControls, 1800);
   window.setTimeout(addContactControls, 3400);
