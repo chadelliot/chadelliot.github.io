@@ -31,7 +31,7 @@ const getArticleSlug = (element: Element | null) => {
   return link?.getAttribute("href")?.replace("/company/", "") || "";
 };
 
-const getProposalUrl = (slug: string) => `${PROPOSAL_BASE_URL}/${slug}`;
+const getProposalUrl = (slug: string) => `${PROPOSAL_BASE_URL}/${slug}?utm_content=${encodeURIComponent(slug)}`;
 
 const getFirstNameFromModal = (modal: HTMLElement) => {
   const name = modal.querySelector("h2")?.textContent?.trim() || "there";
