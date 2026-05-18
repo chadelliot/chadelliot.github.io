@@ -2,7 +2,6 @@ import { type FormEvent, type KeyboardEvent, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ProposalSocialOutreach from "@/components/ProposalSocialOutreach";
 import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
 import { trackEvent, trackPageView } from "@/lib/analytics";
 
@@ -38,7 +37,9 @@ const currencyFormatter = new Intl.NumberFormat("en-US", { style: "currency", cu
 const parseMoney = (amount: string) => Number(amount.replace(/[$,\s]/g, ""));
 const formatMoney = (amount: number) => currencyFormatter.format(amount);
 
-const getTimelineForCompletion = (phases?: { duration: string }[]) => {
+type ProposalPhase = { title: string; duration: string; description: string };
+
+const getTimelineForCompletion = (phases?: ProposalPhase[]) => {
   const uniqueTimelines = Array.from(new Set(phases?.map((phase) => phase.duration.trim()).filter((duration) => duration && !/^phase\s+\d+$/i.test(duration)) ?? []));
   return uniqueTimelines.length ? uniqueTimelines.join(" / ") : "Timeline to be confirmed during scoping.";
 };
@@ -59,6 +60,59 @@ const getCommercialModel = (investment?: string) => {
   const unit = isHourly ? "/hour" : isMonthly ? "/month" : "";
   const thresholdNote = isHourly ? (max < 150 ? "max of posted range" : "upper end of posted range") : max < 4000 ? "max of posted range" : "upper end of posted range";
   return `Recommended: ${formatMoney(max)}${unit} (${thresholdNote}; posted range ${formatMoney(min)}–${formatMoney(max)}${unit})`;
+};
+
+const getMaxEngagementMonths = (source: string) => {
+  const rangeMatch = source.match(/(\d+)\s*(?:-|–|—|to)\s*(\d+)\s*months?/i);
+  if (rangeMatch) return Number(rangeMatch[2]);
+  const monthMatch = source.match(/(?:for\s*)?(\d+)\s*months?/i);
+  if (monthMatch) return Number(monthMatch[1]);
+  const weekMatch = source.match(/(\d+)\s*(?:-|–|—|to)\s*(\d+)\s*weeks?/i);
+  if (weekMatch) return Math.max(1, Math.ceil(Number(weekMatch[2]) / 4));
+  return null;
+};
+
+const getBelievablePhaseDuration = (phase: ProposalPhase, index: number, phases: ProposalPhase[], investment?: string) => {
+  const source = `${investment || ""} ${phases.map((item) => item.duration).join(" ")}`;
+  if (/annual|salary|full-time/i.test(source)) return phase.duration;
+
+  const monthCount = getMaxEngagementMonths(source);
+  const shortTitle = phase.title.toLowerCase();
+  const isDiagnostic = /diagnostic|assessment|review|audit|current-state|input|research|visibility/.test(shortTitle);
+  const isBuild = /build|design|framework|roadmap|playbook|model|pilot design|development/.test(shortTitle);
+  const isExecution = /execution|activation|launch|support|optimization|enablement|transfer|roadmap/.test(shortTitle);
+
+  if (monthCount && monthCount >= 12) {
+    if (isDiagnostic || index === 0) return "Weeks 1–4";
+    if (isBuild || index === 1) return "Months 2–4";
+    if (isExecution || index >= 2) return "Months 5–12";
+  }
+
+  if (monthCount && monthCount >= 6) {
+    if (isDiagnostic || index === 0) return "Weeks 1–3";
+    if (isBuild || index === 1) return "Months 2–3";
+    if (isExecution || index >= 2) return "Months 4–6";
+  }
+
+  if (monthCount && monthCount >= 4) {
+    if (isDiagnostic || index === 0) return "Weeks 1–2";
+    if (isBuild || index === 1) return "Weeks 3–8";
+    if (isExecution || index >= 2) return "Weeks 9–16";
+  }
+
+  if (monthCount && monthCount >= 3) {
+    if (isDiagnostic || index === 0) return "Weeks 1–2";
+    if (isBuild || index === 1) return "Weeks 3–6";
+    if (isExecution || index >= 2) return "Weeks 7–12";
+  }
+
+  if (/weekly|week-to-week|part-time|hours\/week|hrs\/week|contract|fractional|project-based/i.test(source)) {
+    if (isDiagnostic || index === 0) return "Week 1";
+    if (isBuild || index === 1) return "Weeks 2–3";
+    if (isExecution || index >= 2) return "Ongoing cadence";
+  }
+
+  return phase.duration || `Phase ${index + 1}`;
 };
 
 const CompanyLandingPage = () => {
@@ -124,11 +178,11 @@ const CompanyLandingPage = () => {
   const proposal = page.proposal;
   const engagementBullets = page.recommendedEngagement.bullets;
   const shouldOpenContactDrawer = page.ctaLabel.toLowerCase().includes("discuss") && page.ctaLabel.toLowerCase().includes("fit");
-  const phaseDetails = proposal?.phases.map((phase, index) => {
+  const phaseDetails = proposal?.phases.map((phase, index, phases) => {
     const detailGroups = [engagementBullets.slice(0, 2), engagementBullets.slice(1, 3), engagementBullets.slice(2, 4)];
-    return { ...phase, details: detailGroups[index] || engagementBullets.slice(0, 2) };
+    return { ...phase, duration: getBelievablePhaseDuration(phase, index, phases, proposal.investment), details: detailGroups[index] || engagementBullets.slice(0, 2) };
   }) || [];
-  const timelineForCompletion = getTimelineForCompletion(proposal?.phases);
+  const timelineForCompletion = getTimelineForCompletion(phaseDetails);
   const commercialModel = getCommercialModel(proposal?.investment);
 
   const handleContactSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -210,8 +264,6 @@ const CompanyLandingPage = () => {
             </div>
           </div>
         </section>
-
-        <ProposalSocialOutreach page={page} />
 
         {proposal?.phases?.length ? (
           <section className="px-6 md:px-20 py-16 md:py-20 bg-black text-white border-y border-black">
