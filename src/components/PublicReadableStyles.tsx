@@ -23,15 +23,15 @@ const PublicReadableStyles = () => (
       padding-bottom: 14px !important;
     }
 
-    .public-readable [class*="text-[10px]"]:not(button):not(svg),
-    .public-readable [class*="text-[11px]"]:not(button):not(svg),
-    .public-readable [class*="text-[12px]"]:not(button):not(svg) {
+    .public-readable [class*="text-[10px]"]:not([class*="tracking"]):not(button):not(svg),
+    .public-readable [class*="text-[11px]"]:not([class*="tracking"]):not(button):not(svg),
+    .public-readable [class*="text-[12px]"]:not([class*="tracking"]):not(button):not(svg) {
       font-size: 14px !important;
       line-height: 1.65 !important;
     }
 
-    .public-readable ul li[class*="text-[11px]"],
-    .public-readable ul li[class*="text-[12px]"] {
+    .public-readable ul li[class*="text-[11px]"]:not([class*="tracking"]),
+    .public-readable ul li[class*="text-[12px]"]:not([class*="tracking"]) {
       font-size: 15px !important;
       line-height: 1.72 !important;
     }
@@ -55,7 +55,7 @@ const PublicReadableStyles = () => (
       line-height: 1.25 !important;
     }
 
-    .public-readable [class*="300px_1fr"] .font-sans {
+    .public-readable [class*="300px_1fr"] .font-sans:not([class*="tracking"]) {
       font-size: 14.5px !important;
       line-height: 1.65 !important;
     }
