@@ -398,41 +398,77 @@ const CompanyDirectoryPageV5 = () => {
           </div>
         </section>
 
-        <section className="px-6 pb-14 md:px-20 md:pb-16">
+        <section className="bg-[#F8FAFC] px-6 py-8 md:px-20 md:py-10">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-8 flex flex-col gap-2 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
-              <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p><h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">{pages.length} proposal pages</h2></div>
-              <p className="text-sm text-muted-foreground">{isStatusLoading ? "Loading saved contact status..." : "LinkedIn contacts appear below each matching proposal. Email details remain private inside HubSpot."}</p>
+            <div className="mb-4 flex flex-col gap-2 border-b border-[#E2E8F0] bg-white px-4 py-4 shadow-sm md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p>
+                <h2 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-[#0F172A] md:text-3xl">{pages.length} proposal pages</h2>
+              </div>
+              <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{isStatusLoading ? "Loading saved contact status..." : "Compact CRM-style cards with proposal details and outreach actions grouped together."}</p>
             </div>
 
             <div className="grid gap-4">
               {pages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleContacts }) => (
-                <article key={page.slug} className="rounded-[1.5rem] border border-border bg-white p-5 shadow-sm transition-colors hover:border-primary md:p-6">
-                  <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
+                <article key={page.slug} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm transition-colors hover:border-primary/60">
+                  <div className="grid gap-4 border-b border-[#E2E8F0] px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:px-5">
                     <div>
-                      <div className="mb-3 flex flex-wrap items-center gap-3"><h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">{page.companyName}</h3><button type="button" onClick={() => setTypeFilter(opportunityType)} className={`${pillBaseClass} ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>{visibleContacts.length ? <span className={`${pillBaseClass} border-primary/50 bg-background text-primary`}>LinkedIn contacts</span> : null}</div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
-                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>Job posted: {formatDate(jobPostedDate)}</span><span>Round added: {formatDate(roundDate)}</span></div>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-display text-2xl font-extrabold tracking-tight text-[#0F172A]">{page.companyName}</h3>
+                        <button type="button" onClick={() => setTypeFilter(opportunityType)} className={`${pillBaseClass} ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>
+                        {visibleContacts.length ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{visibleContacts.length} contact{visibleContacts.length === 1 ? "" : "s"}</span> : null}
+                      </div>
+                      <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
                     </div>
-                    <div><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Posted role</p><p className="leading-relaxed text-foreground">{getPostedRoleTitle(page)}</p><p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment: {getCommitmentLength(page)}</p></div>
-                    <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
+                    <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
+                  </div>
+
+                  <div className="grid gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC] md:grid-cols-4">
+                    <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Posted role</p>
+                      <p className="mt-1 text-sm font-semibold leading-relaxed text-[#0F172A]">{getPostedRoleTitle(page)}</p>
+                    </div>
+                    <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment</p>
+                      <p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{getCommitmentLength(page)}</p>
+                    </div>
+                    <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job posted</p>
+                      <p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(jobPostedDate)}</p>
+                    </div>
+                    <div className="px-4 py-3 md:px-5">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Round added</p>
+                      <p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(roundDate)}</p>
+                    </div>
                   </div>
 
                   {visibleContacts.length ? (
-                    <div className="mt-6 border-t border-border pt-5">
-                      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">LinkedIn outreach contacts</p>
-                      <div className="grid gap-3 md:grid-cols-2">
-                        {visibleContacts.map((contact) => {
+                    <div className="px-4 py-4 md:px-5">
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Outreach contacts</p>
+                        <p className="hidden text-xs text-muted-foreground md:block">LinkedIn profile, draft, and contacted status stay in one row.</p>
+                      </div>
+                      <div className="overflow-hidden border border-[#E2E8F0]">
+                        {visibleContacts.map((contact, index) => {
                           const contactKey = getContactKey(page, contact);
                           const isContacted = Boolean(contactedContacts[contactKey]);
                           const hasEmailPath = Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo");
                           return (
-                            <div key={`${page.slug}-${contact.linkedinUrl}`} className="rounded-2xl border border-border bg-card p-4">
-                              <div className="mb-4 flex items-start justify-between gap-3">
-                                <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}><p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p><p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></a>
-                                <div className="flex flex-col items-end gap-2">{isContacted ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}{hasEmailPath ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Email path</span> : null}</div>
+                            <div key={`${page.slug}-${contact.linkedinUrl}`} className={`grid gap-3 bg-white px-4 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center ${index === 0 ? "" : "border-t border-[#E2E8F0]"}`}>
+                              <div className="min-w-0">
+                                <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}>
+                                  <p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A] transition-colors group-hover:text-primary">{contact.name}</p>
+                                  <p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
+                                </a>
+                                <div className="mt-2 flex flex-wrap gap-2">
+                                  {isContacted ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}
+                                  {hasEmailPath ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Email path</span> : null}
+                                </div>
                               </div>
-                              <div className="flex flex-wrap items-center gap-3"><button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft message</button><label className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label></div>
+                              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                                <button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-md bg-primary px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft</button>
+                                <label className="inline-flex items-center gap-2 border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary hover:text-primary"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label>
+                              </div>
                             </div>
                           );
                         })}
