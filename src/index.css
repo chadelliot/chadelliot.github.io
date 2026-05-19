@@ -521,6 +521,43 @@
   margin-bottom: 0;
 }
 
+/* ── PROPOSAL DIRECTORY HARD CLEANUP ── */
+body:has(.proposal-directory-page) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2),
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2),
+body:has(a[href*="linkedin.com/search/results/people"]) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) {
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body:has(.proposal-directory-page) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) > div,
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) > div,
+body:has(a[href*="linkedin.com/search/results/people"]) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) > div {
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+body:has(.proposal-directory-page) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) a[href*="linkedin.com/search/results/people"].bg-primary,
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) a[href*="linkedin.com/search/results/people"].bg-primary,
+body:has(a[href*="linkedin.com/search/results/people"]) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) a[href*="linkedin.com/search/results/people"].bg-primary {
+  display: none !important;
+}
+
+body:has(.proposal-directory-page) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) a[href*="linkedin.com/search/results/people"]:not(:first-child),
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) a[href*="linkedin.com/search/results/people"]:not(:first-child),
+body:has(a[href*="linkedin.com/search/results/people"]) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) a[href*="linkedin.com/search/results/people"]:not(:first-child) {
+  display: none !important;
+}
+
+body:has(.proposal-directory-page) main > section:nth-of-type(3) article h4,
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article h4,
+body:has(a[href*="linkedin.com/search/results/people"]) main > section:nth-of-type(3) article h4 {
+  display: none !important;
+}
+
 @media (max-width: 980px) {
   .opportunity-bridge {
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
