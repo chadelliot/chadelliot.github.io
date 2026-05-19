@@ -89,6 +89,34 @@ const PublicReadableStyles = () => (
     .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(5) > div:nth-child(2)::before { content: '△'; font-size: 20px !important; }
     .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(6) > div:nth-child(2)::before { content: '×'; font-size: 22px !important; }
 
+    /* Customer Segmentation: value score thresholds */
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(-n+2) .h-full,
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(-n+2) .font-mono {
+      color: hsl(var(--primary)) !important;
+    }
+
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(-n+2) .h-full {
+      background: hsl(var(--primary)) !important;
+    }
+
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(3) .h-full,
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(4) .h-full {
+      background: #d6a400 !important;
+    }
+
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(3) .font-mono,
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(4) .font-mono {
+      color: #9a7600 !important;
+    }
+
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(n+5) .h-full {
+      background: #c94a4a !important;
+    }
+
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(n+5) .font-mono {
+      color: #b13f3f !important;
+    }
+
     .public-readable [class*="1fr_auto_1fr"] > div:first-child .flex.flex-col > div > span {
       display: inline-flex !important;
       align-items: center !important;
