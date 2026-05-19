@@ -59,6 +59,47 @@ const PublicReadableStyles = () => (
       letter-spacing: 0.06em !important;
     }
 
+    /* My Approach: exact Customer Segmentation markup from the live grid */
+    .public-readable .md\:grid-cols-\[300px_1fr\] .font-display.text-\[14px\],
+    .public-readable .md\:grid-cols-\[300px_1fr\] .font-display.text-\[13px\] {
+      font-size: 18px !important;
+      line-height: 1.25 !important;
+    }
+
+    .public-readable .md\:grid-cols-\[300px_1fr\] .font-sans.text-\[11px\],
+    .public-readable .md\:grid-cols-\[300px_1fr\] .font-sans.text-\[10px\] {
+      font-size: 14.5px !important;
+      line-height: 1.65 !important;
+      letter-spacing: 0.01em !important;
+    }
+
+    .public-readable .md\:grid-cols-\[300px_1fr\] .font-mono.text-\[9px\] {
+      font-size: 12px !important;
+      line-height: 1.45 !important;
+    }
+
+    /* My Approach: exact Segmentation Inputs block */
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child > .font-mono.text-\[10px\] {
+      font-size: 12px !important;
+      letter-spacing: 0.12em !important;
+      line-height: 1.35 !important;
+    }
+
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\] {
+      font-size: 15px !important;
+      line-height: 1.7 !important;
+    }
+
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\] span {
+      font-size: 20px !important;
+    }
+
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:last-child > .font-sans.text-\[10px\] {
+      font-size: 14.5px !important;
+      line-height: 1.7 !important;
+      letter-spacing: 0.03em !important;
+    }
+
     /* My Approach: Revenue Activation outcome cards */
     .public-readable [class*="md:grid-cols-4"] > div {
       padding: 34px 24px !important;
@@ -84,6 +125,34 @@ const PublicReadableStyles = () => (
       font-size: 30px !important;
     }
 
+    /* My Approach: exact Revenue Activation top-card markup */
+    .public-readable .grid.grid-cols-2.md\:grid-cols-4.gap-3.md\:gap-4.mb-12 > div {
+      padding: 36px 26px !important;
+    }
+
+    .public-readable .grid.grid-cols-2.md\:grid-cols-4.gap-3.md\:gap-4.mb-12 > div > div:first-child {
+      font-size: 32px !important;
+      line-height: 1 !important;
+    }
+
+    .public-readable .grid.grid-cols-2.md\:grid-cols-4.gap-3.md\:gap-4.mb-12 > div > .font-display.text-\[13px\] {
+      font-size: 18px !important;
+      line-height: 1.25 !important;
+      margin-bottom: 8px !important;
+    }
+
+    .public-readable .grid.grid-cols-2.md\:grid-cols-4.gap-3.md\:gap-4.mb-12 > div > .font-sans.text-\[10px\] {
+      font-size: 15px !important;
+      line-height: 1.6 !important;
+      margin-bottom: 14px !important;
+    }
+
+    .public-readable .grid.grid-cols-2.md\:grid-cols-4.gap-3.md\:gap-4.mb-12 > div > span.text-\[9px\] {
+      font-size: 12px !important;
+      letter-spacing: 0.09em !important;
+      padding: 5px 10px !important;
+    }
+
     @media (max-width: 640px) {
       .public-readable :where(p, li):not([class*="tracking"]):not([class*="font-display"]):not([class*="font-mono"]) {
         font-size: 15px !important;
@@ -104,6 +173,14 @@ const PublicReadableStyles = () => (
 
       .public-readable [class*="md:grid-cols-4"] > div > .font-sans {
         font-size: 13.5px !important;
+      }
+
+      .public-readable .grid.grid-cols-2.md\:grid-cols-4.gap-3.md\:gap-4.mb-12 > div > .font-sans.text-\[10px\] {
+        font-size: 14px !important;
+      }
+
+      .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\] {
+        font-size: 14px !important;
       }
     }
   `}</style>
