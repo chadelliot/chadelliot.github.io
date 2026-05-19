@@ -1,0 +1,17 @@
+/* Proposal directory polish overrides */
+body:has(.proposal-directory-page) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2),
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) {
+  background: #ffffff !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Keep only the first Find Leaders treatment in the action stack. */
+body:has(.proposal-directory-page) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) > a:nth-of-type(n+2),
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) > a:nth-of-type(n+2),
+body:has(.proposal-directory-page) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) > a[class*="bg-primary"],
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2) > a[class*="bg-primary"] {
+  display: none !important;
+}
