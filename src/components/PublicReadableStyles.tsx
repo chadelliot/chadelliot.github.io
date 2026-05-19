@@ -60,7 +60,7 @@ const PublicReadableStyles = () => (
       line-height: 1.65 !important;
     }
 
-    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div > div:first-child {
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div > div:nth-child(2) {
       display: inline-flex !important;
       align-items: center !important;
       justify-content: center !important;
@@ -74,7 +74,7 @@ const PublicReadableStyles = () => (
       font-size: 0 !important;
     }
 
-    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div > div:first-child::before {
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div > div:nth-child(2)::before {
       color: hsl(var(--muted-foreground)) !important;
       font-family: 'Inter', sans-serif !important;
       font-size: 18px !important;
@@ -82,12 +82,12 @@ const PublicReadableStyles = () => (
       line-height: 1 !important;
     }
 
-    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(1) > div:first-child::before { content: 'A'; }
-    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(2) > div:first-child::before { content: '▱'; font-size: 22px !important; }
-    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(3) > div:first-child::before { content: '↗'; font-size: 20px !important; }
-    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(4) > div:first-child::before { content: '!'; font-size: 20px !important; }
-    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(5) > div:first-child::before { content: '△'; font-size: 20px !important; }
-    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(6) > div:first-child::before { content: '×'; font-size: 22px !important; }
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(1) > div:nth-child(2)::before { content: 'A'; }
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(2) > div:nth-child(2)::before { content: '▱'; font-size: 22px !important; }
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(3) > div:nth-child(2)::before { content: '↗'; font-size: 20px !important; }
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(4) > div:nth-child(2)::before { content: '!'; font-size: 20px !important; }
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(5) > div:nth-child(2)::before { content: '△'; font-size: 20px !important; }
+    .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div:nth-child(6) > div:nth-child(2)::before { content: '×'; font-size: 22px !important; }
 
     .public-readable [class*="1fr_auto_1fr"] > div:first-child .flex.flex-col > div > span {
       display: inline-flex !important;
