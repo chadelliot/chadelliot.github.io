@@ -78,6 +78,36 @@ const PublicReadableStyles = () => (
       line-height: 1.45 !important;
     }
 
+    /* My Approach: monochrome replacements for Customer Segmentation emoji cards */
+    .public-readable .md\:grid-cols-\[300px_1fr\] .grid.grid-cols-2.md\:grid-cols-3 > div > .text-\[24px\] {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 34px !important;
+      height: 34px !important;
+      margin-bottom: 14px !important;
+      border: 1px solid hsl(var(--border)) !important;
+      border-radius: 8px !important;
+      background: hsl(var(--secondary)) !important;
+      color: transparent !important;
+      font-size: 0 !important;
+    }
+
+    .public-readable .md\:grid-cols-\[300px_1fr\] .grid.grid-cols-2.md\:grid-cols-3 > div > .text-\[24px\]::before {
+      color: hsl(var(--muted-foreground)) !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 18px !important;
+      font-weight: 700 !important;
+      line-height: 1 !important;
+    }
+
+    .public-readable .md\:grid-cols-\[300px_1fr\] .grid.grid-cols-2.md\:grid-cols-3 > div:nth-child(1) > .text-\[24px\]::before { content: 'A'; }
+    .public-readable .md\:grid-cols-\[300px_1fr\] .grid.grid-cols-2.md\:grid-cols-3 > div:nth-child(2) > .text-\[24px\]::before { content: '▱'; font-size: 22px !important; }
+    .public-readable .md\:grid-cols-\[300px_1fr\] .grid.grid-cols-2.md\:grid-cols-3 > div:nth-child(3) > .text-\[24px\]::before { content: '↗'; font-size: 20px !important; }
+    .public-readable .md\:grid-cols-\[300px_1fr\] .grid.grid-cols-2.md\:grid-cols-3 > div:nth-child(4) > .text-\[24px\]::before { content: '!'; font-size: 20px !important; }
+    .public-readable .md\:grid-cols-\[300px_1fr\] .grid.grid-cols-2.md\:grid-cols-3 > div:nth-child(5) > .text-\[24px\]::before { content: '△'; font-size: 20px !important; }
+    .public-readable .md\:grid-cols-\[300px_1fr\] .grid.grid-cols-2.md\:grid-cols-3 > div:nth-child(6) > .text-\[24px\]::before { content: '×'; font-size: 22px !important; }
+
     /* My Approach: exact Segmentation Inputs block */
     .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child > .font-mono.text-\[10px\] {
       font-size: 12px !important;
@@ -91,8 +121,31 @@ const PublicReadableStyles = () => (
     }
 
     .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\] span {
-      font-size: 20px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 24px !important;
+      height: 24px !important;
+      border: 1px solid hsl(var(--border)) !important;
+      border-radius: 6px !important;
+      background: hsl(var(--secondary)) !important;
+      color: transparent !important;
+      font-size: 0 !important;
+      flex-shrink: 0 !important;
     }
+
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\] span::before {
+      color: hsl(var(--primary)) !important;
+      font-family: 'Inter', sans-serif !important;
+      font-size: 13px !important;
+      font-weight: 800 !important;
+      line-height: 1 !important;
+    }
+
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\]:nth-child(1) span::before { content: '▥'; }
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\]:nth-child(2) span::before { content: '◌'; }
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\]:nth-child(3) span::before { content: '↗'; }
+    .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:first-child .font-sans.text-\[11px\]:nth-child(4) span::before { content: '▣'; }
 
     .public-readable .md\:grid-cols-\[1fr_auto_1fr\] > div:last-child > .font-sans.text-\[10px\] {
       font-size: 14.5px !important;
