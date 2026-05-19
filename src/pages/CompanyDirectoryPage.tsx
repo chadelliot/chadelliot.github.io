@@ -7,7 +7,7 @@ import { companyLandingPages } from "@/data/companyLandingPages";
 type OutreachContact = {
   name: string;
   title: string;
-  linkedinUrl: string;
+  linkedinUrl?: string;
   email?: string;
   selectionRationale?: string;
 };
@@ -18,8 +18,9 @@ const COMPANY_DIRECTORY_AUTH_KEY = "company-directory-authenticated";
 const getFirstName = (name: string) => name.split(" ")[0] || name;
 
 const getProposalUrl = (slug: string) => {
-  if (typeof window === "undefined") return `/company/${slug}`;
-  return `${window.location.origin}/company/${slug}`;
+  const path = `/company/${slug}?utm_content=${slug}`;
+  if (typeof window === "undefined") return path;
+  return `${window.location.origin}${path}`;
 };
 
 const buildEmailHref = (page: (typeof companyLandingPages)[string], contact: OutreachContact) => {
@@ -85,7 +86,7 @@ const CompanyDirectoryPage = () => {
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="px-6 md:px-20 pt-32 md:pt-36 pb-20">
-          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-6 md:p-8 shadow-sm">
+          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 md:p-9 shadow-sm">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-primary">Company directory</p>
             <h1 className="mb-4 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-5xl">
               Proposal pages are protected.
@@ -147,7 +148,7 @@ const CompanyDirectoryPage = () => {
 
         <section className="px-6 py-14 md:px-20 md:py-16">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-8 flex flex-col gap-2 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
+            <div className="mb-8 flex flex-col gap-2 border-b border-border px-1 pb-6 md:flex-row md:items-end md:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p>
                 <h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">
@@ -157,14 +158,17 @@ const CompanyDirectoryPage = () => {
               <p className="text-sm text-muted-foreground">Sorted alphabetically by company name.</p>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-5">
               {pages.map((page) => {
-                const outreachContacts = ((page as typeof page & { outreachContacts?: OutreachContact[] }).outreachContacts ?? []).slice(0, 3);
+                const outreachContacts = ((page as typeof page & { outreachContacts?: OutreachContact[] }).outreachContacts ?? [])
+                  .filter((contact) => Boolean(contact.email || contact.linkedinUrl))
+                  .slice(0, 3);
+                const hasAnyContactChannel = outreachContacts.length > 0;
 
                 return (
-                  <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-5 transition-colors hover:border-primary md:p-6">
-                    <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
-                      <div>
+                  <article key={page.slug} className="rounded-[1.5rem] border border-border bg-background p-6 transition-colors hover:border-primary md:p-7">
+                    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
+                      <div className="min-w-0">
                         <div className="mb-3 flex flex-wrap items-center gap-3">
                           <h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
                             {page.companyName}
@@ -178,7 +182,7 @@ const CompanyDirectoryPage = () => {
                         <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
                       </div>
 
-                      <div>
+                      <div className="min-w-0 rounded-2xl border border-border/70 bg-muted/20 p-4">
                         <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Engagement</p>
                         <p className="leading-relaxed text-foreground">{page.recommendedEngagement.title}</p>
                       </div>
@@ -191,7 +195,7 @@ const CompanyDirectoryPage = () => {
                       </Link>
                     </div>
 
-                    <div className="mt-6 border-t border-border pt-5">
+                    <div className="mt-6 border-t border-border px-1 pt-6">
                       <div className="mb-4 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
                         <div>
                           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Potential hiring managers</p>
@@ -199,39 +203,43 @@ const CompanyDirectoryPage = () => {
                         </div>
                       </div>
 
-                      {outreachContacts.length ? (
-                        <div className="grid gap-3 md:grid-cols-3">
+                      {hasAnyContactChannel ? (
+                        <div className="grid gap-4 md:grid-cols-3">
                           {outreachContacts.map((contact) => (
-                            <div key={`${page.slug}-${contact.name}`} className="rounded-2xl border border-border p-4">
+                            <div key={`${page.slug}-${contact.name}`} className="rounded-2xl border border-border p-5">
                               <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.name}</p>
                               <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{contact.title}</p>
                               {contact.selectionRationale ? (
-                                <div className="mb-4 rounded-2xl bg-muted/40 p-3">
+                                <div className="mb-4 rounded-2xl bg-muted/40 p-4">
                                   <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Why selected</p>
                                   <p className="m-0 text-sm leading-relaxed text-muted-foreground">{contact.selectionRationale}</p>
                                 </div>
                               ) : null}
                               <div className="flex flex-col gap-2">
-                                <a
-                                  href={contact.linkedinUrl}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-foreground no-underline transition-colors hover:border-primary hover:text-primary"
-                                >
-                                  LinkedIn
-                                </a>
-                                <a
-                                  href={buildEmailHref(page, contact)}
-                                  className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90"
-                                >
-                                  Draft email
-                                </a>
+                                {contact.linkedinUrl ? (
+                                  <a
+                                    href={contact.linkedinUrl}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="inline-flex items-center justify-center rounded-full border border-border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-foreground no-underline transition-colors hover:border-primary hover:text-primary"
+                                  >
+                                    LinkedIn
+                                  </a>
+                                ) : null}
+                                {contact.email ? (
+                                  <a
+                                    href={buildEmailHref(page, contact)}
+                                    className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90"
+                                  >
+                                    Draft email
+                                  </a>
+                                ) : null}
                               </div>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <div className="rounded-2xl border border-dashed border-border p-4 text-sm leading-relaxed text-muted-foreground">
+                        <div className="rounded-2xl border border-dashed border-border p-5 text-sm leading-relaxed text-muted-foreground">
                           No verified hiring manager contacts have been added yet. When contacts are added, this section will show up to three people with LinkedIn, selection rationale, and auto-drafted email actions.
                         </div>
                       )}
