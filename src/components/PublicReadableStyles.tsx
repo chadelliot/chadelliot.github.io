@@ -67,15 +67,15 @@ const PublicReadableStyles = () => (
       width: 34px !important;
       height: 34px !important;
       margin-bottom: 14px !important;
-      border: 1px solid hsl(var(--border)) !important;
+      border: 1px solid hsl(var(--primary) / 0.28) !important;
       border-radius: 8px !important;
-      background: hsl(var(--secondary)) !important;
+      background: hsl(var(--primary) / 0.08) !important;
       color: transparent !important;
       font-size: 0 !important;
     }
 
     .public-readable [class*="300px_1fr"] [class*="grid-cols-3"] > div > div:nth-child(2)::before {
-      color: hsl(var(--muted-foreground)) !important;
+      color: hsl(var(--primary)) !important;
       font-family: 'Inter', sans-serif !important;
       font-size: 18px !important;
       font-weight: 800 !important;
@@ -95,9 +95,9 @@ const PublicReadableStyles = () => (
       justify-content: center !important;
       width: 24px !important;
       height: 24px !important;
-      border: 1px solid hsl(var(--border)) !important;
+      border: 1px solid hsl(var(--primary) / 0.28) !important;
       border-radius: 6px !important;
-      background: hsl(var(--secondary)) !important;
+      background: hsl(var(--primary) / 0.08) !important;
       color: transparent !important;
       font-size: 0 !important;
       flex-shrink: 0 !important;
