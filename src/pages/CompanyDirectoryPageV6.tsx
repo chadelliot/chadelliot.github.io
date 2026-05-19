@@ -281,7 +281,8 @@ const CompanyDirectoryPageV6 = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="proposal-directory-page min-h-screen bg-background">
+      <style>{`.proposal-directory-page > nav { position: absolute !important; }`}</style>
       <Navbar />
       <main>
         <section className="border-b border-border px-6 pb-12 pt-32 md:px-20 md:pb-16 md:pt-36">
@@ -295,8 +296,8 @@ const CompanyDirectoryPageV6 = () => {
           </div>
         </section>
 
-        <section className="px-6 py-7 md:px-20 md:py-8">
-          <div className="mx-auto max-w-6xl rounded-[1.25rem] border border-border bg-background p-4 shadow-sm">
+        <section className="sticky top-0 z-[90] border-b border-[#E2E8F0] bg-white px-6 py-3 shadow-sm md:px-20">
+          <div className="mx-auto max-w-6xl">
             <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.35fr_auto_auto] lg:items-end">
               <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                 Fit rank
@@ -329,9 +330,9 @@ const CompanyDirectoryPageV6 = () => {
           </div>
         </section>
 
-        <section className="bg-[#F8FAFC] px-6 py-8 md:px-20 md:py-10">
+        <section className="bg-[#F8FAFC] px-6 pb-8 pt-4 md:px-20 md:pb-10 md:pt-5">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-4 flex flex-col gap-3 border-b border-[#E2E8F0] bg-white px-4 py-4 shadow-sm md:flex-row md:items-center md:justify-between">
+            <div className="mb-3 flex flex-col gap-3 border-b border-[#E2E8F0] bg-white px-4 py-4 shadow-sm md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">{showArchived ? "Archived pages" : "Active pages"}</p>
                 <h2 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-[#0F172A] md:text-3xl">{pages.length} {showArchived ? "archived" : "active"} proposal page{pages.length === 1 ? "" : "s"}</h2>
@@ -350,7 +351,7 @@ const CompanyDirectoryPageV6 = () => {
             <div className="grid gap-4">
               {paginatedPages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleContacts, isArchived }) => (
                 <article key={page.slug} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm transition-colors hover:border-primary/60">
-                  <div className="grid gap-4 border-b border-[#E2E8F0] px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-start md:px-5">
+                  <div className="grid gap-4 border-b border-[#E2E8F0] px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:px-5">
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-display text-2xl font-extrabold tracking-tight text-[#0F172A]">{page.companyName}</h3>
@@ -361,8 +362,8 @@ const CompanyDirectoryPageV6 = () => {
                       <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
                     </div>
                     <div className="flex flex-col items-start gap-2 md:items-end">
-                      <a href={buildLinkedInSearchUrl(page)} target="_blank" rel="noreferrer" className="text-[11px] font-semibold uppercase tracking-[0.08em] text-primary no-underline underline-offset-4 hover:underline">Find leaders</a>
-                      <div className="flex items-center gap-2 px-1">
+                      <a href={buildLinkedInSearchUrl(page)} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Find leaders</a>
+                      <div className="flex items-center gap-2">
                         <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
                         <button type="button" onClick={() => updateArchivedStatus(page, !isArchived)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">{isArchived ? "Restore" : "Archive"}</button>
                       </div>
