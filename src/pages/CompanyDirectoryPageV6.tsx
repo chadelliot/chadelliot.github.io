@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -174,6 +174,9 @@ const buildEmailHref = (page: (typeof allCompanyLandingPages)[string], contact: 
   return `mailto:${contact.email ?? ""}?subject=${subject}&body=${body}`;
 };
 
+const buildLinkedInSearchUrl = (page: (typeof allCompanyLandingPages)[string]) =>
+  `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${page.companyName} marketing revenue operations leader`)}`;
+
 const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => ({
   company_slug: page.slug,
   company_name: page.companyName,
@@ -185,7 +188,8 @@ const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], 
   has_email_path: Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo"),
 });
 
-const pillBaseClass = "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors";
+const inputClass = "h-[42px] rounded-xl border border-[#CBD5E1] bg-white px-3 text-sm font-normal outline-none focus:border-primary";
+const checkboxClass = "flex h-[42px] items-center gap-2 rounded-xl border border-[#CBD5E1] bg-white px-3 text-sm font-semibold text-[#334155]";
 
 const CompanyDirectoryPageV6 = () => {
   const [sortMode, setSortMode] = useState<SortMode>("social-first");
@@ -237,7 +241,7 @@ const CompanyDirectoryPageV6 = () => {
 
     return records
       .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
-      .filter((record) => showArchived ? record.isArchived : !record.isArchived)
+      .filter((record) => (showArchived ? record.isArchived : !record.isArchived))
       .sort((a, b) => {
         if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
         const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
@@ -291,19 +295,36 @@ const CompanyDirectoryPageV6 = () => {
           </div>
         </section>
 
-        <section className="px-6 py-8 md:px-20 md:py-10">
-          <div className="mx-auto max-w-6xl rounded-[1.5rem] border border-border bg-background p-5 shadow-sm md:p-6">
-            <div className="mb-5 flex flex-wrap gap-2">
-              <button type="button" onClick={() => setTypeFilter("all")} className={`${pillBaseClass} ${typeFilter === "all" ? "border-black bg-black text-white" : "border-border bg-background text-foreground hover:border-primary"}`}>All types</button>
-              {opportunityTypes.map((type) => <button key={type} type="button" onClick={() => setTypeFilter(type)} className={`${pillBaseClass} ${getOpportunityTypeClass(type, typeFilter === type)}`}>{type}</button>)}
-            </div>
-            <div className="grid gap-4 md:grid-cols-4 md:items-end">
-              <label className="grid gap-2 text-sm font-semibold text-foreground md:col-span-2">Sort proposals<select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary"><option value="social-first">Social contacts first</option><option value="newest">Newest job posting first</option><option value="oldest">Oldest job posting first</option><option value="company">Company A-Z</option></select></label>
-              <label className="grid gap-2 text-sm font-semibold text-foreground">Rows per page<select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value) as PageSize)} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary">{PAGE_SIZE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
-              <div className="grid gap-2">
-                <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground"><input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />Show contacted people</label>
-                <label className="flex items-center gap-3 rounded-2xl border border-border px-4 py-3 text-sm font-semibold text-foreground"><input type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} className="h-4 w-4" />Show archived roles</label>
-              </div>
+        <section className="px-6 py-7 md:px-20 md:py-8">
+          <div className="mx-auto max-w-6xl rounded-[1.25rem] border border-border bg-background p-4 shadow-sm">
+            <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.35fr_auto_auto] lg:items-end">
+              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Fit rank
+                <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className={inputClass}>
+                  <option value="social-first">Best fit first</option>
+                  <option value="newest">Newest first</option>
+                  <option value="oldest">Oldest first</option>
+                  <option value="company">Company A-Z</option>
+                </select>
+              </label>
+              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Job type
+                <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} className={inputClass}>
+                  <option value="all">All types</option>
+                  {opportunityTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+                </select>
+              </label>
+              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                Sort proposals
+                <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className={inputClass}>
+                  <option value="social-first">Social contacts first</option>
+                  <option value="newest">Newest job posting first</option>
+                  <option value="oldest">Oldest job posting first</option>
+                  <option value="company">Company A-Z</option>
+                </select>
+              </label>
+              <label className={checkboxClass}><input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />Show contacted</label>
+              <label className={checkboxClass}><input type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} className="h-4 w-4" />Show archived</label>
             </div>
           </div>
         </section>
@@ -315,7 +336,15 @@ const CompanyDirectoryPageV6 = () => {
                 <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">{showArchived ? "Archived pages" : "Active pages"}</p>
                 <h2 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-[#0F172A] md:text-3xl">{pages.length} {showArchived ? "archived" : "active"} proposal page{pages.length === 1 ? "" : "s"}</h2>
               </div>
-              <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{pages.length ? `Showing ${pageStart}-${pageEnd} of ${pages.length}.` : "No roles match the current filters."}</p>
+              <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                <p className="text-sm leading-relaxed text-muted-foreground">{pages.length ? `Showing ${pageStart}-${pageEnd} of ${pages.length}` : "No roles match the current filters."}</p>
+                <label className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                  View
+                  <select value={pageSize} onChange={(event) => setPageSize(Number(event.target.value) as PageSize)} className="h-9 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">
+                    {PAGE_SIZE_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+                  </select>
+                </label>
+              </div>
             </div>
 
             <div className="grid gap-4">
@@ -325,15 +354,18 @@ const CompanyDirectoryPageV6 = () => {
                     <div>
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="font-display text-2xl font-extrabold tracking-tight text-[#0F172A]">{page.companyName}</h3>
-                        <button type="button" onClick={() => setTypeFilter(opportunityType)} className={`${pillBaseClass} ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>
+                        <button type="button" onClick={() => setTypeFilter(opportunityType)} className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>
                         {isArchived ? <span className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-700">Archived</span> : null}
                         {visibleContacts.length ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{visibleContacts.length} contact{visibleContacts.length === 1 ? "" : "s"}</span> : null}
                       </div>
                       <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                      <button type="button" onClick={() => updateArchivedStatus(page, !isArchived)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">{isArchived ? "Restore" : "Archive"}</button>
-                      <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
+                    <div className="flex flex-col items-start gap-2 md:items-end">
+                      <a href={buildLinkedInSearchUrl(page)} target="_blank" rel="noreferrer" className="text-[11px] font-semibold uppercase tracking-[0.08em] text-primary no-underline underline-offset-4 hover:underline">Find leaders</a>
+                      <div className="flex items-center gap-2 px-1">
+                        <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
+                        <button type="button" onClick={() => updateArchivedStatus(page, !isArchived)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">{isArchived ? "Restore" : "Archive"}</button>
+                      </div>
                     </div>
                   </div>
 
@@ -346,7 +378,7 @@ const CompanyDirectoryPageV6 = () => {
 
                   {visibleContacts.length ? (
                     <div className="px-4 py-4 md:px-5">
-                      <div className="mb-3 flex items-center justify-between gap-3"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Outreach contacts</p><p className="hidden text-xs text-muted-foreground md:block">LinkedIn, email, draft, and contacted status stay in one row.</p></div>
+                      <div className="mb-3 flex items-center justify-between gap-3"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Outreach contacts</p><p className="hidden text-xs text-muted-foreground md:block">Available LinkedIn and email contacts are grouped together below.</p></div>
                       <div className="overflow-hidden border border-[#E2E8F0]">
                         {visibleContacts.map((contact, index) => {
                           const contactKey = getContactKey(page, contact);
