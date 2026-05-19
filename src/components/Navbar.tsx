@@ -40,6 +40,7 @@ const Navbar = () => {
                   ? "text-primary"
                   : "text-muted-foreground hover:text-primary"
               }`}
+              style={{ fontSize: "11px" }}
             >
               {item.label}
             </Link>
@@ -71,12 +72,12 @@ const Navbar = () => {
               key={item.label}
               to={item.href}
               onClick={() => setMobileOpen(false)}
-              className={`no-underline text-[12px] font-medium tracking-[0.12em] uppercase py-3 px-2 transition-colors ${
+              className={`no-underline text-[11px] font-medium tracking-[0.12em] uppercase py-3 px-2 transition-colors ${
                 location.pathname === item.href
                   ? "text-primary"
                   : "text-muted-foreground hover:text-primary"
               }`}
-              style={{ borderBottom: "1px solid hsl(var(--border))" }}
+              style={{ borderBottom: "1px solid hsl(var(--border))", fontSize: "11px" }}
             >
               {item.label}
             </Link>
