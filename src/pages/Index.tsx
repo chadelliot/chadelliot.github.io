@@ -3,10 +3,12 @@ import HeroSection from "@/components/HeroSection";
 import MarqueeStrip from "@/components/MarqueeStrip";
 import PillarsSection from "@/components/PillarsSection";
 import Footer from "@/components/Footer";
+import PublicReadableStyles from "@/components/PublicReadableStyles";
 
 const AboutPage = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="public-readable min-h-screen bg-background">
+      <PublicReadableStyles />
       <Navbar />
       <HeroSection />
       <MarqueeStrip />
