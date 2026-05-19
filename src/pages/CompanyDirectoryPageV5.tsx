@@ -240,6 +240,7 @@ const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: Dire
 };
 
 const pillBaseClass = "rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors";
+const mutedPillClass = "rounded-full border border-border bg-background px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground";
 
 const CompanyDirectoryPageV5 = () => {
   const [sortMode, setSortMode] = useState<SortMode>("social-first");
@@ -398,41 +399,77 @@ const CompanyDirectoryPageV5 = () => {
           </div>
         </section>
 
-        <section className="px-6 pb-14 md:px-20 md:pb-16">
+        <section className="bg-muted/30 px-6 py-10 md:px-20 md:py-14">
           <div className="mx-auto max-w-6xl">
-            <div className="mb-8 flex flex-col gap-2 border-b border-border pb-5 md:flex-row md:items-end md:justify-between">
-              <div><p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p><h2 className="font-display text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">{pages.length} proposal pages</h2></div>
-              <p className="text-sm text-muted-foreground">{isStatusLoading ? "Loading saved contact status..." : "LinkedIn contacts appear below each matching proposal. Email details remain private inside HubSpot."}</p>
+            <div className="mb-8 rounded-[1.5rem] border border-border bg-background p-5 shadow-sm md:p-6">
+              <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Active pages</p>
+                  <h2 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-foreground md:text-3xl">{pages.length} proposal pages</h2>
+                </div>
+                <p className="max-w-2xl text-sm leading-relaxed text-muted-foreground">{isStatusLoading ? "Loading saved contact status..." : "Each card separates the proposal summary, role details, page action, and outreach contacts so the workflow stays usable without everything competing visually."}</p>
+              </div>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-6">
               {pages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleContacts }) => (
-                <article key={page.slug} className="rounded-[1.5rem] border border-border bg-white p-5 shadow-sm transition-colors hover:border-primary md:p-6">
-                  <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_auto] lg:items-center">
-                    <div>
-                      <div className="mb-3 flex flex-wrap items-center gap-3"><h3 className="font-display text-2xl font-extrabold tracking-tight text-foreground">{page.companyName}</h3><button type="button" onClick={() => setTypeFilter(opportunityType)} className={`${pillBaseClass} ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>{visibleContacts.length ? <span className={`${pillBaseClass} border-primary/50 bg-background text-primary`}>LinkedIn contacts</span> : null}</div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
-                      <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>Job posted: {formatDate(jobPostedDate)}</span><span>Round added: {formatDate(roundDate)}</span></div>
+                <article key={page.slug} className="overflow-hidden rounded-[2rem] border border-border bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md">
+                  <div className="border-l-4 border-primary p-5 md:p-6">
+                    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(280px,0.42fr)] lg:items-start">
+                      <div>
+                        <div className="mb-4 flex flex-wrap items-center gap-2">
+                          <button type="button" onClick={() => setTypeFilter(opportunityType)} className={`${pillBaseClass} ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`} title="Filter by this opportunity type">{opportunityType}</button>
+                          {visibleContacts.length ? <span className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{visibleContacts.length} outreach {visibleContacts.length === 1 ? "contact" : "contacts"}</span> : null}
+                        </div>
+                        <h3 className="font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{page.companyName}</h3>
+                        <p className="mt-2 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
+                        <div className="mt-5 grid gap-3 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground sm:grid-cols-2">
+                          <div className="rounded-2xl border border-border bg-muted/30 px-4 py-3"><span className="block text-[10px] text-muted-foreground">Job posted</span><span className="mt-1 block text-foreground">{formatDate(jobPostedDate)}</span></div>
+                          <div className="rounded-2xl border border-border bg-muted/30 px-4 py-3"><span className="block text-[10px] text-muted-foreground">Round added</span><span className="mt-1 block text-foreground">{formatDate(roundDate)}</span></div>
+                        </div>
+                      </div>
+
+                      <aside className="rounded-[1.5rem] border border-border bg-muted/20 p-5">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Posted role</p>
+                        <p className="mt-2 text-base font-semibold leading-relaxed text-foreground">{getPostedRoleTitle(page)}</p>
+                        <div className="mt-4 border-t border-border pt-4">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Commitment</p>
+                          <p className="mt-1 text-sm leading-relaxed text-foreground">{getCommitmentLength(page)}</p>
+                        </div>
+                        <Link to={`/company/${page.slug}`} className="mt-5 inline-flex w-full items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View proposal page</Link>
+                      </aside>
                     </div>
-                    <div><p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Posted role</p><p className="leading-relaxed text-foreground">{getPostedRoleTitle(page)}</p><p className="mt-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment: {getCommitmentLength(page)}</p></div>
-                    <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
                   </div>
 
                   {visibleContacts.length ? (
-                    <div className="mt-6 border-t border-border pt-5">
-                      <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">LinkedIn outreach contacts</p>
-                      <div className="grid gap-3 md:grid-cols-2">
+                    <div className="border-t border-border bg-muted/20 px-5 py-5 md:px-6 md:py-6">
+                      <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Outreach contacts</p>
+                          <p className="mt-1 text-sm text-muted-foreground">Use the profile link, draft generator, and contacted status without losing the proposal context.</p>
+                        </div>
+                      </div>
+                      <div className="grid gap-4 md:grid-cols-2">
                         {visibleContacts.map((contact) => {
                           const contactKey = getContactKey(page, contact);
                           const isContacted = Boolean(contactedContacts[contactKey]);
                           const hasEmailPath = Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo");
                           return (
-                            <div key={`${page.slug}-${contact.linkedinUrl}`} className="rounded-2xl border border-border bg-card p-4">
-                              <div className="mb-4 flex items-start justify-between gap-3">
-                                <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}><p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p><p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></a>
-                                <div className="flex flex-col items-end gap-2">{isContacted ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}{hasEmailPath ? <span className="rounded-full border border-border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Email path</span> : null}</div>
+                            <div key={`${page.slug}-${contact.linkedinUrl}`} className="rounded-[1.5rem] border border-border bg-background p-4 shadow-sm">
+                              <div className="flex items-start justify-between gap-4">
+                                <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block min-w-0 no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}>
+                                  <p className="m-0 font-display text-xl font-extrabold tracking-tight text-foreground transition-colors group-hover:text-primary">{contact.name}</p>
+                                  <p className="mt-1 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p>
+                                </a>
+                                <div className="flex shrink-0 flex-col items-end gap-2">
+                                  {isContacted ? <span className={mutedPillClass}>Contacted</span> : null}
+                                  {hasEmailPath ? <span className={mutedPillClass}>Email path</span> : null}
+                                </div>
                               </div>
-                              <div className="flex flex-wrap items-center gap-3"><button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft message</button><label className="inline-flex items-center gap-2 text-xs font-semibold text-muted-foreground"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label></div>
+                              <div className="mt-5 flex flex-col gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                <button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft message</button>
+                                <label className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-4 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary hover:text-primary"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label>
+                              </div>
                             </div>
                           );
                         })}
