@@ -36,6 +36,54 @@ const PublicReadableStyles = () => (
       line-height: 1.72 !important;
     }
 
+    /* My Approach: Customer Segmentation card grid */
+    .public-readable [class*="300px_1fr"] [class*="text-[10px]"],
+    .public-readable [class*="300px_1fr"] [class*="text-[11px]"] {
+      font-size: 13.5px !important;
+      line-height: 1.6 !important;
+      letter-spacing: 0.01em !important;
+    }
+
+    .public-readable [class*="300px_1fr"] .font-display[class*="text-[13px]"],
+    .public-readable [class*="300px_1fr"] .font-display[class*="text-[14px]"] {
+      font-size: 17px !important;
+      line-height: 1.25 !important;
+    }
+
+    .public-readable [class*="300px_1fr"] [class*="text-[24px]"] {
+      font-size: 30px !important;
+    }
+
+    .public-readable [class*="300px_1fr"] .font-mono[class*="text-[9px]"] {
+      font-size: 11px !important;
+      letter-spacing: 0.06em !important;
+    }
+
+    /* My Approach: Revenue Activation outcome cards */
+    .public-readable [class*="md:grid-cols-4"] > div {
+      padding: 34px 24px !important;
+    }
+
+    .public-readable [class*="md:grid-cols-4"] > div > .font-display {
+      font-size: 17px !important;
+      line-height: 1.25 !important;
+    }
+
+    .public-readable [class*="md:grid-cols-4"] > div > .font-sans {
+      font-size: 14px !important;
+      line-height: 1.6 !important;
+    }
+
+    .public-readable [class*="md:grid-cols-4"] > div > span {
+      font-size: 11px !important;
+      letter-spacing: 0.09em !important;
+      padding: 4px 9px !important;
+    }
+
+    .public-readable [class*="md:grid-cols-4"] > div > [class*="text-[24px]"] {
+      font-size: 30px !important;
+    }
+
     @media (max-width: 640px) {
       .public-readable :where(p, li):not([class*="tracking"]):not([class*="font-display"]):not([class*="font-mono"]) {
         font-size: 15px !important;
@@ -47,6 +95,15 @@ const PublicReadableStyles = () => (
       .public-readable #tab-activation {
         font-size: 12px !important;
         letter-spacing: 0.075em !important;
+      }
+
+      .public-readable [class*="300px_1fr"] [class*="text-[10px]"],
+      .public-readable [class*="300px_1fr"] [class*="text-[11px]"] {
+        font-size: 13px !important;
+      }
+
+      .public-readable [class*="md:grid-cols-4"] > div > .font-sans {
+        font-size: 13.5px !important;
       }
     }
   `}</style>
