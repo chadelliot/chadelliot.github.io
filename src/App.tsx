@@ -32,7 +32,7 @@ const App = () => (
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/company" element={<CompanyDirectoryGate><CompanyDirectoryPageV9 /></CompanyDirectoryGate>} />
-          <Route path="/company/:slug" element={<CompanyDirectoryGate><CompanyLandingPage /></CompanyDirectoryGate>} />
+          <Route path="/company/:slug" element={<CompanyLandingPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
