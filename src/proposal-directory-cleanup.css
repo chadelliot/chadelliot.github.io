@@ -3,6 +3,7 @@
   display: none !important;
 }
 
+body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2),
 .proposal-directory-page article .directory-card-actions.directory-card-actions {
   display: flex !important;
   flex-direction: row !important;
@@ -27,6 +28,7 @@
 }
 
 @media (max-width: 767px) {
+  body:has(.proposal-directory-hero) main > section:nth-of-type(3) article > div:first-child > div:nth-child(2),
   .proposal-directory-page article .directory-card-actions.directory-card-actions {
     flex-wrap: wrap !important;
     justify-content: flex-start !important;
