@@ -192,10 +192,21 @@ const CompanyDirectoryPageV7 = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [contactedContacts, setContactedContacts] = useState<Record<string, boolean>>(() => getStoredMap(CONTACTED_STORAGE_KEY));
   const [archivedRoles, setArchivedRoles] = useState<Record<string, boolean>>(() => getStoredMap(ARCHIVED_ROLES_STORAGE_KEY));
+  const [expandedContactCompanies, setExpandedContactCompanies] = useState<Record<string, boolean>>({});
   const [selectedDraft, setSelectedDraft] = useState<{ page: (typeof allCompanyLandingPages)[string]; contact: DirectoryContact } | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy message");
 
   useEffect(() => setCurrentPage(1), [sortMode, typeFilter, showContacted, showArchived, pageSize]);
+
+  useEffect(() => {
+    const removeExtraContactSections = () => {
+      document.querySelectorAll(".proposal-extra-contact-section").forEach((section) => section.remove());
+    };
+    removeExtraContactSections();
+    const observer = new MutationObserver(removeExtraContactSections);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
 
   const updateContactedStatus = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact, isContacted: boolean) => {
     const key = getContactKey(page, contact);
@@ -272,7 +283,7 @@ const CompanyDirectoryPageV7 = () => {
 
   return (
     <div className="proposal-directory-page min-h-screen bg-background">
-      <style>{`.proposal-directory-page > nav { position: absolute !important; }`}</style>
+      <style>{`.proposal-directory-page > nav { position: absolute !important; } .proposal-extra-contact-section { display: none !important; }`}</style>
       <Navbar />
       <main>
         <section className="proposal-directory-hero border-b border-border px-6 pb-12 pt-32 md:px-20 md:pb-16 md:pt-36">
@@ -306,40 +317,45 @@ const CompanyDirectoryPageV7 = () => {
             </div>
 
             <div className="grid gap-4">
-              {paginatedPages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleContacts, isArchived }) => (
-                <article key={page.slug} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm transition-colors hover:border-primary/60">
-                  <div className="grid gap-4 border-b border-[#E2E8F0] bg-white px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:px-5">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2"><h3 className="font-display text-2xl font-extrabold tracking-tight text-[#0F172A]">{page.companyName}</h3><button type="button" onClick={() => setTypeFilter(opportunityType)} className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>{isArchived ? <span className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-700">Archived</span> : null}{visibleContacts.length ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{visibleContacts.length} contact{visibleContacts.length === 1 ? "" : "s"}</span> : null}</div>
-                      <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
-                    </div>
-                    <div className="flex flex-col items-start gap-2 bg-white md:items-end">
-                      <a href={buildLinkedInSearchUrl(page)} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#0F172A] no-underline transition-colors hover:border-primary hover:text-primary">Find leaders</a>
-                      <div className="flex items-center gap-2 bg-white"><Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link><button type="button" onClick={() => updateArchivedStatus(page, !isArchived)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">{isArchived ? "Restore" : "Archive"}</button></div>
-                    </div>
-                  </div>
-                  <div className="grid gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC] md:grid-cols-4"><div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Posted role</p><p className="mt-1 text-sm font-semibold leading-relaxed text-[#0F172A]">{getPostedRoleTitle(page)}</p></div><div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{getCommitmentLength(page)}</p></div><div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job posted</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(jobPostedDate)}</p></div><div className="px-4 py-3 md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Round added</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(roundDate)}</p></div></div>
-
-                  {visibleContacts.length ? (
-                    <div className="px-4 py-4 md:px-5">
-                      <div className="mb-3 flex items-center justify-between gap-3"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Outreach contacts</p><p className="hidden text-xs text-muted-foreground md:block">LinkedIn and email contacts are unified below.</p></div>
-                      <div className="overflow-hidden border border-[#E2E8F0]">
-                        {visibleContacts.map((contact, index) => {
-                          const contactKey = getContactKey(page, contact);
-                          const isContacted = Boolean(contactedContacts[contactKey]);
-                          const hasEmailPath = Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo");
-                          return (
-                            <div key={`${page.slug}-${contactKey}`} className={`grid gap-3 bg-white px-4 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center ${index === 0 ? "" : "border-t border-[#E2E8F0]"}`}>
-                              <div className="min-w-0">{contact.linkedinUrl ? <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}><p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A] transition-colors group-hover:text-primary">{contact.name}</p><p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></a> : <div><p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A]">{contact.name}</p><p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></div>}<div className="mt-2 flex flex-wrap gap-2">{isContacted ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}{contact.linkedinUrl ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">LinkedIn</span> : null}{hasEmailPath ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Email path</span> : null}</div></div>
-                              <div className="flex flex-wrap items-center gap-2 md:justify-end"><button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-md bg-primary px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft</button>{contact.email ? <a href={buildEmailHref(page, contact)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Email</a> : null}{contact.linkedinUrl ? <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">LinkedIn</a> : null}<label className="inline-flex items-center gap-2 border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary hover:text-primary"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label></div>
-                            </div>
-                          );
-                        })}
+              {paginatedPages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleContacts, isArchived }) => {
+                const isExpanded = Boolean(expandedContactCompanies[page.slug]);
+                const displayedContacts = isExpanded ? visibleContacts : visibleContacts.slice(0, 2);
+                const hasMoreContacts = visibleContacts.length > 2;
+                return (
+                  <article key={page.slug} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm transition-colors hover:border-primary/60">
+                    <div className="grid gap-4 border-b border-[#E2E8F0] bg-white px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:px-5">
+                      <div>
+                        <div className="flex flex-wrap items-center gap-2"><h3 className="font-display text-2xl font-extrabold tracking-tight text-[#0F172A]">{page.companyName}</h3><button type="button" onClick={() => setTypeFilter(opportunityType)} className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>{isArchived ? <span className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-700">Archived</span> : null}{visibleContacts.length ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{visibleContacts.length} contact{visibleContacts.length === 1 ? "" : "s"}</span> : null}</div>
+                        <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
+                      </div>
+                      <div className="flex flex-col items-start gap-2 bg-white md:items-end">
+                        <a href={buildLinkedInSearchUrl(page)} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#0F172A] no-underline transition-colors hover:border-primary hover:text-primary">Find leaders</a>
+                        <div className="flex items-center gap-2 bg-white"><Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link><button type="button" onClick={() => updateArchivedStatus(page, !isArchived)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">{isArchived ? "Restore" : "Archive"}</button></div>
                       </div>
                     </div>
-                  ) : null}
-                </article>
-              ))}
+                    <div className="grid gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC] md:grid-cols-4"><div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Posted role</p><p className="mt-1 text-sm font-semibold leading-relaxed text-[#0F172A]">{getPostedRoleTitle(page)}</p></div><div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{getCommitmentLength(page)}</p></div><div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job posted</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(jobPostedDate)}</p></div><div className="px-4 py-3 md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Round added</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(roundDate)}</p></div></div>
+
+                    {visibleContacts.length ? (
+                      <div className="px-4 py-4 md:px-5">
+                        <div className="mb-3 flex items-center justify-between gap-3"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Outreach contacts</p>{hasMoreContacts ? <button type="button" onClick={() => setExpandedContactCompanies((current) => ({ ...current, [page.slug]: !isExpanded }))} className="rounded-full border border-[#CBD5E1] bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-[#334155] transition-colors hover:border-primary hover:text-primary">{isExpanded ? "Show fewer" : `View all ${visibleContacts.length}`}</button> : null}</div>
+                        <div className="overflow-hidden border border-[#E2E8F0]">
+                          {displayedContacts.map((contact, index) => {
+                            const contactKey = getContactKey(page, contact);
+                            const isContacted = Boolean(contactedContacts[contactKey]);
+                            const hasEmailPath = Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo");
+                            return (
+                              <div key={`${page.slug}-${contactKey}`} className={`grid gap-3 bg-white px-4 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center ${index === 0 ? "" : "border-t border-[#E2E8F0]"}`}>
+                                <div className="min-w-0">{contact.linkedinUrl ? <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}><p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A] transition-colors group-hover:text-primary">{contact.name}</p><p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></a> : <div><p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A]">{contact.name}</p><p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></div>}<div className="mt-2 flex flex-wrap gap-2">{isContacted ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}{contact.linkedinUrl ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">LinkedIn</span> : null}{hasEmailPath ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Email path</span> : null}</div></div>
+                                <div className="flex flex-wrap items-center gap-2 md:justify-end"><button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-md bg-primary px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft</button>{contact.email ? <a href={buildEmailHref(page, contact)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Email</a> : null}{contact.linkedinUrl ? <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">LinkedIn</a> : null}<label className="inline-flex items-center gap-2 border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary hover:text-primary"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label></div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
             </div>
 
             {pages.length ? <div className="mt-6 flex flex-col gap-3 border border-[#E2E8F0] bg-white px-4 py-4 shadow-sm md:flex-row md:items-center md:justify-between"><p className="text-sm text-muted-foreground">Showing {pageStart}-{pageEnd} of {pages.length}</p><div className="flex flex-wrap items-center gap-2"><button type="button" disabled={activePage === 1} onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} className="rounded-md border border-[#CBD5E1] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] disabled:cursor-not-allowed disabled:opacity-40">Previous</button>{Array.from({ length: totalPages }, (_, index) => index + 1).map((pageNumber) => <button key={pageNumber} type="button" onClick={() => setCurrentPage(pageNumber)} className={`rounded-md border px-3 py-2 text-xs font-semibold ${activePage === pageNumber ? "border-primary bg-primary text-primary-foreground" : "border-[#CBD5E1] bg-white text-[#334155] hover:border-primary hover:text-primary"}`}>{pageNumber}</button>)}<button type="button" disabled={activePage === totalPages} onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} className="rounded-md border border-[#CBD5E1] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] disabled:cursor-not-allowed disabled:opacity-40">Next</button></div></div> : null}
