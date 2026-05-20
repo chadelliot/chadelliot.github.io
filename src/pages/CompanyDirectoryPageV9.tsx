@@ -6,30 +6,46 @@ const buildLinkedInSearchUrl = (companyName: string) =>
 
 const CompanyDirectoryPageV9 = () => {
   useEffect(() => {
-    const restoreFindLeadersLinks = () => {
+    const fixDirectoryActions = () => {
       document.querySelectorAll<HTMLElement>(".proposal-directory-page article").forEach((article) => {
+        const header = article.firstElementChild as HTMLElement | null;
         const companyName = article.querySelector("h3")?.textContent?.trim();
-        const actionContainer = article.querySelector<HTMLElement>("div:first-child > div:last-child");
+        const actionContainer = header?.lastElementChild as HTMLElement | null;
 
         if (!companyName || !actionContainer) return;
 
-        const existingFindLeaders = actionContainer.querySelector<HTMLAnchorElement>('a[data-directory-find-leaders="true"]');
-        if (existingFindLeaders) return;
+        actionContainer.classList.add("directory-card-actions");
 
-        const findLeadersLink = document.createElement("a");
-        findLeadersLink.href = buildLinkedInSearchUrl(companyName);
-        findLeadersLink.target = "_blank";
-        findLeadersLink.rel = "noreferrer";
-        findLeadersLink.textContent = "Find leaders";
-        findLeadersLink.dataset.directoryFindLeaders = "true";
-        findLeadersLink.className = "directory-find-leaders-link inline-flex items-center justify-center rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#0F172A] no-underline transition-colors hover:border-primary hover:text-primary";
+        const allFindLeaderLinks = Array.from(
+          article.querySelectorAll<HTMLAnchorElement>('a[href*="linkedin.com/search/results/people"]')
+        );
 
-        actionContainer.prepend(findLeadersLink);
+        allFindLeaderLinks.forEach((link, index) => {
+          if (index === 0) {
+            link.classList.add("directory-find-leaders-link");
+            link.dataset.directoryFindLeaders = "true";
+            link.href = buildLinkedInSearchUrl(companyName);
+            if (link.parentElement !== actionContainer) actionContainer.prepend(link);
+          } else {
+            link.remove();
+          }
+        });
+
+        if (!actionContainer.querySelector('a[data-directory-find-leaders="true"]')) {
+          const findLeadersLink = document.createElement("a");
+          findLeadersLink.href = buildLinkedInSearchUrl(companyName);
+          findLeadersLink.target = "_blank";
+          findLeadersLink.rel = "noreferrer";
+          findLeadersLink.textContent = "Find leaders";
+          findLeadersLink.dataset.directoryFindLeaders = "true";
+          findLeadersLink.className = "directory-find-leaders-link inline-flex items-center justify-center rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-extrabold uppercase tracking-[0.08em] text-[#0F172A] no-underline transition-colors hover:border-primary hover:text-primary";
+          actionContainer.prepend(findLeadersLink);
+        }
       });
     };
 
-    restoreFindLeadersLinks();
-    const observer = new MutationObserver(restoreFindLeadersLinks);
+    fixDirectoryActions();
+    const observer = new MutationObserver(fixDirectoryActions);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
@@ -41,7 +57,7 @@ const CompanyDirectoryPageV9 = () => {
           align-items: center !important;
         }
 
-        .proposal-directory-page article > div:first-child > div:last-child {
+        .proposal-directory-page .directory-card-actions {
           display: grid !important;
           grid-template-columns: max-content max-content !important;
           grid-auto-rows: max-content !important;
@@ -55,27 +71,28 @@ const CompanyDirectoryPageV9 = () => {
           min-width: max-content !important;
         }
 
-        .proposal-directory-page article > div:first-child > div:last-child .directory-find-leaders-link {
+        .proposal-directory-page .directory-card-actions .directory-find-leaders-link {
           grid-column: 1 / -1 !important;
           justify-self: end !important;
           white-space: nowrap !important;
         }
 
-        .proposal-directory-page article > div:first-child > div:last-child a:not(.directory-find-leaders-link),
-        .proposal-directory-page article > div:first-child > div:last-child button {
+        .proposal-directory-page .directory-card-actions > a:not(.directory-find-leaders-link),
+        .proposal-directory-page .directory-card-actions > button {
           white-space: nowrap !important;
           width: auto !important;
           min-width: 112px !important;
+          grid-row: 2 !important;
         }
 
         @media (max-width: 767px) {
-          .proposal-directory-page article > div:first-child > div:last-child {
+          .proposal-directory-page .directory-card-actions {
             justify-content: start !important;
             min-width: 0 !important;
             width: 100% !important;
           }
 
-          .proposal-directory-page article > div:first-child > div:last-child .directory-find-leaders-link {
+          .proposal-directory-page .directory-card-actions .directory-find-leaders-link {
             justify-self: start !important;
           }
         }
