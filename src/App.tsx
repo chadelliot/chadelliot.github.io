@@ -9,6 +9,7 @@ import CareerPage from "./pages/CareerPage";
 import SkillsPage from "./pages/SkillsPage";
 import ContactPage from "./pages/ContactPage";
 import CompanyDirectoryPageV7 from "./pages/CompanyDirectoryPageV7";
+import CompanyDirectoryGate from "./pages/CompanyDirectoryGate";
 import CompanyLandingPage from "./pages/CompanyLandingPage";
 import NotFound from "./pages/NotFound";
 import ContactSlideout from "./components/ContactSlideout";
@@ -30,7 +31,7 @@ const App = () => (
           <Route path="/career" element={<CareerPage />} />
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/contact" element={<ContactPage />} />
-          <Route path="/company" element={<CompanyDirectoryPageV7 />} />
+          <Route path="/company" element={<CompanyDirectoryGate><CompanyDirectoryPageV7 /></CompanyDirectoryGate>} />
           <Route path="/company/:slug" element={<CompanyLandingPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
