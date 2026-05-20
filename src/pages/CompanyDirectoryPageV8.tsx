@@ -7,6 +7,7 @@ import { proposalOutreachResearch, type ProposalOutreachResearchContact } from "
 import { trackEvent } from "@/lib/analytics";
 
 type SortMode = "social-first" | "newest" | "oldest" | "company";
+type FitRankSort = "highest" | "lowest";
 type PageSize = 10 | 25 | 50 | 100;
 type DirectoryContact = Partial<ProposalOutreachResearchContact> & {
   name: string;
@@ -32,6 +33,9 @@ const JOB_POSTED_DATES: Record<string, string> = {
   everist: "2026-05-15",
   turtl: "2026-05-15",
   "software-solutions-firm-vp-sales": "2026-05-15",
+  elixirr: "2026-05-11",
+  "industrial-software-product-company": "2026-05-19",
+  "random-golf-club": "2026-05-17",
 };
 
 const ROUND_DATES: Record<string, string> = {
@@ -47,6 +51,9 @@ const ROUND_DATES: Record<string, string> = {
   everist: "2026-05-15",
   turtl: "2026-05-15",
   "software-solutions-firm-vp-sales": "2026-05-15",
+  elixirr: "2026-05-20",
+  "industrial-software-product-company": "2026-05-20",
+  "random-golf-club": "2026-05-20",
 };
 
 const POSTED_ROLE_TITLES: Record<string, string> = {
@@ -62,18 +69,27 @@ const POSTED_ROLE_TITLES: Record<string, string> = {
   everist: "Fractional VP Marketing",
   turtl: "Fractional VP of Customer Success",
   "software-solutions-firm-vp-sales": "Fractional VP of Sales",
+  elixirr: "Interim Global Head of Marketing",
+  "industrial-software-product-company": "Chief Product Officer",
+  "random-golf-club": "Marketing Lead",
 };
 
 const ROLE_SKILLS: Record<string, string[]> = {
   "who-gives-a-crap": ["marketing operations design", "planning cadence", "campaign governance", "resourcing visibility", "operating rhythm", "executive reporting"],
   attest: ["growth marketing strategy", "lifecycle automation", "RevOps partnership", "segmentation", "attribution", "AI-enabled workflows"],
   enmacc: ["revenue operating cadence", "CRO prioritization", "OKR governance", "strategic initiatives", "RevOps reporting", "cross-functional accountability"],
+  elixirr: ["global marketing strategy", "B2B marketing leadership", "executive reporting", "budget ownership", "campaign governance", "commercial alignment"],
+  "industrial-software-product-company": ["industrial digital transformation", "product-market fit", "workflow automation", "AI-enabled operations", "B2B product strategy", "GTM alignment"],
+  "random-golf-club": ["CRM strategy", "lifecycle marketing", "paid media", "newsletter growth", "SEO", "attribution reporting"],
 };
 
 const ROLE_POSITIONING: Record<string, string> = {
   "who-gives-a-crap": "I build the operating layer behind marketing teams so strategy, resourcing, campaign governance, and reporting move as one system.",
   attest: "I build growth operating systems that connect lifecycle marketing, RevOps, automation, attribution, and AI-enabled execution to measurable pipeline outcomes.",
   enmacc: "I build revenue operating systems that turn CRO priorities, OKRs, reporting, and cross-functional execution into a clear leadership cadence.",
+  elixirr: "I build marketing operating systems that connect global strategy, campaign execution, digital performance, budget decisions, and executive reporting to commercial outcomes.",
+  "industrial-software-product-company": "I build practical operating systems for industrial digital transformation, translating complex workflows into adoption, measurement, and GTM execution.",
+  "random-golf-club": "I build growth systems that connect CRM, lifecycle marketing, content, paid media, SEO, attribution, and reporting into repeatable audience engagement.",
 };
 
 const inputClass = "h-[42px] rounded-xl border border-[#CBD5E1] bg-white px-3 text-sm font-normal outline-none focus:border-primary";
@@ -116,6 +132,36 @@ const getCommitmentLength = (page: (typeof allCompanyLandingPages)[string]) => {
   const investment = page.proposal?.investment || "";
   const match = investment.match(/(?:remote;\s*)?([^;]*(?:contract|engagement|month|week|hour)[^;]*)/i);
   return match?.[1]?.trim() || "Length not listed";
+};
+
+const getFitScore = (page: (typeof allCompanyLandingPages)[string]) => {
+  const fitText = `${page.fitSummary} ${page.headline} ${page.subheadline} ${page.outreachAngle}`.toLowerCase();
+  if (/not\s+a\s+fit|not\s+aligned|poor\s+fit/.test(fitText)) return 20;
+  if (/very\s+strong\s+fit|excellent\s+fit/.test(fitText)) return 95;
+  if (/strong\s+adjacent\s+fit|strong\s+fit|high\s+fit/.test(fitText)) return 86;
+  if (/medium-strong\s+fit|medium\s+strong\s+fit/.test(fitText)) return 76;
+  if (/medium\s+fit|moderate\s+fit/.test(fitText)) return 62;
+  if (/lower-medium\s+fit|low-medium\s+fit/.test(fitText)) return 45;
+  if (/lower\s+fit|low\s+fit/.test(fitText)) return 35;
+  return 70;
+};
+
+const getFitLabel = (score: number) => {
+  if (score >= 85) return "High fit";
+  if (score >= 65) return "Medium fit";
+  if (score >= 40) return "Low fit";
+  return "Not a fit";
+};
+
+const buildLeaderSearchUrl = (page: (typeof allCompanyLandingPages)[string]) => {
+  const roleTitle = getPostedRoleTitle(page).toLowerCase();
+  const seniority = roleTitle.includes("head of marketing") || roleTitle.includes("marketing lead")
+    ? "CMO OR chief marketing officer OR VP marketing OR marketing director"
+    : roleTitle.includes("product")
+      ? "CEO OR founder OR chief product officer OR VP product OR product director"
+      : "CEO OR founder OR chief revenue officer OR VP marketing OR VP revenue operations OR director marketing";
+
+  return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${page.companyName} ${seniority}`)}`;
 };
 
 const getContactKey = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => `${page.slug}::${contact.linkedinUrl || contact.email || contact.name}`.toLowerCase();
@@ -187,6 +233,7 @@ const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], 
 });
 
 const CompanyDirectoryPageV8 = () => {
+  const [fitRankSort, setFitRankSort] = useState<FitRankSort>("highest");
   const [sortMode, setSortMode] = useState<SortMode>("social-first");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showContacted, setShowContacted] = useState(false);
@@ -199,7 +246,7 @@ const CompanyDirectoryPageV8 = () => {
   const [selectedDraft, setSelectedDraft] = useState<{ page: (typeof allCompanyLandingPages)[string]; contact: DirectoryContact } | null>(null);
   const [copyStatus, setCopyStatus] = useState("Copy message");
 
-  useEffect(() => setCurrentPage(1), [sortMode, typeFilter, showContacted, showArchived, pageSize]);
+  useEffect(() => setCurrentPage(1), [fitRankSort, sortMode, typeFilter, showContacted, showArchived, pageSize]);
 
   useEffect(() => {
     const cleanup = () => document.querySelectorAll(".proposal-extra-contact-section").forEach((section) => section.remove());
@@ -233,24 +280,31 @@ const CompanyDirectoryPageV8 = () => {
       const contacts = getDirectoryContacts(page);
       const visibleContacts = contacts.filter((contact) => showContacted || !contactedContacts[getContactKey(page, contact)]);
       const isArchived = Boolean(archivedRoles[page.slug]);
-      return { page, jobPostedDate: JOB_POSTED_DATES[page.slug], roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), contacts, visibleContacts, isArchived };
+      const fitScore = getFitScore(page);
+      const fitLabel = getFitLabel(fitScore);
+      return { page, jobPostedDate: JOB_POSTED_DATES[page.slug], roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), contacts, visibleContacts, isArchived, fitScore, fitLabel };
     });
+
+    const compareSecondary = (a: (typeof records)[number], b: (typeof records)[number]) => {
+      if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
+      const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
+      const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
+      if (sortMode === "social-first") {
+        if (b.visibleContacts.length !== a.visibleContacts.length) return b.visibleContacts.length - a.visibleContacts.length;
+        if (b.contacts.length !== a.contacts.length) return b.contacts.length - a.contacts.length;
+        return bJobTime - aJobTime;
+      }
+      return sortMode === "newest" ? bJobTime - aJobTime : aJobTime - bJobTime;
+    };
 
     return records
       .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
       .filter((record) => (showArchived ? record.isArchived : !record.isArchived))
       .sort((a, b) => {
-        if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
-        const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
-        const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
-        if (sortMode === "social-first") {
-          if (b.visibleContacts.length !== a.visibleContacts.length) return b.visibleContacts.length - a.visibleContacts.length;
-          if (b.contacts.length !== a.contacts.length) return b.contacts.length - a.contacts.length;
-          return bJobTime - aJobTime;
-        }
-        return sortMode === "newest" ? bJobTime - aJobTime : aJobTime - bJobTime;
+        const fitDifference = fitRankSort === "highest" ? b.fitScore - a.fitScore : a.fitScore - b.fitScore;
+        return fitDifference || compareSecondary(a, b);
       });
-  }, [sortMode, typeFilter, showContacted, showArchived, contactedContacts, archivedRoles]);
+  }, [fitRankSort, sortMode, typeFilter, showContacted, showArchived, contactedContacts, archivedRoles]);
 
   const opportunityTypes = useMemo(() => Array.from(new Set(Object.values(allCompanyLandingPages).map(getOpportunityType))).sort(), []);
   const totalPages = Math.max(1, Math.ceil(pages.length / pageSize));
@@ -296,7 +350,7 @@ const CompanyDirectoryPageV8 = () => {
         <section className="sticky top-0 z-[90] border-b border-[#E2E8F0] bg-white px-6 py-3 shadow-sm md:px-20">
           <div className="mx-auto max-w-6xl">
             <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.35fr_auto_auto] lg:items-end">
-              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Fit rank<select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className={inputClass}><option value="social-first">Best fit first</option><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="company">Company A-Z</option></select></label>
+              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Fit rank<select value={fitRankSort} onChange={(event) => setFitRankSort(event.target.value as FitRankSort)} className={inputClass}><option value="highest">Highest fit first</option><option value="lowest">Lowest fit first</option></select></label>
               <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job type<select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} className={inputClass}><option value="all">All types</option>{opportunityTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
               <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Sort proposals<select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className={inputClass}><option value="social-first">Social contacts first</option><option value="newest">Newest job posting first</option><option value="oldest">Oldest job posting first</option><option value="company">Company A-Z</option></select></label>
               <label className={checkboxClass}><input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />Show contacted</label>
@@ -319,7 +373,7 @@ const CompanyDirectoryPageV8 = () => {
             </div>
 
             <div className="grid gap-4">
-              {paginatedPages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleContacts, isArchived }) => {
+              {paginatedPages.map(({ page, jobPostedDate, roundDate, opportunityType, visibleContacts, isArchived, fitScore, fitLabel }) => {
                 const isExpanded = Boolean(expandedContactCompanies[page.slug]);
                 const displayedContacts = isExpanded ? visibleContacts : visibleContacts.slice(0, 2);
                 const hasMoreContacts = visibleContacts.length > 2;
@@ -329,6 +383,7 @@ const CompanyDirectoryPageV8 = () => {
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-display text-2xl font-extrabold tracking-tight text-[#0F172A]">{page.companyName}</h3>
+                          <span className="rounded-full border border-primary/40 bg-primary/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{fitScore}% {fitLabel}</span>
                           <button type="button" onClick={() => setTypeFilter(opportunityType)} className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>
                           {isArchived ? <span className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-700">Archived</span> : null}
                           {visibleContacts.length ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{visibleContacts.length} contact{visibleContacts.length === 1 ? "" : "s"}</span> : null}
@@ -336,12 +391,14 @@ const CompanyDirectoryPageV8 = () => {
                         <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
                       </div>
                       <div className="flex flex-row flex-wrap items-center justify-start gap-3 bg-white px-1 py-1 md:justify-end">
+                        <a href={buildLeaderSearchUrl(page)} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Find leaders</a>
                         <Link to={`/company/${page.slug}`} className="inline-flex items-center justify-center rounded-md bg-primary px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground no-underline transition-opacity hover:opacity-90">View page</Link>
                         <button type="button" onClick={() => updateArchivedStatus(page, !isArchived)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">{isArchived ? "Restore" : "Archive"}</button>
                       </div>
                     </div>
 
-                    <div className="grid gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC] md:grid-cols-4">
+                    <div className="grid gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC] md:grid-cols-5">
+                      <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Fit score</p><p className="mt-1 text-sm font-semibold leading-relaxed text-[#0F172A]">{fitScore}% — {fitLabel}</p></div>
                       <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Posted role</p><p className="mt-1 text-sm font-semibold leading-relaxed text-[#0F172A]">{getPostedRoleTitle(page)}</p></div>
                       <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{getCommitmentLength(page)}</p></div>
                       <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job posted</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(jobPostedDate)}</p></div>
@@ -376,7 +433,15 @@ const CompanyDirectoryPageV8 = () => {
                           })}
                         </div>
                       </div>
-                    ) : null}
+                    ) : (
+                      <div className="px-4 py-4 md:px-5">
+                        <div className="border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-4">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Suggested outreach search</p>
+                          <p className="mt-2 text-sm leading-relaxed text-[#334155]">No saved contacts yet. Use the leader search to look for senior people above or adjacent to the posted role, then add the best contacts to the research list.</p>
+                          <a href={buildLeaderSearchUrl(page)} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Search senior leaders</a>
+                        </div>
+                      </div>
+                    )}
                   </article>
                 );
               })}
