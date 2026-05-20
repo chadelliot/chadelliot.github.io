@@ -1,0 +1,4 @@
+.proposal-directory-page .proposal-fit-rank,
+.proposal-directory-page [class*="proposal-fit-rank"] {
+  display: none !important;
+}
