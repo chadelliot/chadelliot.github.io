@@ -32,8 +32,8 @@ const getAnonSlug = (article: HTMLElement) => {
 const getAnonCompany = (article: HTMLElement) => article.querySelector("h3")?.textContent?.trim() || "the company";
 
 const getAnonRole = (article: HTMLElement) => {
-  const rolePanel = article.querySelector(":scope > div:first-child > div:nth-child(2)") as HTMLElement | null;
-  const role = rolePanel?.querySelector("p:nth-child(2)")?.textContent?.trim();
+  const rolePanel = article.querySelector(":scope > div:nth-child(2)") as HTMLElement | null;
+  const role = rolePanel?.querySelector("p:nth-of-type(2)")?.textContent?.trim();
   return role || "the opportunity";
 };
 
@@ -52,11 +52,8 @@ const getAnonProposalUrl = (article: HTMLElement) => {
 };
 
 const hasRealContacts = (article: HTMLElement) => {
-  const contactSections = Array.from(article.querySelectorAll(":scope > div")) as HTMLElement[];
-  return contactSections.some((section) => {
-    if (!section.textContent?.includes("LinkedIn outreach contacts")) return false;
-    return Boolean(section.querySelector("a[href*='linkedin.com'], .proposal-contact-card-enhanced:not(.proposal-anonymous-contact-card)"));
-  });
+  const contactBlocks = Array.from(article.querySelectorAll("a[href*='linkedin.com/in/'], a[href^='mailto:']"));
+  return contactBlocks.length > 0;
 };
 
 const buildAnonLinkedInDraft = (article: HTMLElement) => {
@@ -140,52 +137,42 @@ const openAnonDraftModal = (article: HTMLElement) => {
   setDraft("linkedin");
 };
 
-const ensureAnonSection = (article: HTMLElement) => {
-  let section = Array.from(article.querySelectorAll(":scope > div")).find((div) => div.textContent?.includes("LinkedIn outreach contacts")) as HTMLElement | undefined;
-  if (!section) {
-    section = document.createElement("div");
-    section.className = "proposal-extra-contact-section mt-6 border-t border-border pt-5";
-    section.innerHTML = `<p class="mb-4 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">LinkedIn outreach contacts</p><div class="grid gap-3 md:grid-cols-2"></div>`;
-    article.appendChild(section);
-  }
-  return section;
+const createAnonButton = (article: HTMLElement) => {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "proposal-anonymous-inline-draft inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90";
+  button.textContent = "Draft message";
+  button.addEventListener("click", () => openAnonDraftModal(article));
+  return button;
 };
 
-const createAnonCard = (article: HTMLElement) => {
-  const context = getAnonContext(article);
-  const card = document.createElement("div");
-  card.className = "rounded-2xl border border-border bg-card p-4 proposal-contact-card-enhanced proposal-anonymous-contact-card";
-  card.innerHTML = `
-    <div class="proposal-contact-card-grid">
-      <div class="proposal-contact-detail-block">
-        <p class="m-0 font-display text-xl font-extrabold tracking-tight text-foreground">No contact identified yet</p>
-        <p class="mt-1 text-sm font-semibold leading-relaxed text-primary">Generic draft for likely hiring leader</p>
-        <p class="proposal-anonymous-card-note">${context.role}</p>
-      </div>
-      <div class="proposal-contact-action-block"><button type="button" class="inline-flex items-center justify-center rounded-full bg-primary px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft message</button></div>
-    </div>
-  `;
-  card.querySelector("button")?.addEventListener("click", () => openAnonDraftModal(article));
-  return card;
-};
-
-const addAnonymousDraftCards = () => {
+const addAnonymousDraftButtons = () => {
   if (window.location.pathname !== "/company") return;
   const articles = Array.from(document.querySelectorAll("main > section:nth-of-type(3) article")) as HTMLElement[];
   articles.forEach((article) => {
-    if (article.querySelector(".proposal-anonymous-contact-card")) return;
+    if (article.querySelector(".proposal-anonymous-inline-draft")) return;
     if (hasRealContacts(article)) return;
-    const section = ensureAnonSection(article);
-    const grid = section.querySelector(".grid") as HTMLElement | null;
-    grid?.appendChild(createAnonCard(article));
+
+    const noContactBlock = Array.from(article.querySelectorAll("div")).find((div) =>
+      div.textContent?.includes("No saved contacts yet")
+    ) as HTMLElement | undefined;
+
+    if (!noContactBlock) return;
+
+    const existingSearchLink = noContactBlock.querySelector("a[href*='linkedin.com/search/results/people']") as HTMLElement | null;
+    const actions = document.createElement("div");
+    actions.className = "proposal-anonymous-actions mt-3 flex flex-wrap items-center gap-2";
+    actions.appendChild(createAnonButton(article));
+    if (existingSearchLink) actions.appendChild(existingSearchLink);
+    noContactBlock.appendChild(actions);
   });
 };
 
 const bootAnonymousDraftCards = () => {
-  window.setTimeout(addAnonymousDraftCards, 1800);
-  window.setTimeout(addAnonymousDraftCards, 3400);
-  window.setTimeout(addAnonymousDraftCards, 5600);
-  window.setTimeout(addAnonymousDraftCards, 7600);
+  window.setTimeout(addAnonymousDraftButtons, 400);
+  window.setTimeout(addAnonymousDraftButtons, 1200);
+  window.setTimeout(addAnonymousDraftButtons, 2400);
+  window.setTimeout(addAnonymousDraftButtons, 4200);
 };
 
 if (document.readyState === "loading") {
