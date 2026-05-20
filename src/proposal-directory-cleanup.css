@@ -2,3 +2,34 @@
 .proposal-directory-page [class*="proposal-fit-rank"] {
   display: none !important;
 }
+
+.proposal-directory-page article .directory-card-actions.directory-card-actions {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 10px !important;
+  padding: 4px 0 !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+.proposal-directory-page article .directory-card-actions.directory-card-actions .directory-find-leaders-link,
+.proposal-directory-page article .directory-card-actions.directory-card-actions > a,
+.proposal-directory-page article .directory-card-actions.directory-card-actions > button {
+  grid-column: auto !important;
+  grid-row: auto !important;
+  justify-self: auto !important;
+  white-space: nowrap !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+@media (max-width: 767px) {
+  .proposal-directory-page article .directory-card-actions.directory-card-actions {
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+  }
+}
