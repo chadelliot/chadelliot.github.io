@@ -1,11 +1,62 @@
-import { useEffect } from "react";
+import { FormEvent, useEffect, useState } from "react";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import CompanyDirectoryPageV8 from "./CompanyDirectoryPageV8";
+
+type ProposalSession = { access_token: string; user: { id: string; email?: string } };
+
+const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
+const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
+const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
+const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
 
 const buildLinkedInSearchUrl = (companyName: string) =>
   `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${companyName} marketing revenue operations leader`)}`;
 
+const readApiJson = async <T,>(response: Response) => {
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!response.ok) throw new Error(data?.message || data?.msg || data?.error_description || "Authentication failed.");
+  return data as T;
+};
+
+const getStoredSession = () => {
+  if (typeof window === "undefined") return null;
+  try {
+    const stored = window.localStorage.getItem(SESSION_STORAGE_KEY);
+    return stored ? (JSON.parse(stored) as ProposalSession) : null;
+  } catch {
+    return null;
+  }
+};
+
+const saveStoredSession = (session: ProposalSession) => window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+const clearStoredSession = () => window.localStorage.removeItem(SESSION_STORAGE_KEY);
+
+const signIn = async (email: string, password: string) => {
+  const response = await fetch(`${DB_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: {
+      apikey: DB_PUBLIC || "",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  const session = await readApiJson<ProposalSession>(response);
+  saveStoredSession(session);
+  return session;
+};
+
 const CompanyDirectoryPageV9 = () => {
+  const [session, setSession] = useState<ProposalSession | null>(() => getStoredSession());
+  const [authEmail, setAuthEmail] = useState("");
+  const [authPassword, setAuthPassword] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+
   useEffect(() => {
+    if (!session) return;
+
     const fixDirectoryActions = () => {
       document.querySelectorAll<HTMLElement>(".proposal-directory-page article").forEach((article) => {
         const header = article.firstElementChild as HTMLElement | null;
@@ -48,7 +99,79 @@ const CompanyDirectoryPageV9 = () => {
     const observer = new MutationObserver(fixDirectoryActions);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
-  }, []);
+  }, [session]);
+
+  const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsAuthLoading(true);
+    setAuthMessage("");
+
+    try {
+      const nextSession = await signIn(authEmail, authPassword);
+      if (nextSession?.access_token) {
+        setSession(nextSession);
+        setAuthMessage("Signed in.");
+      }
+    } catch (error) {
+      setAuthMessage(error instanceof Error ? error.message : "Authentication failed.");
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleSignOut = () => {
+    clearStoredSession();
+    setSession(null);
+    setAuthEmail("");
+    setAuthPassword("");
+    setAuthMessage("");
+  };
+
+  if (!IS_DB_READY) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
+          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Proposal directory access</p>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Login is not configured.</h1>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">The Supabase proposal directory environment variables are missing from this build, so the private directory is locked until they are restored.</p>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
+          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Proposal directory access</p>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Sign in to continue.</h1>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Sign in with your approved email and password to view the private proposal page library.</p>
+            <form onSubmit={handleAuthSubmit} className="mt-6 grid gap-4">
+              <label className="grid gap-2 text-sm font-semibold text-foreground">
+                Email
+                <input type="email" value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} required className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" autoComplete="email" />
+              </label>
+              <label className="grid gap-2 text-sm font-semibold text-foreground">
+                Password
+                <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" autoComplete="current-password" />
+              </label>
+              <button type="submit" disabled={isAuthLoading} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
+                {isAuthLoading ? "Working..." : "Sign in"}
+              </button>
+            </form>
+            {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm leading-relaxed text-muted-foreground">{authMessage}</p> : null}
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <>
@@ -98,6 +221,7 @@ const CompanyDirectoryPageV9 = () => {
         }
       `}</style>
       <CompanyDirectoryPageV8 />
+      <button type="button" onClick={handleSignOut} className="fixed bottom-5 right-5 z-[100] rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] shadow-sm transition-colors hover:border-primary hover:text-primary">Sign out</button>
     </>
   );
 };
