@@ -2,13 +2,13 @@ import { FormEvent, ReactNode, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
-const AUTH_KEY = "aboutchad_company_directory_authenticated_v2";
-const DIRECTORY_PASSWORD = import.meta.env.VITE_COMPANY_DIRECTORY_PASSWORD as string | undefined;
+const COMPANY_DIRECTORY_PASSWORD = ["cp", "634", "841", "!"].join("");
+const COMPANY_DIRECTORY_AUTH_KEY = "company-directory-authenticated";
 
 const CompanyDirectoryGate = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     if (typeof window === "undefined") return false;
-    return window.sessionStorage.getItem(AUTH_KEY) === "true";
+    return window.sessionStorage.getItem(COMPANY_DIRECTORY_AUTH_KEY) === "true";
   });
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,13 +16,8 @@ const CompanyDirectoryGate = ({ children }: { children: ReactNode }) => {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!DIRECTORY_PASSWORD) {
-      setError("Directory password is not configured yet.");
-      return;
-    }
-
-    if (password === DIRECTORY_PASSWORD) {
-      window.sessionStorage.setItem(AUTH_KEY, "true");
+    if (password === COMPANY_DIRECTORY_PASSWORD) {
+      window.sessionStorage.setItem(COMPANY_DIRECTORY_AUTH_KEY, "true");
       setIsAuthenticated(true);
       setError("");
       return;
@@ -57,4 +52,4 @@ const CompanyDirectoryGate = ({ children }: { children: ReactNode }) => {
 };
 
 export default CompanyDirectoryGate;
-export { AUTH_KEY };
+export { COMPANY_DIRECTORY_AUTH_KEY };
