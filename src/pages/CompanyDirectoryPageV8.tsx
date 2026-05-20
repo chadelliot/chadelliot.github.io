@@ -153,6 +153,13 @@ const getFitLabel = (score: number) => {
   return "Not a fit";
 };
 
+const getFitRankWeight = (score: number) => {
+  if (score >= 85) return 4;
+  if (score >= 65) return 3;
+  if (score >= 40) return 2;
+  return 1;
+};
+
 const buildLeaderSearchUrl = (page: (typeof allCompanyLandingPages)[string]) => {
   const roleTitle = getPostedRoleTitle(page).toLowerCase();
   const seniority = roleTitle.includes("head of marketing") || roleTitle.includes("marketing lead")
@@ -282,27 +289,34 @@ const CompanyDirectoryPageV8 = () => {
       const isArchived = Boolean(archivedRoles[page.slug]);
       const fitScore = getFitScore(page);
       const fitLabel = getFitLabel(fitScore);
-      return { page, jobPostedDate: JOB_POSTED_DATES[page.slug], roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), contacts, visibleContacts, isArchived, fitScore, fitLabel };
+      const fitRankWeight = getFitRankWeight(fitScore);
+      return { page, jobPostedDate: JOB_POSTED_DATES[page.slug], roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), contacts, visibleContacts, isArchived, fitScore, fitLabel, fitRankWeight };
     });
 
     const compareSecondary = (a: (typeof records)[number], b: (typeof records)[number]) => {
-      if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
+      const aHasContext = a.visibleContacts.length > 0 || a.contacts.length > 0;
+      const bHasContext = b.visibleContacts.length > 0 || b.contacts.length > 0;
       const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
       const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
+
       if (sortMode === "social-first") {
+        if (Number(bHasContext) !== Number(aHasContext)) return Number(bHasContext) - Number(aHasContext);
         if (b.visibleContacts.length !== a.visibleContacts.length) return b.visibleContacts.length - a.visibleContacts.length;
         if (b.contacts.length !== a.contacts.length) return b.contacts.length - a.contacts.length;
         return bJobTime - aJobTime;
       }
-      return sortMode === "newest" ? bJobTime - aJobTime : aJobTime - bJobTime;
+
+      if (sortMode === "newest") return bJobTime - aJobTime;
+      if (sortMode === "oldest") return aJobTime - bJobTime;
+      return a.page.companyName.localeCompare(b.page.companyName);
     };
 
     return records
       .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
       .filter((record) => (showArchived ? record.isArchived : !record.isArchived))
       .sort((a, b) => {
-        const fitDifference = fitRankSort === "highest" ? b.fitScore - a.fitScore : a.fitScore - b.fitScore;
-        return fitDifference || compareSecondary(a, b);
+        const fitDifference = fitRankSort === "highest" ? b.fitRankWeight - a.fitRankWeight : a.fitRankWeight - b.fitRankWeight;
+        return fitDifference || compareSecondary(a, b) || b.fitScore - a.fitScore;
       });
   }, [fitRankSort, sortMode, typeFilter, showContacted, showArchived, contactedContacts, archivedRoles]);
 
@@ -352,7 +366,7 @@ const CompanyDirectoryPageV8 = () => {
             <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.35fr_auto_auto] lg:items-end">
               <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Fit rank<select value={fitRankSort} onChange={(event) => setFitRankSort(event.target.value as FitRankSort)} className={inputClass}><option value="highest">Highest fit first</option><option value="lowest">Lowest fit first</option></select></label>
               <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job type<select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} className={inputClass}><option value="all">All types</option>{opportunityTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
-              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Sort proposals<select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className={inputClass}><option value="social-first">Social contacts first</option><option value="newest">Newest job posting first</option><option value="oldest">Oldest job posting first</option><option value="company">Company A-Z</option></select></label>
+              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Sort proposals<select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className={inputClass}><option value="social-first">Social context first</option><option value="newest">Newest job posting first</option><option value="oldest">Oldest job posting first</option><option value="company">Company A-Z</option></select></label>
               <label className={checkboxClass}><input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />Show contacted</label>
               <label className={checkboxClass}><input type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} className="h-4 w-4" />Show archived</label>
             </div>
@@ -383,12 +397,15 @@ const CompanyDirectoryPageV8 = () => {
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-display text-2xl font-extrabold tracking-tight text-[#0F172A]">{page.companyName}</h3>
-                          <span className="rounded-full border border-primary/40 bg-primary/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{fitScore}% {fitLabel}</span>
                           <button type="button" onClick={() => setTypeFilter(opportunityType)} className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${getOpportunityTypeClass(opportunityType, typeFilter === opportunityType)}`}>{opportunityType}</button>
                           {isArchived ? <span className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-700">Archived</span> : null}
                           {visibleContacts.length ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{visibleContacts.length} contact{visibleContacts.length === 1 ? "" : "s"}</span> : null}
                         </div>
                         <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
+                        <div className="mt-3 max-w-md">
+                          <div className="mb-1 flex items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>{fitLabel}</span><span>{fitScore}%</span></div>
+                          <div className="h-2 overflow-hidden rounded-full bg-[#E2E8F0]"><div className="h-full rounded-full bg-primary" style={{ width: `${fitScore}%` }} /></div>
+                        </div>
                       </div>
                       <div className="flex flex-row flex-wrap items-center justify-start gap-3 bg-white px-1 py-1 md:justify-end">
                         <a href={buildLeaderSearchUrl(page)} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Find leaders</a>
@@ -397,8 +414,7 @@ const CompanyDirectoryPageV8 = () => {
                       </div>
                     </div>
 
-                    <div className="grid gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC] md:grid-cols-5">
-                      <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Fit score</p><p className="mt-1 text-sm font-semibold leading-relaxed text-[#0F172A]">{fitScore}% — {fitLabel}</p></div>
+                    <div className="grid gap-0 border-b border-[#E2E8F0] bg-[#F8FAFC] md:grid-cols-4">
                       <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Posted role</p><p className="mt-1 text-sm font-semibold leading-relaxed text-[#0F172A]">{getPostedRoleTitle(page)}</p></div>
                       <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{getCommitmentLength(page)}</p></div>
                       <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job posted</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(jobPostedDate)}</p></div>
