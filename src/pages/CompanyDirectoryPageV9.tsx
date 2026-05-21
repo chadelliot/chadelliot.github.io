@@ -152,14 +152,17 @@ const CompanyDirectoryPageV9 = () => {
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
+    const requestedAuthMode = (submitter?.dataset.authMode as AuthMode | undefined) ?? authMode;
+    setAuthMode(requestedAuthMode);
     setIsAuthLoading(true);
     setAuthMessage("");
 
     try {
-      const nextSession = authMode === "signup" ? await signUp(authEmail, authPassword) : await signIn(authEmail, authPassword);
+      const nextSession = requestedAuthMode === "signup" ? await signUp(authEmail, authPassword) : await signIn(authEmail, authPassword);
       if (nextSession?.access_token) {
         setSession(nextSession);
-        setAuthMessage(authMode === "signup" ? "Account created. You are signed in." : "Signed in.");
+        setAuthMessage(requestedAuthMode === "signup" ? "Account created. You are signed in." : "Signed in.");
       } else {
         setAuthMessage("Account created. Check your email if confirmation is required before access.");
       }
@@ -212,14 +215,11 @@ const CompanyDirectoryPageV9 = () => {
                 Password
                 <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" autoComplete={authMode === "signup" ? "new-password" : "current-password"} />
               </label>
-              <button type="submit" disabled={isAuthLoading} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
-                {isAuthLoading ? "Working..." : authMode === "signup" ? "Create account" : "Sign in"}
-              </button>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <button type="submit" data-auth-mode="signup" disabled={isAuthLoading} className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] transition-colors disabled:opacity-50 ${authMode === "signup" ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}>Sign up</button>
+                <button type="submit" data-auth-mode="login" disabled={isAuthLoading} className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] transition-colors disabled:opacity-50 ${authMode === "login" ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}>Sign in</button>
+              </div>
             </form>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              <button type="button" onClick={() => setAuthMode("signup")} className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] transition-colors ${authMode === "signup" ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}>Sign up</button>
-              <button type="button" onClick={() => setAuthMode("login")} className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] transition-colors ${authMode === "login" ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}>Sign in</button>
-            </div>
             {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm leading-relaxed text-muted-foreground">{authMessage}</p> : null}
           </section>
         </main>
