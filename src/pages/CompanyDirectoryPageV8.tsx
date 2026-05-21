@@ -6,14 +6,17 @@ import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
 import { proposalOutreachResearch, type ProposalOutreachResearchContact } from "@/data/proposalOutreachResearch";
 import { trackEvent } from "@/lib/analytics";
 
+type CompanyPage = (typeof allCompanyLandingPages)[string];
 type SortMode = "social-first" | "newest" | "oldest" | "company";
 type FitRankSort = "highest" | "lowest";
 type PageSize = 10 | 25 | 50 | 100;
+type DraftChannel = "email" | "linkedin";
 type DirectoryContact = Partial<ProposalOutreachResearchContact> & {
   name: string;
   title: string;
   linkedinUrl?: string;
   email?: string;
+  isDefaultContacted?: boolean;
 };
 
 const CONTACTED_STORAGE_KEY = "aboutchad_contacted_social_contacts_v1";
@@ -36,6 +39,7 @@ const JOB_POSTED_DATES: Record<string, string> = {
   elixirr: "2026-05-11",
   "industrial-software-product-company": "2026-05-19",
   "random-golf-club": "2026-05-17",
+  "cro-metrics": "2026-05-20",
 };
 
 const ROUND_DATES: Record<string, string> = {
@@ -54,6 +58,7 @@ const ROUND_DATES: Record<string, string> = {
   elixirr: "2026-05-20",
   "industrial-software-product-company": "2026-05-20",
   "random-golf-club": "2026-05-20",
+  "cro-metrics": "2026-05-21",
 };
 
 const POSTED_ROLE_TITLES: Record<string, string> = {
@@ -72,6 +77,7 @@ const POSTED_ROLE_TITLES: Record<string, string> = {
   elixirr: "Interim Global Head of Marketing",
   "industrial-software-product-company": "Chief Product Officer",
   "random-golf-club": "Marketing Lead",
+  "cro-metrics": "Copywriter — Conversion & Growth Copy",
 };
 
 const ROLE_SKILLS: Record<string, string[]> = {
@@ -81,6 +87,7 @@ const ROLE_SKILLS: Record<string, string[]> = {
   elixirr: ["global marketing strategy", "B2B marketing leadership", "executive reporting", "budget ownership", "campaign governance", "commercial alignment"],
   "industrial-software-product-company": ["industrial digital transformation", "product-market fit", "workflow automation", "AI-enabled operations", "B2B product strategy", "GTM alignment"],
   "random-golf-club": ["CRM strategy", "lifecycle marketing", "paid media", "newsletter growth", "SEO", "attribution reporting"],
+  "cro-metrics": ["conversion copy", "CRO experimentation", "landing pages", "lifecycle campaigns", "paid media copy", "AI writing agents"],
 };
 
 const ROLE_POSITIONING: Record<string, string> = {
@@ -90,7 +97,47 @@ const ROLE_POSITIONING: Record<string, string> = {
   elixirr: "I build marketing operating systems that connect global strategy, campaign execution, digital performance, budget decisions, and executive reporting to commercial outcomes.",
   "industrial-software-product-company": "I build practical operating systems for industrial digital transformation, translating complex workflows into adoption, measurement, and GTM execution.",
   "random-golf-club": "I build growth systems that connect CRM, lifecycle marketing, content, paid media, SEO, attribution, and reporting into repeatable audience engagement.",
+  "cro-metrics": "I build conversion-focused content and campaign systems that connect experimentation, lifecycle strategy, landing pages, paid media, AI workflows, and measurable growth outcomes.",
 };
+
+const CRO_METRICS_EMAILS: Record<string, string> = {
+  "Travis Jones": "travis@crometrics.com",
+  "Amanda Hetty": "amanda@crometrics.com",
+  "Chris Neumann": "chris@crometrics.com",
+  "Gwen Hammes": "gwen@crometrics.com",
+};
+
+const CRO_METRICS_ADDED_CONTACTS: DirectoryContact[] = [
+  {
+    name: "Travis Jones",
+    title: "Director of Performance Marketing",
+    company: "Cro Metrics",
+    email: "travis@crometrics.com",
+    linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Travis%20Jones%20Cro%20Metrics%20Director%20Performance%20Marketing",
+    confidence: "high",
+    emailStatus: "exact",
+    hubspotStatus: "not_loaded_needs_validation",
+    relationshipToOpportunity: "Performance marketing leader at Cro Metrics and relevant stakeholder for experimentation, paid media, and conversion copy work.",
+    selectionRationale: "Added after outreach; Chad already emailed Travis and wants him tracked in the CRO Metrics proposal workflow.",
+    outreachTone: "Concise, professional, and tied to conversion experimentation and measurable growth.",
+    suggestedAngle: "I can help connect performance marketing, conversion copy, experimentation, lifecycle messaging, and AI-enabled writing systems into a practical growth engine.",
+    isDefaultContacted: true,
+  },
+  {
+    name: "Amanda Hetty",
+    title: "Senior Integrated Growth Strategist",
+    company: "Cro Metrics",
+    email: "amanda@crometrics.com",
+    linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Amanda%20Hetty%20Cro%20Metrics%20Senior%20Integrated%20Growth%20Strategist",
+    confidence: "medium",
+    emailStatus: "pattern_supported",
+    hubspotStatus: "not_loaded_needs_validation",
+    relationshipToOpportunity: "Likely adjacent growth strategist who may influence or participate in the hiring process.",
+    selectionRationale: "Added because Chad plans to email Amanda and believes she may be involved in evaluating the role.",
+    outreachTone: "Concise, professional, and tied to growth strategy, experimentation, and client outcomes.",
+    suggestedAngle: "I can help Cro Metrics connect conversion copy, testing strategy, lifecycle messaging, and AI-assisted creative systems to measurable client growth.",
+  },
+];
 
 const inputClass = "h-[42px] rounded-xl border border-[#CBD5E1] bg-white px-3 text-sm font-normal outline-none focus:border-primary";
 const checkboxClass = "flex h-[42px] items-center gap-2 rounded-xl border border-[#CBD5E1] bg-white px-3 text-sm font-semibold text-[#334155]";
@@ -111,7 +158,7 @@ const formatDate = (date?: string) => {
   return new Date(`${date}T12:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
-const getOpportunityType = (page: (typeof allCompanyLandingPages)[string]) => {
+const getOpportunityType = (page: CompanyPage) => {
   const industry = page.industry.toLowerCase();
   if (industry.includes("talent") || industry.includes("consulting network") || industry.includes("executive network")) return "Agency / Talent Network";
   if (industry.includes("marketplace") || industry.includes("platform") || industry.includes("owned consulting channel")) return "Marketplace / Platform";
@@ -124,9 +171,9 @@ const getOpportunityTypeClass = (opportunityType: string, isSelected = false) =>
   return isSelected ? "border-sky-700 bg-sky-600 text-white" : "border-sky-400 bg-sky-50 text-sky-900 hover:border-sky-700";
 };
 
-const getPostedRoleTitle = (page: (typeof allCompanyLandingPages)[string]) => POSTED_ROLE_TITLES[page.slug] ?? page.recommendedEngagement.title;
+const getPostedRoleTitle = (page: CompanyPage) => POSTED_ROLE_TITLES[page.slug] ?? page.recommendedEngagement.title;
 
-const getCommitmentLength = (page: (typeof allCompanyLandingPages)[string]) => {
+const getCommitmentLength = (page: CompanyPage) => {
   const phaseDurations = Array.from(new Set(page.proposal?.phases?.map((phase) => phase.duration.trim()).filter(Boolean) ?? []));
   if (phaseDurations.length) return phaseDurations.join(" / ");
   const investment = page.proposal?.investment || "";
@@ -134,7 +181,7 @@ const getCommitmentLength = (page: (typeof allCompanyLandingPages)[string]) => {
   return match?.[1]?.trim() || "Length not listed";
 };
 
-const getFitScore = (page: (typeof allCompanyLandingPages)[string]) => {
+const getFitScore = (page: CompanyPage) => {
   const fitText = `${page.fitSummary} ${page.headline} ${page.subheadline} ${page.outreachAngle}`.toLowerCase();
   if (/not\s+a\s+fit|not\s+aligned|poor\s+fit/.test(fitText)) return 20;
   if (/very\s+strong\s+fit|excellent\s+fit/.test(fitText)) return 95;
@@ -160,20 +207,24 @@ const getFitRankWeight = (score: number) => {
   return 1;
 };
 
-const buildLeaderSearchUrl = (page: (typeof allCompanyLandingPages)[string]) => {
+const buildLeaderSearchUrl = (page: CompanyPage) => {
   const roleTitle = getPostedRoleTitle(page).toLowerCase();
-  const seniority = roleTitle.includes("head of marketing") || roleTitle.includes("marketing lead")
-    ? "CMO OR chief marketing officer OR VP marketing OR marketing director"
+  const seniority = roleTitle.includes("head of marketing") || roleTitle.includes("marketing lead") || roleTitle.includes("copywriter")
+    ? "CMO OR chief marketing officer OR VP marketing OR marketing director OR growth strategist"
     : roleTitle.includes("product")
       ? "CEO OR founder OR chief product officer OR VP product OR product director"
       : "CEO OR founder OR chief revenue officer OR VP marketing OR VP revenue operations OR director marketing";
-
   return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${page.companyName} ${seniority}`)}`;
 };
 
-const getContactKey = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => `${page.slug}::${contact.linkedinUrl || contact.email || contact.name}`.toLowerCase();
+const getContactKey = (page: CompanyPage, contact: DirectoryContact) => `${page.slug}::${contact.linkedinUrl || contact.email || contact.name}`.toLowerCase();
 
-const getDirectoryContacts = (page: (typeof allCompanyLandingPages)[string]): DirectoryContact[] => {
+const enrichCroMetricsContact = (contact: DirectoryContact): DirectoryContact => {
+  const email = CRO_METRICS_EMAILS[contact.name];
+  return email ? { ...contact, email, emailStatus: "pattern_supported" } : contact;
+};
+
+const getDirectoryContacts = (page: CompanyPage): DirectoryContact[] => {
   const researchContacts = proposalOutreachResearch[page.slug]?.contacts ?? [];
   const pageContacts = (page.outreachContacts ?? []).map((contact) => ({
     name: contact.name,
@@ -186,22 +237,32 @@ const getDirectoryContacts = (page: (typeof allCompanyLandingPages)[string]): Di
     emailStatus: contact.email ? "exact" as const : "not_available" as const,
     suggestedAngle: page.outreachAngle,
   }));
-
+  const sourceContacts = page.slug === "cro-metrics" ? [...CRO_METRICS_ADDED_CONTACTS, ...researchContacts, ...pageContacts] : [...researchContacts, ...pageContacts];
   const deduped = new Map<string, DirectoryContact>();
-  [...researchContacts, ...pageContacts]
+  sourceContacts
+    .map((contact) => (page.slug === "cro-metrics" ? enrichCroMetricsContact(contact) : contact))
     .filter((contact) => contact.name && contact.title && (contact.linkedinUrl || contact.email))
     .forEach((contact) => {
       const key = `${contact.linkedinUrl || contact.email || contact.name}`.toLowerCase();
       if (!deduped.has(key)) deduped.set(key, contact);
     });
-
   return Array.from(deduped.values());
 };
 
-const getRoleSkills = (page: (typeof allCompanyLandingPages)[string]) => ROLE_SKILLS[page.slug] ?? ["revenue operations", "marketing operations", "lifecycle strategy", "CRM workflows", "segmentation", "executive reporting"];
-const getRolePositioning = (page: (typeof allCompanyLandingPages)[string]) => ROLE_POSITIONING[page.slug] ?? "I build practical revenue and marketing operating systems that connect strategy, data, workflows, and reporting to measurable execution.";
+const getRoleSkills = (page: CompanyPage) => ROLE_SKILLS[page.slug] ?? ["revenue operations", "marketing operations", "lifecycle strategy", "CRM workflows", "segmentation", "executive reporting"];
+const getRolePositioning = (page: CompanyPage) => ROLE_POSITIONING[page.slug] ?? "I build practical revenue and marketing operating systems that connect strategy, data, workflows, and reporting to measurable execution.";
 
-const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => {
+const getProposalUrl = (page: CompanyPage, channel: DraftChannel) => {
+  const origin = typeof window !== "undefined" ? window.location.origin : "https://aboutchad.com";
+  const url = new URL(`/company/${page.slug}`, origin);
+  if (channel === "email") {
+    url.searchParams.set("utm_medium", "email");
+    url.searchParams.set("utm_campaign", page.companyName.replace(/\s+/g, ""));
+  }
+  return url.toString();
+};
+
+const buildEmailDraft = (page: CompanyPage, contact: DirectoryContact) => {
   const firstName = contact.name.split(" ")[0] || contact.name;
   const roleTitle = proposalOutreachResearch[page.slug]?.opportunityTitle || getPostedRoleTitle(page);
   return [
@@ -215,6 +276,8 @@ const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: Dire
     "",
     contact.suggestedAngle || page.outreachAngle,
     "",
+    `Here is the proposal page I put together: ${getProposalUrl(page, "email")}`,
+    "",
     "If you’re the right person to discuss this, I’d welcome the chance to connect. If not, I’d appreciate any direction on who owns the conversation internally.",
     "",
     "Best,",
@@ -222,20 +285,35 @@ const buildDraft = (page: (typeof allCompanyLandingPages)[string], contact: Dire
   ].join("\n");
 };
 
-const buildEmailHref = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => {
+const buildLinkedInDraft = (page: CompanyPage, contact: DirectoryContact) => {
+  const firstName = contact.name.split(" ")[0] || contact.name;
+  const roleTitle = proposalOutreachResearch[page.slug]?.opportunityTitle || getPostedRoleTitle(page);
+  return [
+    `Hi ${firstName}, I saw the ${roleTitle} opportunity with ${page.companyName} and put together a quick proposal page outlining how I could help:`,
+    "",
+    getProposalUrl(page, "linkedin"),
+    "",
+    "Would welcome the chance to connect if you’re involved in the conversation or know who owns it internally.",
+  ].join("\n");
+};
+
+const buildDraft = (page: CompanyPage, contact: DirectoryContact, channel: DraftChannel) =>
+  channel === "email" ? buildEmailDraft(page, contact) : buildLinkedInDraft(page, contact);
+
+const buildEmailHref = (page: CompanyPage, contact: DirectoryContact) => {
   const subject = encodeURIComponent(`Potential fit with ${page.companyName}`);
-  const body = encodeURIComponent(buildDraft(page, contact));
+  const body = encodeURIComponent(buildEmailDraft(page, contact));
   return `mailto:${contact.email ?? ""}?subject=${subject}&body=${body}`;
 };
 
-const buildContactEventParams = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => ({
+const buildContactEventParams = (page: CompanyPage, contact: DirectoryContact, channel?: DraftChannel) => ({
   company_slug: page.slug,
   company_name: page.companyName,
   engagement_title: proposalOutreachResearch[page.slug]?.opportunityTitle || page.recommendedEngagement.title,
   contact_name: contact.name,
   contact_title: contact.title,
   contact_confidence: contact.confidence || "unknown",
-  outreach_type: contact.linkedinUrl ? "linkedin" : "email",
+  outreach_type: channel || (contact.linkedinUrl ? "linkedin" : "email"),
   has_email_path: Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo"),
 });
 
@@ -250,7 +328,8 @@ const CompanyDirectoryPageV8 = () => {
   const [contactedContacts, setContactedContacts] = useState<Record<string, boolean>>(() => getStoredMap(CONTACTED_STORAGE_KEY));
   const [archivedRoles, setArchivedRoles] = useState<Record<string, boolean>>(() => getStoredMap(ARCHIVED_ROLES_STORAGE_KEY));
   const [expandedContactCompanies, setExpandedContactCompanies] = useState<Record<string, boolean>>({});
-  const [selectedDraft, setSelectedDraft] = useState<{ page: (typeof allCompanyLandingPages)[string]; contact: DirectoryContact } | null>(null);
+  const [selectedDraft, setSelectedDraft] = useState<{ page: CompanyPage; contact: DirectoryContact } | null>(null);
+  const [draftChannel, setDraftChannel] = useState<DraftChannel>("email");
   const [copyStatus, setCopyStatus] = useState("Copy message");
 
   useEffect(() => setCurrentPage(1), [fitRankSort, sortMode, typeFilter, showContacted, showArchived, pageSize]);
@@ -263,7 +342,7 @@ const CompanyDirectoryPageV8 = () => {
     return () => observer.disconnect();
   }, []);
 
-  const updateContactedStatus = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact, isContacted: boolean) => {
+  const updateContactedStatus = (page: CompanyPage, contact: DirectoryContact, isContacted: boolean) => {
     const key = getContactKey(page, contact);
     const next = { ...contactedContacts };
     if (isContacted) next[key] = true;
@@ -273,7 +352,7 @@ const CompanyDirectoryPageV8 = () => {
     trackEvent("mark_social_contact_contacted", { ...buildContactEventParams(page, contact), contacted_status: isContacted });
   };
 
-  const updateArchivedStatus = (page: (typeof allCompanyLandingPages)[string], isArchived: boolean) => {
+  const updateArchivedStatus = (page: CompanyPage, isArchived: boolean) => {
     const next = { ...archivedRoles };
     if (isArchived) next[page.slug] = true;
     else delete next[page.slug];
@@ -285,7 +364,7 @@ const CompanyDirectoryPageV8 = () => {
   const pages = useMemo(() => {
     const records = Object.values(allCompanyLandingPages).map((page) => {
       const contacts = getDirectoryContacts(page);
-      const visibleContacts = contacts.filter((contact) => showContacted || !contactedContacts[getContactKey(page, contact)]);
+      const visibleContacts = contacts.filter((contact) => showContacted || !(contact.isDefaultContacted || contactedContacts[getContactKey(page, contact)]));
       const isArchived = Boolean(archivedRoles[page.slug]);
       const fitScore = getFitScore(page);
       const fitLabel = getFitLabel(fitScore);
@@ -298,14 +377,12 @@ const CompanyDirectoryPageV8 = () => {
       const bHasContext = b.visibleContacts.length > 0 || b.contacts.length > 0;
       const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
       const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
-
       if (sortMode === "social-first") {
         if (Number(bHasContext) !== Number(aHasContext)) return Number(bHasContext) - Number(aHasContext);
         if (b.visibleContacts.length !== a.visibleContacts.length) return b.visibleContacts.length - a.visibleContacts.length;
         if (b.contacts.length !== a.contacts.length) return b.contacts.length - a.contacts.length;
         return bJobTime - aJobTime;
       }
-
       if (sortMode === "newest") return bJobTime - aJobTime;
       if (sortMode === "oldest") return aJobTime - bJobTime;
       return a.page.companyName.localeCompare(b.page.companyName);
@@ -326,11 +403,17 @@ const CompanyDirectoryPageV8 = () => {
   const pageStart = pages.length ? (activePage - 1) * pageSize + 1 : 0;
   const pageEnd = Math.min(activePage * pageSize, pages.length);
   const paginatedPages = pages.slice((activePage - 1) * pageSize, activePage * pageSize);
-  const selectedDraftMessage = selectedDraft ? buildDraft(selectedDraft.page, selectedDraft.contact) : "";
+  const selectedDraftMessage = selectedDraft ? buildDraft(selectedDraft.page, selectedDraft.contact, draftChannel) : "";
 
-  const openDraft = (page: (typeof allCompanyLandingPages)[string], contact: DirectoryContact) => {
-    trackEvent("open_draft_message", buildContactEventParams(page, contact));
+  const openDraft = (page: CompanyPage, contact: DirectoryContact, channel: DraftChannel = "email") => {
+    trackEvent("open_draft_message", buildContactEventParams(page, contact, channel));
     setSelectedDraft({ page, contact });
+    setDraftChannel(channel);
+    setCopyStatus("Copy message");
+  };
+
+  const switchDraftChannel = (channel: DraftChannel) => {
+    setDraftChannel(channel);
     setCopyStatus("Copy message");
   };
 
@@ -338,7 +421,7 @@ const CompanyDirectoryPageV8 = () => {
     if (!selectedDraftMessage || !selectedDraft) return;
     try {
       await navigator.clipboard.writeText(selectedDraftMessage);
-      trackEvent("copy_draft_message", buildContactEventParams(selectedDraft.page, selectedDraft.contact));
+      trackEvent("copy_draft_message", buildContactEventParams(selectedDraft.page, selectedDraft.contact, draftChannel));
       setCopyStatus("Copied");
     } catch {
       setCopyStatus("Select and copy text");
@@ -402,10 +485,7 @@ const CompanyDirectoryPageV8 = () => {
                           {visibleContacts.length ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">{visibleContacts.length} contact{visibleContacts.length === 1 ? "" : "s"}</span> : null}
                         </div>
                         <p className="mt-1 text-sm font-semibold uppercase tracking-[0.12em] text-primary">{page.industry}</p>
-                        <div className="mt-3 max-w-md">
-                          <div className="mb-1 flex items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>{fitLabel}</span><span>{fitScore}%</span></div>
-                          <div className="h-2 overflow-hidden rounded-full bg-[#E2E8F0]"><div className="h-full rounded-full bg-primary" style={{ width: `${fitScore}%` }} /></div>
-                        </div>
+                        <div className="mt-3 max-w-md"><div className="mb-1 flex items-center justify-between gap-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"><span>{fitLabel}</span><span>{fitScore}%</span></div><div className="h-2 overflow-hidden rounded-full bg-[#E2E8F0]"><div className="h-full rounded-full bg-primary" style={{ width: `${fitScore}%` }} /></div></div>
                       </div>
                       <div className="flex flex-row flex-wrap items-center justify-start gap-3 bg-white px-1 py-1 md:justify-end">
                         <a href={buildLeaderSearchUrl(page)} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Find leaders</a>
@@ -430,16 +510,16 @@ const CompanyDirectoryPageV8 = () => {
                         <div className="overflow-hidden border border-[#E2E8F0]">
                           {displayedContacts.map((contact, index) => {
                             const contactKey = getContactKey(page, contact);
-                            const isContacted = Boolean(contactedContacts[contactKey]);
+                            const isContacted = Boolean(contactedContacts[contactKey] || contact.isDefaultContacted);
                             const hasEmailPath = Boolean(contact.email || contact.emailStatus === "exact" || contact.emailStatus === "pattern_supported" || contact.emailStatus === "not_stored_in_repo");
                             return (
                               <div key={`${page.slug}-${contactKey}`} className={`grid gap-3 bg-white px-4 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center ${index === 0 ? "" : "border-t border-[#E2E8F0]"}`}>
                                 <div className="min-w-0">
-                                  {contact.linkedinUrl ? <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact))}><p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A] transition-colors group-hover:text-primary">{contact.name}</p><p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></a> : <div><p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A]">{contact.name}</p><p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></div>}
+                                  {contact.linkedinUrl ? <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="group block no-underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(page, contact, "linkedin"))}><p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A] transition-colors group-hover:text-primary">{contact.name}</p><p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></a> : <div><p className="m-0 font-display text-lg font-extrabold tracking-tight text-[#0F172A]">{contact.name}</p><p className="mt-0.5 text-sm font-semibold leading-relaxed text-primary">{contact.title}</p></div>}
                                   <div className="mt-2 flex flex-wrap gap-2">{isContacted ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Contacted</span> : null}{contact.linkedinUrl ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">LinkedIn</span> : null}{hasEmailPath ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Email path</span> : null}</div>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                                  <button type="button" onClick={() => openDraft(page, contact)} className="inline-flex items-center justify-center rounded-md bg-primary px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft</button>
+                                  <button type="button" onClick={() => openDraft(page, contact, "email")} className="inline-flex items-center justify-center rounded-md bg-primary px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">Draft</button>
                                   {contact.email ? <a href={buildEmailHref(page, contact)} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Email</a> : null}
                                   {contact.linkedinUrl ? <a href={contact.linkedinUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">LinkedIn</a> : null}
                                   <label className="inline-flex items-center gap-2 border border-[#E2E8F0] bg-[#F8FAFC] px-3.5 py-2 text-xs font-semibold text-muted-foreground transition-colors hover:border-primary hover:text-primary"><input type="checkbox" checked={isContacted} onChange={(event) => updateContactedStatus(page, contact, event.target.checked)} className="h-4 w-4" />Mark contacted</label>
@@ -450,13 +530,7 @@ const CompanyDirectoryPageV8 = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="px-4 py-4 md:px-5">
-                        <div className="border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-4">
-                          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Suggested outreach search</p>
-                          <p className="mt-2 text-sm leading-relaxed text-[#334155]">No saved contacts yet. Use the leader search to look for senior people above or adjacent to the posted role, then add the best contacts to the research list.</p>
-                          <a href={buildLeaderSearchUrl(page)} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Search senior leaders</a>
-                        </div>
-                      </div>
+                      <div className="px-4 py-4 md:px-5"><div className="border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-4"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Suggested outreach search</p><p className="mt-2 text-sm leading-relaxed text-[#334155]">No saved contacts yet. Use the leader search to look for senior people above or adjacent to the posted role, then add the best contacts to the research list.</p><a href={buildLeaderSearchUrl(page)} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Search senior leaders</a></div></div>
                     )}
                   </article>
                 );
@@ -480,7 +554,8 @@ const CompanyDirectoryPageV8 = () => {
       {selectedDraft ? (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="directory-social-draft-title" onClick={() => setSelectedDraft(null)}>
           <div className="absolute left-1/2 top-1/2 w-[calc(100%-2rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-[2rem] bg-background p-6 text-foreground shadow-2xl md:p-8" onClick={(event) => event.stopPropagation()}>
-            <div className="mb-6 flex items-start justify-between gap-6"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Draft message</p><h2 id="directory-social-draft-title" className="mt-3 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{selectedDraft.contact.name}</h2>{selectedDraft.contact.linkedinUrl ? <a href={selectedDraft.contact.linkedinUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(selectedDraft.page, selectedDraft.contact))}>Open LinkedIn profile</a> : null}</div><button type="button" onClick={() => setSelectedDraft(null)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" aria-label="Close draft message">Close</button></div>
+            <div className="mb-6 flex items-start justify-between gap-6"><div><p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Draft message</p><h2 id="directory-social-draft-title" className="mt-3 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{selectedDraft.contact.name}</h2>{selectedDraft.contact.linkedinUrl ? <a href={selectedDraft.contact.linkedinUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-sm font-semibold text-primary underline-offset-4 hover:underline" onClick={() => trackEvent("click_linkedin_profile", buildContactEventParams(selectedDraft.page, selectedDraft.contact, "linkedin"))}>Open LinkedIn profile</a> : null}</div><button type="button" onClick={() => setSelectedDraft(null)} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:text-primary" aria-label="Close draft message">Close</button></div>
+            <div className="mb-4 flex flex-wrap gap-2"><button type="button" onClick={() => switchDraftChannel("email")} className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition-colors ${draftChannel === "email" ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:border-primary hover:text-primary"}`}>Email</button><button type="button" onClick={() => switchDraftChannel("linkedin")} className={`rounded-full border px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] transition-colors ${draftChannel === "linkedin" ? "border-primary bg-primary text-primary-foreground" : "border-border bg-background text-foreground hover:border-primary hover:text-primary"}`}>LinkedIn</button></div>
             <textarea readOnly value={selectedDraftMessage} className="h-72 w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm leading-relaxed text-foreground outline-none" />
             <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"><p className="text-xs leading-relaxed text-muted-foreground sm:max-w-md">Copy this message and personalize the final line if needed before sending.</p><button type="button" onClick={copyDraft} className="inline-flex items-center justify-center rounded-full bg-primary px-5 py-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90">{copyStatus}</button></div>
           </div>
