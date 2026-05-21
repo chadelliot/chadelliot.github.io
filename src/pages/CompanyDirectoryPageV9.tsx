@@ -3,12 +3,19 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompanyDirectoryPageV8 from "./CompanyDirectoryPageV8";
 
+type AuthMode = "login" | "signup";
 type ProposalSession = { access_token: string; user: { id: string; email?: string } };
 
 const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
+
+const JOB_POSTING_URLS_BY_ROLE_TITLE: Record<string, string> = {
+  "Fractional Head of Marketing Operations & Planning": "https://www.gofractional.com/job/greenhouse-head-of-marketing-operations-planning-12-month-contract",
+  "Interim Senior Growth Marketing Manager": "https://www.gofractional.com/job/welcometothejungle-interim-senior-growth-marketing-manager-attest",
+  "Interim Business Manager Revenue": "https://www.gofractional.com/job/greenhouse-business-manager-revenue-one-year-fixed-term-contract-m-f-d",
+};
 
 const buildLinkedInSearchUrl = (companyName: string) =>
   `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${companyName} marketing revenue operations leader`)}`;
@@ -47,8 +54,23 @@ const signIn = async (email: string, password: string) => {
   return session;
 };
 
+const signUp = async (email: string, password: string) => {
+  const response = await fetch(`${DB_URL}/auth/v1/signup`, {
+    method: "POST",
+    headers: {
+      apikey: DB_PUBLIC || "",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+  const session = await readApiJson<ProposalSession>(response);
+  if (session?.access_token) saveStoredSession(session);
+  return session;
+};
+
 const CompanyDirectoryPageV9 = () => {
   const [session, setSession] = useState<ProposalSession | null>(() => getStoredSession());
+  const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
@@ -95,8 +117,35 @@ const CompanyDirectoryPageV9 = () => {
       });
     };
 
-    fixDirectoryActions();
-    const observer = new MutationObserver(fixDirectoryActions);
+    const linkPostedRoles = () => {
+      document.querySelectorAll<HTMLElement>(".proposal-directory-page article").forEach((article) => {
+        const postedRoleLabel = Array.from(article.querySelectorAll<HTMLElement>("p")).find(
+          (element) => element.textContent?.trim().toLowerCase() === "posted role"
+        );
+        const roleElement = postedRoleLabel?.nextElementSibling as HTMLElement | null;
+        if (!roleElement || roleElement.tagName.toLowerCase() === "a") return;
+
+        const roleTitle = roleElement.textContent?.trim() || "";
+        const jobPostingUrl = JOB_POSTING_URLS_BY_ROLE_TITLE[roleTitle];
+        if (!jobPostingUrl) return;
+
+        const roleLink = document.createElement("a");
+        roleLink.href = jobPostingUrl;
+        roleLink.target = "_blank";
+        roleLink.rel = "noreferrer";
+        roleLink.textContent = roleTitle;
+        roleLink.className = `${roleElement.className} directory-posted-role-link underline-offset-4 transition-colors hover:text-primary hover:underline`;
+        roleElement.replaceWith(roleLink);
+      });
+    };
+
+    const enhanceDirectory = () => {
+      fixDirectoryActions();
+      linkPostedRoles();
+    };
+
+    enhanceDirectory();
+    const observer = new MutationObserver(enhanceDirectory);
     observer.observe(document.body, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, [session]);
@@ -107,10 +156,12 @@ const CompanyDirectoryPageV9 = () => {
     setAuthMessage("");
 
     try {
-      const nextSession = await signIn(authEmail, authPassword);
+      const nextSession = authMode === "signup" ? await signUp(authEmail, authPassword) : await signIn(authEmail, authPassword);
       if (nextSession?.access_token) {
         setSession(nextSession);
-        setAuthMessage("Signed in.");
+        setAuthMessage(authMode === "signup" ? "Account created. You are signed in." : "Signed in.");
+      } else {
+        setAuthMessage("Account created. Check your email if confirmation is required before access.");
       }
     } catch (error) {
       setAuthMessage(error instanceof Error ? error.message : "Authentication failed.");
@@ -150,8 +201,8 @@ const CompanyDirectoryPageV9 = () => {
         <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
           <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Proposal directory access</p>
-            <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Sign in to continue.</h1>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Sign in with your approved email and password to view the private proposal page library.</p>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">{authMode === "signup" ? "Create your account." : "Sign in to continue."}</h1>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Create your account or sign in to view the private proposal page library and save contacted statuses.</p>
             <form onSubmit={handleAuthSubmit} className="mt-6 grid gap-4">
               <label className="grid gap-2 text-sm font-semibold text-foreground">
                 Email
@@ -159,12 +210,16 @@ const CompanyDirectoryPageV9 = () => {
               </label>
               <label className="grid gap-2 text-sm font-semibold text-foreground">
                 Password
-                <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" autoComplete="current-password" />
+                <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" autoComplete={authMode === "signup" ? "new-password" : "current-password"} />
               </label>
               <button type="submit" disabled={isAuthLoading} className="rounded-full bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50">
-                {isAuthLoading ? "Working..." : "Sign in"}
+                {isAuthLoading ? "Working..." : authMode === "signup" ? "Create account" : "Sign in"}
               </button>
             </form>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <button type="button" onClick={() => setAuthMode("signup")} className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] transition-colors ${authMode === "signup" ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}>Sign up</button>
+              <button type="button" onClick={() => setAuthMode("login")} className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] transition-colors ${authMode === "login" ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}>Sign in</button>
+            </div>
             {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm leading-relaxed text-muted-foreground">{authMessage}</p> : null}
           </section>
         </main>
@@ -206,6 +261,15 @@ const CompanyDirectoryPageV9 = () => {
           width: auto !important;
           min-width: 112px !important;
           grid-row: 2 !important;
+        }
+
+        .proposal-directory-page .directory-posted-role-link {
+          display: block !important;
+          text-decoration: none;
+        }
+
+        .proposal-directory-page .directory-posted-role-link:hover {
+          text-decoration: underline;
         }
 
         @media (max-width: 767px) {
