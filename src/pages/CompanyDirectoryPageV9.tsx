@@ -117,6 +117,15 @@ const CompanyDirectoryPageV9 = () => {
       });
     };
 
+    const getJobPostingUrlFromArticle = (article: HTMLElement) => {
+      const postedRoleLabel = Array.from(article.querySelectorAll<HTMLElement>("p")).find(
+        (element) => element.textContent?.trim().toLowerCase() === "posted role"
+      );
+      const roleElement = postedRoleLabel?.nextElementSibling as HTMLElement | null;
+      const roleTitle = roleElement?.textContent?.trim() || "";
+      return JOB_POSTING_URLS_BY_ROLE_TITLE[roleTitle];
+    };
+
     const linkPostedRoles = () => {
       document.querySelectorAll<HTMLElement>(".proposal-directory-page article").forEach((article) => {
         const postedRoleLabel = Array.from(article.querySelectorAll<HTMLElement>("p")).find(
@@ -139,9 +148,35 @@ const CompanyDirectoryPageV9 = () => {
       });
     };
 
+    const linkCompanyNames = () => {
+      document.querySelectorAll<HTMLElement>(".proposal-directory-page article").forEach((article) => {
+        const companyHeading = article.querySelector<HTMLHeadingElement>("h3");
+        const companyName = companyHeading?.textContent?.trim() || "";
+        const jobPostingUrl = getJobPostingUrlFromArticle(article);
+        if (!companyHeading || !companyName || !jobPostingUrl) return;
+
+        const existingLink = companyHeading.querySelector<HTMLAnchorElement>('a[data-directory-company-job-link="true"]');
+        if (existingLink) {
+          existingLink.href = jobPostingUrl;
+          return;
+        }
+
+        companyHeading.textContent = "";
+        const companyLink = document.createElement("a");
+        companyLink.href = jobPostingUrl;
+        companyLink.target = "_blank";
+        companyLink.rel = "noreferrer";
+        companyLink.textContent = companyName;
+        companyLink.dataset.directoryCompanyJobLink = "true";
+        companyLink.className = "directory-company-job-link no-underline transition-colors hover:text-primary hover:underline";
+        companyHeading.appendChild(companyLink);
+      });
+    };
+
     const enhanceDirectory = () => {
       fixDirectoryActions();
       linkPostedRoles();
+      linkCompanyNames();
     };
 
     enhanceDirectory();
@@ -263,12 +298,16 @@ const CompanyDirectoryPageV9 = () => {
           grid-row: 2 !important;
         }
 
-        .proposal-directory-page .directory-posted-role-link {
-          display: block !important;
+        .proposal-directory-page .directory-posted-role-link,
+        .proposal-directory-page .directory-company-job-link {
+          display: inline-block !important;
+          color: inherit !important;
           text-decoration: none;
         }
 
-        .proposal-directory-page .directory-posted-role-link:hover {
+        .proposal-directory-page .directory-posted-role-link:hover,
+        .proposal-directory-page .directory-company-job-link:hover {
+          color: hsl(var(--primary)) !important;
           text-decoration: underline;
         }
 
