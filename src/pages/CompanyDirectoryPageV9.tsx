@@ -180,10 +180,13 @@ const CompanyDirectoryPageV9 = () => {
       });
     };
 
-    const correctCroMetricsEmailHandles = () => {
-      const croMetricsArticle = Array.from(document.querySelectorAll<HTMLElement>(".proposal-directory-page article")).find((article) =>
+    const getCroMetricsArticle = () =>
+      Array.from(document.querySelectorAll<HTMLElement>(".proposal-directory-page article")).find((article) =>
         article.querySelector("h3")?.textContent?.trim().toLowerCase() === "cro metrics"
       );
+
+    const correctCroMetricsEmailHandles = () => {
+      const croMetricsArticle = getCroMetricsArticle();
       if (!croMetricsArticle) return;
 
       Object.entries(CRO_METRICS_EMAILS_BY_CONTACT_NAME).forEach(([contactName, correctedEmail]) => {
@@ -201,11 +204,48 @@ const CompanyDirectoryPageV9 = () => {
       });
     };
 
+    const ensureCroMetricsContactLinkedNames = () => {
+      const croMetricsArticle = getCroMetricsArticle();
+      if (!croMetricsArticle) return;
+
+      Object.keys(CRO_METRICS_EMAILS_BY_CONTACT_NAME).forEach((contactName) => {
+        const nameElement = Array.from(croMetricsArticle.querySelectorAll<HTMLElement>("p")).find(
+          (element) => element.textContent?.trim() === contactName
+        );
+        const contactRow = nameElement?.closest<HTMLElement>("div.grid");
+        if (!nameElement || !contactRow || nameElement.closest('a[href*="linkedin.com"]')) return;
+
+        const linkedInAction = Array.from(contactRow.querySelectorAll<HTMLAnchorElement>('a[href*="linkedin.com"]')).find((link) =>
+          /linkedin|open linkedin profile/i.test(link.textContent || "")
+        );
+        if (!linkedInAction) return;
+
+        const titleElement = nameElement.nextElementSibling as HTMLElement | null;
+        const profileLink = document.createElement("a");
+        profileLink.href = linkedInAction.href;
+        profileLink.target = "_blank";
+        profileLink.rel = "noreferrer";
+        profileLink.className = "group block no-underline";
+
+        const linkedName = nameElement.cloneNode(true) as HTMLElement;
+        linkedName.className = `${nameElement.className} transition-colors group-hover:text-primary`;
+        profileLink.appendChild(linkedName);
+
+        if (titleElement) {
+          profileLink.appendChild(titleElement.cloneNode(true));
+          titleElement.remove();
+        }
+
+        nameElement.replaceWith(profileLink);
+      });
+    };
+
     const enhanceDirectory = () => {
       fixDirectoryActions();
       linkPostedRoles();
       linkCompanyNames();
       correctCroMetricsEmailHandles();
+      ensureCroMetricsContactLinkedNames();
     };
 
     enhanceDirectory();
