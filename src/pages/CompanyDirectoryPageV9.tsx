@@ -17,6 +17,13 @@ const JOB_POSTING_URLS_BY_ROLE_TITLE: Record<string, string> = {
   "Interim Business Manager Revenue": "https://www.gofractional.com/job/greenhouse-business-manager-revenue-one-year-fixed-term-contract-m-f-d",
 };
 
+const CRO_METRICS_EMAILS_BY_CONTACT_NAME: Record<string, string> = {
+  "Travis Jones": "travis.jones@crometrics.com",
+  "Amanda Hetty": "amanda.hetty@crometrics.com",
+  "Chris Neumann": "chris.neumann@crometrics.com",
+  "Gwen Hammes": "gwen.hammes@crometrics.com",
+};
+
 const buildLinkedInSearchUrl = (companyName: string) =>
   `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${companyName} marketing revenue operations leader`)}`;
 
@@ -173,10 +180,32 @@ const CompanyDirectoryPageV9 = () => {
       });
     };
 
+    const correctCroMetricsEmailHandles = () => {
+      const croMetricsArticle = Array.from(document.querySelectorAll<HTMLElement>(".proposal-directory-page article")).find((article) =>
+        article.querySelector("h3")?.textContent?.trim().toLowerCase() === "cro metrics"
+      );
+      if (!croMetricsArticle) return;
+
+      Object.entries(CRO_METRICS_EMAILS_BY_CONTACT_NAME).forEach(([contactName, correctedEmail]) => {
+        const nameElement = Array.from(croMetricsArticle.querySelectorAll<HTMLElement>("p")).find(
+          (element) => element.textContent?.trim() === contactName
+        );
+        const contactRow = nameElement?.closest<HTMLElement>("div.grid");
+        if (!contactRow) return;
+
+        contactRow.querySelectorAll<HTMLAnchorElement>('a[href^="mailto:"]').forEach((emailLink) => {
+          const currentHref = emailLink.getAttribute("href") || "";
+          const queryString = currentHref.includes("?") ? currentHref.slice(currentHref.indexOf("?")) : "";
+          emailLink.href = `mailto:${correctedEmail}${queryString}`;
+        });
+      });
+    };
+
     const enhanceDirectory = () => {
       fixDirectoryActions();
       linkPostedRoles();
       linkCompanyNames();
+      correctCroMetricsEmailHandles();
     };
 
     enhanceDirectory();
