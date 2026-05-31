@@ -6,6 +6,7 @@ import { goFractionalWave4CompanyLandingPages } from "./goFractionalWave4Company
 import { goFractionalWave5CompanyLandingPages } from "./goFractionalWave5CompanyLandingPages";
 import { goFractionalWave6CompanyLandingPages } from "./goFractionalWave6CompanyLandingPages";
 import { indeedContractWave1CompanyLandingPages } from "./indeedContractWave1CompanyLandingPages";
+import { fractionalOpportunityWave7CompanyLandingPages } from "./fractionalOpportunityWave7CompanyLandingPages";
 
 const proofPoints = [
   "Built enterprise marketing infrastructure from zero, including funnel architecture, CDP activation, segmentation, attribution, lifecycle operations, and cross-functional growth systems.",
@@ -203,5 +204,6 @@ export const allCompanyLandingPages = Object.fromEntries(
     ...goFractionalWave6CompanyLandingPages,
     ...latestGoFractionalCompanyLandingPages,
     ...indeedContractWave1CompanyLandingPages,
+    ...fractionalOpportunityWave7CompanyLandingPages,
   }).map(([slug, page]) => [slug, normalizePage(page)]),
 );
