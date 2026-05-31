@@ -4,6 +4,7 @@ import { goFractionalWave2CompanyLandingPages } from "./goFractionalWave2Company
 import { goFractionalWave3CompanyLandingPages } from "./goFractionalWave3CompanyLandingPages";
 import { goFractionalWave4CompanyLandingPages } from "./goFractionalWave4CompanyLandingPages";
 import { goFractionalWave5CompanyLandingPages } from "./goFractionalWave5CompanyLandingPages";
+import { goFractionalWave6CompanyLandingPages } from "./goFractionalWave6CompanyLandingPages";
 import { indeedContractWave1CompanyLandingPages } from "./indeedContractWave1CompanyLandingPages";
 
 const proofPoints = [
@@ -199,6 +200,7 @@ export const allCompanyLandingPages = Object.fromEntries(
     ...goFractionalWave3CompanyLandingPages,
     ...goFractionalWave4CompanyLandingPages,
     ...goFractionalWave5CompanyLandingPages,
+    ...goFractionalWave6CompanyLandingPages,
     ...latestGoFractionalCompanyLandingPages,
     ...indeedContractWave1CompanyLandingPages,
   }).map(([slug, page]) => [slug, normalizePage(page)]),
