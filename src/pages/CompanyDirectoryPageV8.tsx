@@ -7,8 +7,7 @@ import { proposalOutreachResearch, type ProposalOutreachResearchContact } from "
 import { trackEvent } from "@/lib/analytics";
 
 type CompanyPage = (typeof allCompanyLandingPages)[string];
-type SortMode = "social-first" | "newest" | "oldest" | "company";
-type FitRankSort = "highest" | "lowest";
+type SortMode = "social-first" | "newest" | "oldest" | "company" | "fit-highest" | "fit-lowest";
 type PageSize = 10 | 25 | 50 | 100;
 type DraftChannel = "email" | "linkedin";
 type DirectoryContact = Partial<ProposalOutreachResearchContact> & {
@@ -100,47 +99,11 @@ const ROLE_POSITIONING: Record<string, string> = {
   "cro-metrics": "I build conversion-focused content and campaign systems that connect experimentation, lifecycle strategy, landing pages, paid media, AI workflows, and measurable growth outcomes.",
 };
 
-const CRO_METRICS_EMAILS: Record<string, string> = {
-  "Travis Jones": "travis@crometrics.com",
-  "Amanda Hetty": "amanda@crometrics.com",
-  "Chris Neumann": "chris@crometrics.com",
-  "Gwen Hammes": "gwen@crometrics.com",
-};
-
-const CRO_METRICS_ADDED_CONTACTS: DirectoryContact[] = [
-  {
-    name: "Travis Jones",
-    title: "Director of Performance Marketing",
-    company: "Cro Metrics",
-    email: "travis@crometrics.com",
-    linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Travis%20Jones%20Cro%20Metrics%20Director%20Performance%20Marketing",
-    confidence: "high",
-    emailStatus: "exact",
-    hubspotStatus: "not_loaded_needs_validation",
-    relationshipToOpportunity: "Performance marketing leader at Cro Metrics and relevant stakeholder for experimentation, paid media, and conversion copy work.",
-    selectionRationale: "Added after outreach; Chad already emailed Travis and wants him tracked in the CRO Metrics proposal workflow.",
-    outreachTone: "Concise, professional, and tied to conversion experimentation and measurable growth.",
-    suggestedAngle: "I can help connect performance marketing, conversion copy, experimentation, lifecycle messaging, and AI-enabled writing systems into a practical growth engine.",
-    isDefaultContacted: true,
-  },
-  {
-    name: "Amanda Hetty",
-    title: "Senior Integrated Growth Strategist",
-    company: "Cro Metrics",
-    email: "amanda@crometrics.com",
-    linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Amanda%20Hetty%20Cro%20Metrics%20Senior%20Integrated%20Growth%20Strategist",
-    confidence: "medium",
-    emailStatus: "pattern_supported",
-    hubspotStatus: "not_loaded_needs_validation",
-    relationshipToOpportunity: "Likely adjacent growth strategist who may influence or participate in the hiring process.",
-    selectionRationale: "Added because Chad plans to email Amanda and believes she may be involved in evaluating the role.",
-    outreachTone: "Concise, professional, and tied to growth strategy, experimentation, and client outcomes.",
-    suggestedAngle: "I can help Cro Metrics connect conversion copy, testing strategy, lifecycle messaging, and AI-assisted creative systems to measurable client growth.",
-  },
-];
-
 const inputClass = "h-[42px] rounded-xl border border-[#CBD5E1] bg-white px-3 text-sm font-normal outline-none focus:border-primary";
 const checkboxClass = "flex h-[42px] items-center gap-2 rounded-xl border border-[#CBD5E1] bg-white px-3 text-sm font-semibold text-[#334155]";
+
+const GENERIC_CONTACT_PATTERN = /^(contact|unknown|tbd|n\/a|na|hiring manager|recruiter|marketing contact|leadership contact|people contact|decision maker|senior leader)$/i;
+const GENERIC_TITLE_PATTERN = /(leadership contact|people-path|hiring-path|routing contact|proposed contact|generic contact|company leader|senior company leader|likely useful routing|unknown|tbd|n\/a)/i;
 
 const getStoredMap = (key: string) => {
   try {
@@ -200,13 +163,6 @@ const getFitLabel = (score: number) => {
   return "Not a fit";
 };
 
-const getFitRankWeight = (score: number) => {
-  if (score >= 85) return 4;
-  if (score >= 65) return 3;
-  if (score >= 40) return 2;
-  return 1;
-};
-
 const buildLeaderSearchUrl = (page: CompanyPage) => {
   const roleTitle = getPostedRoleTitle(page).toLowerCase();
   const seniority = roleTitle.includes("head of marketing") || roleTitle.includes("marketing lead") || roleTitle.includes("copywriter")
@@ -217,16 +173,30 @@ const buildLeaderSearchUrl = (page: CompanyPage) => {
   return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${page.companyName} ${seniority}`)}`;
 };
 
-const getContactKey = (page: CompanyPage, contact: DirectoryContact) => `${page.slug}::${contact.linkedinUrl || contact.email || contact.name}`.toLowerCase();
-
-const enrichCroMetricsContact = (contact: DirectoryContact): DirectoryContact => {
-  const email = CRO_METRICS_EMAILS[contact.name];
-  return email ? { ...contact, email, emailStatus: "pattern_supported" } : contact;
+const sanitizeLinkedInUrl = (linkedinUrl?: string) => {
+  if (!linkedinUrl) return undefined;
+  if (/linkedin\.com\/search\//i.test(linkedinUrl)) return undefined;
+  if (!/linkedin\.com\/(in|company)\//i.test(linkedinUrl)) return undefined;
+  return linkedinUrl;
 };
+
+const sanitizeContact = (contact: DirectoryContact): DirectoryContact | null => {
+  const name = contact.name?.trim();
+  const title = contact.title?.trim();
+  const linkedinUrl = sanitizeLinkedInUrl(contact.linkedinUrl);
+  const email = contact.email?.trim();
+  if (!name || !title) return null;
+  if (GENERIC_CONTACT_PATTERN.test(name) || GENERIC_TITLE_PATTERN.test(title)) return null;
+  if (!linkedinUrl && !email) return null;
+  return { ...contact, name, title, linkedinUrl, email };
+};
+
+const getContactKey = (page: CompanyPage, contact: DirectoryContact) => `${page.slug}::${contact.linkedinUrl || contact.email || contact.name}`.toLowerCase();
 
 const getDirectoryContacts = (page: CompanyPage): DirectoryContact[] => {
   const researchContacts = proposalOutreachResearch[page.slug]?.contacts ?? [];
-  const pageContacts = (page.outreachContacts ?? []).map((contact) => ({
+  const pageWithContacts = page as CompanyPage & { outreachContacts?: DirectoryContact[] };
+  const pageContacts = (pageWithContacts.outreachContacts ?? []).map((contact) => ({
     name: contact.name,
     title: contact.title,
     linkedinUrl: contact.linkedinUrl,
@@ -237,11 +207,11 @@ const getDirectoryContacts = (page: CompanyPage): DirectoryContact[] => {
     emailStatus: contact.email ? "exact" as const : "not_available" as const,
     suggestedAngle: page.outreachAngle,
   }));
-  const sourceContacts = page.slug === "cro-metrics" ? [...CRO_METRICS_ADDED_CONTACTS, ...researchContacts, ...pageContacts] : [...researchContacts, ...pageContacts];
+
   const deduped = new Map<string, DirectoryContact>();
-  sourceContacts
-    .map((contact) => (page.slug === "cro-metrics" ? enrichCroMetricsContact(contact) : contact))
-    .filter((contact) => contact.name && contact.title && (contact.linkedinUrl || contact.email))
+  [...researchContacts, ...pageContacts]
+    .map((contact) => sanitizeContact(contact as DirectoryContact))
+    .filter((contact): contact is DirectoryContact => Boolean(contact))
     .forEach((contact) => {
       const key = `${contact.linkedinUrl || contact.email || contact.name}`.toLowerCase();
       if (!deduped.has(key)) deduped.set(key, contact);
@@ -318,7 +288,6 @@ const buildContactEventParams = (page: CompanyPage, contact: DirectoryContact, c
 });
 
 const CompanyDirectoryPageV8 = () => {
-  const [fitRankSort, setFitRankSort] = useState<FitRankSort>("highest");
   const [sortMode, setSortMode] = useState<SortMode>("social-first");
   const [typeFilter, setTypeFilter] = useState("all");
   const [showContacted, setShowContacted] = useState(false);
@@ -332,7 +301,7 @@ const CompanyDirectoryPageV8 = () => {
   const [draftChannel, setDraftChannel] = useState<DraftChannel>("email");
   const [copyStatus, setCopyStatus] = useState("Copy message");
 
-  useEffect(() => setCurrentPage(1), [fitRankSort, sortMode, typeFilter, showContacted, showArchived, pageSize]);
+  useEffect(() => setCurrentPage(1), [sortMode, typeFilter, showContacted, showArchived, pageSize]);
 
   useEffect(() => {
     const cleanup = () => document.querySelectorAll(".proposal-extra-contact-section").forEach((section) => section.remove());
@@ -368,34 +337,30 @@ const CompanyDirectoryPageV8 = () => {
       const isArchived = Boolean(archivedRoles[page.slug]);
       const fitScore = getFitScore(page);
       const fitLabel = getFitLabel(fitScore);
-      const fitRankWeight = getFitRankWeight(fitScore);
-      return { page, jobPostedDate: JOB_POSTED_DATES[page.slug], roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), contacts, visibleContacts, isArchived, fitScore, fitLabel, fitRankWeight };
+      const jobPostedDate = JOB_POSTED_DATES[page.slug];
+      const jobTime = jobPostedDate ? new Date(jobPostedDate).getTime() : 0;
+      return { page, jobPostedDate, jobTime, roundDate: ROUND_DATES[page.slug], opportunityType: getOpportunityType(page), contacts, visibleContacts, isArchived, fitScore, fitLabel };
     });
-
-    const compareSecondary = (a: (typeof records)[number], b: (typeof records)[number]) => {
-      const aHasContext = a.visibleContacts.length > 0 || a.contacts.length > 0;
-      const bHasContext = b.visibleContacts.length > 0 || b.contacts.length > 0;
-      const aJobTime = a.jobPostedDate ? new Date(a.jobPostedDate).getTime() : 0;
-      const bJobTime = b.jobPostedDate ? new Date(b.jobPostedDate).getTime() : 0;
-      if (sortMode === "social-first") {
-        if (Number(bHasContext) !== Number(aHasContext)) return Number(bHasContext) - Number(aHasContext);
-        if (b.visibleContacts.length !== a.visibleContacts.length) return b.visibleContacts.length - a.visibleContacts.length;
-        if (b.contacts.length !== a.contacts.length) return b.contacts.length - a.contacts.length;
-        return bJobTime - aJobTime;
-      }
-      if (sortMode === "newest") return bJobTime - aJobTime;
-      if (sortMode === "oldest") return aJobTime - bJobTime;
-      return a.page.companyName.localeCompare(b.page.companyName);
-    };
 
     return records
       .filter((record) => typeFilter === "all" || record.opportunityType === typeFilter)
       .filter((record) => (showArchived ? record.isArchived : !record.isArchived))
       .sort((a, b) => {
-        const fitDifference = fitRankSort === "highest" ? b.fitRankWeight - a.fitRankWeight : a.fitRankWeight - b.fitRankWeight;
-        return fitDifference || compareSecondary(a, b) || b.fitScore - a.fitScore;
+        if (sortMode === "social-first") {
+          const aHasContacts = a.visibleContacts.length > 0 || a.contacts.length > 0;
+          const bHasContacts = b.visibleContacts.length > 0 || b.contacts.length > 0;
+          if (Number(bHasContacts) !== Number(aHasContacts)) return Number(bHasContacts) - Number(aHasContacts);
+          if (b.visibleContacts.length !== a.visibleContacts.length) return b.visibleContacts.length - a.visibleContacts.length;
+          if (b.contacts.length !== a.contacts.length) return b.contacts.length - a.contacts.length;
+          return b.jobTime - a.jobTime;
+        }
+        if (sortMode === "newest") return b.jobTime - a.jobTime;
+        if (sortMode === "oldest") return a.jobTime - b.jobTime;
+        if (sortMode === "company") return a.page.companyName.localeCompare(b.page.companyName);
+        if (sortMode === "fit-lowest") return a.fitScore - b.fitScore || b.jobTime - a.jobTime;
+        return b.fitScore - a.fitScore || b.jobTime - a.jobTime;
       });
-  }, [fitRankSort, sortMode, typeFilter, showContacted, showArchived, contactedContacts, archivedRoles]);
+  }, [sortMode, typeFilter, showContacted, showArchived, contactedContacts, archivedRoles]);
 
   const opportunityTypes = useMemo(() => Array.from(new Set(Object.values(allCompanyLandingPages).map(getOpportunityType))).sort(), []);
   const totalPages = Math.max(1, Math.ceil(pages.length / pageSize));
@@ -446,10 +411,9 @@ const CompanyDirectoryPageV8 = () => {
 
         <section className="sticky top-0 z-[90] border-b border-[#E2E8F0] bg-white px-6 py-3 shadow-sm md:px-20">
           <div className="mx-auto max-w-6xl">
-            <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1.35fr_auto_auto] lg:items-end">
-              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Fit rank<select value={fitRankSort} onChange={(event) => setFitRankSort(event.target.value as FitRankSort)} className={inputClass}><option value="highest">Highest fit first</option><option value="lowest">Lowest fit first</option></select></label>
+            <div className="grid gap-3 lg:grid-cols-[1fr_1.35fr_auto_auto] lg:items-end">
               <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job type<select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} className={inputClass}><option value="all">All types</option>{opportunityTypes.map((type) => <option key={type} value={type}>{type}</option>)}</select></label>
-              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Sort proposals<select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className={inputClass}><option value="social-first">Social context first</option><option value="newest">Newest job posting first</option><option value="oldest">Oldest job posting first</option><option value="company">Company A-Z</option></select></label>
+              <label className="grid gap-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Sort proposals<select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)} className={inputClass}><option value="social-first">Social contacts first</option><option value="newest">Newest job posting first</option><option value="oldest">Oldest job posting first</option><option value="company">Company A-Z</option><option value="fit-highest">Highest fit first</option><option value="fit-lowest">Lowest fit first</option></select></label>
               <label className={checkboxClass}><input type="checkbox" checked={showContacted} onChange={(event) => setShowContacted(event.target.checked)} className="h-4 w-4" />Show contacted</label>
               <label className={checkboxClass}><input type="checkbox" checked={showArchived} onChange={(event) => setShowArchived(event.target.checked)} className="h-4 w-4" />Show archived</label>
             </div>
@@ -530,7 +494,7 @@ const CompanyDirectoryPageV8 = () => {
                         </div>
                       </div>
                     ) : (
-                      <div className="px-4 py-4 md:px-5"><div className="border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-4"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Suggested outreach search</p><p className="mt-2 text-sm leading-relaxed text-[#334155]">No saved contacts yet. Use the leader search to look for senior people above or adjacent to the posted role, then add the best contacts to the research list.</p><a href={buildLeaderSearchUrl(page)} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Search senior leaders</a></div></div>
+                      <div className="px-4 py-4 md:px-5"><div className="border border-dashed border-[#CBD5E1] bg-[#F8FAFC] px-4 py-4"><p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Suggested outreach search</p><p className="mt-2 text-sm leading-relaxed text-[#334155]">No saved contacts yet. Use the leader search to look for senior people above or adjacent to the posted role, then add only verified named contacts with usable email or LinkedIn profile details.</p><a href={buildLeaderSearchUrl(page)} target="_blank" rel="noreferrer" className="mt-3 inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#334155] no-underline transition-colors hover:border-primary hover:text-primary">Search senior leaders</a></div></div>
                     )}
                   </article>
                 );
