@@ -204,5 +204,71 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
       makeHubSpotContact({ name: "Lionel Bodin", title: "Senior Director - Digital Strategy and Transformation", company: "Logic20/20", linkedinUrl: "https://www.linkedin.com/in/lionel-bodin/", email: "lionelb@logic2020.com", hubspotContactId: "487041037042" }),
       makeHubSpotContact({ name: "Tejan Gabisi", title: "Director, Digital Strategy & Transformation | AI", company: "Logic20/20", linkedinUrl: "https://www.linkedin.com/in/tejangabisi/", email: "tejang@logic2020.com", hubspotContactId: "487041037048" })
     ]
+  },
+  "cro-metrics": {
+    slug: "cro-metrics",
+    companyName: "Cro Metrics",
+    opportunityTitle: "Copywriter — Conversion & Growth Copy",
+    sourceTools: ["User research", "LinkedIn", "email pattern"],
+    lastResearched: "2026-06-02",
+    roleContext: "Conversion and growth copy opportunity where experimentation, paid media, lifecycle messaging, landing page strategy, and AI-assisted creative systems are relevant. Contacts should render as named people with titles and draftable outreach options, not blank name pills.",
+    contacts: [
+      {
+        name: "Travis Jones",
+        title: "Director of Performance Marketing",
+        company: "Cro Metrics",
+        linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Travis%20Jones%20Cro%20Metrics%20Director%20Performance%20Marketing",
+        email: "travis.jones@crometrics.com",
+        relationshipToOpportunity: "Performance marketing leader at Cro Metrics and relevant stakeholder for experimentation, paid media, and conversion copy work.",
+        confidence: "high",
+        emailStatus: "pattern_supported",
+        hubspotStatus: "not_loaded_needs_validation",
+        selectionRationale: "Added after Chad emailed Travis and corrected the Cro Metrics pattern to firstname.lastname@crometrics.com.",
+        outreachTone: "Concise, professional, and tied to conversion experimentation and measurable growth.",
+        suggestedAngle: "I can help connect performance marketing, conversion copy, experimentation, lifecycle messaging, and AI-enabled writing systems into a practical growth engine."
+      },
+      {
+        name: "Amanda Hetty",
+        title: "Senior Integrated Growth Strategist",
+        company: "Cro Metrics",
+        linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Amanda%20Hetty%20Cro%20Metrics%20Senior%20Integrated%20Growth%20Strategist",
+        email: "amanda.hetty@crometrics.com",
+        relationshipToOpportunity: "Adjacent growth strategist who may influence or participate in the hiring process.",
+        confidence: "medium",
+        emailStatus: "pattern_supported",
+        hubspotStatus: "not_loaded_needs_validation",
+        selectionRationale: "Added because Chad plans to email Amanda and believes she may be involved in evaluating the role.",
+        outreachTone: "Concise, professional, and tied to growth strategy, experimentation, and client outcomes.",
+        suggestedAngle: "I can help Cro Metrics connect conversion copy, testing strategy, lifecycle messaging, and AI-assisted creative systems to measurable client growth."
+      },
+      {
+        name: "Chris Neumann",
+        title: "Co-Founder / Cro Metrics leadership contact",
+        company: "Cro Metrics",
+        linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Chris%20Neumann%20Cro%20Metrics",
+        email: "chris.neumann@crometrics.com",
+        relationshipToOpportunity: "Senior company leader who may route the opportunity owner or influence senior hiring conversations.",
+        confidence: "medium",
+        emailStatus: "pattern_supported",
+        hubspotStatus: "not_loaded_needs_validation",
+        selectionRationale: "Added as a proposed senior contact because Chad may reach out to Chris and wants viable contacts attached to the job workflow.",
+        outreachTone: "Concise, executive, and focused on fit, not a generic job application.",
+        suggestedAngle: "I can help Cro Metrics translate experimentation, conversion copy, lifecycle messaging, and AI-assisted production into measurable client growth."
+      },
+      {
+        name: "Gwen Hammes",
+        title: "Cro Metrics leadership / people-path contact",
+        company: "Cro Metrics",
+        linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Gwen%20Hammes%20Cro%20Metrics",
+        email: "gwen.hammes@crometrics.com",
+        relationshipToOpportunity: "Likely useful routing or hiring-path contact for the Cro Metrics proposal workflow.",
+        confidence: "medium",
+        emailStatus: "pattern_supported",
+        hubspotStatus: "not_loaded_needs_validation",
+        selectionRationale: "Added as a proposed contact because Chad may reach out to Gwen and wants proposed contacts available dynamically on the directory.",
+        outreachTone: "Concise, professional, and easy to route internally.",
+        suggestedAngle: "I can help support conversion-focused growth work across copy, testing, lifecycle messaging, and AI-enabled content systems."
+      }
+    ]
   }
 };
