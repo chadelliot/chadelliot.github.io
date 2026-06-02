@@ -80,7 +80,7 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
     lastResearched: "2026-05-17",
     roleContext: "Interim senior growth marketing role for a B2B SaaS / consumer insights platform. The role emphasizes UK/US growth strategy, AI-enhanced customer acquisition, self-service conversion paths, predictive scoring with Revenue Operations, retention campaigns, marketing automation, attribution, forecasting, Product Marketing partnership, and Marketing Director partnership.",
     contacts: [
-      makeHubSpotContact({ name: "Jennifer Armstrong", title: "Marketing Director", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/jennifer-armstrong-50572236/", hubspotContactId: "487073401558", confidence: "high", relationshipToOpportunity: "High-confidence senior marketing stakeholder and likely hiring-path contact for an interim senior growth marketing role.", selectionRationale: "Her Marketing Director title is directly aligned to the role's stated partnership with marketing leadership and growth execution priorities.", suggestedAngle: "I can help Attest connect growth marketing ambition to the operating system underneath it — lifecycle, segmentation, attribution, automation, AI workflows, and RevOps partnership that make growth measurable.\n\nHere are some details on how I think I can help:\nhttps://chadelliot.github.io/company/attest?utm_content=attest" }),
+      makeHubSpotContact({ name: "Jennifer Armstrong", title: "Marketing Director", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/jennifer-armstrong-50572236/", hubspotContactId: "487073401558", confidence: "high", relationshipToOpportunity: "High-confidence senior marketing stakeholder and likely hiring-path contact for an interim senior growth marketing role.", selectionRationale: "Her Marketing Director title is directly aligned to the role's stated partnership with marketing leadership and growth execution priorities.", suggestedAngle: "I can help Attest connect growth marketing ambition to the operating system underneath it — lifecycle, segmentation, attribution, automation, AI workflows, and RevOps partnership that make growth measurable." }),
       makeHubSpotContact({ name: "Morgan Tilling", title: "People Partner", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/morgan-tilling/", hubspotContactId: "487062131442", relationshipToOpportunity: "People/recruiting path who may be connected to the hiring process or able to route the inquiry.", selectionRationale: "People Partner role may support hiring logistics or point to the internal owner if the marketing leader is not directly reachable.", suggestedAngle: "I saw the interim senior growth marketing role and would appreciate guidance on the right person to discuss fit with." }),
       makeHubSpotContact({ name: "Katherine Millar", title: "Senior Product Marketing Manager", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/katherinemillar/", hubspotContactId: "487067779812", relationshipToOpportunity: "Visible adjacent stakeholder; Product Marketing is explicitly part of the role's partnership model.", selectionRationale: "The role references partnership with Product Marketing for feature launches, market research, competitive intelligence, and strategic positioning.", suggestedAngle: "I can help bridge product marketing, growth marketing, RevOps, lifecycle automation, and attribution into a connected growth operating system." }),
       makeHubSpotContact({ name: "O’Brien Sharjeel", title: "Digital Marketing Manager", company: "Attest", linkedinUrl: "https://www.linkedin.com/in/obrien-sharjeel-673846318/", hubspotContactId: "487057433276", relationshipToOpportunity: "Adjacent marketing execution stakeholder who may understand growth marketing priorities or route to the hiring owner.", selectionRationale: "Digital Marketing Manager is relevant to growth marketing execution, campaign operations, funnel conversion, and activation work tied to the role.", suggestedAngle: "I can help connect campaign execution, lifecycle workflows, and RevOps measurement into a cleaner growth operating system." })
@@ -98,6 +98,32 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
       makeHubSpotContact({ name: "Isa Korn", title: "Head of Revenue Operations", company: "enmacc", linkedinUrl: "https://www.linkedin.com/in/isa-korn-894ba463/", hubspotContactId: "487077999318", confidence: "high", relationshipToOpportunity: "Direct functional partner; the role explicitly works with the Head of RevOps.", selectionRationale: "The job description names Head of RevOps as a close partner, making Isa one of the strongest target-path stakeholders.", suggestedAngle: "I can help strengthen the operating rhythm between CRO priorities, RevOps execution, OKR governance, and executive reporting." }),
       makeHubSpotContact({ name: "Michael McBride", title: "Senior Revenue Operations Manager", company: "enmacc", linkedinUrl: "https://www.linkedin.com/in/michaeljohnmcbride/", hubspotContactId: "487069569750", relationshipToOpportunity: "RevOps execution stakeholder and adjacent influencer.", selectionRationale: "Senior RevOps manager likely has context on reporting, process, revenue cadence, project execution, and operating friction the role is meant to solve.", suggestedAngle: "I can help translate revenue leadership priorities into cleaner operating rhythms, project trackers, dashboards, and follow-through mechanisms." }),
       makeHubSpotContact({ name: "Simon Blake", title: "Head of Marketing", company: "enmacc", linkedinUrl: "https://www.linkedin.com/in/simon-blake-munich/", hubspotContactId: "487059273458", relationshipToOpportunity: "Adjacent revenue stakeholder across marketing alignment.", selectionRationale: "The role aligns Sales, Marketing, RevOps, and Customer Success around the revenue organization's OKRs and strategic initiatives.", suggestedAngle: "I can help connect marketing priorities into the broader revenue operating cadence so campaigns, pipeline, OKRs, and leadership reporting stay aligned." })
+    ]
+  },
+  "nerdio": {
+    slug: "nerdio",
+    companyName: "Nerdio",
+    opportunityTitle: "Marketing AI Operations System",
+    sourceTools: ["Nerdio official leadership page", "LinkedIn", "Google Sheet Contacts", "Google Sheet Outreach"],
+    lastResearched: "2026-06-02",
+    roleContext: "Marketing AI operations opportunity where marketing leadership, revenue alignment, automation, reporting, AI-assisted campaign operations, and GTM operating cadence are relevant.",
+    contacts: [
+      { name: "Bryan Law", title: "Chief Marketing Officer", company: "Nerdio", linkedinUrl: "https://www.linkedin.com/in/bryanbasdenlaw/", relationshipToOpportunity: "Direct marketing executive for the Marketing AI Operations System proposal.", confidence: "high", emailStatus: "not_available", hubspotStatus: "not_loaded_email_unavailable", selectionRationale: "CMO role is directly connected to marketing AI operations, campaign systems, lifecycle execution, and reporting priorities.", outreachTone: "Concise, executive, and tied to marketing operating systems, AI workflow adoption, and measurable execution.", suggestedAngle: "I can help Nerdio connect lifecycle strategy, automation, AI-assisted workflows, campaign execution, and revenue visibility into one practical marketing engine." },
+      { name: "Larry Sweeney", title: "Chief Revenue Officer", company: "Nerdio", linkedinUrl: "https://www.linkedin.com/in/larrysweeney1/", relationshipToOpportunity: "Revenue executive sponsor; relevant to GTM operating model, revenue alignment, and marketing systems.", confidence: "high", emailStatus: "not_available", hubspotStatus: "not_loaded_email_unavailable", selectionRationale: "CRO role is relevant because the proposal connects marketing operations to revenue visibility, pipeline alignment, and GTM execution.", outreachTone: "Concise, executive, and focused on revenue alignment and practical operating cadence.", suggestedAngle: "I can help Nerdio connect marketing automation, lifecycle strategy, RevOps, reporting, and AI-assisted workflows into a clearer GTM operating system." },
+      { name: "Joseph Landes", title: "Co-Founder & President", company: "Nerdio", linkedinUrl: "https://www.linkedin.com/in/joseph-landes-93b9561", relationshipToOpportunity: "Executive leader who may route or sponsor marketing/GTM operations conversations.", confidence: "medium", emailStatus: "not_available", hubspotStatus: "not_loaded_email_unavailable", selectionRationale: "President/co-founder role may be useful for routing or sponsoring a strategic marketing operations conversation.", outreachTone: "Concise, executive, and easy to route internally.", suggestedAngle: "I can help support a practical marketing and revenue operating system across automation, campaign execution, reporting, and AI-assisted operations." }
+    ]
+  },
+  "pearl-health-growth-operations": {
+    slug: "pearl-health-growth-operations",
+    companyName: "Pearl Health",
+    opportunityTitle: "Growth Contracting Operations Control System",
+    sourceTools: ["Pearl Health official team page", "Google Sheet Contacts", "Google Sheet Outreach"],
+    lastResearched: "2026-06-02",
+    roleContext: "Growth operations contract opportunity where business operations, contracting workflows, execution discipline, reporting, and cross-functional operating cadence are relevant.",
+    contacts: [
+      { name: "Michael Kopko", title: "Board Member, CEO", company: "Pearl Health", linkedinUrl: "https://www.linkedin.com/company/pearlhealth/", email: "info@pearlhealth.com", relationshipToOpportunity: "Executive sponsor for Pearl Health growth operations and company-level routing.", confidence: "high", emailStatus: "pattern_supported", hubspotStatus: "not_loaded_needs_validation", selectionRationale: "CEO/board leadership is relevant to strategic growth operations and can route the right internal owner.", outreachTone: "Concise, executive, and easy to route internally.", suggestedAngle: "I can help Pearl Health connect growth operations, workflow design, lifecycle execution, automation, reporting, and cross-functional cadence into measurable execution." },
+      { name: "Steven Duque", title: "Chief Business Officer", company: "Pearl Health", linkedinUrl: "https://www.linkedin.com/company/pearlhealth/", email: "info@pearlhealth.com", relationshipToOpportunity: "Commercial/GTM leader closely connected to growth operations and business execution.", confidence: "high", emailStatus: "pattern_supported", hubspotStatus: "not_loaded_needs_validation", selectionRationale: "Chief Business Officer role is directly relevant to growth contracting, business operations, commercial execution, and operating cadence.", outreachTone: "Concise, executive, and tied to commercial operations.", suggestedAngle: "I can help Pearl Health connect growth strategy, lifecycle execution, automation, reporting, and cross-functional execution into clearer measurable workflows." },
+      { name: "Gabriel Drapos", title: "Chief Operating and Compliance Officer", company: "Pearl Health", linkedinUrl: "https://www.linkedin.com/company/pearlhealth/", email: "info@pearlhealth.com", relationshipToOpportunity: "Operating executive relevant to growth operations, workflow control, and execution discipline.", confidence: "medium", emailStatus: "pattern_supported", hubspotStatus: "not_loaded_needs_validation", selectionRationale: "Operating and compliance leadership is relevant to process design, operational rigor, execution cadence, and governance around growth workflows.", outreachTone: "Concise, operational, and easy to route internally.", suggestedAngle: "I can help Pearl Health translate growth operations complexity into clearer workflows, reporting, automation, and execution rhythm." }
     ]
   },
   "turtl": {
@@ -213,62 +239,10 @@ export const proposalOutreachResearch: Record<string, ProposalOutreachResearchRe
     lastResearched: "2026-06-02",
     roleContext: "Conversion and growth copy opportunity where experimentation, paid media, lifecycle messaging, landing page strategy, and AI-assisted creative systems are relevant. Contacts should render as named people with titles and draftable outreach options, not blank name pills.",
     contacts: [
-      {
-        name: "Travis Jones",
-        title: "Director of Performance Marketing",
-        company: "Cro Metrics",
-        linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Travis%20Jones%20Cro%20Metrics%20Director%20Performance%20Marketing",
-        email: "travis.jones@crometrics.com",
-        relationshipToOpportunity: "Performance marketing leader at Cro Metrics and relevant stakeholder for experimentation, paid media, and conversion copy work.",
-        confidence: "high",
-        emailStatus: "pattern_supported",
-        hubspotStatus: "not_loaded_needs_validation",
-        selectionRationale: "Added after Chad emailed Travis and corrected the Cro Metrics pattern to firstname.lastname@crometrics.com.",
-        outreachTone: "Concise, professional, and tied to conversion experimentation and measurable growth.",
-        suggestedAngle: "I can help connect performance marketing, conversion copy, experimentation, lifecycle messaging, and AI-enabled writing systems into a practical growth engine."
-      },
-      {
-        name: "Amanda Hetty",
-        title: "Senior Integrated Growth Strategist",
-        company: "Cro Metrics",
-        linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Amanda%20Hetty%20Cro%20Metrics%20Senior%20Integrated%20Growth%20Strategist",
-        email: "amanda.hetty@crometrics.com",
-        relationshipToOpportunity: "Adjacent growth strategist who may influence or participate in the hiring process.",
-        confidence: "medium",
-        emailStatus: "pattern_supported",
-        hubspotStatus: "not_loaded_needs_validation",
-        selectionRationale: "Added because Chad plans to email Amanda and believes she may be involved in evaluating the role.",
-        outreachTone: "Concise, professional, and tied to growth strategy, experimentation, and client outcomes.",
-        suggestedAngle: "I can help Cro Metrics connect conversion copy, testing strategy, lifecycle messaging, and AI-assisted creative systems to measurable client growth."
-      },
-      {
-        name: "Chris Neumann",
-        title: "Co-Founder / Cro Metrics leadership contact",
-        company: "Cro Metrics",
-        linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Chris%20Neumann%20Cro%20Metrics",
-        email: "chris.neumann@crometrics.com",
-        relationshipToOpportunity: "Senior company leader who may route the opportunity owner or influence senior hiring conversations.",
-        confidence: "medium",
-        emailStatus: "pattern_supported",
-        hubspotStatus: "not_loaded_needs_validation",
-        selectionRationale: "Added as a proposed senior contact because Chad may reach out to Chris and wants viable contacts attached to the job workflow.",
-        outreachTone: "Concise, executive, and focused on fit, not a generic job application.",
-        suggestedAngle: "I can help Cro Metrics translate experimentation, conversion copy, lifecycle messaging, and AI-assisted production into measurable client growth."
-      },
-      {
-        name: "Gwen Hammes",
-        title: "Cro Metrics leadership / people-path contact",
-        company: "Cro Metrics",
-        linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Gwen%20Hammes%20Cro%20Metrics",
-        email: "gwen.hammes@crometrics.com",
-        relationshipToOpportunity: "Likely useful routing or hiring-path contact for the Cro Metrics proposal workflow.",
-        confidence: "medium",
-        emailStatus: "pattern_supported",
-        hubspotStatus: "not_loaded_needs_validation",
-        selectionRationale: "Added as a proposed contact because Chad may reach out to Gwen and wants proposed contacts available dynamically on the directory.",
-        outreachTone: "Concise, professional, and easy to route internally.",
-        suggestedAngle: "I can help support conversion-focused growth work across copy, testing, lifecycle messaging, and AI-enabled content systems."
-      }
+      { name: "Travis Jones", title: "Director of Performance Marketing", company: "Cro Metrics", linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Travis%20Jones%20Cro%20Metrics%20Director%20Performance%20Marketing", email: "travis.jones@crometrics.com", relationshipToOpportunity: "Performance marketing leader at Cro Metrics and relevant stakeholder for experimentation, paid media, and conversion copy work.", confidence: "high", emailStatus: "pattern_supported", hubspotStatus: "not_loaded_needs_validation", selectionRationale: "Added after Chad emailed Travis and corrected the Cro Metrics pattern to firstname.lastname@crometrics.com.", outreachTone: "Concise, professional, and tied to conversion experimentation and measurable growth.", suggestedAngle: "I can help connect performance marketing, conversion copy, experimentation, lifecycle messaging, and AI-enabled writing systems into a practical growth engine." },
+      { name: "Amanda Heady", title: "Senior Integrated Growth Strategist", company: "Cro Metrics", linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Amanda%20Heady%20Cro%20Metrics%20Senior%20Integrated%20Growth%20Strategist", email: "amanda.heady@crometrics.com", relationshipToOpportunity: "Adjacent growth strategist who may influence or participate in the hiring process.", confidence: "medium", emailStatus: "pattern_supported", hubspotStatus: "not_loaded_needs_validation", selectionRationale: "Matched to the About Chad Outreach sheet spelling and email pattern for Amanda Heady.", outreachTone: "Concise, professional, and tied to growth strategy, experimentation, and client outcomes.", suggestedAngle: "I can help Cro Metrics connect conversion copy, testing strategy, lifecycle messaging, and AI-assisted creative systems to measurable client growth." },
+      { name: "Chris Neumann", title: "Co-Founder / Cro Metrics leadership contact", company: "Cro Metrics", linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Chris%20Neumann%20Cro%20Metrics", email: "chris.neumann@crometrics.com", relationshipToOpportunity: "Senior company leader who may route the opportunity owner or influence senior hiring conversations.", confidence: "medium", emailStatus: "pattern_supported", hubspotStatus: "not_loaded_needs_validation", selectionRationale: "Added as a proposed senior contact because Chad may reach out to Chris and wants viable contacts attached to the job workflow.", outreachTone: "Concise, executive, and focused on fit, not a generic job application.", suggestedAngle: "I can help Cro Metrics translate experimentation, conversion copy, lifecycle messaging, and AI-assisted production into measurable client growth." },
+      { name: "Gwen Hammes", title: "Cro Metrics leadership / people-path contact", company: "Cro Metrics", linkedinUrl: "https://www.linkedin.com/search/results/people/?keywords=Gwen%20Hammes%20Cro%20Metrics", email: "gwen.hammes@crometrics.com", relationshipToOpportunity: "Likely useful routing or hiring-path contact for the Cro Metrics proposal workflow.", confidence: "medium", emailStatus: "pattern_supported", hubspotStatus: "not_loaded_needs_validation", selectionRationale: "Added as a proposed contact because Chad may reach out to Gwen and wants proposed contacts available dynamically on the directory.", outreachTone: "Concise, professional, and easy to route internally.", suggestedAngle: "I can help support conversion-focused growth work across copy, testing, lifecycle messaging, and AI-enabled content systems." }
     ]
   }
 };
