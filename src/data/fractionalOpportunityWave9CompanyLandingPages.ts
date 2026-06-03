@@ -13,7 +13,7 @@ const phases = [
   { title: "Activate", duration: "Contract or fractional engagement", description: "Support execution, documentation, stakeholder alignment, reporting, and optimization." }
 ];
 
-const makePage = (slug: string, companyName: string, industry: string, roleTitle: string, headline: string, fitSummary: string, priorities: string[], bullets: string[], outreachAngle: string): CompanyLandingPage => ({
+const makePage = (slug: string, companyName: string, industry: string, roleTitle: string, headline: string, fitSummary: string, priorities: string[], bullets: string[], outreachAngle: string, outreachContacts: CompanyLandingPage["outreachContacts"] = []): CompanyLandingPage => ({
   slug,
   companyName,
   industry,
@@ -32,6 +32,7 @@ const makePage = (slug: string, companyName: string, industry: string, roleTitle
   },
   proofPoints,
   outreachAngle,
+  outreachContacts,
   ctaLabel: "Discuss fit",
   ctaHref: "/contact",
   status: "ready"
@@ -47,7 +48,8 @@ export const fractionalOpportunityWave9CompanyLandingPages: Record<string, Compa
     "Very strong fit across Salesforce Account Engagement, Pardot optimization, lifecycle marketing, campaign automation, analytics, and RevOps alignment.",
     ["Optimize Pardot / Account Engagement workflows.", "Improve campaign automation, lead management, segmentation, and reporting.", "Bridge strategy and hands-on execution."],
     ["Audit Pardot architecture, automation rules, segmentation, forms, and campaign workflows.", "Identify quick wins across nurture paths, lead routing, scoring, reporting, and Salesforce alignment.", "Document recommendations and support implementation."],
-    "I can help Blue Star Partners bring senior Pardot, lifecycle marketing, RevOps, automation, and analytics judgment into a focused contract engagement."
+    "I can help Blue Star Partners bring senior Pardot, lifecycle marketing, RevOps, automation, and analytics judgment into a focused contract engagement.",
+    [{ name: "Christopher House", title: "Director of Services & Staffing", linkedinUrl: "https://www.linkedin.com/in/eslhouse/", selectionRationale: "Services and staffing leader; useful routing contact for the Pardot consulting role." }]
   ),
   "gravity-infosolutions-pardot-consultant-contract": makePage(
     "gravity-infosolutions-pardot-consultant-contract",
@@ -58,7 +60,11 @@ export const fractionalOpportunityWave9CompanyLandingPages: Record<string, Compa
     "Strong fit across Salesforce Account Engagement, Pardot consulting, CRM integration, campaign automation, and lifecycle performance.",
     ["Support Pardot implementation and optimization.", "Connect Salesforce CRM processes to campaign and nurture execution.", "Improve automation, reporting, and stakeholder clarity."],
     ["Review Pardot setup, Salesforce integration, workflows, campaign assets, and reporting needs.", "Define implementation priorities based on business value and effort.", "Support documentation, QA, and stakeholder alignment."],
-    "I can help Gravity Infosolutions translate Pardot and Salesforce requirements into practical lifecycle, automation, and reporting improvements."
+    "I can help Gravity Infosolutions translate Pardot and Salesforce requirements into practical lifecycle, automation, and reporting improvements.",
+    [
+      { name: "Nagendra Singh", title: "Global Managing Director", linkedinUrl: "https://www.linkedin.com/in/nagendra-singh-34b350158/", selectionRationale: "Executive leader and likely routing contact for Salesforce consulting delivery." },
+      { name: "Anjali Aswal", title: "Growth Transformation Specialist- Salesforce", linkedinUrl: "https://www.linkedin.com/in/anjali-aswal-778152239/", selectionRationale: "Salesforce-aligned growth contact tied to transformation and consulting opportunities." }
+    ]
   ),
   "top-employers-institute-freelance-marketing-specialist": makePage(
     "top-employers-institute-freelance-marketing-specialist",
@@ -69,7 +75,11 @@ export const fractionalOpportunityWave9CompanyLandingPages: Record<string, Compa
     "Strong fit across fractional marketing operations, Salesforce/Pardot, lead nurturing, campaign execution, and funnel progression.",
     ["Improve campaign execution and nurture performance.", "Use Salesforce and Account Engagement to support funnel progression.", "Create clearer reporting and operating rhythm."],
     ["Audit campaign workflows, nurture paths, CRM handoffs, and reporting gaps.", "Build a practical campaign operating cadence.", "Improve segmentation, lifecycle paths, and lead management."],
-    "I can help Top Employers Institute strengthen campaign execution, lead nurturing, Salesforce workflows, and lifecycle reporting without needing a full-time hire."
+    "I can help Top Employers Institute strengthen campaign execution, lead nurturing, Salesforce workflows, and lifecycle reporting without needing a full-time hire.",
+    [
+      { name: "Mark Stoop", title: "Global Marketing Director", linkedinUrl: "https://www.linkedin.com/in/markstoop/", selectionRationale: "Global marketing leader and likely senior stakeholder for freelance marketing support." },
+      { name: "Monica Alexandra Bilba", title: "Marketing Automation & Campaign Specialist", linkedinUrl: "https://www.linkedin.com/in/monica-alexandra-bilba-1b9a51130/", selectionRationale: "Directly aligned to campaign automation and marketing execution needs." }
+    ]
   ),
   "rdi-technologies-demand-generation-manager": makePage(
     "rdi-technologies-demand-generation-manager",
@@ -80,7 +90,11 @@ export const fractionalOpportunityWave9CompanyLandingPages: Record<string, Compa
     "Strong fit across demand generation, Pardot, lead scoring, segmentation, sales alignment, lifecycle nurture, and analytics.",
     ["Strengthen nurture programs, segmentation, scoring, and database hygiene.", "Improve sales alignment and lead progression.", "Connect demand generation work to pipeline and revenue outcomes."],
     ["Audit lead flow, nurture journeys, scoring logic, segmentation, and campaign performance.", "Build a practical demand generation operating model tied to ICP and funnel stage.", "Improve reporting on qualified demand and pipeline movement."],
-    "I can help RDI Technologies connect Pardot, lifecycle marketing, lead scoring, segmentation, sales alignment, and analytics into a stronger demand generation engine."
+    "I can help RDI Technologies connect Pardot, lifecycle marketing, lead scoring, segmentation, sales alignment, and analytics into a stronger demand generation engine.",
+    [
+      { name: "Brea P.", title: "Marketing Director", linkedinUrl: "https://www.linkedin.com/in/breaparke/", selectionRationale: "Direct marketing leader and strongest available stakeholder for demand generation." },
+      { name: "James Boldt", title: "Digital Marketing and Video Specialist", linkedinUrl: "https://www.linkedin.com/in/james-boldt-85641129b/", selectionRationale: "Digital marketing stakeholder close to campaign and content execution." }
+    ]
   ),
   "participate-learning-campaign-lead-lifecycle": makePage(
     "participate-learning-campaign-lead-lifecycle",
@@ -91,7 +105,11 @@ export const fractionalOpportunityWave9CompanyLandingPages: Record<string, Compa
     "Strong fit across lifecycle marketing, lead management, Salesforce Marketing Cloud, Pardot, scoring, routing, workflow optimization, and campaign strategy.",
     ["Clarify lead lifecycle stages, scoring, routing, and nurture logic.", "Improve campaign strategy and automation workflows.", "Create better visibility into funnel progression."],
     ["Map lifecycle stages, handoffs, scoring, routing, and campaign workflows.", "Define automation and segmentation improvements.", "Build reporting around funnel progression, engagement, and conversion."],
-    "I can help Participate Learning connect campaign strategy, lead lifecycle design, Salesforce/Pardot automation, scoring, routing, and analytics into a practical operating model."
+    "I can help Participate Learning connect campaign strategy, lead lifecycle design, Salesforce/Pardot automation, scoring, routing, and analytics into a practical operating model.",
+    [
+      { name: "Anamaria Knight", title: "Executive Director of Product, Marketing & Research Strategy", linkedinUrl: "https://www.linkedin.com/in/anamaria-knight-16a6a5/", selectionRationale: "Senior marketing and product strategy leader tied to lifecycle and campaign strategy." },
+      { name: "Emily Smokonich", title: "Marketing Analytics Senior Manager", linkedinUrl: "https://www.linkedin.com/in/emilyesmokonich/", selectionRationale: "Marketing analytics stakeholder relevant to lifecycle reporting and campaign measurement." }
+    ]
   ),
   "intradiem-marketing-automation-specialist": makePage(
     "intradiem-marketing-automation-specialist",
@@ -102,7 +120,11 @@ export const fractionalOpportunityWave9CompanyLandingPages: Record<string, Compa
     "Strong fit across Pardot execution, nurture programs, segmentation, workflows, landing pages, forms, tracking, and analytics.",
     ["Improve Pardot execution and campaign operations.", "Strengthen nurture workflows, segmentation, landing pages, and forms.", "Create clearer campaign analytics."],
     ["Audit Pardot campaigns, forms, landing pages, segmentation, workflows, tracking, and reporting.", "Prioritize quick improvements across nurture logic, QA, attribution, and campaign execution.", "Document repeatable operating practices."],
-    "I can help Intradiem improve Pardot execution, lifecycle workflows, campaign analytics, and automation discipline in a way that supports measurable demand generation."
+    "I can help Intradiem improve Pardot execution, lifecycle workflows, campaign analytics, and automation discipline in a way that supports measurable demand generation.",
+    [
+      { name: "Tom Russell", title: "Chief Marketing Officer", linkedinUrl: "https://www.linkedin.com/in/thomasjrussell/", selectionRationale: "Direct marketing executive and likely sponsor for marketing automation support." },
+      { name: "Melissa Spies", title: "Vice President, Marketing", linkedinUrl: "https://www.linkedin.com/in/melissaspies/", selectionRationale: "Senior marketing leader aligned to automation, demand generation, and campaign operations." }
+    ]
   ),
   "salesfive-account-engagement-consultant-refresh": makePage(
     "salesfive-account-engagement-consultant-refresh",
@@ -113,7 +135,11 @@ export const fractionalOpportunityWave9CompanyLandingPages: Record<string, Compa
     "Very strong fit across Pardot, Sales Cloud integration, client workshops, requirements gathering, automation, and journey design.",
     ["Support client workshops and requirements gathering.", "Design Account Engagement and Sales Cloud workflows.", "Translate customer journeys into automation and reporting models."],
     ["Facilitate discovery around lifecycle goals, Salesforce structure, campaign workflows, and reporting needs.", "Design automation, segmentation, scoring, routing, and journey logic.", "Support documentation and implementation handoff."],
-    "I can help Salesfive deliver Account Engagement consulting that connects Pardot, Salesforce, lifecycle marketing, automation architecture, and RevOps into practical client outcomes."
+    "I can help Salesfive deliver Account Engagement consulting that connects Pardot, Salesforce, lifecycle marketing, automation architecture, and RevOps into practical client outcomes.",
+    [
+      { name: "Jonas Kold", title: "Senior Manager & Marketing Cloud Competence Center Lead", linkedinUrl: "https://www.linkedin.com/in/jonas-kold-58880b83/", selectionRationale: "Direct Marketing Cloud competence leader and strongest functional stakeholder." },
+      { name: "David Grieve", title: "Expert Salesforce Marketing Cloud Consultant and Team Lead", linkedinUrl: "https://www.linkedin.com/in/david-grieve-31454739/", selectionRationale: "Marketing Cloud consultant and team lead aligned to Account Engagement delivery." }
+    ]
   ),
   "revops-careers-fractional-network-june": makePage(
     "revops-careers-fractional-network-june",
@@ -124,6 +150,7 @@ export const fractionalOpportunityWave9CompanyLandingPages: Record<string, Compa
     "Strong pipeline fit across fractional revenue operations, marketing operations, customer operations, and GTM advisory work.",
     ["Position Chad for fractional RevOps and marketing operations engagements.", "Package Salesforce, Pardot, lifecycle, analytics, and AI-enabled operations.", "Create an outreach path for marketplace operators, founders, and RevOps leaders."],
     ["Position a clear fractional RevOps and marketing operations profile.", "Use proposal pages to support outreach to fractional networks and agency operators.", "Package services into diagnostics, advisory retainers, and project-based operating system builds."],
-    "I can support fractional RevOps and marketing operations engagements that need Salesforce/Pardot expertise, lifecycle architecture, automation, analytics, and executive-ready operating cadence."
+    "I can support fractional RevOps and marketing operations engagements that need Salesforce/Pardot expertise, lifecycle architecture, automation, analytics, and executive-ready operating cadence.",
+    [{ name: "Daniel Secareanu", title: "Co-Founder & Revenue Architect", linkedinUrl: "https://www.linkedin.com/in/danielsecareanu/", selectionRationale: "RevOps ecosystem contact surfaced for RevOps Careers; useful routing contact for fractional RevOps opportunities." }]
   )
 };
