@@ -9,6 +9,7 @@ import { indeedContractWave1CompanyLandingPages } from "./indeedContractWave1Com
 import { fractionalOpportunityWave7CompanyLandingPages } from "./fractionalOpportunityWave7CompanyLandingPages";
 import { fractionalOpportunityWave8CompanyLandingPages } from "./fractionalOpportunityWave8CompanyLandingPages";
 import { fractionalOpportunityWave9CompanyLandingPages } from "./fractionalOpportunityWave9CompanyLandingPages";
+import { jobWorkflowWave11CompanyLandingPages } from "./jobWorkflowWave11CompanyLandingPages";
 
 const proofPoints = [
   "Built enterprise marketing infrastructure from zero, including funnel architecture, CDP activation, segmentation, attribution, lifecycle operations, and cross-functional growth systems.",
@@ -209,5 +210,6 @@ export const allCompanyLandingPages = Object.fromEntries(
     ...fractionalOpportunityWave7CompanyLandingPages,
     ...fractionalOpportunityWave8CompanyLandingPages,
     ...fractionalOpportunityWave9CompanyLandingPages,
+    ...jobWorkflowWave11CompanyLandingPages,
   }).map(([slug, page]) => [slug, normalizePage(page)]),
 );
