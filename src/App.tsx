@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +19,18 @@ import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
+const HomeRoute = () => {
+  const isCommercialStrategyFallback = window.location.search.includes("commercial-strategy");
+
+  useEffect(() => {
+    if (isCommercialStrategyFallback) {
+      window.history.replaceState(null, "", "/commercial-strategy");
+    }
+  }, [isCommercialStrategyFallback]);
+
+  return isCommercialStrategyFallback ? <CommercialStrategyPage /> : <Index />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -27,7 +40,7 @@ const App = () => (
         <ScrollToTop />
         <ContactSlideout />
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/approach" element={<ApproachPage />} />
           <Route path="/career" element={<CareerPage />} />
           <Route path="/skills" element={<SkillsPage />} />
