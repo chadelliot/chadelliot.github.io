@@ -11,6 +11,7 @@ import ContactPage from "./pages/ContactPage";
 import CompanyDirectoryPageV9 from "./pages/CompanyDirectoryPageV9";
 import CompanyLandingPage from "./pages/CompanyLandingPage";
 import ExecutiveDashboardPage from "./pages/ExecutiveDashboardPage";
+import CommercialStrategyPage from "./pages/CommercialStrategyPage";
 import NotFound from "./pages/NotFound";
 import ContactSlideout from "./components/ContactSlideout";
 import ScrollToTop from "./components/ScrollToTop";
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/company" element={<CompanyDirectoryPageV9 />} />
           <Route path="/company/:slug" element={<CompanyLandingPage />} />
           <Route path="/executive-dashboard" element={<ExecutiveDashboardPage />} />
+          <Route path="/commercial-strategy" element={<CommercialStrategyPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
