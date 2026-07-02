@@ -54,5 +54,54 @@ export const customRoleCompanyLandingPages = {
     ctaLabel: "Discuss growth fit",
     ctaHref: "/contact",
     status: "ready"
+  },
+  "wsp": {
+    slug: "wsp",
+    companyName: "WSP",
+    industry: "Infrastructure consulting / engineering / transportation and advisory services",
+    eyebrow: "WSP × Chad Parker",
+    dateFound: "2026-07-02",
+    dateAdded: "2026-07-02",
+    source: "Direct Oracle job link for Assistant Vice President, Senior Marketing Manager",
+    headline: "A pursuit-led commercial growth system for complex infrastructure markets.",
+    subheadline: "A proposal-style response to WSP’s Assistant Vice President, Senior Marketing Manager role across strategic growth, client strategy, pursuit prioritization, proposal leadership, interview readiness, and executive KPI visibility.",
+    fitSummary: "WSP is a strong adjacent fit because the role is not just about producing proposals — it is about helping a complex professional services organization decide where to compete, how to position, how to align technical and commercial stakeholders, and how to turn pursuit activity into measurable growth. My background in commercial strategy, segmentation, KPI systems, sales alignment, and executive reporting translates well into a pursuit-led environment where growth starts before the RFP.",
+    likelyPriorities: [
+      "Strengthen pursuit strategy across Mid-Atlantic Transportation and Advisory markets.",
+      "Improve Go/No-Go discipline so high-value opportunities receive the right level of investment.",
+      "Translate technical expertise into client-centered win themes, proposal narratives, and interview stories.",
+      "Create clearer executive visibility into pursuit pipeline quality, shortlist rate, win rate, client expansion, and debrief insights."
+    ],
+    recommendedEngagement: {
+      title: "Infrastructure Pursuit Growth System",
+      description: "A senior strategic growth operating model that connects market intelligence, client priorities, opportunity scoring, win strategy, proposal execution, interview readiness, and post-pursuit learning.",
+      bullets: [
+        "Map the Mid-Atlantic opportunity landscape across transportation agencies, advisory buyers, funding signals, procurement calendars, and strategic accounts.",
+        "Build a pursuit prioritization framework that weighs relationship strength, technical fit, funding readiness, competitive position, strategic value, and team capacity.",
+        "Create a win theme system that connects client pressure, WSP advantage, proof of delivery, local relevance, and risk reduction.",
+        "Establish a KPI and debrief loop that helps leadership understand where WSP is winning, where it is losing, and what should improve before the next pursuit."
+      ]
+    },
+    proposal: {
+      situation: "WSP’s Assistant Vice President, Senior Marketing Manager role sits within the Strategic Growth Team and supports pursuit, proposal, client strategy, and business development activity across complex infrastructure markets. For Transportation and Advisory, growth is likely shaped by public funding cycles, agency priorities, technical credibility, local relationships, procurement discipline, and the ability to turn WSP’s expertise into a differentiated client story.",
+      opportunity: "The opportunity is to move beyond reactive proposal support and operate as a strategic pursuit command center. WSP can improve commercial outcomes by seeing market signals earlier, prioritizing the right pursuits, aligning technical and business development stakeholders, sharpening win themes, strengthening interview readiness, and converting every debrief into reusable intelligence.",
+      investment: "Full-time Assistant Vice President, Senior Marketing Manager opportunity; compensation not listed in accessible source",
+      phases: [
+        { title: "Market and pursuit diagnostic", duration: "First 30 days", description: "Review current pursuit pipeline, client priorities, proposal workflows, Go/No-Go criteria, win/loss themes, debrief feedback, content gaps, and executive reporting needs." },
+        { title: "Pursuit strategy operating model", duration: "Days 31-60", description: "Define a repeatable pursuit framework across market intelligence, client segmentation, opportunity scoring, capture planning, win theme development, proposal workflow, and stakeholder governance." },
+        { title: "Activation and KPI loop", duration: "Days 61-90", description: "Implement the pursuit cadence, improve proposal and interview readiness, establish KPI reporting, and create a closed-loop process for converting pursuit performance into future strategy." }
+      ],
+      outcomes: [
+        "A clearer commercial strategy for where WSP should compete and why.",
+        "A stronger Go/No-Go model that protects capacity and improves pursuit investment decisions.",
+        "More differentiated win themes that connect WSP’s technical depth to client priorities.",
+        "Executive-ready visibility into pipeline quality, shortlist rate, win rate, pursuit efficiency, and debrief learning."
+      ]
+    },
+    proofPoints,
+    outreachAngle: "I can help WSP turn market intelligence, client strategy, pursuit prioritization, win themes, proposal execution, and debrief learning into one measurable growth system for Transportation and Advisory markets.",
+    ctaLabel: "Discuss WSP strategy",
+    ctaHref: "/contact",
+    status: "ready"
   }
 };
