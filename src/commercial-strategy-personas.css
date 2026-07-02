@@ -143,6 +143,46 @@
   z-index: 50;
 }
 
+.commercial-page .map-dot:nth-of-type(10n+1):hover::after {
+  content: "Crestline Fashion Group\A Active · $284K TTM";
+}
+
+.commercial-page .map-dot:nth-of-type(10n+2):hover::after {
+  content: "Northgate Builders\A Active · $612K TTM";
+}
+
+.commercial-page .map-dot:nth-of-type(10n+3):hover::after {
+  content: "Harborline Supply Co.\A Engaged · $156K TTM";
+}
+
+.commercial-page .map-dot:nth-of-type(10n+4):hover::after {
+  content: "Summit Ridge Homes\A Prospect · $420K est.";
+}
+
+.commercial-page .map-dot:nth-of-type(10n+5):hover::after {
+  content: "Eastside Renovation\A Lapsed · $91K prior";
+}
+
+.commercial-page .map-dot:nth-of-type(10n+6):hover::after {
+  content: "Blue Oak Contractors\A Active · $738K TTM";
+}
+
+.commercial-page .map-dot:nth-of-type(10n+7):hover::after {
+  content: "Valleyview Design Build\A Engaged · $233K TTM";
+}
+
+.commercial-page .map-dot:nth-of-type(10n+8):hover::after {
+  content: "Ridgeline Commercial\A Prospect · $510K est.";
+}
+
+.commercial-page .map-dot:nth-of-type(10n+9):hover::after {
+  content: "Farpoint Development\A Active · $1.2M TTM";
+}
+
+.commercial-page .map-dot:nth-of-type(10n):hover::after {
+  content: "Bayside Project Group\A Lead · $188K est.";
+}
+
 .commercial-page .map-dot:hover::before {
   content: "";
   position: absolute;
