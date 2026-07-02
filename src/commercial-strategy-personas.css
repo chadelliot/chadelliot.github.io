@@ -104,3 +104,124 @@
 .commercial-page .pc-body {
   padding: 14px 16px 16px !important;
 }
+
+/* TAM map hover behavior */
+.commercial-page .tam-shell {
+  overflow: visible !important;
+}
+
+.commercial-page .map-dot {
+  cursor: pointer !important;
+  z-index: 2 !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+}
+
+.commercial-page .map-dot:hover {
+  transform: scale(1.7) !important;
+  z-index: 20 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.28) !important;
+}
+
+.commercial-page .map-dot:hover::after {
+  content: "Crestline Fashion Group\A Active · $284K TTM";
+  white-space: pre;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 9px);
+  transform: translateX(-50%) scale(0.588);
+  transform-origin: bottom center;
+  background: #111;
+  color: #fff;
+  min-width: 148px;
+  padding: 9px 11px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1.35;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+  pointer-events: none;
+  z-index: 50;
+}
+
+.commercial-page .map-dot:hover::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 3px);
+  transform: translateX(-50%) scale(0.588);
+  transform-origin: bottom center;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #111;
+  pointer-events: none;
+  z-index: 51;
+}
+
+/* Prospect funnel: horizontal stage breakdown only */
+.commercial-page .funnel-layout {
+  display: block !important;
+  margin-bottom: 20px !important;
+}
+
+.commercial-page .funnel-layout > div:nth-child(2) {
+  display: none !important;
+}
+
+.commercial-page .funnel-list {
+  display: grid !important;
+  grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
+  border: 1px solid var(--rule) !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  background: var(--rule) !important;
+  gap: 1px !important;
+}
+
+.commercial-page .funnel-row {
+  min-height: 74px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 2px !important;
+  border: 0 !important;
+  background: #fff !important;
+  padding: 10px 8px !important;
+  text-align: center !important;
+}
+
+.commercial-page .funnel-row:last-child {
+  background: var(--green-pale) !important;
+}
+
+.commercial-page .funnel-row .section-eye {
+  margin-bottom: 0 !important;
+  text-align: center !important;
+}
+
+.commercial-page .funnel-num {
+  font-size: 19px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+}
+
+.commercial-page .funnel-note {
+  font-size: 10px !important;
+  color: var(--muted) !important;
+  font-weight: 600 !important;
+}
+
+.commercial-page .funnel-row:nth-child(n+3) .funnel-note,
+.commercial-page .funnel-row:last-child .funnel-note,
+.commercial-page .funnel-row:last-child .section-eye {
+  color: var(--green) !important;
+  font-weight: 800 !important;
+}
+
+@media(max-width:1000px){
+  .commercial-page .funnel-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
