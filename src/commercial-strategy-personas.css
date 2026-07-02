@@ -143,45 +143,16 @@
   z-index: 50;
 }
 
-.commercial-page .map-dot:nth-of-type(10n+1):hover::after {
-  content: "Crestline Fashion Group\A Active · $284K TTM";
-}
-
-.commercial-page .map-dot:nth-of-type(10n+2):hover::after {
-  content: "Northgate Builders\A Active · $612K TTM";
-}
-
-.commercial-page .map-dot:nth-of-type(10n+3):hover::after {
-  content: "Harborline Supply Co.\A Engaged · $156K TTM";
-}
-
-.commercial-page .map-dot:nth-of-type(10n+4):hover::after {
-  content: "Summit Ridge Homes\A Prospect · $420K est.";
-}
-
-.commercial-page .map-dot:nth-of-type(10n+5):hover::after {
-  content: "Eastside Renovation\A Lapsed · $91K prior";
-}
-
-.commercial-page .map-dot:nth-of-type(10n+6):hover::after {
-  content: "Blue Oak Contractors\A Active · $738K TTM";
-}
-
-.commercial-page .map-dot:nth-of-type(10n+7):hover::after {
-  content: "Valleyview Design Build\A Engaged · $233K TTM";
-}
-
-.commercial-page .map-dot:nth-of-type(10n+8):hover::after {
-  content: "Ridgeline Commercial\A Prospect · $510K est.";
-}
-
-.commercial-page .map-dot:nth-of-type(10n+9):hover::after {
-  content: "Farpoint Development\A Active · $1.2M TTM";
-}
-
-.commercial-page .map-dot:nth-of-type(10n):hover::after {
-  content: "Bayside Project Group\A Lead · $188K est.";
-}
+.commercial-page .map-dot:nth-of-type(10n+1):hover::after { content: "Crestline Fashion Group\A Active · $284K TTM"; }
+.commercial-page .map-dot:nth-of-type(10n+2):hover::after { content: "Northgate Builders\A Active · $612K TTM"; }
+.commercial-page .map-dot:nth-of-type(10n+3):hover::after { content: "Harborline Supply Co.\A Engaged · $156K TTM"; }
+.commercial-page .map-dot:nth-of-type(10n+4):hover::after { content: "Summit Ridge Homes\A Prospect · $420K est."; }
+.commercial-page .map-dot:nth-of-type(10n+5):hover::after { content: "Eastside Renovation\A Lapsed · $91K prior"; }
+.commercial-page .map-dot:nth-of-type(10n+6):hover::after { content: "Blue Oak Contractors\A Active · $738K TTM"; }
+.commercial-page .map-dot:nth-of-type(10n+7):hover::after { content: "Valleyview Design Build\A Engaged · $233K TTM"; }
+.commercial-page .map-dot:nth-of-type(10n+8):hover::after { content: "Ridgeline Commercial\A Prospect · $510K est."; }
+.commercial-page .map-dot:nth-of-type(10n+9):hover::after { content: "Farpoint Development\A Active · $1.2M TTM"; }
+.commercial-page .map-dot:nth-of-type(10n):hover::after { content: "Bayside Project Group\A Lead · $188K est."; }
 
 .commercial-page .map-dot:hover::before {
   content: "";
@@ -199,4 +170,119 @@
   z-index: 51;
 }
 
-/* deployment retry: previous run timed out during GitHub Pages deploy */
+/* Simplified Audience Architecture slide */
+.commercial-page .cs-stage:has(.audience-step) .stage-body,
+.commercial-page .cs-stage:has(.audience-step) .stage-quote {
+  font-size: 0 !important;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .stage-body::after {
+  content: "We structure the audience in two layers. First, we tier accounts by revenue value to establish where effort should be focused. Then within each tier, we define the personas making the decisions — so messaging is personalized by business context and by the job each person is there to do.";
+  display: block;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--body);
+  max-width: 760px;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .stage-quote::after {
+  content: "Tier tells us who matters most. Persona tells us what to say to each person inside that account.";
+  display: block;
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+.commercial-page .cs-stage:has(.audience-step) .audience-step {
+  grid-template-columns: auto 1fr !important;
+  margin: 10px 0 10px !important;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .audience-step:first-of-type span,
+.commercial-page .cs-stage:has(.audience-step) .audience-step:nth-of-type(2) span {
+  font-size: 0 !important;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .audience-step:first-of-type span::after {
+  content: "STEP 1 — REVENUE TIERING";
+  font-size: 9px;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .audience-step:nth-of-type(2) span::after {
+  content: "STEP 2 — PERSONAS";
+  font-size: 9px;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .audience-explainer,
+.commercial-page .cs-stage:has(.audience-step) .persona-secondary,
+.commercial-page .cs-stage:has(.audience-step) .persona-primary + .section-eye {
+  display: none !important;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card {
+  padding: 18px 20px !important;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-desc,
+.commercial-page .cs-stage:has(.audience-step) .tier-card ul {
+  display: none !important;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card::after {
+  display: block;
+  margin-top: 12px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #111;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(1)::after {
+  content: "Messaging: Outcomes & ROI";
+  color: #4a9e7a;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(2)::after {
+  content: "Messaging: Value & Availability";
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(3)::after {
+  content: "Messaging: Problem & Need";
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(1) .tier-seg,
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(2) .tier-seg,
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(3) .tier-seg {
+  font-size: 0 !important;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(1) .tier-seg::after {
+  content: "Largest revenue, deepest relationship. Goal is expansion, not just retention.";
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--body);
+  line-height: 1.55;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(2) .tier-seg::after {
+  content: "Solid base, underpenetrated category. Right motion moves these to Tier 1.";
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--body);
+  line-height: 1.55;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .tier-card:nth-child(3) .tier-seg::after {
+  content: "Narrow engagement or low frequency. Education-first motions activate the relationship.";
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--body);
+  line-height: 1.55;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .persona-primary {
+  margin-top: 14px !important;
+}
+
+.commercial-page .cs-stage:has(.audience-step) .pc-row:nth-of-type(n+4) {
+  display: none !important;
+}
