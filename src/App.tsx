@@ -18,6 +18,10 @@ import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
 
+const HomeRoute = () => (
+  window.location.search.includes("commercial-strategy") ? <CommercialStrategyPage /> : <Index />
+);
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -27,7 +31,7 @@ const App = () => (
         <ScrollToTop />
         <ContactSlideout />
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<HomeRoute />} />
           <Route path="/approach" element={<ApproachPage />} />
           <Route path="/career" element={<CareerPage />} />
           <Route path="/skills" element={<SkillsPage />} />
