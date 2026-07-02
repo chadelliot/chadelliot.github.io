@@ -1,0 +1,49 @@
+/* Commercial strategy persona photo overrides */
+.commercial-page .persona-primary .persona-card .pc-photo {
+  height: 150px !important;
+  padding-left: 0 !important;
+  display: block !important;
+  position: relative !important;
+  background-size: cover !important;
+  background-position: center 28% !important;
+  overflow: hidden !important;
+}
+
+.commercial-page .persona-primary .persona-card:nth-child(1) .pc-photo {
+  background-image:
+    linear-gradient(90deg, rgba(17, 17, 17, 0.05), rgba(74, 158, 122, 0.12)),
+    url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80') !important;
+}
+
+.commercial-page .persona-primary .persona-card:nth-child(2) .pc-photo {
+  background-image:
+    linear-gradient(90deg, rgba(17, 17, 17, 0.06), rgba(45, 107, 205, 0.12)),
+    url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80') !important;
+  background-position: center 22% !important;
+}
+
+.commercial-page .persona-primary .pc-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));
+  pointer-events: none;
+}
+
+.commercial-page .persona-primary .pc-head,
+.commercial-page .persona-primary .pc-lines {
+  display: none !important;
+}
+
+.commercial-page .persona-primary .pc-badge {
+  z-index: 2 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
+}
+
+.commercial-page .persona-card {
+  box-shadow: none !important;
+}
+
+.commercial-page .pc-body {
+  padding: 14px 16px 16px !important;
+}
