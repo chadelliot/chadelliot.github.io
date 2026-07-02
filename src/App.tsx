@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,24 +11,11 @@ import ContactPage from "./pages/ContactPage";
 import CompanyDirectoryPageV9 from "./pages/CompanyDirectoryPageV9";
 import CompanyLandingPage from "./pages/CompanyLandingPage";
 import ExecutiveDashboardPage from "./pages/ExecutiveDashboardPage";
-import CommercialStrategyPage from "./pages/CommercialStrategyPage";
 import NotFound from "./pages/NotFound";
 import ContactSlideout from "./components/ContactSlideout";
 import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient();
-
-const HomeRoute = () => {
-  const isCommercialStrategyFallback = window.location.search.includes("commercial-strategy");
-
-  useEffect(() => {
-    if (isCommercialStrategyFallback) {
-      window.history.replaceState(null, "", "/commercial-strategy");
-    }
-  }, [isCommercialStrategyFallback]);
-
-  return isCommercialStrategyFallback ? <CommercialStrategyPage /> : <Index />;
-};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -40,7 +26,7 @@ const App = () => (
         <ScrollToTop />
         <ContactSlideout />
         <Routes>
-          <Route path="/" element={<HomeRoute />} />
+          <Route path="/" element={<Index />} />
           <Route path="/approach" element={<ApproachPage />} />
           <Route path="/career" element={<CareerPage />} />
           <Route path="/skills" element={<SkillsPage />} />
@@ -48,7 +34,6 @@ const App = () => (
           <Route path="/company" element={<CompanyDirectoryPageV9 />} />
           <Route path="/company/:slug" element={<CompanyLandingPage />} />
           <Route path="/executive-dashboard" element={<ExecutiveDashboardPage />} />
-          <Route path="/commercial-strategy" element={<CommercialStrategyPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
