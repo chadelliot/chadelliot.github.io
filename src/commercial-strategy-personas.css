@@ -1,42 +1,99 @@
 /* Commercial strategy persona photo overrides */
 .commercial-page .persona-primary .persona-card .pc-photo {
-  height: 150px !important;
-  padding-left: 0 !important;
-  display: block !important;
+  height: 130px !important;
+  padding: 18px 22px !important;
+  display: grid !important;
+  grid-template-columns: 76px 1fr !important;
+  align-items: center !important;
+  column-gap: 18px !important;
   position: relative !important;
-  background-size: cover !important;
-  background-position: center 28% !important;
   overflow: hidden !important;
-}
-
-.commercial-page .persona-primary .persona-card:nth-child(1) .pc-photo {
-  background-image:
-    linear-gradient(90deg, rgba(17, 17, 17, 0.05), rgba(74, 158, 122, 0.12)),
-    url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=900&q=80') !important;
+  background-image: linear-gradient(135deg, #e0ebe4, #c8dbd0) !important;
 }
 
 .commercial-page .persona-primary .persona-card:nth-child(2) .pc-photo {
-  background-image:
-    linear-gradient(90deg, rgba(17, 17, 17, 0.06), rgba(45, 107, 205, 0.12)),
-    url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=900&q=80') !important;
-  background-position: center 22% !important;
+  background-image: linear-gradient(135deg, #e4eaf0, #ccd6e0) !important;
+}
+
+.commercial-page .persona-primary .pc-head {
+  display: block !important;
+  position: relative !important;
+  left: auto !important;
+  top: auto !important;
+  width: 76px !important;
+  height: 76px !important;
+  border-radius: 999px !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  border: 3px solid rgba(255,255,255,0.78) !important;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12) !important;
+  z-index: 2 !important;
+}
+
+.commercial-page .persona-primary .persona-card:nth-child(1) .pc-head {
+  background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80') !important;
+}
+
+.commercial-page .persona-primary .persona-card:nth-child(2) .pc-head {
+  background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80') !important;
+}
+
+.commercial-page .persona-primary .pc-lines {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  min-height: 72px !important;
+  margin-left: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.commercial-page .persona-primary .pc-lines::before {
+  content: "ALEXANDRA M." !important;
+  position: static !important;
+  display: block !important;
+  height: auto !important;
+  background: rgba(255,255,255,0.58) !important;
+  box-shadow: none !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  color: #2e5c42 !important;
+  font-size: 17px !important;
+  line-height: 1 !important;
+  font-weight: 800 !important;
+  letter-spacing: -0.2px !important;
+}
+
+.commercial-page .persona-primary .persona-card:nth-child(2) .pc-lines::before {
+  content: "MARCUS T." !important;
+  color: #1e3a5c !important;
+}
+
+.commercial-page .persona-primary .pc-lines::after {
+  content: "" !important;
+  display: block !important;
+  width: min(100%, 230px) !important;
+  height: 2px !important;
+  margin-top: 14px !important;
+  background: currentColor !important;
+  opacity: 0.16 !important;
+  box-shadow: 0 16px 0 currentColor, 0 32px 0 currentColor !important;
 }
 
 .commercial-page .persona-primary .pc-photo::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.18));
+  background: radial-gradient(circle at 88% 16%, rgba(255,255,255,0.38), transparent 34%);
   pointer-events: none;
 }
 
-.commercial-page .persona-primary .pc-head,
-.commercial-page .persona-primary .pc-lines {
-  display: none !important;
-}
-
 .commercial-page .persona-primary .pc-badge {
-  z-index: 2 !important;
+  z-index: 3 !important;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;
 }
 
