@@ -8,6 +8,7 @@ import "./proposal-directory-role-links.css";
 import "./proposal-directory-delete-controls.css";
 import "./proposal-directory-anonymous-drafts.css";
 import "./proposal-directory-cleanup.css";
+import "./commercial-strategy-personas.css";
 import "./proposal-directory-floating-menu";
 import "./proposal-directory-extra-contacts";
 import "./proposal-directory-contact-controls";
