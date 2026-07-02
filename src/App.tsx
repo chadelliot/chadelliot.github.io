@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ApproachPage from "./pages/ApproachPage";
 import CareerPage from "./pages/CareerPage";
@@ -39,10 +39,10 @@ const App = () => (
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/company" element={<CompanyDirectoryPageV9 />} />
           <Route path="/company/:slug" element={<CompanyLandingPage />} />
-          <Route path="/gray-swan" element={<Navigate to="/company/gray-swan" replace />} />
           <Route path="/executive-dashboard" element={<ExecutiveDashboardPage />} />
           <Route path="/commercial-strategy" element={<CommercialStrategyPage />} />
           <Route path="/wsp" element={<WspCommercialStrategyPage />} />
+          <Route path="/:slug" element={<CompanyLandingPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
