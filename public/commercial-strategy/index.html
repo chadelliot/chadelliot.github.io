@@ -4,9 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Commercial Growth System — Interactive Demo</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" type="image/png" href="/favicon.svg">
-<link rel="apple-touch-icon" href="/favicon.svg">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&display=swap');
 
@@ -62,7 +59,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   cursor:pointer;transition:background 0.15s;
 }
 .rail-chapter:hover{background:var(--surface);}
-.rail-chapter.active{background:var(--green-pale);}
+.rail-chapter.active{}
 
 .rail-dot{
   width:8px;height:8px;border-radius:50%;
@@ -85,6 +82,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   width:1px;height:10px;background:var(--rule);
   margin-left:23px;
 }
+.rail-section-hdr{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:6px 10px 6px;border-bottom:1px solid var(--rule);margin-bottom:4px;}
+.rail-section-hdr.foundation{color:var(--green);border-bottom-color:var(--green);}
 
 /* ── STAGE AREA ── */
 .stage-area{
@@ -219,27 +218,42 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 /* TAM Map */
 .tam-shell{
   border:1px solid var(--rule);border-radius:4px;overflow:hidden;
-  margin-bottom:20px;background:#f0f4f8;
-  position:relative;height:320px;
+  margin-bottom:20px;
+  position:relative;height:360px;
+  background:#e8edf2;
 }
 .tam-map-area{width:100%;height:100%;position:relative;overflow:hidden;}
+.tam-map-area svg{position:absolute;top:0;left:0;width:100%;height:100%;}
 
-/* SVG map dots */
-.map-dot{position:absolute;border-radius:50%;transition:all 0.3s;}
+/* Account dots layered on top of SVG */
+.map-dot{position:absolute;border-radius:50%;transition:all 0.3s;cursor:pointer;z-index:2;}
+.map-dot:hover{transform:scale(1.6);z-index:10;}
+
+/* Tooltip on hover */
+.map-tooltip{
+  position:absolute;background:var(--ink);color:var(--white);
+  font-size:10px;font-weight:500;padding:7px 10px;border-radius:4px;
+  pointer-events:none;white-space:nowrap;z-index:20;
+  display:none;line-height:1.4;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+  min-width:160px;
+}
 
 .tam-legend{
   position:absolute;bottom:12px;left:12px;
-  background:rgba(255,255,255,0.95);border:1px solid var(--rule);border-radius:3px;
+  background:rgba(255,255,255,0.97);border:1px solid var(--rule);border-radius:3px;
   padding:10px 14px;
   display:flex;flex-direction:column;gap:5px;
+  z-index:5;box-shadow:0 1px 4px rgba(0,0,0,0.08);
 }
 .tam-leg-item{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:500;color:var(--body);}
 .tam-leg-dot{width:8px;height:8px;border-radius:50%;}
 
 .tam-count{
-  position:absolute;bottom:12px;right:12px;
-  background:rgba(255,255,255,0.95);border:1px solid var(--rule);border-radius:3px;
+  position:absolute;top:12px;right:12px;
+  background:rgba(255,255,255,0.97);border:1px solid var(--rule);border-radius:3px;
   padding:10px 14px;text-align:right;
+  z-index:5;box-shadow:0 1px 4px rgba(0,0,0,0.08);
 }
 .tam-count-val{font-size:22px;font-weight:800;color:var(--green);letter-spacing:-0.5px;line-height:1;}
 .tam-count-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);}
@@ -279,32 +293,69 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .signal-step{font-size:10px;font-weight:600;color:var(--body);padding:4px 10px;background:var(--white);border:1px solid var(--rule);border-radius:2px;}
 .signal-arrow-sm{color:var(--rule);font-size:12px;}
 
-/* Alignment diagram */
-.align-grid{display:grid;grid-template-columns:1fr auto 1fr;gap:0;border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
-.align-side{background:var(--white);padding:24px;}
-.align-center{background:var(--green);padding:24px 20px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:140px;}
-.align-center-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.7);text-align:center;}
-.align-center-val{font-size:13px;font-weight:700;color:var(--white);text-align:center;line-height:1.35;}
+/* Alignment grid — true fixed three-col, green always centered */
+.align-grid{
+  display:grid;
+  grid-template-columns:1fr 180px 1fr;
+  gap:0;border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;
+}
+.align-side{background:var(--white);padding:22px;}
+.align-center{
+  background:var(--green);padding:22px 14px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  width:180px;flex-shrink:0;
+}
+.align-center-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.7);text-align:center;margin-bottom:4px;}
+.align-center-val{font-size:12px;font-weight:700;color:var(--white);text-align:center;line-height:1.35;}
+.align-sep{width:24px;height:1px;background:rgba(255,255,255,0.25);margin:1px auto;}
 .align-eye{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;}
 .align-item{font-size:11px;color:var(--body);padding:5px 0;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:6px;}
 .align-item:last-child{border-bottom:none;}
 .align-item::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;}
 
-/* Persona grid */
-.persona-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;}
-.persona-card{border:1px solid var(--rule);border-radius:4px;padding:16px;background:var(--white);}
-.persona-role{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;}
-.persona-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px;}
-.persona-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;}
-.persona-key{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);min-width:60px;padding-top:1px;}
-.persona-val{font-size:11px;color:var(--body);line-height:1.4;}
+/* Persona cards — large profile + small summary */
+.persona-primary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+.persona-secondary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px;}
+
+.persona-card-lg{border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--white);display:flex;flex-direction:column;}
+.pc-photo{height:130px;overflow:hidden;position:relative;background:var(--surface);display:flex;align-items:center;justify-content:center;}
+.pc-photo svg{width:100%;height:100%;}
+.pc-photo-badge{position:absolute;bottom:10px;left:12px;background:var(--green);color:var(--white);font-size:9px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
+.pc-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;}
+.pc-role{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:3px;}
+.pc-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;margin-bottom:2px;}
+.pc-seg{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--rule);}
+.pc-rows{display:flex;flex-direction:column;gap:6px;flex:1;}
+.pc-row{display:flex;gap:8px;align-items:flex-start;}
+.pc-key{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);min-width:52px;padding-top:1px;flex-shrink:0;}
+.pc-val{font-size:11px;color:var(--body);line-height:1.4;}
+
+.persona-card-sm{border:1px solid var(--rule);border-radius:4px;padding:14px 15px;background:var(--white);}
+.pcs-photo-strip{height:4px;border-radius:2px;margin-bottom:10px;}
+.pcs-role{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:2px;}
+.pcs-name{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.pcs-row{display:flex;gap:6px;align-items:flex-start;margin-bottom:4px;}
+.pcs-key{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;color:var(--muted);min-width:46px;flex-shrink:0;padding-top:1px;}
+.pcs-val{font-size:10px;color:var(--body);line-height:1.4;}
+
+/* Tier cards */
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.tier-card{background:var(--white);padding:20px;}
+.tier-num{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-1px;margin-bottom:2px;}
+.tier-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px;}
+.tier-seg{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--rule);}
+.tier-desc{font-size:11px;color:var(--body);line-height:1.55;margin-bottom:10px;}
+.tier-bullets{list-style:none;display:flex;flex-direction:column;gap:4px;}
+.tier-bullets li{font-size:11px;color:var(--muted);padding-left:12px;position:relative;}
+.tier-bullets li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:700;}
 
 /* Track */
 .track{height:2px;background:var(--rule);border-radius:1px;overflow:hidden;margin:8px 0 4px;}
 .tf{height:100%;background:#c8d0d8;border-radius:1px;}
 .tf.g{background:var(--green);}
 
-/* Progress bar top */
+/* Funnel visual layout */
+.funnel-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;align-items:start;}
 .progress-bar{
   position:fixed;top:56px;left:220px;right:0;height:2px;
   background:var(--rule);z-index:90;
@@ -389,44 +440,38 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <p style="font-size:12px;color:var(--muted);">These eight outcomes anchor every layer of the commercial system. Click <strong>Next</strong> to begin building the strategy beneath them.</p>
     </div>
 
-    <!-- ══ STAGE 2: Growth Objective + Audience ══ -->
+    <!-- ══ STAGE 2: Segmentation (merged Ch 2 + 3) ══ -->
     <div class="stage" id="stage-1">
-      <div class="stage-eyebrow">Chapter 02 — The Growth Question</div>
-      <h1 class="stage-title">What are we growing? <em>And for whom?</em></h1>
-      <p class="stage-body">Once the KPI framework is clear, we define the growth objective and the audience behind it. Strategy becomes sharper when these two questions are answered together — because the motion required to grow revenue through acquisition is fundamentally different from the motion required to grow it through expansion.</p>
-      <div class="stage-quote">"The question is not just 'What do we want to grow?' It is also 'Who do we need to move in order to grow it?' These two questions define the entire system architecture."</div>
+      <div class="stage-eyebrow">Chapter 02 — Segmentation</div>
+      <h1 class="stage-title">Know the audience. <em>Define the growth.</em></h1>
+      <p class="stage-body">Segmentation is where strategy begins to take shape. Before we can define a growth objective, we need to understand who is in the market — who is already a customer, who should be, and what each group needs. The segments themselves answer the growth question: they tell us what to pursue, in what order, and with what motion.</p>
+      <div class="stage-quote">"Segmentation turns a broad market into actionable groups. It tells us who we are speaking to, what they care about, how they buy, and where the largest opportunities exist — and in doing so, it defines the growth objective itself."</div>
 
-      <div class="two-col">
-        <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Business Outcome</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">Revenue growth</span></div>
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">Market share expansion</span></div>
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">New customer acquisition</span></div>
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">Customer retention &amp; expansion</span></div>
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">Profitability improvement</span></div>
+      <!-- Growth objective flows from segmentation — shown as outcome, not input -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+        <div style="border:1px solid var(--rule);border-radius:4px;padding:16px 18px;background:var(--white);">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">What segmentation reveals</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Who the audience actually is</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>What each group needs and how they buy</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Where the largest revenue opportunity sits</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Which customers to grow, protect, or acquire</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>How to prioritize marketing and sales motion</div>
           </div>
         </div>
-        <div>
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Audience Focus</div>
-          <div style="display:flex;flex-direction:column;gap:8px;">
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">Customer segments by value</span></div>
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">High-fit prospect segments</span></div>
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">Industries &amp; verticals</span></div>
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">Territories &amp; geographies</span></div>
-            <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:10px;"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span><span style="font-size:12px;font-weight:600;color:var(--ink);">Accounts &amp; buying contacts</span></div>
+        <div style="border:1px solid var(--rule);border-radius:4px;padding:16px 18px;background:var(--white);">
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Growth objectives that follow</div>
+          <div style="display:flex;flex-direction:column;gap:7px;">
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Revenue growth from highest-value segments</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Market share expansion into whitespace</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>New customer acquisition from high-fit prospects</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Retention and expansion of existing customers</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Profitability from the most efficient motions</div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ══ STAGE 3: Segmentation ══ -->
-    <div class="stage" id="stage-2">
-      <div class="stage-eyebrow">Chapter 03 — Segmentation</div>
-      <h1 class="stage-title">Turn a broad market into <em>actionable groups.</em></h1>
-      <p class="stage-body">Segmentation is the first intelligence layer underneath the dashboard. It tells us who we are speaking to, what they care about, how they buy, and where the largest opportunities exist. Without segmentation, every campaign and sales motion is generic by default.</p>
-      <div class="stage-quote">"Segmentation turns a broad market into actionable groups. It tells us who we are speaking to, what they care about, how they buy, and where the largest opportunities exist."</div>
-
+      <!-- Segment cards — clickable -->
       <div class="three-col">
         <div class="card clickable" onclick="expandSeg(this,'A')">
           <div class="card-eye">Segment A</div>
@@ -435,7 +480,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:90%"></div></div><div style="font-size:10px;color:var(--muted);">Opportunity size: High</div></div>
           <span class="card-tag tag-g">Expand &amp; Retain</span>
           <div class="seg-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);">
-            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Motion:</strong> Executive relationship management, loyalty programs, personalized cross-sell offers, seller-assisted expansion plays.<br><strong>KPI link:</strong> NRR, LTV, revenue growth</div>
+            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Revenue growth and NRR through expansion.<br><strong>Motion:</strong> Executive relationship management, loyalty programs, personalized cross-sell, seller-assisted expansion plays.<br><strong>KPI link:</strong> NRR, LTV, revenue growth</div>
           </div>
         </div>
         <div class="card clickable" onclick="expandSeg(this,'B')">
@@ -445,7 +490,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:62%"></div></div><div style="font-size:10px;color:var(--muted);">Opportunity size: Medium–High</div></div>
           <span class="card-tag tag-b">Move Tier 3 → Tier 2</span>
           <div class="seg-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);">
-            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Motion:</strong> Category expansion campaigns, lifecycle nurture, cross-sell enablement, seller-assisted growth plays.<br><strong>KPI link:</strong> Revenue per customer, pipeline contribution</div>
+            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Revenue per customer through category expansion.<br><strong>Motion:</strong> Category expansion campaigns, lifecycle nurture, cross-sell enablement, seller-assisted growth plays.<br><strong>KPI link:</strong> Revenue per customer, pipeline contribution</div>
           </div>
         </div>
         <div class="card clickable" onclick="expandSeg(this,'C')">
@@ -455,27 +500,28 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:45%"></div></div><div style="font-size:10px;color:var(--muted);">Opportunity size: Large</div></div>
           <span class="card-tag tag-a">Acquire</span>
           <div class="seg-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);">
-            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Motion:</strong> Lead generation, intent-based campaigns, account-based selling, outbound sequencing.<br><strong>KPI link:</strong> New customers, CAC, pipeline, market share</div>
+            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Market share and new customer acquisition.<br><strong>Motion:</strong> Lead generation, intent-based campaigns, account-based selling, outbound sequencing.<br><strong>KPI link:</strong> New customers, CAC, pipeline, market share</div>
           </div>
         </div>
       </div>
-      <p style="font-size:11px;color:var(--muted);">Click each segment to reveal the recommended commercial motion.</p>
+      <p style="font-size:11px;color:var(--muted);">Click each segment to see the growth objective and recommended motion.</p>
     </div>
 
-    <!-- ══ STAGE 4: TAM ══ -->
-    <div class="stage" id="stage-3">
-      <div class="stage-eyebrow">Chapter 04 — Total Addressable Market</div>
+    <!-- ══ STAGE 3: TAM ══ -->
+    <div class="stage" id="stage-2">
+      <div class="stage-eyebrow">Chapter 03 — Total Addressable Market</div>
       <h1 class="stage-title">Map the full <em>market opportunity.</em></h1>
-      <p class="stage-body">Once segments are defined, we map the Total Addressable Market for each one. This is how the executive team begins to understand market share, whitespace, and where growth is still available. The TAM layer answers the questions a dashboard alone cannot.</p>
+      <p class="stage-body">With segments defined, we map the Total Addressable Market for each one. This is how the executive team begins to understand market share, whitespace, and where growth is still available. The TAM layer answers the questions a dashboard alone cannot.</p>
       <div class="stage-quote">"How many companies are in the addressable market? Which ones are already customers? Which ones are prospects? Where do we have share? Where do we have whitespace? And who are the contacts we need to reach?"</div>
 
       <div class="tam-shell">
         <div class="tam-map-area" id="tamMap"></div>
+        <div class="map-tooltip" id="mapTooltip"></div>
         <div class="tam-legend">
-          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#2d6bcd;"></div>Active customer</div>
-          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#38b2a0;"></div>Engaged / recent</div>
-          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#aab8c8;"></div>Lead / prospect</div>
-          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#f59e0b;"></div>Lapsed</div>
+          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#2a72d5;"></div>Active customer</div>
+          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#3baf9e;"></div>Engaged / recent</div>
+          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#9eaab8;"></div>Lead / prospect</div>
+          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#e8a020;"></div>Lapsed</div>
         </div>
         <div class="tam-count">
           <div class="tam-count-val">895</div>
@@ -493,124 +539,177 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     </div>
 
     <!-- ══ STAGE 5: Personas ══ -->
+    <!-- ══ STAGE 3: Audience Architecture (Tiers + Personas merged) ══ -->
+    <div class="stage" id="stage-3">
+      <div class="stage-eyebrow">Chapter 04 — Audience Architecture</div>
+      <h1 class="stage-title">Who gets the message. <em>And what it says.</em></h1>
+      <p class="stage-body">We structure the audience in two layers. First, we tier accounts by revenue value to establish where effort should be focused. Then within each tier, we define the personas making the decisions — so messaging is personalized by business context and by the job each person is there to do.</p>
+      <div class="stage-quote">"Tier tells us who matters most. Persona tells us what to say to each person inside that account."</div>
+
+      <!-- TIER SECTION — simplified -->
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Step 1 — Revenue Tiering</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:24px;">
+
+        <div style="background:var(--white);padding:18px 20px;">
+          <div style="font-size:22px;font-weight:800;color:var(--green);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T1</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Highest-Value Accounts</div>
+          <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">Largest revenue, deepest relationship. Goal is expansion, not just retention.</div>
+          <div style="font-size:10px;font-weight:600;color:var(--green);">Messaging: Outcomes &amp; ROI</div>
+        </div>
+
+        <div style="background:var(--white);padding:18px 20px;">
+          <div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T2</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Growth Accounts</div>
+          <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">Solid base, underpenetrated category. Right motion moves these to Tier 1.</div>
+          <div style="font-size:10px;font-weight:600;color:var(--body);">Messaging: Value &amp; Availability</div>
+        </div>
+
+        <div style="background:var(--white);padding:18px 20px;">
+          <div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T3</div>
+          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Early-Stage Accounts</div>
+          <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">Narrow engagement or low frequency. Education-first motions activate the relationship.</div>
+          <div style="font-size:10px;font-weight:600;color:var(--body);">Messaging: Problem &amp; Need</div>
+        </div>
+
+      </div>
+
+      <!-- DIVIDER -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+        <div style="flex:1;height:1px;background:var(--rule);"></div>
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">Step 2 — Personas</div>
+        <div style="flex:1;height:1px;background:var(--rule);"></div>
+      </div>
+
+      <!-- 2 persona cards only -->
+      <div class="persona-primary">
+
+        <div class="persona-card-lg">
+          <div class="pc-photo">
+            <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <rect width="400" height="130" fill="#e8f0ea"/>
+              <circle cx="320" cy="-20" r="100" fill="#4a9e7a" opacity="0.12"/>
+              <circle cx="380" cy="140" r="80" fill="#4a9e7a" opacity="0.08"/>
+              <rect x="0" y="0" width="400" height="130" fill="url(#grad1)"/>
+              <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#e0ebe4;stop-opacity:1"/>
+                  <stop offset="100%" style="stop-color:#c8dbd0;stop-opacity:1"/>
+                </linearGradient>
+              </defs>
+              <circle cx="90" cy="55" r="28" fill="#4a9e7a" opacity="0.7"/>
+              <ellipse cx="90" cy="118" rx="38" ry="22" fill="#4a9e7a" opacity="0.5"/>
+              <line x1="150" y1="40" x2="370" y2="40" stroke="#4a9e7a" stroke-width="1.5" opacity="0.3"/>
+              <line x1="150" y1="55" x2="340" y2="55" stroke="#4a9e7a" stroke-width="1.5" opacity="0.2"/>
+              <line x1="150" y1="70" x2="290" y2="70" stroke="#4a9e7a" stroke-width="1.5" opacity="0.15"/>
+              <rect x="150" y="30" width="130" height="22" rx="3" fill="rgba(255,255,255,0.5)"/>
+              <text x="158" y="45" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2e5c42">ALEXANDRA M.</text>
+            </svg>
+            <div class="pc-photo-badge">T1 Accounts · Decision-Maker</div>
+          </div>
+          <div class="pc-body">
+            <div class="pc-role">Executive Buyer</div>
+            <div class="pc-name">VP / C-Suite Leader</div>
+            <div class="pc-seg">Tier 1 &amp; 2 · Segment A &amp; B</div>
+            <div class="pc-rows">
+              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Drive revenue growth and competitive positioning</div></div>
+              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Suppliers that don't scale or speak to strategic outcomes</div></div>
+              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Business outcomes, ROI, and strategic fit</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="persona-card-lg">
+          <div class="pc-photo">
+            <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#e4eaf0;stop-opacity:1"/>
+                  <stop offset="100%" style="stop-color:#ccd6e0;stop-opacity:1"/>
+                </linearGradient>
+              </defs>
+              <rect width="400" height="130" fill="url(#grad2)"/>
+              <circle cx="350" cy="20" r="90" fill="#2d6bcd" opacity="0.08"/>
+              <circle cx="90" cy="55" r="28" fill="#2d6bcd" opacity="0.6"/>
+              <ellipse cx="90" cy="118" rx="38" ry="22" fill="#2d6bcd" opacity="0.4"/>
+              <rect x="148" y="32" width="200" height="1.5" fill="#2d6bcd" opacity="0.25"/>
+              <rect x="148" y="46" width="170" height="1.5" fill="#2d6bcd" opacity="0.2"/>
+              <rect x="148" y="60" width="140" height="1.5" fill="#2d6bcd" opacity="0.15"/>
+              <rect x="150" y="72" width="8" height="22" rx="1" fill="#2d6bcd" opacity="0.3"/>
+              <rect x="163" y="80" width="8" height="14" rx="1" fill="#2d6bcd" opacity="0.25"/>
+              <rect x="176" y="68" width="8" height="26" rx="1" fill="#2d6bcd" opacity="0.35"/>
+              <rect x="150" y="30" width="120" height="20" rx="3" fill="rgba(255,255,255,0.5)"/>
+              <text x="158" y="44" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#1e3a5c">MARCUS T.</text>
+            </svg>
+            <div class="pc-photo-badge">T2 Accounts · Operational Buyer</div>
+          </div>
+          <div class="pc-body">
+            <div class="pc-role">Operational Buyer</div>
+            <div class="pc-name">Category / Ops Manager</div>
+            <div class="pc-seg">Tier 2 &amp; 3 · Segment B &amp; C</div>
+            <div class="pc-rows">
+              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Keep operations running — right product, right time</div></div>
+              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Stockouts, unreliable suppliers, limited category options</div></div>
+              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Availability, service levels, and ease of reorder</div></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ STAGE 4: Prospect Funnel ══ -->
     <div class="stage" id="stage-4">
-      <div class="stage-eyebrow">Chapter 05 — Personas</div>
-      <h1 class="stage-title">Build personas from <em>real opportunity,</em> not assumptions.</h1>
-      <p class="stage-body">Personas are not generic marketing exercises. They are built from actual customer segments and market opportunity. Each persona represents a real buyer role inside the accounts we've already identified — with a specific message, motion, and conversion barrier.</p>
-      <div class="stage-quote">"Once we know the segments and the addressable market, we can build personas that are grounded in real commercial opportunity."</div>
-
-      <div class="persona-grid">
-        <div class="persona-card">
-          <div class="persona-role">Decision-Maker</div>
-          <div class="persona-name">Executive Buyer</div>
-          <div class="persona-row"><div class="persona-key">Priority</div><div class="persona-val">Revenue growth, operational efficiency, competitive position</div></div>
-          <div class="persona-row"><div class="persona-key">Trigger</div><div class="persona-val">Board pressure, competitor moves, market opportunity</div></div>
-          <div class="persona-row"><div class="persona-key">Message</div><div class="persona-val">Business outcomes, ROI, strategic fit</div></div>
-          <div class="persona-row"><div class="persona-key">Barrier</div><div class="persona-val">Risk aversion, incumbent relationships</div></div>
-        </div>
-        <div class="persona-card">
-          <div class="persona-role">Operational Buyer</div>
-          <div class="persona-name">Category / Ops Manager</div>
-          <div class="persona-row"><div class="persona-key">Priority</div><div class="persona-val">Supplier reliability, ease of ordering, product range</div></div>
-          <div class="persona-row"><div class="persona-key">Trigger</div><div class="persona-val">Stockouts, supplier issues, new product need</div></div>
-          <div class="persona-row"><div class="persona-key">Message</div><div class="persona-val">Availability, service levels, category depth</div></div>
-          <div class="persona-row"><div class="persona-key">Barrier</div><div class="persona-val">Process inertia, existing vendor contracts</div></div>
-        </div>
-        <div class="persona-card">
-          <div class="persona-role">Financial Approver</div>
-          <div class="persona-name">CFO / Finance Lead</div>
-          <div class="persona-row"><div class="persona-key">Priority</div><div class="persona-val">Cost control, payment terms, total cost of ownership</div></div>
-          <div class="persona-row"><div class="persona-key">Trigger</div><div class="persona-val">Budget cycle, cost reduction mandate</div></div>
-          <div class="persona-row"><div class="persona-key">Message</div><div class="persona-val">Price competitiveness, consolidated billing, savings</div></div>
-          <div class="persona-row"><div class="persona-key">Barrier</div><div class="persona-val">Switching cost perception, approval process</div></div>
-        </div>
-        <div class="persona-card">
-          <div class="persona-role">Technical Evaluator</div>
-          <div class="persona-name">Procurement / Spec Lead</div>
-          <div class="persona-row"><div class="persona-key">Priority</div><div class="persona-val">Product specs, compliance, quality standards</div></div>
-          <div class="persona-row"><div class="persona-key">Trigger</div><div class="persona-val">New project, spec change, compliance requirement</div></div>
-          <div class="persona-row"><div class="persona-key">Message</div><div class="persona-val">Technical depth, certifications, support</div></div>
-          <div class="persona-row"><div class="persona-key">Barrier</div><div class="persona-val">Spec lock-in, long evaluation cycles</div></div>
-        </div>
-        <div class="persona-card">
-          <div class="persona-role">Influencer / User</div>
-          <div class="persona-name">Field / Project Team</div>
-          <div class="persona-row"><div class="persona-key">Priority</div><div class="persona-val">Ease of use, product availability, delivery speed</div></div>
-          <div class="persona-row"><div class="persona-key">Trigger</div><div class="persona-val">Project start, urgent need, product failure</div></div>
-          <div class="persona-row"><div class="persona-key">Message</div><div class="persona-val">Speed, reliability, familiar brands</div></div>
-          <div class="persona-row"><div class="persona-key">Barrier</div><div class="persona-val">Habit, familiarity with current tools</div></div>
-        </div>
-        <div class="persona-card" style="background:var(--green-pale);border-color:var(--green);">
-          <div class="persona-role" style="color:var(--sig-g);">All Personas</div>
-          <div class="persona-name">The Common Thread</div>
-          <div style="font-size:11px;color:var(--body);line-height:1.6;margin-top:4px;">Each persona receives a tailored message, sales talk track, content offer, and conversion path — mapped to their segment, tier, and active signals. One audience. Multiple entry points.</div>
-          <span class="card-tag tag-g" style="margin-top:8px;">System-connected</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ STAGE 6: Customer Tiering ══ -->
-    <div class="stage" id="stage-5">
-      <div class="stage-eyebrow">Chapter 06 — Customer Value Tiering</div>
-      <h1 class="stage-title">Every customer has a <em>next move.</em></h1>
-      <p class="stage-body">For current customers, the goal is not only retention. The goal is expansion. We use customer value, purchase behavior, product fit, and growth potential to determine which customers can move up — and what motion is required to move them.</p>
-      <div class="stage-quote">"We use customer value, purchase behavior, product fit, and growth potential to understand which customers can move from Tier 3 to Tier 2, or from Tier 2 to Tier 1."</div>
-
-      <div class="tier-grid">
-        <div class="tier-card">
-          <div class="tier-num" style="color:var(--green);">T1</div>
-          <div class="tier-label">Highest-Value Customers</div>
-          <div class="tier-desc">Largest revenue, broadest category depth, strongest relationship. Protect and grow at all costs.</div>
-          <ul class="tier-bullets">
-            <li>Executive relationship management</li>
-            <li>Strategic account plans</li>
-            <li>Loyalty &amp; retention campaigns</li>
-            <li>Proactive cross-sell by seller</li>
-            <li>Early access to new products</li>
-          </ul>
-        </div>
-        <div class="tier-card">
-          <div class="tier-num">T2</div>
-          <div class="tier-label">Growth Customers</div>
-          <div class="tier-desc">Good fit, solid revenue, underpenetrated category. Clear path to Tier 1 with the right motion.</div>
-          <ul class="tier-bullets">
-            <li>Category expansion campaigns</li>
-            <li>Personalized cross-sell offers</li>
-            <li>Seller-assisted growth plays</li>
-            <li>Lifecycle nurture sequences</li>
-            <li>Reorder reminders, usage signals</li>
-          </ul>
-        </div>
-        <div class="tier-card">
-          <div class="tier-num">T3</div>
-          <div class="tier-label">Underdeveloped Customers</div>
-          <div class="tier-desc">Low purchase frequency or narrow category use. Relationship exists but full potential is unrealized.</div>
-          <ul class="tier-bullets">
-            <li>Re-engagement campaigns</li>
-            <li>Product education content</li>
-            <li>Category introduction sequences</li>
-            <li>Automated nurture tracks</li>
-            <li>Win-back with incentive</li>
-          </ul>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ STAGE 7: Prospect Funnel ══ -->
-    <div class="stage" id="stage-6">
-      <div class="stage-eyebrow">Chapter 07 — Prospect Funnel</div>
+      <div class="stage-eyebrow">Chapter 05 — Prospect Funnel</div>
       <h1 class="stage-title">Turn market opportunity into <em>qualified pipeline.</em></h1>
       <p class="stage-body">For prospects, the goal is to convert TAM into pipeline. We use segmentation, TAM fit, intent signals, and engagement data to prioritize who marketing should target and who sales should pursue — at each stage of the funnel.</p>
-      <div class="stage-quote">"For prospects, the goal is to turn market opportunity into qualified pipeline. We use segmentation, intent, engagement, and fit data to prioritize who marketing should target and who sales should pursue."</div>
 
-      <div class="funnel-row" id="funnelRow">
-        <div class="funnel-cell lit"><div class="funnel-stage">Visitor</div><div class="funnel-num">2.4M</div><div class="funnel-note">Market reach</div><span class="funnel-arrow">›</span></div>
-        <div class="funnel-cell lit"><div class="funnel-stage">Lead</div><div class="funnel-num">12,400</div><div class="funnel-note">Identified accounts</div><span class="funnel-arrow">›</span></div>
-        <div class="funnel-cell lit"><div class="funnel-stage">MQL</div><div class="funnel-num">3,840</div><div class="funnel-note"><strong>31%</strong> of leads</div><span class="funnel-arrow">›</span></div>
-        <div class="funnel-cell lit"><div class="funnel-stage">SQL</div><div class="funnel-num">1,228</div><div class="funnel-note">MQL→SQL <strong>32%</strong></div><span class="funnel-arrow">›</span></div>
-        <div class="funnel-cell lit"><div class="funnel-stage">Opportunity</div><div class="funnel-num">614</div><div class="funnel-note">SQL→Opp <strong>50%</strong></div><span class="funnel-arrow">›</span></div>
-        <div class="funnel-cell lit"><div class="funnel-stage">Closed Won</div><div class="funnel-num">196</div><div class="funnel-note">Win rate <strong>31.9%</strong></div><span class="funnel-arrow">›</span></div>
-        <div class="funnel-cell lit"><div class="funnel-stage">Customer</div><div class="funnel-num">$84.2M</div><div class="funnel-note">TTM revenue</div></div>
+      <div style="margin-bottom:20px;">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Funnel Stage Breakdown</div>
+        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;">
+
+          <div style="background:var(--white);padding:12px 10px;text-align:center;position:relative;">
+            <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:6px;">Market Reach</div>
+            <div style="font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;">2.4M</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:4px;">Impressions</div>
+          </div>
+
+          <div style="background:var(--white);padding:12px 10px;text-align:center;position:relative;">
+            <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:6px;">Leads</div>
+            <div style="font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;">12,400</div>
+            <div style="font-size:9px;color:var(--muted);margin-top:4px;">Accounts</div>
+          </div>
+
+          <div style="background:var(--white);padding:12px 10px;text-align:center;position:relative;">
+            <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:6px;">MQL</div>
+            <div style="font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;">3,840</div>
+            <div style="font-size:9px;color:var(--sig-g);font-weight:600;margin-top:4px;">31% of leads</div>
+          </div>
+
+          <div style="background:var(--white);padding:12px 10px;text-align:center;position:relative;">
+            <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:6px;">SQL</div>
+            <div style="font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;">1,228</div>
+            <div style="font-size:9px;color:var(--sig-g);font-weight:600;margin-top:4px;">32% conv.</div>
+          </div>
+
+          <div style="background:var(--white);padding:12px 10px;text-align:center;position:relative;">
+            <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:6px;">Opportunity</div>
+            <div style="font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;">614</div>
+            <div style="font-size:9px;color:var(--sig-g);font-weight:600;margin-top:4px;">50% conv.</div>
+          </div>
+
+          <div style="background:var(--white);padding:12px 10px;text-align:center;position:relative;">
+            <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:6px;">Closed Won</div>
+            <div style="font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;">196</div>
+            <div style="font-size:9px;color:var(--sig-g);font-weight:600;margin-top:4px;">31.9% win rate</div>
+          </div>
+
+          <div style="background:var(--green-pale);padding:12px 10px;text-align:center;">
+            <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--green);margin-bottom:6px;">Revenue</div>
+            <div style="font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;">$84.2M</div>
+            <div style="font-size:9px;color:var(--green);font-weight:600;margin-top:4px;">TTM closed</div>
+          </div>
+
+        </div>
       </div>
 
       <div class="three-col" style="margin-bottom:0;">
@@ -621,8 +720,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     </div>
 
     <!-- ══ STAGE 8: Signal Intelligence ══ -->
-    <div class="stage" id="stage-7">
-      <div class="stage-eyebrow">Chapter 08 — Signal Intelligence</div>
+    <div class="stage" id="stage-5">
+      <div class="stage-eyebrow">Chapter 06 — Signal Intelligence</div>
       <h1 class="stage-title">Act on the right signal <em>at the right moment.</em></h1>
       <p class="stage-body">Signals tell us when to act. Instead of treating every customer or prospect the same, we monitor market, account, and contact-level activity to understand when there is a real reason to engage — and when waiting means losing.</p>
       <div class="stage-quote">"Instead of treating every customer or prospect the same, we monitor market, account, and contact-level activity to understand when there is a reason to engage."</div>
@@ -654,8 +753,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     </div>
 
     <!-- ══ STAGE 9: Campaign Activation ══ -->
-    <div class="stage" id="stage-8">
-      <div class="stage-eyebrow">Chapter 09 — Campaign Activation</div>
+    <div class="stage" id="stage-6">
+      <div class="stage-eyebrow">Chapter 07 — Campaign Activation</div>
       <h1 class="stage-title">From signal to <em>coordinated action.</em></h1>
       <p class="stage-body">Once a signal is detected, the system turns insight into action. Marketing builds the message, advertising amplifies it, and sales receives a clear motion — who to contact, why now, and what to say. The public funding signal becomes a real campaign example here.</p>
       <div class="stage-quote">"Marketing builds the message, advertising amplifies it, and sales receives a clear motion for who to contact, why now, and what to say."</div>
@@ -698,8 +797,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     </div>
 
     <!-- ══ STAGE 10: Sales Motion ══ -->
-    <div class="stage" id="stage-9">
-      <div class="stage-eyebrow">Chapter 10 — Sales Motion</div>
+    <div class="stage" id="stage-7">
+      <div class="stage-eyebrow">Chapter 08 — Sales Motion</div>
       <h1 class="stage-title">Sales execution built on the <em>same intelligence.</em></h1>
       <p class="stage-body">The same segmentation, TAM, tiering, and signals that power marketing should also power sales execution. Account assignment, territory coverage, seller prioritization, and talk tracks all connect back to the customer segment, opportunity tier, and active signals.</p>
       <div class="stage-quote">"Sales motions become stronger when they are built from the same intelligence layer as marketing."</div>
@@ -739,8 +838,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     </div>
 
     <!-- ══ STAGE 11: Alignment ══ -->
-    <div class="stage" id="stage-10">
-      <div class="stage-eyebrow">Chapter 11 — Marketing + Sales Alignment</div>
+    <div class="stage" id="stage-8">
+      <div class="stage-eyebrow">Chapter 09 — Marketing + Sales Alignment</div>
       <h1 class="stage-title">One system. <em>Two engines.</em></h1>
       <p class="stage-body">The power of this model is alignment. Marketing and sales are not working from separate plans. They are operating from the same KPI framework, the same customer intelligence, and the same market opportunity model — feeding performance back into the executive dashboard together.</p>
       <div class="stage-quote">"Marketing and sales are not working from separate plans. They are operating from the same intelligence layer."</div>
@@ -759,15 +858,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         </div>
         <div class="align-center">
           <div class="align-center-label">Shared Intelligence Layer</div>
+          <div class="align-sep"></div>
           <div class="align-center-val">KPI Framework</div>
-          <div style="width:1px;height:8px;background:rgba(255,255,255,0.3);"></div>
+          <div class="align-sep"></div>
           <div class="align-center-val">Segmentation</div>
-          <div style="width:1px;height:8px;background:rgba(255,255,255,0.3);"></div>
+          <div class="align-sep"></div>
           <div class="align-center-val">TAM + Personas</div>
-          <div style="width:1px;height:8px;background:rgba(255,255,255,0.3);"></div>
+          <div class="align-sep"></div>
           <div class="align-center-val">Tiering</div>
-          <div style="width:1px;height:8px;background:rgba(255,255,255,0.3);"></div>
+          <div class="align-sep"></div>
           <div class="align-center-val">Signals</div>
+          <div class="align-sep"></div>
         </div>
         <div class="align-side">
           <div class="align-eye">Sales Outputs</div>
@@ -784,8 +885,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     </div>
 
     <!-- ══ STAGE 12: Return to Dashboard ══ -->
-    <div class="stage" id="stage-11">
-      <div class="stage-eyebrow">Chapter 12 — Performance Layer</div>
+    <div class="stage" id="stage-9">
+      <div class="stage-eyebrow">Chapter 10 — Performance Layer</div>
       <h1 class="stage-title">Back to the dashboard. <em>Now it means something.</em></h1>
       <p class="stage-body">We return to where we started — but the dashboard looks different now. Every KPI has a system behind it: a segment it belongs to, a tier it represents, a signal that activated it, and a campaign or sales motion that drove it. The dashboard is the performance layer of a complete commercial system.</p>
       <div class="stage-quote">"The dashboard is not the starting point and it is not the strategy by itself. It is the performance layer of a complete commercial system."</div>
@@ -828,26 +929,39 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
 <script>
 const STAGES = [
-  { label: "KPI Foundation",       eyebrow: "The Scoreboard" },
-  { label: "Growth Objective",     eyebrow: "What + Who" },
-  { label: "Segmentation",         eyebrow: "Intelligence Layer 1" },
-  { label: "Total Addressable Market", eyebrow: "Intelligence Layer 2" },
-  { label: "Personas",             eyebrow: "Intelligence Layer 3" },
-  { label: "Customer Tiering",     eyebrow: "Customer Strategy" },
-  { label: "Prospect Funnel",      eyebrow: "Prospect Strategy" },
-  { label: "Signal Intelligence",  eyebrow: "Activation Layer" },
-  { label: "Campaign Activation",  eyebrow: "Marketing Engine" },
-  { label: "Sales Motion",         eyebrow: "Sales Engine" },
-  { label: "M+S Alignment",        eyebrow: "Operating Model" },
-  { label: "Return to Dashboard",  eyebrow: "Performance Layer" },
+  { label: "KPI Foundation",           eyebrow: "The Scoreboard" },
+  { label: "Segmentation",             eyebrow: "Audience + Growth Objective" },
+  { label: "Total Addressable Market", eyebrow: "Intelligence Layer" },
+  { label: "Audience Architecture",    eyebrow: "Tiers + Personas" },
+  { label: "Prospect Funnel",          eyebrow: "Prospect Strategy" },
+  { label: "Signal Intelligence",      eyebrow: "Activation Layer" },
+  { label: "Campaign Activation",      eyebrow: "Marketing Engine" },
+  { label: "Sales Motion",             eyebrow: "Sales Engine" },
+  { label: "M+S Alignment",            eyebrow: "Operating Model" },
+  { label: "Return to Dashboard",      eyebrow: "Performance Layer" },
 ];
 
 let current = 0;
 
+// Section headers
+const sections = [
+  {start:0, label:'Foundation',           foundation:true},
+  {start:4, label:'Execution',            foundation:false},
+  {start:7, label:'Measurement & System', foundation:false},
+];
+
 // Build rail
 const rail = document.getElementById('rail');
 STAGES.forEach((s, i) => {
-  if (i > 0) {
+  const sec = sections.find(s => s.start === i);
+  if (sec) {
+    if (i > 0) { const sp = document.createElement('div'); sp.style.height = '12px'; rail.appendChild(sp); }
+    const hdr = document.createElement('div');
+    hdr.className = 'rail-section-hdr' + (sec.foundation ? ' foundation' : '');
+    hdr.textContent = sec.label;
+    rail.appendChild(hdr);
+  }
+  if (i > 0 && !sections.find(s => s.start === i)) {
     const conn = document.createElement('div');
     conn.className = 'rail-connector';
     rail.appendChild(conn);
@@ -860,45 +974,510 @@ STAGES.forEach((s, i) => {
   rail.appendChild(ch);
 });
 
-// Build TAM map
+// Build TAM map — SVG street grid + account dots
 function buildTAMMap() {
-  const map = document.getElementById('tamMap');
-  if (!map) return;
-  const dots = [
-    // Active customers — blue
-    {x:12,y:18,s:10,c:'#2d6bcd'},{x:18,y:28,s:8,c:'#2d6bcd'},{x:25,y:15,s:12,c:'#2d6bcd'},
-    {x:35,y:35,s:8,c:'#2d6bcd'},{x:42,y:22,s:10,c:'#2d6bcd'},{x:50,y:45,s:14,c:'#2d6bcd'},
-    {x:55,y:18,s:8,c:'#2d6bcd'},{x:62,y:55,s:10,c:'#2d6bcd'},{x:68,y:30,s:12,c:'#2d6bcd'},
-    {x:72,y:65,s:8,c:'#2d6bcd'},{x:78,y:42,s:10,c:'#2d6bcd'},{x:82,y:20,s:8,c:'#2d6bcd'},
-    {x:88,y:55,s:12,c:'#2d6bcd'},{x:15,y:55,s:8,c:'#2d6bcd'},{x:30,y:68,s:10,c:'#2d6bcd'},
-    {x:45,y:72,s:8,c:'#2d6bcd'},{x:58,y:78,s:12,c:'#2d6bcd'},{x:73,y:80,s:8,c:'#2d6bcd'},
-    {x:85,y:72,s:10,c:'#2d6bcd'},{x:92,y:35,s:8,c:'#2d6bcd'},
-    // Engaged — teal
-    {x:20,y:42,s:8,c:'#38b2a0'},{x:32,y:22,s:7,c:'#38b2a0'},{x:48,y:58,s:8,c:'#38b2a0'},
-    {x:60,y:40,s:7,c:'#38b2a0'},{x:75,y:52,s:8,c:'#38b2a0'},{x:38,y:48,s:7,c:'#38b2a0'},
-    {x:65,y:70,s:8,c:'#38b2a0'},{x:22,y:72,s:7,c:'#38b2a0'},{x:52,y:32,s:8,c:'#38b2a0'},
-    {x:80,y:82,s:7,c:'#38b2a0'},{x:90,y:68,s:8,c:'#38b2a0'},{x:10,y:82,s:7,c:'#38b2a0'},
-    // Lapsed — amber
-    {x:28,y:58,s:7,c:'#f59e0b'},{x:70,y:22,s:7,c:'#f59e0b'},{x:48,y:82,s:7,c:'#f59e0b'},
-    {x:86,y:40,s:7,c:'#f59e0b'},{x:14,y:38,s:7,c:'#f59e0b'},{x:40,y:12,s:7,c:'#f59e0b'},
-    {x:93,y:82,s:7,c:'#f59e0b'},
-    // Leads — grey
-    {x:8,y:65,s:6,c:'#aab8c8'},{x:16,y:8,s:6,c:'#aab8c8'},{x:22,y:85,s:6,c:'#aab8c8'},
-    {x:33,y:12,s:6,c:'#aab8c8'},{x:38,y:82,s:5,c:'#aab8c8'},{x:44,y:8,s:6,c:'#aab8c8'},
-    {x:46,y:38,s:5,c:'#aab8c8'},{x:53,y:65,s:6,c:'#aab8c8'},{x:56,y:8,s:5,c:'#aab8c8'},
-    {x:64,y:85,s:6,c:'#aab8c8'},{x:66,y:45,s:5,c:'#aab8c8'},{x:72,y:10,s:6,c:'#aab8c8'},
-    {x:76,y:72,s:5,c:'#aab8c8'},{x:80,y:30,s:6,c:'#aab8c8'},{x:84,y:88,s:5,c:'#aab8c8'},
-    {x:90,y:12,s:6,c:'#aab8c8'},{x:94,y:55,s:5,c:'#aab8c8'},{x:6,y:48,s:6,c:'#aab8c8'},
-    {x:10,y:28,s:5,c:'#aab8c8'},{x:26,y:38,s:6,c:'#aab8c8'},{x:36,y:60,s:5,c:'#aab8c8'},
-    {x:43,y:28,s:6,c:'#aab8c8'},{x:58,y:52,s:5,c:'#aab8c8'},{x:69,y:18,s:6,c:'#aab8c8'},
-    {x:77,y:88,s:5,c:'#aab8c8'},{x:85,y:62,s:6,c:'#aab8c8'},{x:92,y:22,s:5,c:'#aab8c8'},
-    {x:18,y:62,s:6,c:'#aab8c8'},{x:28,y:48,s:5,c:'#aab8c8'},{x:54,y:88,s:6,c:'#aab8c8'},
+  const container = document.getElementById('tamMap');
+  if (!container) return;
+
+  // ── SVG base map — realistic coastal city map ────────────────────
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 900 360');
+  svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+
+  svg.innerHTML = `
+  <defs>
+    <linearGradient id="waterG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6b7280"/>
+      <stop offset="100%" stop-color="#4b5563"/>
+    </linearGradient>
+    <linearGradient id="landG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#e8e4dd"/>
+      <stop offset="100%" stop-color="#dedad2"/>
+    </linearGradient>
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#00000030"/>
+    </filter>
+  </defs>
+
+  <!-- ── WATER — full background, dark grey like a real map ── -->
+  <rect width="900" height="360" fill="url(#waterG)"/>
+
+  <!-- Water texture — subtle depth variation -->
+  <rect x="0" y="0" width="220" height="360" fill="#5a6170" opacity="0.3"/>
+  <path d="M0,0 L180,0 L140,360 L0,360 Z" fill="#3f4754" opacity="0.25"/>
+
+  <!-- ── LAND MASS — irregular coastal shape, left-side bay ── -->
+  <!--
+    The coastline runs roughly north-south with:
+    - A deep bay/inlet on the upper-left (like San Francisco Bay)
+    - A peninsula jutting down
+    - Irregular rocky outcrops
+    - The main land mass filling the right 75% of the frame
+  -->
+  <path d="
+    M 900,0
+    L 900,360
+    L 145,360
+    L 138,340
+    L 128,318
+    L 118,305
+    L 105,298
+    Q 95,290 100,278
+    L 110,265
+    L 115,252
+    L 108,240
+    Q 98,228 88,232
+    L 75,238
+    L 62,235
+    L 55,222
+    L 58,208
+    L 68,198
+    Q 78,190 74,178
+    L 65,168
+    L 60,155
+    L 66,142
+    L 78,135
+    L 90,130
+    Q 105,125 108,112
+    L 105,98
+    L 95,88
+    L 88,75
+    L 92,62
+    L 104,54
+    L 118,50
+    L 130,52
+    L 145,48
+    L 158,40
+    L 165,28
+    L 172,16
+    L 185,8
+    L 200,4
+    L 900,0
+    Z
+  " fill="url(#landG)" filter="url(#shadow)"/>
+
+  <!-- ── SECONDARY LAND — peninsula / island on the bay ── -->
+  <path d="
+    M 52,140
+    L 62,135
+    L 72,130
+    L 80,122
+    L 82,110
+    L 76,100
+    L 66,96
+    L 55,98
+    L 46,106
+    L 44,118
+    L 48,130
+    Z
+  " fill="#e0dbd3"/>
+
+  <!-- Small island in bay -->
+  <ellipse cx="44" cy="200" rx="14" ry="8" fill="#d8d4cc" transform="rotate(-15,44,200)"/>
+
+  <!-- ── PARKS / GREEN AREAS ── -->
+  <rect x="310" y="58"  width="55"  height="38" rx="3" fill="#c8d9b8" opacity="0.7"/>
+  <rect x="520" y="140" width="40"  height="28" rx="3" fill="#c8d9b8" opacity="0.6"/>
+  <rect x="680" y="220" width="60"  height="35" rx="3" fill="#c8d9b8" opacity="0.65"/>
+  <rect x="200" y="260" width="45"  height="30" rx="3" fill="#c8d9b8" opacity="0.6"/>
+  <ellipse cx="820" cy="80" rx="32" ry="22" fill="#c8d9b8" opacity="0.5"/>
+
+  <!-- ── WATER BODY INLAND — bay inlet / estuary ── -->
+  <path d="
+    M 58,208
+    L 68,198
+    L 78,192
+    L 90,188
+    L 100,185
+    L 112,188
+    L 118,196
+    L 120,208
+    L 116,220
+    L 108,230
+    L 96,236
+    L 82,238
+    L 70,234
+    L 60,226
+    Z
+  " fill="#6b7890" opacity="0.8"/>
+
+  <!-- River/channel running inland -->
+  <path d="M 108,230 Q 130,250 125,275 Q 120,298 130,315 Q 138,330 145,360"
+        stroke="#7a8898" stroke-width="8" fill="none" opacity="0.6"/>
+
+  <!-- ── CITY BLOCKS — varying sizes, realistic urban texture ── -->
+  <!-- Dense urban core, center-right -->
+  <rect x="420" y="90"  width="28" height="18" rx="1" fill="#d4cfc8" opacity="0.8"/>
+  <rect x="452" y="90"  width="22" height="18" rx="1" fill="#d4cfc8" opacity="0.8"/>
+  <rect x="478" y="90"  width="30" height="18" rx="1" fill="#cec9c2" opacity="0.8"/>
+  <rect x="420" y="112" width="28" height="22" rx="1" fill="#d0cbc4" opacity="0.75"/>
+  <rect x="452" y="112" width="22" height="22" rx="1" fill="#d4cfc8" opacity="0.75"/>
+  <rect x="478" y="112" width="30" height="22" rx="1" fill="#cec9c2" opacity="0.75"/>
+  <rect x="512" y="90"  width="25" height="18" rx="1" fill="#d4cfc8" opacity="0.8"/>
+  <rect x="541" y="90"  width="28" height="18" rx="1" fill="#cec9c2" opacity="0.75"/>
+  <rect x="512" y="112" width="25" height="22" rx="1" fill="#d0cbc4" opacity="0.75"/>
+  <rect x="541" y="112" width="28" height="22" rx="1" fill="#d4cfc8" opacity="0.75"/>
+
+  <!-- Mid-density blocks -->
+  <rect x="230" y="80"  width="40" height="26" rx="1" fill="#d8d3cc" opacity="0.7"/>
+  <rect x="275" y="80"  width="32" height="26" rx="1" fill="#d4cfc8" opacity="0.7"/>
+  <rect x="230" y="110" width="40" height="22" rx="1" fill="#d8d3cc" opacity="0.65"/>
+  <rect x="275" y="110" width="32" height="22" rx="1" fill="#d4cfc8" opacity="0.65"/>
+  <rect x="370" y="80"  width="46" height="26" rx="1" fill="#d4cfc8" opacity="0.7"/>
+  <rect x="370" y="110" width="46" height="22" rx="1" fill="#d8d3cc" opacity="0.65"/>
+
+  <!-- Suburb blocks — eastern zone -->
+  <rect x="620" y="70"  width="50" height="30" rx="2" fill="#dedad2" opacity="0.6"/>
+  <rect x="675" y="70"  width="40" height="30" rx="2" fill="#d8d3cc" opacity="0.6"/>
+  <rect x="620" y="105" width="50" height="28" rx="2" fill="#dedad2" opacity="0.55"/>
+  <rect x="675" y="105" width="40" height="28" rx="2" fill="#d8d3cc" opacity="0.55"/>
+  <rect x="720" y="70"  width="55" height="30" rx="2" fill="#dedad2" opacity="0.6"/>
+  <rect x="780" y="70"  width="45" height="30" rx="2" fill="#d8d3cc" opacity="0.6"/>
+  <rect x="720" y="105" width="55" height="28" rx="2" fill="#dedad2" opacity="0.55"/>
+  <rect x="780" y="105" width="45" height="28" rx="2" fill="#d8d3cc" opacity="0.55"/>
+
+  <!-- Lower zone blocks -->
+  <rect x="200" y="195" width="42" height="28" rx="1" fill="#d4cfc8" opacity="0.65"/>
+  <rect x="246" y="195" width="35" height="28" rx="1" fill="#d8d3cc" opacity="0.65"/>
+  <rect x="285" y="195" width="40" height="28" rx="1" fill="#d4cfc8" opacity="0.6"/>
+  <rect x="200" y="228" width="42" height="26" rx="1" fill="#d8d3cc" opacity="0.6"/>
+  <rect x="246" y="228" width="35" height="26" rx="1" fill="#d4cfc8" opacity="0.6"/>
+  <rect x="285" y="228" width="40" height="26" rx="1" fill="#d8d3cc" opacity="0.55"/>
+
+  <rect x="380" y="185" width="48" height="30" rx="1" fill="#d4cfc8" opacity="0.65"/>
+  <rect x="432" y="185" width="38" height="30" rx="1" fill="#d8d3cc" opacity="0.65"/>
+  <rect x="474" y="185" width="42" height="30" rx="1" fill="#d4cfc8" opacity="0.6"/>
+  <rect x="380" y="220" width="48" height="26" rx="1" fill="#d8d3cc" opacity="0.6"/>
+  <rect x="432" y="220" width="38" height="26" rx="1" fill="#d4cfc8" opacity="0.6"/>
+  <rect x="474" y="220" width="42" height="26" rx="1" fill="#d8d3cc" opacity="0.55"/>
+
+  <rect x="580" y="185" width="52" height="32" rx="2" fill="#dedad2" opacity="0.6"/>
+  <rect x="636" y="185" width="42" height="32" rx="2" fill="#d8d3cc" opacity="0.6"/>
+  <rect x="580" y="222" width="52" height="28" rx="2" fill="#dedad2" opacity="0.55"/>
+  <rect x="636" y="222" width="42" height="28" rx="2" fill="#d8d3cc" opacity="0.55"/>
+
+  <rect x="750" y="185" width="55" height="32" rx="2" fill="#dedad2" opacity="0.6"/>
+  <rect x="810" y="185" width="48" height="32" rx="2" fill="#d8d3cc" opacity="0.6"/>
+  <rect x="750" y="222" width="55" height="28" rx="2" fill="#dedad2" opacity="0.55"/>
+  <rect x="810" y="222" width="48" height="28" rx="2" fill="#d8d3cc" opacity="0.55"/>
+
+  <!-- Southern zone blocks -->
+  <rect x="180" y="295" width="50" height="34" rx="1" fill="#d4cfc8" opacity="0.6"/>
+  <rect x="234" y="295" width="42" height="34" rx="1" fill="#d8d3cc" opacity="0.6"/>
+  <rect x="280" y="295" width="38" height="34" rx="1" fill="#d4cfc8" opacity="0.55"/>
+  <rect x="380" y="290" width="48" height="35" rx="1" fill="#d8d3cc" opacity="0.6"/>
+  <rect x="432" y="290" width="40" height="35" rx="1" fill="#d4cfc8" opacity="0.6"/>
+  <rect x="476" y="290" width="45" height="35" rx="1" fill="#d8d3cc" opacity="0.55"/>
+  <rect x="580" y="285" width="55" height="35" rx="2" fill="#dedad2" opacity="0.55"/>
+  <rect x="638" y="285" width="42" height="35" rx="2" fill="#d8d3cc" opacity="0.55"/>
+  <rect x="750" y="285" width="58" height="35" rx="2" fill="#dedad2" opacity="0.55"/>
+  <rect x="812" y="285" width="44" height="35" rx="2" fill="#d8d3cc" opacity="0.55"/>
+
+  <!-- ── ROAD NETWORK — realistic street grid with arterials ── -->
+  <g fill="none">
+
+    <!-- Major arterials — wide, cream/white -->
+    <!-- Horizontal arterials -->
+    <line x1="160" y1="62"  x2="900" y2="58"  stroke="#f5f2ec" stroke-width="4"/>
+    <line x1="150" y1="138" x2="900" y2="135" stroke="#f5f2ec" stroke-width="5"/>
+    <line x1="140" y1="180" x2="900" y2="178" stroke="#ebe8e0" stroke-width="3.5"/>
+    <line x1="135" y1="258" x2="900" y2="255" stroke="#f5f2ec" stroke-width="4.5"/>
+    <line x1="148" y1="328" x2="900" y2="325" stroke="#ebe8e0" stroke-width="3"/>
+
+    <!-- Vertical arterials -->
+    <line x1="210" y1="10"  x2="208" y2="360" stroke="#f5f2ec" stroke-width="4"/>
+    <line x1="370" y1="10"  x2="368" y2="360" stroke="#f5f2ec" stroke-width="3.5"/>
+    <line x1="520" y1="10"  x2="518" y2="360" stroke="#f5f2ec" stroke-width="5"/>
+    <line x1="680" y1="10"  x2="678" y2="360" stroke="#ebe8e0" stroke-width="3.5"/>
+    <line x1="830" y1="10"  x2="828" y2="360" stroke="#f5f2ec" stroke-width="4"/>
+
+    <!-- Secondary streets — thinner -->
+    <line x1="170" y1="100" x2="900" y2="97"  stroke="#eeeae2" stroke-width="2"/>
+    <line x1="160" y1="160" x2="900" y2="158" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="155" y1="220" x2="900" y2="218" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="152" y1="295" x2="900" y2="292" stroke="#eeeae2" stroke-width="1.5"/>
+
+    <line x1="290" y1="10"  x2="288" y2="360" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="445" y1="10"  x2="443" y2="360" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="600" y1="10"  x2="598" y2="360" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="755" y1="10"  x2="753" y2="360" stroke="#eeeae2" stroke-width="1.5"/>
+
+    <!-- Diagonal arterial — cuts across grid, common in real cities -->
+    <path d="M 165,50 Q 300,110 370,138 Q 450,165 520,178" stroke="#f0ece4" stroke-width="3.5" fill="none"/>
+    <path d="M 520,178 Q 590,190 680,200 Q 750,208 830,215"  stroke="#eceae0" stroke-width="3" fill="none"/>
+
+    <!-- Local streets — very thin -->
+    <line x1="175" y1="78"  x2="900" y2="76"  stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="168" y1="118" x2="900" y2="116" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="158" y1="200" x2="900" y2="198" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="155" y1="238" x2="900" y2="236" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="152" y1="315" x2="900" y2="312" stroke="#e8e4dc" stroke-width="1"/>
+
+    <line x1="250" y1="10"  x2="248" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="330" y1="10"  x2="328" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="410" y1="10"  x2="408" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="480" y1="10"  x2="478" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="560" y1="10"  x2="558" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="640" y1="10"  x2="638" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="720" y1="10"  x2="718" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="795" y1="10"  x2="793" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+    <line x1="865" y1="10"  x2="863" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
+  </g>
+
+  <!-- ── COASTLINE EDGE — crisp shore detail ── -->
+  <!-- Main shore edge with slight shadow to water -->
+  <path d="
+    M 172,16 L 165,28 L 158,40 L 145,48 L 130,52 L 118,50
+    L 104,54 L 92,62 L 88,75 L 95,88 L 105,98 L 108,112
+    Q 105,125 90,130 L 78,135 L 66,142 L 60,155 L 65,168
+    Q 74,178 68,198 L 58,208
+  " stroke="#b0a898" stroke-width="1.5" fill="none" opacity="0.8"/>
+  <path d="
+    M 58,208 L 55,222 L 62,235 L 75,238 L 88,232
+    Q 98,228 108,240 L 115,252 L 110,265 L 100,278
+    Q 95,290 105,298 L 118,305 L 128,318 L 138,340 L 145,360
+  " stroke="#b0a898" stroke-width="1.5" fill="none" opacity="0.8"/>
+
+  <!-- Slight wave/shore texture in water near coast -->
+  <path d="M 30,80  Q 50,85  35,95"  stroke="#7a8898" stroke-width="1" fill="none" opacity="0.4"/>
+  <path d="M 25,140 Q 45,148 30,158" stroke="#7a8898" stroke-width="1" fill="none" opacity="0.4"/>
+  <path d="M 20,300 Q 40,308 25,318" stroke="#7a8898" stroke-width="1" fill="none" opacity="0.4"/>
+
+  <!-- ── PLACE NAME LABELS — sparse, like real map ── -->
+  <text x="255" y="128" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Northgate</text>
+  <text x="390" y="128" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#8a8078" letter-spacing="0.4" opacity="0.9">Central District</text>
+  <text x="555" y="128" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Eastside</text>
+  <text x="695" y="128" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Hillcrest</text>
+  <text x="840" y="128" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Ridgeline</text>
+  <text x="200" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Bayside</text>
+  <text x="380" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Midtown</text>
+  <text x="555" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Southpark</text>
+  <text x="700" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Valleyview</text>
+  <text x="840" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Farpoint</text>
+
+  <!-- Bay label in water -->
+  <text x="20" y="192" font-family="Inter,sans-serif" font-size="8" font-weight="400" fill="#9aaabb" letter-spacing="1" opacity="0.7" transform="rotate(-75,20,192)">COASTAL BAY</text>
+  `;
+  container.appendChild(svg);
+
+  // ── Account dots — placed only on land areas ──────────────────────
+  function rnd(min, max, seed) {
+    const x = Math.sin(seed * 9301 + 49297) * 233280;
+    return min + (x - Math.floor(x)) * (max - min);
+  }
+
+  // Land zones — rectangles clear of the water/coast on the left
+  const zones = [
+    // Upper band
+    {x1:215,x2:355,y1:22, y2:130},
+    {x1:375,x2:510,y1:18, y2:130},
+    {x1:525,x2:670,y1:18, y2:130},
+    {x1:685,x2:820,y1:18, y2:130},
+    {x1:835,x2:895,y1:18, y2:130},
+    // Middle band
+    {x1:160,x2:355,y1:142,y2:252},
+    {x1:375,x2:510,y1:142,y2:252},
+    {x1:525,x2:670,y1:142,y2:252},
+    {x1:685,x2:820,y1:142,y2:252},
+    {x1:835,x2:895,y1:142,y2:252},
+    // Lower band
+    {x1:158,x2:355,y1:262,y2:350},
+    {x1:375,x2:510,y1:262,y2:350},
+    {x1:525,x2:670,y1:262,y2:350},
+    {x1:685,x2:820,y1:262,y2:350},
+    {x1:835,x2:895,y1:262,y2:350},
   ];
-  dots.forEach(d => {
+
+  // Named fictional companies for rich hover tooltips
+  const activeNames = [
+    'Meridian Apparel Co · Active · $142K TTM',
+    'Crestline Fashion Group · Active · $284K TTM',
+    'Holloway Retail Partners · Active · $198K TTM',
+    'Summit Style Inc · Active · $310K TTM',
+    'Parkview Clothing Co · Active · $88K TTM',
+    'Lakeshore Brands LLC · Active · $176K TTM',
+    'Northgate Outfitters · Active · $224K TTM',
+    'Ridgeline Retail Group · Active · $156K TTM',
+    'Bayside Fashion Co · Active · $342K TTM',
+    'Central Ave Clothiers · Active · $412K TTM',
+    'Westfield Style House · Active · $267K TTM',
+    'Eastpoint Garments · Active · $193K TTM',
+    'Cornerstone Apparel · Active · $128K TTM',
+    'Harborview Brands · Active · $88K TTM',
+    'Clearwater Retail LLC · Active · $74K TTM',
+    'Highline Fashion Group · Active · $165K TTM',
+    'Bridgepoint Clothiers · Active · $209K TTM',
+    'Valleyview Style Co · Active · $118K TTM',
+    'Foxhill Apparel Inc · Active · $94K TTM',
+    'Wavecrest Retail Group · Active · $236K TTM',
+    'Stillwater Brands · Active · $148K TTM',
+    'Copperfield Fashion Co · Active · $82K TTM',
+  ];
+
+  const engagedNames = [
+    'Ashford Retail Co · Engaged · Last order 42 days ago',
+    'Brookdale Style Group · Recent · Last order 28 days ago',
+    'Cloverton Apparel · Engaged · Category expansion opportunity',
+    'Dunmore Fashion LLC · Recent · Last order 31 days ago',
+    'Elmwood Clothiers · Engaged · Cross-sell signal active',
+    'Fairfield Retail Inc · Recent · Last order 19 days ago',
+    'Glenwood Style Co · Engaged · Reorder reminder sent',
+    'Hartfield Brands · Recent · Last order 55 days ago',
+    'Ironwood Apparel · Engaged · Meeting scheduled',
+    'Juniper Retail Group · Recent · Last order 37 days ago',
+    'Kingsway Fashion · Engaged · Category expansion opportunity',
+    'Lakewood Clothiers · Recent · Last order 22 days ago',
+    'Maplecrest Style · Engaged · Upsell in progress',
+  ];
+
+  const lapsedNames = [
+    'Norwood Apparel Co · Lapsed · No order in 180 days',
+    'Oakdale Retail LLC · Lapsed · No order in 210 days',
+    'Pinecrest Fashion · Lapsed · No order in 165 days',
+    'Queensbury Style · Lapsed · Win-back campaign active',
+    'Riverside Brands · Lapsed · No order in 240 days',
+    'Stonefield Clothiers · Lapsed · No order in 195 days',
+    'Thornwood Retail · Lapsed · Re-engagement sent',
+  ];
+
+  const leadNames = [
+    'Alderwood Style Group · Lead · High fit score',
+    'Birchwood Fashion Co · Lead · Website visit detected',
+    'Cedarfield Apparel · Lead · Trade show contact',
+    'Driftwood Retail Inc · Lead · LinkedIn outreach sent',
+    'Elmdale Clothiers · Lead · Intent signal active',
+    'Fernwood Style LLC · Lead · RFI submitted',
+    'Greenfield Brands · Lead · Cold — no engagement',
+    'Harewood Fashion · Lead · Email opened ×3',
+    'Irondale Retail · Lead · Referral source',
+    'Junewood Apparel · Lead · Trade show contact',
+    'Kestrel Style Group · Lead · Cold — no engagement',
+    'Lynwood Clothiers · Lead · Intent signal active',
+    'Millwood Retail Co · Lead · Website visit detected',
+    'Northwood Brands · Lead · High fit score',
+    'Oakwood Fashion · Lead · Cold — no engagement',
+    'Pinewood Style Inc · Lead · LinkedIn outreach sent',
+    'Quarryfield Apparel · Lead · Email opened ×1',
+    'Riverwood Retail · Lead · Cold — no engagement',
+    'Stonewood Clothiers · Lead · Trade show contact',
+    'Timberfield Style · Lead · RFI submitted',
+    'Underwood Brands · Lead · Cold — no engagement',
+    'Valewood Fashion · Lead · Intent signal active',
+    'Westwood Retail LLC · Lead · Website visit detected',
+    'Ximwood Apparel Co · Lead · High fit score',
+    'Yarwood Style Group · Lead · Cold — no engagement',
+    'Zenwood Clothiers · Lead · Email opened ×2',
+    'Ashwood Retail Inc · Lead · Cold — no engagement',
+    'Bramblewood Fashion · Lead · LinkedIn outreach sent',
+    'Creekwood Brands · Lead · Cold — no engagement',
+    'Dawnwood Style · Lead · Trade show contact',
+    'Edgewood Apparel · Lead · Intent signal active',
+    'Fallwood Retail Co · Lead · Cold — no engagement',
+    'Glennwood Clothiers · Lead · Website visit detected',
+    'Hazelwood Fashion · Lead · Cold — no engagement',
+    'Ivywood Style LLC · Lead · High fit score',
+    'Jadewood Brands · Lead · Cold — no engagement',
+    'Knollwood Retail · Lead · Email opened ×1',
+    'Laurelwood Apparel · Lead · Cold — no engagement',
+    'Mosswood Style Co · Lead · LinkedIn outreach sent',
+    'Nettlewood Fashion · Lead · Cold — no engagement',
+    'Olivewood Clothiers · Lead · Intent signal active',
+    'Parsewood Retail · Lead · Cold — no engagement',
+    'Quakewood Brands · Lead · Website visit detected',
+    'Rowanwood Style · Lead · Cold — no engagement',
+    'Sycamore Apparel Co · Lead · Trade show contact',
+  ];
+
+  const accounts = [];
+  let seed = 7;
+  let ai = 0, ei = 0, li = 0, ldi = 0;
+
+  // Active customers — blue, 22 total
+  const activeDist = [1,3,3,2,1, 2,2,2,1,1, 1,1,0,1,1];
+  activeDist.forEach((count, zi) => {
+    const z = zones[zi];
+    for (let i = 0; i < count; i++) {
+      accounts.push({
+        x: rnd(z.x1 + 6, z.x2 - 6, seed++),
+        y: rnd(z.y1 + 8, z.y2 - 8, seed++),
+        s: Math.round(rnd(9, 13, seed++)),
+        c: '#2a72d5',
+        t: activeNames[ai++ % activeNames.length]
+      });
+    }
+  });
+
+  // Engaged — teal, 13 total
+  const engagedDist = [0,1,1,1,1, 1,1,1,1,1, 1,1,1,1,0];
+  engagedDist.forEach((count, zi) => {
+    const z = zones[zi];
+    for (let i = 0; i < count; i++) {
+      accounts.push({
+        x: rnd(z.x1 + 6, z.x2 - 6, seed++),
+        y: rnd(z.y1 + 8, z.y2 - 8, seed++),
+        s: Math.round(rnd(7, 10, seed++)),
+        c: '#3baf9e',
+        t: engagedNames[ei++ % engagedNames.length]
+      });
+    }
+  });
+
+  // Lapsed — amber, 7
+  for (let i = 0; i < 7; i++) {
+    const z = zones[Math.floor(rnd(0, zones.length, seed++))];
+    accounts.push({
+      x: rnd(z.x1 + 6, z.x2 - 6, seed++),
+      y: rnd(z.y1 + 8, z.y2 - 8, seed++),
+      s: Math.round(rnd(6, 9, seed++)),
+      c: '#e8a020',
+      t: lapsedNames[li++ % lapsedNames.length]
+    });
+  }
+
+  // Leads — grey, 45 scattered
+  for (let i = 0; i < 45; i++) {
+    const z = zones[Math.floor(rnd(0, zones.length, seed++))];
+    accounts.push({
+      x: rnd(z.x1 + 4, z.x2 - 4, seed++),
+      y: rnd(z.y1 + 6, z.y2 - 6, seed++),
+      s: Math.round(rnd(4, 7, seed++)),
+      c: '#9eaab8',
+      t: leadNames[ldi++ % leadNames.length]
+    });
+  }
+
+  const tooltip = document.getElementById('mapTooltip');
+  accounts.forEach(d => {
     const el = document.createElement('div');
     el.className = 'map-dot';
-    el.style.cssText = `left:${d.x}%;top:${d.y}%;width:${d.s}px;height:${d.s}px;background:${d.c};opacity:0.85;`;
-    map.appendChild(el);
+    const xp = (d.x / 900 * 100).toFixed(2);
+    const yp = (d.y / 360 * 100).toFixed(2);
+    el.style.cssText = `left:${xp}%;top:${yp}%;width:${d.s}px;height:${d.s}px;background:${d.c};opacity:0.92;margin-left:-${Math.round(d.s/2)}px;margin-top:-${Math.round(d.s/2)}px;box-shadow:0 1px 4px rgba(0,0,0,0.25);`;
+    if (tooltip) {
+      el.addEventListener('mouseenter', (e) => {
+        // Split "Company Name · Status · Detail" into two lines
+        const parts = d.t.split(' · ');
+        const name = parts[0] || '';
+        const rest = parts.slice(1).join(' · ');
+        tooltip.innerHTML = `<div style="font-weight:700;font-size:11px;margin-bottom:2px;">${name}</div><div style="font-size:10px;opacity:0.8;">${rest}</div>`;
+        tooltip.style.display = 'block';
+        // Position above dot, clamp to stay inside container
+        const container = tooltip.parentElement;
+        const cw = container.offsetWidth;
+        let leftPx = d.x / 900 * cw;
+        if (leftPx + 180 > cw) leftPx = cw - 185;
+        if (leftPx < 5) leftPx = 5;
+        tooltip.style.left = leftPx + 'px';
+        tooltip.style.top = '';
+        const topPct = parseFloat(yp);
+        tooltip.style.bottom = (100 - topPct + 2) + '%';
+      });
+      el.addEventListener('mouseleave', () => {
+        tooltip.style.display = 'none';
+        tooltip.style.bottom = '';
+      });
+    }
+    container.appendChild(el);
   });
 }
 
@@ -922,30 +1501,40 @@ function goTo(n) {
   });
 
   document.getElementById('btnBack').disabled = current === 0;
-  document.getElementById('btnNext').textContent = current === STAGES.length - 1 ? 'View Dashboard →' : 'Next →';
+  // Last chapter: button loops back to start
+  if (current === STAGES.length - 1) {
+    document.getElementById('btnNext').textContent = '↩ Start Over';
+  } else {
+    document.getElementById('btnNext').textContent = 'Next →';
+  }
   document.getElementById('btnNext').disabled = false;
   document.getElementById('stageCounter').textContent = `Chapter ${current + 1} of ${STAGES.length}`;
   document.getElementById('progressFill').style.width = ((current + 1) / STAGES.length * 100) + '%';
 
-  // Scroll stage area to top
   document.getElementById('stageArea').scrollTop = 0;
 }
 
 function navigate(dir) {
-  const next = current + dir;
-  if (next < 0 || next >= STAGES.length) return;
-  if (next === STAGES.length - 1 && dir > 0 && current === STAGES.length - 1) {
-    window.open('https://www.aboutchad.com/executive-dashboard', '_blank');
+  // On last stage, Next loops back to chapter 1
+  if (current === STAGES.length - 1 && dir > 0) {
+    goTo(0);
     return;
   }
+  const next = current + dir;
+  if (next < 0 || next >= STAGES.length) return;
   goTo(next);
 }
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+});
 
 // Segment expand
 function expandSeg(card, seg) {
   const detail = card.querySelector('.seg-detail');
   const isOpen = detail.style.display === 'block';
-  // close all
   document.querySelectorAll('.seg-detail').forEach(d => d.style.display = 'none');
   document.querySelectorAll('.card.clickable').forEach(c => c.classList.remove('expanded'));
   if (!isOpen) {
