@@ -30,6 +30,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .rail-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);line-height:1.4;}
 .rail-chapter.active .rail-label{color:var(--green);}
 .rail-connector{width:1px;height:10px;background:var(--rule);margin-left:23px;}
+.rail-section-hdr{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:6px 10px 6px;border-bottom:1px solid var(--rule);margin-bottom:4px;}
+.rail-section-hdr.foundation{color:var(--green);border-bottom-color:var(--green);}
 .stage-area{flex:1;overflow-y:auto;padding:40px 48px 100px;position:relative;}
 .stage{display:none;animation:fadeIn 0.35s ease;}
 .stage.active{display:block;}
@@ -643,9 +645,22 @@ const STAGES = [
 ];
 
 let current=0;
+const sections=[
+  {start:0, label:'Foundation',           foundation:true},
+  {start:4, label:'Execution',            foundation:false},
+  {start:7, label:'Measurement & System', foundation:false},
+];
 const rail=document.getElementById('rail');
 STAGES.forEach((s,i)=>{
-  if(i>0){const c=document.createElement('div');c.className='rail-connector';rail.appendChild(c);}
+  const sec=sections.find(s=>s.start===i);
+  if(sec){
+    if(i>0){const sp=document.createElement('div');sp.style.height='12px';rail.appendChild(sp);}
+    const hdr=document.createElement('div');
+    hdr.className='rail-section-hdr'+(sec.foundation?' foundation':'');
+    hdr.textContent=sec.label;
+    rail.appendChild(hdr);
+  }
+  if(i>0 && !sections.find(s=>s.start===i)){const c=document.createElement('div');c.className='rail-connector';rail.appendChild(c);}
   const ch=document.createElement('div');
   ch.className='rail-chapter'+(i===0?' active':'');
   ch.id='rail-'+i;
