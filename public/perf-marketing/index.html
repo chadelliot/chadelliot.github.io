@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Performance Marketing Growth System — Chad Parker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#4a9e7a;--green-pale:#edf6f1;--ink:#111111;--body:#444444;
+  --muted:#888888;--rule:#e8e8e8;--surface:#f7f7f7;--white:#ffffff;
+  --sig-g:#2e7d52;--sig-a:#b45309;--sig-r:#b91c1c;
+}
+html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-serif;background:var(--white);color:var(--ink);}
+.site-nav{position:fixed;top:0;left:0;right:0;height:56px;background:var(--white);border-bottom:1px solid var(--rule);display:flex;align-items:center;padding:0 32px;justify-content:space-between;z-index:100;}
+.site-logo{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;}
+.site-logo em{font-style:italic;color:var(--green);}
+.nav-links{display:flex;gap:28px;list-style:none;}
+.nav-links a{font-size:10px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;text-decoration:none;color:var(--muted);}
+.nav-links a.active{color:var(--green);}
+.shell{display:flex;height:100vh;padding-top:56px;}
+.rail{width:220px;flex-shrink:0;border-right:1px solid var(--rule);padding:28px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.rail-chapter{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:4px;cursor:pointer;transition:background 0.15s;}
+.rail-chapter:hover{background:var(--surface);}
+.rail-chapter.active{background:var(--green-pale);}
+.rail-dot{width:8px;height:8px;border-radius:50%;border:2px solid var(--rule);background:var(--white);flex-shrink:0;margin-top:4px;transition:all 0.2s;}
+.rail-chapter.active .rail-dot{background:var(--green);border-color:var(--green);}
+.rail-chapter.done .rail-dot{background:var(--green);border-color:var(--green);opacity:0.45;}
+.rail-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);line-height:1.4;}
+.rail-chapter.active .rail-label{color:var(--green);}
+.rail-connector{width:1px;height:10px;background:var(--rule);margin-left:23px;}
+.stage-area{flex:1;overflow-y:auto;padding:40px 48px 100px;position:relative;}
+.stage{display:none;animation:fadeIn 0.35s ease;}
+.stage.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.stage-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--green);margin-bottom:12px;}
+.stage-title{font-size:32px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1.1;margin-bottom:8px;}
+.stage-title em{font-style:italic;color:var(--green);}
+.stage-body{font-size:14px;color:var(--body);line-height:1.7;max-width:640px;margin-bottom:28px;}
+.stage-quote{font-size:13px;font-style:italic;color:var(--muted);border-left:3px solid var(--green);padding-left:16px;margin-bottom:28px;line-height:1.65;max-width:600px;}
+.nav-buttons{position:fixed;bottom:0;right:0;width:calc(100% - 220px);background:var(--white);border-top:1px solid var(--rule);padding:16px 48px;display:flex;align-items:center;justify-content:space-between;z-index:90;}
+.stage-counter{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);}
+.btn-group{display:flex;gap:10px;}
+.btn{padding:9px 22px;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;border-radius:3px;cursor:pointer;border:1px solid var(--rule);font-family:'Inter',sans-serif;transition:all 0.15s;}
+.btn-back{background:var(--white);color:var(--muted);}
+.btn-back:hover{border-color:var(--ink);color:var(--ink);}
+.btn-next{background:var(--green);color:var(--white);border-color:var(--green);}
+.btn-next:hover{background:#3a8a68;border-color:#3a8a68;}
+.btn:disabled{opacity:0.3;cursor:default;}
+.progress-bar{position:fixed;top:56px;left:220px;right:0;height:2px;background:var(--rule);z-index:90;}
+.progress-fill{height:100%;background:var(--green);transition:width 0.4s ease;}
+/* KPI DASH */
+.kpi-dash{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:24px;}
+.kd-card{background:var(--white);padding:16px 18px;}
+.kd-eye{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.kd-val{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;margin-bottom:4px;}
+.kd-delta{font-size:10px;font-weight:500;}
+.kd-delta.pos{color:var(--sig-g);}
+.kd-delta.neg{color:var(--sig-r);}
+.kd-delta.warn{color:var(--sig-a);}
+.kd-delta.flat{color:var(--muted);}
+/* CARDS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.card{background:var(--white);border:1px solid var(--rule);border-radius:4px;padding:20px;transition:box-shadow 0.15s;}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+.card-eye{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.card-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.card-body{font-size:12px;color:var(--body);line-height:1.55;}
+.card-tag{display:inline-block;margin-top:10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;padding:3px 8px;border-radius:2px;}
+.tag-g{background:var(--green-pale);color:var(--sig-g);}
+.tag-b{background:#eef3fc;color:#2d6bcd;}
+.tag-a{background:#fef3c7;color:var(--sig-a);}
+.card.clickable{cursor:pointer;}
+.card.clickable.expanded{border-color:var(--green);background:var(--green-pale);}
+/* TIERS */
+.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.tier-card{background:var(--white);padding:20px;}
+.tier-num{font-size:22px;font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:4px;}
+.tier-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;}
+.tier-desc{font-size:12px;color:var(--body);line-height:1.5;margin-bottom:8px;}
+.tier-msg{font-size:10px;font-weight:600;color:var(--body);}
+/* TAM MAP */
+.tam-shell{border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;position:relative;height:360px;background:#e8edf2;}
+.tam-map-area{width:100%;height:100%;position:relative;overflow:hidden;}
+.tam-map-area svg{position:absolute;top:0;left:0;width:100%;height:100%;}
+.map-dot{position:absolute;border-radius:50%;transition:all 0.3s;cursor:pointer;z-index:2;}
+.map-dot:hover{transform:scale(1.6);z-index:10;}
+.map-tooltip{position:absolute;background:var(--ink);color:var(--white);font-size:10px;font-weight:500;padding:7px 10px;border-radius:4px;pointer-events:none;white-space:nowrap;z-index:20;display:none;line-height:1.4;box-shadow:0 2px 8px rgba(0,0,0,0.3);min-width:160px;}
+.tam-legend{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,0.97);border:1px solid var(--rule);border-radius:3px;padding:10px 14px;display:flex;flex-direction:column;gap:5px;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.tam-leg-item{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:500;color:var(--body);}
+.tam-leg-dot{width:8px;height:8px;border-radius:50%;}
+.tam-count{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.97);border:1px solid var(--rule);border-radius:3px;padding:10px 14px;text-align:right;z-index:5;box-shadow:0 1px 4px rgba(0,0,0,0.08);}
+.tam-count-val{font-size:22px;font-weight:800;color:var(--green);letter-spacing:-0.5px;line-height:1;}
+.tam-count-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);}
+/* FUNNEL */
+.funnel-horiz{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.fh-cell{background:var(--white);padding:12px 10px;text-align:center;}
+.fh-cell.rev{background:var(--green-pale);}
+.fh-stage{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:6px;}
+.fh-val{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;}
+.fh-note{font-size:9px;color:var(--muted);margin-top:4px;}
+.fh-note.g{color:var(--sig-g);font-weight:600;}
+.fh-cell.rev .fh-stage{color:var(--green);}
+.fh-cell.rev .fh-note{color:var(--green);font-weight:600;}
+/* SIGNAL */
+.signal-card{border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.signal-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--rule);background:var(--white);}
+.signal-icon{width:32px;height:32px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.signal-hed{font-size:13px;font-weight:700;color:var(--ink);}
+.signal-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.signal-tag{margin-left:auto;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;padding:3px 8px;border-radius:2px;}
+.signal-body{padding:14px 18px;background:var(--surface);}
+.signal-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.signal-step{font-size:10px;font-weight:600;color:var(--body);padding:4px 10px;background:var(--white);border:1px solid var(--rule);border-radius:2px;}
+.signal-arrow-sm{color:var(--rule);font-size:12px;}
+/* ALIGN */
+.align-grid{display:grid;grid-template-columns:1fr 180px 1fr;gap:0;border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.align-side{background:var(--white);padding:22px;}
+.align-center{background:var(--green);padding:22px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:180px;flex-shrink:0;}
+.align-center-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.7);text-align:center;margin-bottom:4px;}
+.align-center-val{font-size:12px;font-weight:700;color:var(--white);text-align:center;line-height:1.35;}
+.align-sep{width:24px;height:1px;background:rgba(255,255,255,0.25);margin:1px auto;}
+.align-eye{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;}
+.align-item{font-size:11px;color:var(--body);padding:5px 0;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:6px;}
+.align-item:last-child{border-bottom:none;}
+.align-item::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;}
+/* PERSONA */
+.persona-primary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
+.persona-card-lg{border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--white);display:flex;flex-direction:column;}
+.pc-photo{height:130px;overflow:hidden;position:relative;background:var(--surface);display:flex;align-items:center;justify-content:center;}
+.pc-photo svg{width:100%;height:100%;}
+.pc-photo-badge{position:absolute;bottom:10px;left:12px;background:var(--green);color:var(--white);font-size:9px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
+.pc-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;}
+.pc-role{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:3px;}
+.pc-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;margin-bottom:2px;}
+.pc-seg{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--rule);}
+.pc-rows{display:flex;flex-direction:column;gap:6px;flex:1;}
+.pc-row{display:flex;gap:8px;align-items:flex-start;}
+.pc-key{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);min-width:52px;padding-top:1px;flex-shrink:0;}
+.pc-val{font-size:11px;color:var(--body);line-height:1.4;}
+/* SALES BOARD */
+.sales-board{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.sb-col{background:var(--white);}
+.sb-head{padding:12px 16px;border-bottom:1px solid var(--rule);background:var(--surface);}
+.sb-head-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink);}
+.sb-head-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.sb-body{padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.sb-item{font-size:11px;color:var(--body);padding:6px 0;border-bottom:1px solid var(--surface);display:flex;gap:6px;align-items:flex-start;}
+.sb-item:last-child{border-bottom:none;}
+.sb-bullet{color:var(--green);font-weight:700;flex-shrink:0;}
+/* RETURN GRID */
+.return-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.rg-card{background:var(--white);padding:14px 16px;}
+.rg-layer{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--green);margin-bottom:4px;}
+.rg-kpi{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.rg-source{font-size:10px;color:var(--muted);}
+/* SYSTEM FLOW */
+.system-flow{display:flex;flex-direction:column;gap:2px;margin-bottom:20px;}
+.sys-row{display:flex;align-items:center;gap:0;border:1px solid var(--rule);border-radius:3px;overflow:hidden;}
+.sys-label{background:var(--ink);color:var(--white);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:8px 14px;min-width:160px;flex-shrink:0;}
+.sys-items{display:flex;flex:1;flex-wrap:wrap;gap:0;}
+.sys-item{font-size:10px;color:var(--body);padding:8px 14px;border-left:1px solid var(--rule);}
+/* TRACK */
+.track{height:2px;background:var(--rule);border-radius:1px;overflow:hidden;margin-bottom:10px;}
+.tf{height:100%;background:#c8d0d8;border-radius:1px;}
+.tf.g{background:var(--green);}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.g{background:var(--sig-g);}
+.dot.a{background:var(--sig-a);}
+.dot.r{background:var(--sig-r);}
+.status{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);}
+.seg-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);}
+</style>
+</head>
+<body>
+
+<nav class="site-nav">
+  <div class="site-logo">About <em>Chad</em></div>
+  <ul class="nav-links">
+    <li><a href="/">About</a></li>
+    <li><a href="/approach">My Approach</a></li>
+    <li><a href="/career">Career</a></li>
+    <li><a href="/skills">Skills</a></li>
+    <li><a href="/commercial-strategy" class="active">Work Samples</a></li>
+    <li><a href="/contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+
+<div class="shell">
+<aside class="rail" id="rail"></aside>
+
+<main class="stage-area" id="stageArea">
+
+<!-- STAGE 0: KPI Foundation -->
+<div class="stage active" id="stage-0">
+  <div class="stage-eyebrow">Chapter 01 — The Scoreboard</div>
+  <h1 class="stage-title">The metrics that <em>matter most.</em></h1>
+  <p class="stage-body">In a high-growth consumer company, the executive team measures performance marketing against outcomes that compound — not just clicks and impressions. Before building a single campaign, we align on the KPIs that define success across acquisition efficiency, customer value, and business growth. These become the operating system for every channel decision, budget allocation, and optimization that follows.</p>
+  <div class="stage-quote">"We don't start with channels. We start with the scoreboard. What does the business need to move — CAC, payback period, LTV, market share? Every campaign, every test, every dollar of paid media has to connect back to these outcomes."</div>
+
+  <div class="kpi-dash">
+    <div class="kd-card"><div class="kd-eye">Blended CAC</div><div class="kd-val">$48</div><div class="kd-delta pos">▲ Down from $72 at hire</div></div>
+    <div class="kd-card"><div class="kd-eye">CAC Payback Period</div><div class="kd-val">8.2 mo</div><div class="kd-delta pos">▲ Target &lt;9 months</div></div>
+    <div class="kd-card"><div class="kd-eye">LTV : CAC Ratio</div><div class="kd-val">4.6×</div><div class="kd-delta pos">▲ Above 4.0× threshold</div></div>
+    <div class="kd-card"><div class="kd-eye">Marketing ROI (ROMI)</div><div class="kd-val">5.2×</div><div class="kd-delta pos">▲ Above 4.5× target</div></div>
+    <div class="kd-card"><div class="kd-eye">New Customer Volume</div><div class="kd-val">+34%</div><div class="kd-delta pos">▲ YoY acquisition growth</div></div>
+    <div class="kd-card"><div class="kd-eye">Cost Per Opportunity</div><div class="kd-val">$186</div><div class="kd-delta warn">▼ Monitoring Q3 trend</div></div>
+    <div class="kd-card"><div class="kd-eye">Paid Conversion Rate</div><div class="kd-val">3.8%</div><div class="kd-delta pos">▲ Up from 2.1% baseline</div></div>
+    <div class="kd-card"><div class="kd-eye">Channel Diversification</div><div class="kd-val">6 ch</div><div class="kd-delta flat">Meta · Google · Affiliate · TikTok · CTV · SEO</div></div>
+  </div>
+  <p style="font-size:12px;color:var(--muted);">These eight outcomes anchor every acquisition decision. Click <strong>Next</strong> to see how the strategy underneath them is built.</p>
+</div>
+
+<!-- STAGE 1: Segmentation -->
+<div class="stage" id="stage-1">
+  <div class="stage-eyebrow">Chapter 02 — Segmentation</div>
+  <h1 class="stage-title">Know the audience. <em>Define the growth.</em></h1>
+  <p class="stage-body">In a consumer business, not all customers are equal — in value, in payback speed, or in the channels that reach them. Segmentation is how we stop treating a broad market as one audience. It tells us who our highest-value customers are, what they look like, where they come from, and which prospect profiles are most likely to convert and retain. The segments define the growth objective: who to acquire more of, who to expand, and who is too expensive to chase.</p>
+  <div class="stage-quote">"Segmentation is not a targeting exercise. It is a business decision. It tells us which customers fund the model, which ones drain it, and where the next dollar of paid media should go."</div>
+
+  <div class="two-col">
+    <div style="border:1px solid var(--rule);border-radius:4px;padding:18px 20px;background:var(--white);">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">What segmentation reveals</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Which customer profiles have the lowest CAC and highest LTV</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Which acquisition channels source the best-retaining customers</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Where the largest untapped lookalike opportunity sits</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Which segments are over-indexed on spend relative to return</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Where creative and message needs to change by audience type</div>
+      </div>
+    </div>
+    <div style="border:1px solid var(--rule);border-radius:4px;padding:18px 20px;background:var(--white);">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Growth objectives that follow</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Scale acquisition of highest-LTV customer profiles</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Reduce blended CAC by shifting budget to efficient segments</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Expand affiliate and partnership reach into new audience pools</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Improve payback period by prioritizing fast-converting segments</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Reduce churn by matching retention programs to segment behavior</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="card clickable" onclick="expandSeg(this)">
+      <div class="card-eye">Segment A</div>
+      <div class="card-title">High-LTV Power Users</div>
+      <div class="card-body">Fastest payback, highest retention, strongest referral behavior. Often acquired via organic search, affiliate, or word of mouth. The model's most efficient customers.</div>
+      <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:92%"></div></div><div style="font-size:10px;color:var(--muted);">LTV index: Very High</div></div>
+      <span class="card-tag tag-g">Scale &amp; Clone</span>
+      <div class="seg-detail"><div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Build lookalike audiences from this segment and increase affiliate volume sourcing similar profiles.<br><strong>KPI link:</strong> LTV:CAC, payback period, ROMI</div></div>
+    </div>
+    <div class="card clickable" onclick="expandSeg(this)">
+      <div class="card-eye">Segment B</div>
+      <div class="card-title">Mid-Value Acquirables</div>
+      <div class="card-body">Good fit, moderate LTV, acquired primarily via paid social and search. Larger volume pool. Optimization focus on creative and funnel efficiency to improve unit economics.</div>
+      <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:60%"></div></div><div style="font-size:10px;color:var(--muted);">LTV index: Medium</div></div>
+      <span class="card-tag tag-b">Optimize &amp; Grow</span>
+      <div class="seg-detail"><div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Improve conversion rate and reduce CPA through creative testing, landing page optimization, and lifecycle nurture.<br><strong>KPI link:</strong> CPA, conversion rate, CAC payback</div></div>
+    </div>
+    <div class="card clickable" onclick="expandSeg(this)">
+      <div class="card-eye">Segment C</div>
+      <div class="card-title">High-Churn Risk Acquirables</div>
+      <div class="card-body">Broad top-of-funnel volume, low retention. Often driven by promotional or discount-driven creative. Expensive on a net basis once churn is factored into CAC payback.</div>
+      <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:28%"></div></div><div style="font-size:10px;color:var(--muted);">LTV index: Low</div></div>
+      <span class="card-tag tag-a">Suppress or Re-message</span>
+      <div class="seg-detail"><div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Reduce spend on discount-driven creative, shift messaging to value and product fit to attract better-retaining profiles.<br><strong>KPI link:</strong> Churn rate, CAC efficiency, blended LTV</div></div>
+    </div>
+  </div>
+  <p style="font-size:11px;color:var(--muted);">Click each segment to see the growth objective and acquisition motion.</p>
+</div>
+
+<!-- STAGE 2: TAM -->
+<div class="stage" id="stage-2">
+  <div class="stage-eyebrow">Chapter 03 — Total Addressable Market</div>
+  <h1 class="stage-title">Map the <em>full market opportunity.</em></h1>
+  <p class="stage-body">Once we know who our best customers are, we map the total addressable market to understand how much whitespace remains. For a consumer company operating across digital channels, the TAM question is not just how many people exist — it is how many are reachable at efficient cost, which acquisition channels index well for each segment, and where competitive density is driving up CPMs and reducing returns.</p>
+  <div class="stage-quote">"The TAM layer tells us where growth is still available, which channels are getting crowded, and where we can build a cost advantage before competitors arrive."</div>
+
+  <div class="tam-shell">
+    <div class="tam-map-area" id="tamMap"></div>
+    <div class="map-tooltip" id="mapTooltip"></div>
+    <div class="tam-legend">
+      <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#2a72d5;"></div>Active customer</div>
+      <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#3baf9e;"></div>Engaged / trial</div>
+      <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#9eaab8;"></div>Addressable prospect</div>
+      <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#e8a020;"></div>Lapsed / churned</div>
+    </div>
+    <div class="tam-count">
+      <div class="tam-count-val">4.2M</div>
+      <div class="tam-count-lbl">Addressable consumers</div>
+      <div style="margin-top:6px;font-size:10px;color:var(--muted);">~680K active · 2.8M reachable</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;">
+    <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Total Addressable</div><div style="font-size:22px;font-weight:800;color:var(--ink);">4.2M</div><div style="font-size:10px;color:var(--muted);">Reachable consumers</div></div>
+    <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Active Customers</div><div style="font-size:22px;font-weight:800;color:var(--green);">680K</div><div style="font-size:10px;color:var(--muted);">16% market penetration</div></div>
+    <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">In-Funnel Prospects</div><div style="font-size:22px;font-weight:800;color:var(--ink);">720K</div><div style="font-size:10px;color:var(--muted);">Engaged or in trial</div></div>
+    <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Whitespace</div><div style="font-size:22px;font-weight:800;color:var(--ink);">2.8M</div><div style="font-size:10px;color:var(--muted);">Reachable, not yet acquired</div></div>
+  </div>
+</div>
+
+<!-- STAGE 3: Audience Architecture -->
+<div class="stage" id="stage-3">
+  <div class="stage-eyebrow">Chapter 04 — Audience Architecture</div>
+  <h1 class="stage-title">Who gets the message. <em>And what it says.</em></h1>
+  <p class="stage-body">We structure the audience in two layers. First, we tier consumers by actual or estimated lifetime value — this tells us where to concentrate paid media investment and where to build lookalike scale. Then within each tier, we define the personas who make the purchase decision, based on their job context, their pain point, and what message breaks through for them specifically.</p>
+  <div class="stage-quote">"Tier tells us where the media dollar belongs. Persona tells us what the creative needs to say to the person seeing it."</div>
+
+  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Step 1 — Value Tiering</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:24px;">
+    <div style="background:var(--white);padding:18px 20px;">
+      <div style="font-size:22px;font-weight:800;color:var(--green);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T1</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">High-LTV Loyalists</div>
+      <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">Fastest payback, strongest retention, highest referral rate. Protect, expand, and build lookalike pools from this group.</div>
+      <div style="font-size:10px;font-weight:600;color:var(--green);">Messaging: Value, community, identity</div>
+    </div>
+    <div style="background:var(--white);padding:18px 20px;">
+      <div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T2</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Mid-Value Converts</div>
+      <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">Good conversion rate, moderate LTV. Respond to product-led and benefit-led creative. Nurture improves payback.</div>
+      <div style="font-size:10px;font-weight:600;color:var(--body);">Messaging: Product benefit, social proof</div>
+    </div>
+    <div style="background:var(--white);padding:18px 20px;">
+      <div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T3</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Price-Sensitive Trialists</div>
+      <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">High churn risk. Attracted by discount creative. Reframe messaging toward value and outcome to improve retention.</div>
+      <div style="font-size:10px;font-weight:600;color:var(--body);">Messaging: Outcome, risk reduction</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+    <div style="flex:1;height:1px;background:var(--rule);"></div>
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">Step 2 — Personas</div>
+    <div style="flex:1;height:1px;background:var(--rule);"></div>
+  </div>
+
+  <div class="persona-primary">
+    <div class="persona-card-lg">
+      <div class="pc-photo">
+        <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <defs><linearGradient id="pg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#e0ebe4;stop-opacity:1"/><stop offset="100%" style="stop-color:#c8dbd0;stop-opacity:1"/></linearGradient></defs>
+          <rect width="400" height="130" fill="url(#pg1)"/>
+          <circle cx="320" cy="-20" r="100" fill="#4a9e7a" opacity="0.12"/>
+          <circle cx="90" cy="55" r="28" fill="#4a9e7a" opacity="0.7"/>
+          <ellipse cx="90" cy="118" rx="38" ry="22" fill="#4a9e7a" opacity="0.5"/>
+          <line x1="150" y1="40" x2="370" y2="40" stroke="#4a9e7a" stroke-width="1.5" opacity="0.3"/>
+          <line x1="150" y1="55" x2="340" y2="55" stroke="#4a9e7a" stroke-width="1.5" opacity="0.2"/>
+          <line x1="150" y1="70" x2="290" y2="70" stroke="#4a9e7a" stroke-width="1.5" opacity="0.15"/>
+          <rect x="150" y="30" width="150" height="22" rx="3" fill="rgba(255,255,255,0.5)"/>
+          <text x="158" y="45" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2e5c42">TAYLOR M. · 34</text>
+        </svg>
+        <div class="pc-photo-badge">T1 · High-Intent Consumer</div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-role">Primary Acquisition Persona</div>
+        <div class="pc-name">The Value-Driven Optimizer</div>
+        <div class="pc-seg">Tier 1 · Highest LTV · Segment A</div>
+        <div class="pc-rows">
+          <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Improve their financial or lifestyle position with a product that actually delivers</div></div>
+          <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Skeptical of ads — needs social proof, real results, and transparent pricing before converting</div></div>
+          <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Outcome-led creative, UGC testimonials, clear value proposition, trust signals</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="persona-card-lg">
+      <div class="pc-photo">
+        <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <defs><linearGradient id="pg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#e4eaf0;stop-opacity:1"/><stop offset="100%" style="stop-color:#ccd6e0;stop-opacity:1"/></linearGradient></defs>
+          <rect width="400" height="130" fill="url(#pg2)"/>
+          <circle cx="350" cy="20" r="90" fill="#2d6bcd" opacity="0.08"/>
+          <circle cx="90" cy="55" r="28" fill="#2d6bcd" opacity="0.6"/>
+          <ellipse cx="90" cy="118" rx="38" ry="22" fill="#2d6bcd" opacity="0.4"/>
+          <rect x="148" y="32" width="200" height="1.5" fill="#2d6bcd" opacity="0.25"/>
+          <rect x="148" y="46" width="170" height="1.5" fill="#2d6bcd" opacity="0.2"/>
+          <rect x="148" y="60" width="140" height="1.5" fill="#2d6bcd" opacity="0.15"/>
+          <rect x="150" y="72" width="8" height="22" rx="1" fill="#2d6bcd" opacity="0.3"/>
+          <rect x="163" y="80" width="8" height="14" rx="1" fill="#2d6bcd" opacity="0.25"/>
+          <rect x="176" y="68" width="8" height="26" rx="1" fill="#2d6bcd" opacity="0.35"/>
+          <rect x="150" y="30" width="130" height="20" rx="3" fill="rgba(255,255,255,0.5)"/>
+          <text x="158" y="44" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#1e3a5c">JORDAN K. · 28</text>
+        </svg>
+        <div class="pc-photo-badge">T2 · Discovery-Stage Consumer</div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-role">Growth Acquisition Persona</div>
+        <div class="pc-name">The Curious Evaluator</div>
+        <div class="pc-seg">Tier 2 · Mid-LTV · Segment B</div>
+        <div class="pc-rows">
+          <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Find a solution they've been considering — needs low friction to try</div></div>
+          <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Comparison fatigue — has seen many similar products and needs clear differentiation</div></div>
+          <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Benefit-led creative, free trial or low-barrier offer, easy onboarding proof points</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE 4: Prospect Funnel -->
+<div class="stage" id="stage-4">
+  <div class="stage-eyebrow">Chapter 05 — Acquisition Funnel</div>
+  <h1 class="stage-title">From impression to <em>retained customer.</em></h1>
+  <p class="stage-body">The acquisition funnel is where strategy meets execution. Every stage — from the first paid impression to the moment a customer becomes profitable — has its own conversion lever, its own creative requirement, and its own optimization metric. We manage each stage intentionally, not as a single blended number.</p>
+
+  <div class="funnel-horiz">
+    <div class="fh-cell"><div class="fh-stage">Impression</div><div class="fh-val">28M</div><div class="fh-note">Monthly paid reach</div></div>
+    <div class="fh-cell"><div class="fh-stage">Click / Visit</div><div class="fh-val">840K</div><div class="fh-note g">CTR 3.0%</div></div>
+    <div class="fh-cell"><div class="fh-stage">Lead / Signup</div><div class="fh-val">168K</div><div class="fh-note g">Conv. 20%</div></div>
+    <div class="fh-cell"><div class="fh-stage">Trial / Intent</div><div class="fh-val">58K</div><div class="fh-note g">34.5% of leads</div></div>
+    <div class="fh-cell"><div class="fh-stage">Purchase</div><div class="fh-val">22K</div><div class="fh-note g">Trial→Buy 38%</div></div>
+    <div class="fh-cell"><div class="fh-stage">Retained 90d</div><div class="fh-val">16K</div><div class="fh-note g">72% retention</div></div>
+    <div class="fh-cell rev"><div class="fh-stage">Revenue</div><div class="fh-val">$4.8M</div><div class="fh-note">Monthly GMV</div></div>
+  </div>
+
+  <div class="three-col">
+    <div class="card"><div class="card-eye">Tier 1 Prospects</div><div class="card-title">High-intent · High-fit</div><div class="card-body">Organic search, affiliate-referred, and word-of-mouth. Priority for bid increases, lookalike expansion, and affiliate partner investment.</div><span class="card-tag tag-g">Invest &amp; Scale</span></div>
+    <div class="card"><div class="card-eye">Tier 2 Prospects</div><div class="card-title">Paid social · Mid-funnel</div><div class="card-body">Meta and Google-acquired. Respond to creative testing and landing page optimization. Nurture sequences improve payback from this group.</div><span class="card-tag tag-b">Optimize &amp; Convert</span></div>
+    <div class="card"><div class="card-eye">Tier 3 Prospects</div><div class="card-title">Broad reach · Early stage</div><div class="card-body">Top-of-funnel awareness. TikTok, CTV, display. Build brand familiarity and retargeting pools. Managed on MER rather than direct CPA.</div><span class="card-tag tag-a">Build &amp; Retarget</span></div>
+  </div>
+</div>
+
+<!-- STAGE 5: Signal Intelligence -->
+<div class="stage" id="stage-5">
+  <div class="stage-eyebrow">Chapter 06 — Signal Intelligence</div>
+  <h1 class="stage-title">Act on the right signal <em>at the right moment.</em></h1>
+  <p class="stage-body">In performance marketing, signals are the competitive edge. The brands winning on Meta and Google in 2025 are not the ones with the biggest budgets — they are the ones feeding the algorithms the right data, reading intent at the account and contact level, and acting before competitors do. Signals tell us when to scale, when to pull back, and when to launch.</p>
+  <div class="stage-quote">"A signal is a reason to act now. Intent data, funding events, lifecycle behavior, platform engagement — each one is an opportunity to reach the right person at exactly the right moment with exactly the right message."</div>
+
+  <div class="two-col">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Performance Signals</div>
+      <div class="signal-card">
+        <div class="signal-header"><div class="signal-icon">📉</div><div><div class="signal-hed">CAC Trending Up on Meta</div><div class="signal-sub">Blended CAC up 18% over 14-day window</div></div><span class="signal-tag tag-a">Optimize</span></div>
+        <div class="signal-body"><div class="signal-flow"><span class="signal-step">Signal detected</span><span class="signal-arrow-sm">→</span><span class="signal-step">Creative audit</span><span class="signal-arrow-sm">→</span><span class="signal-step">New variants launched</span><span class="signal-arrow-sm">→</span><span class="signal-step">CAC normalized</span></div></div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-header"><div class="signal-icon">🔁</div><div><div class="signal-hed">High-LTV Segment Expanding</div><div class="signal-sub">Affiliate channel sourcing 34% more Tier 1 customers</div></div><span class="signal-tag tag-g">Scale</span></div>
+        <div class="signal-body"><div class="signal-flow"><span class="signal-step">Signal</span><span class="signal-arrow-sm">→</span><span class="signal-step">Increase affiliate budget</span><span class="signal-arrow-sm">→</span><span class="signal-step">Onboard new partners</span><span class="signal-arrow-sm">→</span><span class="signal-step">Measure LTV lift</span></div></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Market &amp; Intent Signals</div>
+      <div class="signal-card">
+        <div class="signal-header"><div class="signal-icon">💰</div><div><div class="signal-hed">Competitor Funding Announcement</div><div class="signal-sub">Primary competitor raises Series C — expect CPM pressure</div></div><span class="signal-tag tag-b">Anticipate</span></div>
+        <div class="signal-body"><div class="signal-flow"><span class="signal-step">Signal detected</span><span class="signal-arrow-sm">→</span><span class="signal-step">Pre-empt with creative refresh</span><span class="signal-arrow-sm">→</span><span class="signal-step">Shift budget to owned channels</span><span class="signal-arrow-sm">→</span><span class="signal-step">Monitor CPMs</span></div></div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-header"><div class="signal-icon">🔍</div><div><div class="signal-hed">Search Intent Surge Detected</div><div class="signal-sub">Category keywords up 42% — seasonal or news-driven</div></div><span class="signal-tag tag-g">Act Now</span></div>
+        <div class="signal-body"><div class="signal-flow"><span class="signal-step">Signal</span><span class="signal-arrow-sm">→</span><span class="signal-step">Increase search bids</span><span class="signal-arrow-sm">→</span><span class="signal-step">Launch category landing page</span><span class="signal-arrow-sm">→</span><span class="signal-step">Track incremental conversions</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE 6: Campaign Activation -->
+<div class="stage" id="stage-6">
+  <div class="stage-eyebrow">Chapter 07 — Campaign Activation</div>
+  <h1 class="stage-title">From insight to <em>coordinated campaign.</em></h1>
+  <p class="stage-body">Campaign activation is where intelligence becomes revenue. Every campaign is built from a signal, a segment, a persona, and a channel — not from a calendar or a budget cycle. The workflow connects creative to media buying to measurement in one system, so what we learn from one test immediately informs the next.</p>
+  <div class="stage-quote">"The best-performing acquisition programs are not the ones with the most channels. They are the ones where every channel knows what the others are doing — and the creative, the audience, and the bid strategy are all pulling in the same direction."</div>
+
+  <div style="border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;">
+    <div style="background:var(--ink);color:var(--white);padding:12px 20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Campaign Example: Q3 Acquisition Push — High-Intent Segment</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);">
+      <div style="background:var(--white);padding:16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">01 Audience</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Tier 1 lookalikes</div>
+        <div style="font-size:11px;color:var(--muted);">Lookalike from top 10% LTV customers · Affiliate partner list overlay · Exclude recent converters</div>
+      </div>
+      <div style="background:var(--white);padding:16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">02 Creative</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">UGC + outcome-led</div>
+        <div style="font-size:11px;color:var(--muted);">5 UGC variants · 2 product demo videos · 3 static testimonial ads · Continuous A/B testing</div>
+      </div>
+      <div style="background:var(--white);padding:16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">03 Channels</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Meta + Google + Affiliate</div>
+        <div style="font-size:11px;color:var(--muted);">Meta Advantage+ · Google PMAX · 12 affiliate partners · Retargeting on all channels</div>
+      </div>
+      <div style="background:var(--white);padding:16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">04 Measurement</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Blended CAC + LTV</div>
+        <div style="font-size:11px;color:var(--muted);">Incrementality test running · CAPI server-side tracking · 90-day LTV cohort reporting</div>
+      </div>
+    </div>
+    <div style="background:var(--surface);padding:12px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);">Results:</div>
+      <span class="signal-step">CAC $44 vs $58 target</span>
+      <span class="signal-arrow-sm">·</span>
+      <span class="signal-step">ROMI 5.8×</span>
+      <span class="signal-arrow-sm">·</span>
+      <span class="signal-step">22K new customers</span>
+      <span class="signal-arrow-sm">·</span>
+      <span class="signal-step">Payback 7.4 months</span>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE 7: Channel Strategy -->
+<div class="stage" id="stage-7">
+  <div class="stage-eyebrow">Chapter 08 — Channel Strategy</div>
+  <h1 class="stage-title">The right channel for <em>every stage of growth.</em></h1>
+  <p class="stage-body">Channel diversification is not about being everywhere — it is about having the right acquisition engine at each stage of the funnel and the growth curve. We manage Meta and Google as the core performance layer, build affiliate as an owned efficiency channel, and use TikTok and CTV to expand the top-of-funnel addressable market without cannibalizing paid performance.</p>
+  <div class="stage-quote">"The goal is a channel mix where no single platform failure can break the acquisition model. Diversification is a risk management strategy as much as a growth strategy."</div>
+
+  <div class="sales-board">
+    <div class="sb-col">
+      <div class="sb-head"><div class="sb-head-title">Core Performance</div><div class="sb-head-sub">Meta · Google · Affiliate</div></div>
+      <div class="sb-body">
+        <div class="sb-item"><span class="sb-bullet">›</span>Meta Advantage+ for T1 and T2 lookalike acquisition</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Google PMAX for high-intent category search</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Affiliate program: 20+ partners, CPA-based, weekly optimization</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>KPI: Blended CAC, CPA, ROMI, payback period</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Budget: 65% of total acquisition spend</div>
+      </div>
+    </div>
+    <div class="sb-col">
+      <div class="sb-head"><div class="sb-head-title">Emerging Channels</div><div class="sb-head-sub">TikTok · CTV · Programmatic</div></div>
+      <div class="sb-body">
+        <div class="sb-item"><span class="sb-bullet">›</span>TikTok Shop and creator-affiliate hybrid model</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>CTV for brand trust-building in high-LTV demos</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Programmatic retargeting across open web</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>KPI: MER, brand lift, view-through attribution</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Budget: 20% of total, increasing with incrementality proof</div>
+      </div>
+    </div>
+    <div class="sb-col">
+      <div class="sb-head"><div class="sb-head-title">Owned &amp; Earned</div><div class="sb-head-sub">SEO · Email · Lifecycle</div></div>
+      <div class="sb-body">
+        <div class="sb-item"><span class="sb-bullet">›</span>SEO content program targeting high-intent category terms</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Lifecycle email reducing CAC on repeat and referral</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Referral program converting high-LTV customers to affiliates</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>KPI: Organic CAC, email conversion, referral volume</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Budget: 15% of total — highest efficiency per dollar</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE 8: Measurement -->
+<div class="stage" id="stage-8">
+  <div class="stage-eyebrow">Chapter 09 — Measurement &amp; Attribution</div>
+  <h1 class="stage-title">Measure what <em>actually drives growth.</em></h1>
+  <p class="stage-body">Post-iOS 14, platform-reported metrics are directional at best. We run a measurement stack that combines server-side tracking via Meta CAPI, incrementality testing for true channel lift, and blended CAC as the primary decision metric — not ROAS from a platform dashboard. This is what separates teams that actually know what's working from teams that think they do.</p>
+  <div class="stage-quote">"Platform ROAS is not a business metric. It is a signal. We make budget and channel decisions on blended CAC, LTV by cohort and source, incrementality-validated lift, and CAC payback period. Those are the numbers that tell the truth."</div>
+
+  <div class="align-grid">
+    <div class="align-side">
+      <div class="align-eye">Measurement Infrastructure</div>
+      <div class="align-item">Meta CAPI server-side event tracking</div>
+      <div class="align-item">Google enhanced conversions</div>
+      <div class="align-item">UTM taxonomy + campaign naming standards</div>
+      <div class="align-item">Incrementality holdout tests by channel</div>
+      <div class="align-item">Media mix modeling for budget allocation</div>
+      <div class="align-item">90-day LTV cohort tracking by source</div>
+      <div class="align-item">Cross-channel attribution model</div>
+    </div>
+    <div class="align-center">
+      <div class="align-center-label">North Star Metrics</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">Blended CAC</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">CAC Payback</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">LTV : CAC</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">ROMI</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">90-day Retention</div>
+    </div>
+    <div class="align-side">
+      <div class="align-eye">Reporting Cadence</div>
+      <div class="align-item">Daily: CAC, CPA, spend pacing by channel</div>
+      <div class="align-item">Weekly: Creative performance, channel efficiency</div>
+      <div class="align-item">Bi-weekly: Affiliate partner review and optimization</div>
+      <div class="align-item">Monthly: LTV cohort, payback by source, MER</div>
+      <div class="align-item">Quarterly: Channel mix review, budget reallocation</div>
+      <div class="align-item">Incrementality tests: Rolling 4-week cycles</div>
+      <div class="align-item">Executive dashboard: KPI scorecard weekly</div>
+    </div>
+  </div>
+</div>
+
+<!-- STAGE 9: Return to Dashboard -->
+<div class="stage" id="stage-9">
+  <div class="stage-eyebrow">Chapter 10 — Performance Layer</div>
+  <h1 class="stage-title">Back to the dashboard. <em>Now it means something.</em></h1>
+  <p class="stage-body">Every KPI on the opening dashboard now has a system behind it. A segment it belongs to, a channel that sources it, a signal that triggered the action, a campaign that delivered it, and a measurement framework that validates it. This is the 12–24 month playbook for building a scalable, efficient, and diversified performance marketing engine.</p>
+  <div class="stage-quote">"The dashboard is not the strategy. It is the proof that the strategy is working. Because we built the system underneath it — the segments, the channels, the creative, the measurement — every number on the scoreboard is one we understand and can move."</div>
+
+  <div class="return-grid">
+    <div class="rg-card"><div class="rg-layer">Segmentation + TAM</div><div class="rg-kpi">Blended CAC: $48</div><div class="rg-source">Shift budget to Tier 1 lookalike audiences</div></div>
+    <div class="rg-card"><div class="rg-layer">Audience Architecture</div><div class="rg-kpi">LTV:CAC: 4.6×</div><div class="rg-source">Value-led creative targeting high-retention personas</div></div>
+    <div class="rg-card"><div class="rg-layer">Acquisition Funnel</div><div class="rg-kpi">New Customers: +34%</div><div class="rg-source">Funnel optimization at every conversion stage</div></div>
+    <div class="rg-card"><div class="rg-layer">Campaign Activation</div><div class="rg-kpi">ROMI: 5.2×</div><div class="rg-source">Multi-channel campaigns built from signal + segment</div></div>
+    <div class="rg-card"><div class="rg-layer">Channel Strategy</div><div class="rg-kpi">Payback: 8.2 months</div><div class="rg-source">Diversified across Meta, Google, affiliate, TikTok</div></div>
+    <div class="rg-card"><div class="rg-layer">Signal Intelligence</div><div class="rg-kpi">Conversion Rate: 3.8%</div><div class="rg-source">Intent signals triggering timely, relevant creative</div></div>
+    <div class="rg-card"><div class="rg-layer">Measurement Stack</div><div class="rg-kpi">CPA: $186</div><div class="rg-source">Incrementality-validated, CAPI-tracked attribution</div></div>
+    <div class="rg-card"><div class="rg-layer">Full System</div><div class="rg-kpi">Channel Diversification: 6</div><div class="rg-source">No single channel dependency — resilient acquisition model</div></div>
+  </div>
+
+  <div class="system-flow">
+    <div class="sys-row"><div class="sys-label">KPI Scoreboard</div><div class="sys-items"><span class="sys-item">Blended CAC</span><span class="sys-item">LTV:CAC ratio</span><span class="sys-item">CAC payback</span><span class="sys-item">ROMI</span><span class="sys-item">New customer volume</span></div></div>
+    <div class="sys-row"><div class="sys-label">Intelligence Layer</div><div class="sys-items"><span class="sys-item">Segmentation</span><span class="sys-item">TAM + whitespace</span><span class="sys-item">Audience architecture</span><span class="sys-item">Signal monitoring</span><span class="sys-item">Measurement stack</span></div></div>
+    <div class="sys-row"><div class="sys-label">Acquisition Engine</div><div class="sys-items"><span class="sys-item">Meta + Google</span><span class="sys-item">Affiliate program</span><span class="sys-item">TikTok + CTV</span><span class="sys-item">SEO + lifecycle</span><span class="sys-item">Creative testing</span></div></div>
+    <div class="sys-row"><div class="sys-label">Optimization Loop</div><div class="sys-items"><span class="sys-item">Incrementality testing</span><span class="sys-item">Creative iteration</span><span class="sys-item">Budget reallocation</span><span class="sys-item">Partner optimization</span><span class="sys-item">Cohort LTV tracking</span></div></div>
+  </div>
+
+  <div style="padding:20px;background:var(--green-pale);border:1px solid var(--green);border-radius:4px;margin-top:4px;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--green);margin-bottom:8px;">The 12–24 month commitment</div>
+    <div style="font-size:14px;color:var(--ink);line-height:1.65;font-weight:500;">Build a performance marketing engine that grows efficiently — not just fast. Reduce blended CAC while increasing volume. Diversify channel dependency. Build measurement infrastructure that tells the truth. And connect every acquisition dollar back to the LTV, payback, and profitability metrics the business actually runs on.</div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<div class="nav-buttons">
+  <div class="stage-counter" id="stageCounter">Chapter 1 of 10</div>
+  <div class="btn-group">
+    <button class="btn btn-back" id="btnBack" onclick="navigate(-1)" disabled>← Back</button>
+    <button class="btn btn-next" id="btnNext" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+const STAGES = [
+  {label:"KPI Foundation",eyebrow:"The Scoreboard"},
+  {label:"Segmentation",eyebrow:"Audience + Growth Objective"},
+  {label:"Total Addressable Market",eyebrow:"Intelligence Layer"},
+  {label:"Audience Architecture",eyebrow:"Tiers + Personas"},
+  {label:"Acquisition Funnel",eyebrow:"Prospect Strategy"},
+  {label:"Signal Intelligence",eyebrow:"Activation Layer"},
+  {label:"Campaign Activation",eyebrow:"Marketing Engine"},
+  {label:"Channel Strategy",eyebrow:"Channel Mix"},
+  {label:"Measurement",eyebrow:"Attribution + Reporting"},
+  {label:"Return to Dashboard",eyebrow:"Performance Layer"},
+];
+
+let current=0;
+const rail=document.getElementById('rail');
+STAGES.forEach((s,i)=>{
+  if(i>0){const c=document.createElement('div');c.className='rail-connector';rail.appendChild(c);}
+  const ch=document.createElement('div');
+  ch.className='rail-chapter'+(i===0?' active':'');
+  ch.id='rail-'+i;
+  ch.innerHTML=`<div class="rail-dot"></div><div class="rail-label">${s.label}</div>`;
+  ch.onclick=()=>goTo(i);
+  rail.appendChild(ch);
+});
+
+function buildTAMMap(){
+  const container=document.getElementById('tamMap');
+  if(!container)return;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 900 360');
+  svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  svg.innerHTML=`
+  <defs>
+    <linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6b7280"/><stop offset="100%" stop-color="#4b5563"/></linearGradient>
+    <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8e4dd"/><stop offset="100%" stop-color="#dedad2"/></linearGradient>
+  </defs>
+  <rect width="900" height="360" fill="url(#wg)"/>
+  <rect x="0" y="0" width="220" height="360" fill="#5a6170" opacity="0.3"/>
+  <path d="M 900,0 L 900,360 L 145,360 L 138,340 L 128,318 L 118,305 L 105,298 Q 95,290 100,278 L 110,265 L 115,252 L 108,240 Q 98,228 88,232 L 75,238 L 62,235 L 55,222 L 58,208 L 68,198 Q 78,190 74,178 L 65,168 L 60,155 L 66,142 L 78,135 L 90,130 Q 105,125 108,112 L 105,98 L 95,88 L 88,75 L 92,62 L 104,54 L 118,50 L 130,52 L 145,48 L 158,40 L 165,28 L 172,16 L 185,8 L 200,4 L 900,0 Z" fill="url(#lg)"/>
+  <path d="M 52,140 L 62,135 L 72,130 L 80,122 L 82,110 L 76,100 L 66,96 L 55,98 L 46,106 L 44,118 L 48,130 Z" fill="#e0dbd3"/>
+  <ellipse cx="44" cy="200" rx="14" ry="8" fill="#d8d4cc" transform="rotate(-15,44,200)"/>
+  <rect x="310" y="58" width="55" height="38" rx="3" fill="#c8d9b8" opacity="0.7"/>
+  <rect x="520" y="140" width="40" height="28" rx="3" fill="#c8d9b8" opacity="0.6"/>
+  <rect x="680" y="220" width="60" height="35" rx="3" fill="#c8d9b8" opacity="0.65"/>
+  <rect x="200" y="260" width="45" height="30" rx="3" fill="#c8d9b8" opacity="0.6"/>
+  <ellipse cx="820" cy="80" rx="32" ry="22" fill="#c8d9b8" opacity="0.5"/>
+  <path d="M 108,230 Q 130,250 125,275 Q 120,298 130,315 Q 138,330 145,360" stroke="#7a8898" stroke-width="8" fill="none" opacity="0.6"/>
+  <g fill="none">
+    <line x1="160" y1="62" x2="900" y2="58" stroke="#f5f2ec" stroke-width="4"/>
+    <line x1="150" y1="138" x2="900" y2="135" stroke="#f5f2ec" stroke-width="5"/>
+    <line x1="140" y1="180" x2="900" y2="178" stroke="#ebe8e0" stroke-width="3.5"/>
+    <line x1="135" y1="258" x2="900" y2="255" stroke="#f5f2ec" stroke-width="4.5"/>
+    <line x1="210" y1="10" x2="208" y2="360" stroke="#f5f2ec" stroke-width="4"/>
+    <line x1="370" y1="10" x2="368" y2="360" stroke="#f5f2ec" stroke-width="3.5"/>
+    <line x1="520" y1="10" x2="518" y2="360" stroke="#f5f2ec" stroke-width="5"/>
+    <line x1="680" y1="10" x2="678" y2="360" stroke="#ebe8e0" stroke-width="3.5"/>
+    <line x1="830" y1="10" x2="828" y2="360" stroke="#f5f2ec" stroke-width="4"/>
+    <line x1="170" y1="100" x2="900" y2="97" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="290" y1="10" x2="288" y2="360" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="445" y1="10" x2="443" y2="360" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="600" y1="10" x2="598" y2="360" stroke="#eeeae2" stroke-width="2"/>
+    <path d="M 165,50 Q 300,110 370,138 Q 450,165 520,178" stroke="#f0ece4" stroke-width="3.5" fill="none"/>
+  </g>
+  <text x="255" y="128" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Northgate</text>
+  <text x="390" y="128" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#8a8078">Central District</text>
+  <text x="555" y="128" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Eastside</text>
+  <text x="695" y="128" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Hillcrest</text>
+  <text x="840" y="128" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Ridgeline</text>
+  <text x="200" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Bayside</text>
+  <text x="380" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Midtown</text>
+  <text x="555" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Southpark</text>
+  <text x="700" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Valleyview</text>
+  <text x="840" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Farpoint</text>
+  `;
+  container.appendChild(svg);
+
+  function rnd(min,max,seed){const x=Math.sin(seed*9301+49297)*233280;return min+(x-Math.floor(x))*(max-min);}
+
+  const zones=[
+    {x1:215,x2:355,y1:22,y2:130},{x1:375,x2:510,y1:18,y2:130},{x1:525,x2:670,y1:18,y2:130},
+    {x1:685,x2:820,y1:18,y2:130},{x1:835,x2:895,y1:18,y2:130},
+    {x1:160,x2:355,y1:142,y2:252},{x1:375,x2:510,y1:142,y2:252},{x1:525,x2:670,y1:142,y2:252},
+    {x1:685,x2:820,y1:142,y2:252},{x1:835,x2:895,y1:142,y2:252},
+    {x1:158,x2:355,y1:262,y2:350},{x1:375,x2:510,y1:262,y2:350},{x1:525,x2:670,y1:262,y2:350},
+    {x1:685,x2:820,y1:262,y2:350},{x1:835,x2:895,y1:262,y2:350},
+  ];
+
+  const activeNames=['Taylor M. · Active Customer · LTV $840','Jordan K. · Active Customer · LTV $620','Alex R. · Active Customer · LTV $1,240','Sam L. · Active Customer · LTV $780','Morgan T. · Active Customer · LTV $940','Casey P. · Active Customer · LTV $560','Riley B. · Active Customer · LTV $1,100','Drew W. · Active Customer · LTV $690','Quinn A. · Active Customer · LTV $820','Blake S. · Active Customer · LTV $750','Avery C. · Active Customer · LTV $1,320','Jamie N. · Active Customer · LTV $480','Peyton M. · Active Customer · LTV $660','Reese D. · Active Customer · LTV $890','Logan F. · Active Customer · LTV $540','Harper G. · Active Customer · LTV $970','Skyler H. · Active Customer · LTV $730','Dylan J. · Active Customer · LTV $610','Parker K. · Active Customer · LTV $1,050','Emerson L. · Active Customer · LTV $800','Finley M. · Active Customer · LTV $920','Hayden N. · Active Customer · LTV $670'];
+  const engagedNames=['Addison O. · Trial · Day 12','Cameron P. · Engaged · 3 sessions','Charlie Q. · Trial · Day 6','Dakota R. · Engaged · Email opened','Elliot S. · Trial · Day 18','Frankie T. · Engaged · Cart abandoned','Gray U. · Trial · Day 3','Hunter V. · Engaged · Video watched','Indigo W. · Trial · Day 21','Jesse X. · Engaged · Pricing page','Kendall Y. · Trial · Day 8','Lane Z. · Engaged · Retargeted','Marlowe A. · Trial · Day 14'];
+  const lapsedNames=['Nova B. · Churned · Day 45','Oakley C. · Lapsed · 90 days inactive','Pax D. · Churned · Refunded','Quinn E. · Lapsed · Trial expired','River F. · Churned · Price objection','Sage G. · Lapsed · 60 days inactive','Tatum H. · Churned · Competitor switch'];
+  const leadNames=Array.from({length:45},(_,i)=>`Prospect #${String(i+1001).padStart(4,'0')} · ${['High intent — search click','Medium intent — social ad','Low intent — display view','Affiliate referred','Organic visit','Retargeted','Email list'][i%7]}`);
+
+  const accounts=[];
+  let seed=7,ai=0,ei=0,li=0,ldi=0;
+  const activeDist=[1,3,3,2,1,2,2,2,1,1,1,1,0,1,1];
+  activeDist.forEach((count,zi)=>{
+    const z=zones[zi];
+    for(let i=0;i<count;i++){accounts.push({x:rnd(z.x1+6,z.x2-6,seed++),y:rnd(z.y1+8,z.y2-8,seed++),s:Math.round(rnd(9,13,seed++)),c:'#2a72d5',t:activeNames[ai++%activeNames.length]});}
+  });
+  const engagedDist=[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0];
+  engagedDist.forEach((count,zi)=>{
+    const z=zones[zi];
+    for(let i=0;i<count;i++){accounts.push({x:rnd(z.x1+6,z.x2-6,seed++),y:rnd(z.y1+8,z.y2-8,seed++),s:Math.round(rnd(7,10,seed++)),c:'#3baf9e',t:engagedNames[ei++%engagedNames.length]});}
+  });
+  for(let i=0;i<7;i++){const z=zones[Math.floor(rnd(0,zones.length,seed++))];accounts.push({x:rnd(z.x1+6,z.x2-6,seed++),y:rnd(z.y1+8,z.y2-8,seed++),s:Math.round(rnd(6,9,seed++)),c:'#e8a020',t:lapsedNames[li++%lapsedNames.length]});}
+  for(let i=0;i<45;i++){const z=zones[Math.floor(rnd(0,zones.length,seed++))];accounts.push({x:rnd(z.x1+4,z.x2-4,seed++),y:rnd(z.y1+6,z.y2-6,seed++),s:Math.round(rnd(4,7,seed++)),c:'#9eaab8',t:leadNames[ldi++%leadNames.length]});}
+
+  const tooltip=document.getElementById('mapTooltip');
+  accounts.forEach(d=>{
+    const el=document.createElement('div');
+    el.className='map-dot';
+    const xp=(d.x/900*100).toFixed(2);
+    const yp=(d.y/360*100).toFixed(2);
+    el.style.cssText=`left:${xp}%;top:${yp}%;width:${d.s}px;height:${d.s}px;background:${d.c};opacity:0.92;margin-left:-${Math.round(d.s/2)}px;margin-top:-${Math.round(d.s/2)}px;box-shadow:0 1px 4px rgba(0,0,0,0.25);`;
+    if(tooltip){
+      el.addEventListener('mouseenter',()=>{
+        const parts=d.t.split(' · ');
+        tooltip.innerHTML=`<div style="font-weight:700;font-size:11px;margin-bottom:2px;">${parts[0]}</div><div style="font-size:10px;opacity:0.8;">${parts.slice(1).join(' · ')}</div>`;
+        tooltip.style.display='block';
+        const cw=container.offsetWidth;
+        let leftPx=d.x/900*cw;
+        if(leftPx+180>cw)leftPx=cw-185;
+        if(leftPx<5)leftPx=5;
+        tooltip.style.left=leftPx+'px';
+        tooltip.style.bottom=(100-parseFloat(yp)+2)+'%';
+        tooltip.style.top='';
+      });
+      el.addEventListener('mouseleave',()=>{tooltip.style.display='none';tooltip.style.bottom='';});
+    }
+    container.appendChild(el);
+  });
+}
+
+function goTo(n){
+  document.getElementById('stage-'+current).classList.remove('active');
+  document.getElementById('rail-'+current).classList.remove('active');
+  if(current<n)document.getElementById('rail-'+current).classList.add('done');
+  else document.getElementById('rail-'+current).classList.remove('done');
+  current=n;
+  document.getElementById('stage-'+current).classList.add('active');
+  document.getElementById('rail-'+current).classList.remove('done');
+  document.getElementById('rail-'+current).classList.add('active');
+  STAGES.forEach((_,i)=>{
+    const rc=document.getElementById('rail-'+i);
+    rc.classList.remove('done','active');
+    if(i<current)rc.classList.add('done');
+    else if(i===current)rc.classList.add('active');
+  });
+  document.getElementById('btnBack').disabled=current===0;
+  document.getElementById('btnNext').textContent=current===STAGES.length-1?'↩ Start Over':'Next →';
+  document.getElementById('stageCounter').textContent=`Chapter ${current+1} of ${STAGES.length}`;
+  document.getElementById('progressFill').style.width=((current+1)/STAGES.length*100)+'%';
+  document.getElementById('stageArea').scrollTop=0;
+}
+
+function navigate(dir){
+  if(current===STAGES.length-1&&dir>0){goTo(0);return;}
+  const next=current+dir;
+  if(next<0||next>=STAGES.length)return;
+  goTo(next);
+}
+
+function expandSeg(card){
+  const detail=card.querySelector('.seg-detail');
+  const isOpen=detail.style.display==='block';
+  document.querySelectorAll('.seg-detail').forEach(d=>d.style.display='none');
+  document.querySelectorAll('.card.clickable').forEach(c=>c.classList.remove('expanded'));
+  if(!isOpen){detail.style.display='block';card.classList.add('expanded');}
+}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')navigate(-1);
+});
+
+buildTAMMap();
+</script>
+</body>
+</html>
