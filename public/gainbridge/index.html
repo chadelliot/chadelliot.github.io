@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gainbridge — VP Marketing Growth Playbook · Chad Parker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,700;1,800&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --green:#4a9e7a;--green-pale:#edf6f1;--ink:#111111;--body:#444444;
+  --muted:#888888;--rule:#e8e8e8;--surface:#f7f7f7;--white:#ffffff;
+  --sig-g:#2e7d52;--sig-a:#b45309;--sig-r:#b91c1c;
+}
+html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-serif;background:var(--white);color:var(--ink);}
+.site-nav{position:fixed;top:0;left:0;right:0;height:56px;background:var(--white);border-bottom:1px solid var(--rule);display:flex;align-items:center;padding:0 32px;justify-content:space-between;z-index:100;}
+.site-logo{font-size:17px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;}
+.site-logo em{font-style:italic;color:var(--green);}
+.nav-links{display:flex;gap:28px;list-style:none;}
+.nav-links a{font-size:10px;font-weight:600;letter-spacing:1.1px;text-transform:uppercase;text-decoration:none;color:var(--muted);}
+.nav-links a.active{color:var(--green);}
+.shell{display:flex;height:100vh;padding-top:56px;}
+.rail{width:220px;flex-shrink:0;border-right:1px solid var(--rule);padding:28px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;}
+.rail-chapter{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:4px;cursor:pointer;transition:background 0.15s;}
+.rail-chapter:hover{background:var(--surface);}
+.rail-chapter.active{}
+.rail-dot{width:8px;height:8px;border-radius:50%;border:2px solid var(--rule);background:var(--white);flex-shrink:0;margin-top:4px;transition:all 0.2s;}
+.rail-chapter.active .rail-dot{background:var(--green);border-color:var(--green);}
+.rail-chapter.done .rail-dot{background:var(--green);border-color:var(--green);opacity:0.45;}
+.rail-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);line-height:1.4;}
+.rail-chapter.active .rail-label{color:var(--green);}
+.rail-connector{width:1px;height:10px;background:var(--rule);margin-left:23px;}
+.rail-section-hdr{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);padding:6px 10px;border-bottom:1px solid var(--rule);margin-bottom:4px;}
+.rail-section-hdr.foundation{color:var(--green);border-bottom-color:var(--green);}
+.stage-area{flex:1;overflow-y:auto;padding:40px 48px 100px;position:relative;}
+.stage{display:none;animation:fadeIn 0.35s ease;}
+.stage.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.stage-eyebrow{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--green);margin-bottom:12px;}
+.stage-title{font-size:32px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1.1;margin-bottom:8px;}
+.stage-title em{font-style:italic;color:var(--green);}
+.stage-body{font-size:14px;color:var(--body);line-height:1.7;max-width:640px;margin-bottom:28px;}
+.stage-quote{font-size:13px;font-style:italic;color:var(--muted);border-left:3px solid var(--green);padding-left:16px;margin-bottom:28px;line-height:1.65;max-width:600px;}
+.nav-buttons{position:fixed;bottom:0;right:0;width:calc(100% - 220px);background:var(--white);border-top:1px solid var(--rule);padding:16px 48px;display:flex;align-items:center;justify-content:space-between;z-index:90;}
+.stage-counter{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);}
+.btn-group{display:flex;gap:10px;}
+.btn{padding:9px 22px;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;border-radius:3px;cursor:pointer;border:1px solid var(--rule);font-family:'Inter',sans-serif;transition:all 0.15s;}
+.btn-back{background:var(--white);color:var(--muted);}
+.btn-back:hover{border-color:var(--ink);color:var(--ink);}
+.btn-next{background:var(--green);color:var(--white);border-color:var(--green);}
+.btn-next:hover{background:#3a8a68;border-color:#3a8a68;}
+.btn:disabled{opacity:0.3;cursor:default;}
+.progress-bar{position:fixed;top:56px;left:220px;right:0;height:2px;background:var(--rule);z-index:90;}
+.progress-fill{height:100%;background:var(--green);transition:width 0.4s ease;}
+.kpi-dash{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:24px;}
+.kd-card{background:var(--white);padding:16px 18px;}
+.kd-eye{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.kd-val{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;margin-bottom:4px;}
+.kd-delta{font-size:10px;font-weight:500;}
+.kd-delta.pos{color:var(--sig-g);}
+.kd-delta.neg{color:var(--sig-r);}
+.kd-delta.warn{color:var(--sig-a);}
+.kd-delta.flat{color:var(--muted);}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.card{background:var(--white);border:1px solid var(--rule);border-radius:4px;padding:20px;transition:box-shadow 0.15s;}
+.card:hover{box-shadow:0 2px 12px rgba(0,0,0,0.07);}
+.card-eye{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.card-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+.card-body{font-size:12px;color:var(--body);line-height:1.55;}
+.card-tag{display:inline-block;margin-top:10px;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;padding:3px 8px;border-radius:2px;}
+.tag-g{background:var(--green-pale);color:var(--sig-g);}
+.tag-b{background:#eef3fc;color:#2d6bcd;}
+.tag-a{background:#fef3c7;color:var(--sig-a);}
+.card.clickable{cursor:pointer;}
+.card.clickable.expanded{border-color:var(--green);background:var(--green-pale);}
+.seg-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);}
+.track{height:2px;background:var(--rule);border-radius:1px;overflow:hidden;margin-bottom:10px;}
+.tf{height:100%;background:#c8d0d8;border-radius:1px;}
+.tf.g{background:var(--green);}
+.tam-shell{border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;position:relative;height:360px;}
+.tam-map-area{width:100%;height:100%;position:relative;overflow:hidden;}
+.tam-map-area svg{position:absolute;top:0;left:0;width:100%;height:100%;}
+.map-dot{position:absolute;border-radius:50%;transition:all 0.3s;cursor:pointer;z-index:2;}
+.map-dot:hover{transform:scale(1.6);z-index:10;}
+.map-tooltip{position:absolute;background:var(--ink);color:var(--white);font-size:10px;font-weight:500;padding:7px 10px;border-radius:4px;pointer-events:none;white-space:nowrap;z-index:20;display:none;line-height:1.4;box-shadow:0 2px 8px rgba(0,0,0,0.3);min-width:160px;}
+.tam-legend{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,0.97);border:1px solid var(--rule);border-radius:3px;padding:10px 14px;display:flex;flex-direction:column;gap:5px;z-index:5;}
+.tam-leg-item{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:500;color:var(--body);}
+.tam-leg-dot{width:8px;height:8px;border-radius:50%;}
+.tam-count{position:absolute;top:12px;right:12px;background:rgba(255,255,255,0.97);border:1px solid var(--rule);border-radius:3px;padding:10px 14px;text-align:right;z-index:5;}
+.tam-count-val{font-size:22px;font-weight:800;color:var(--green);letter-spacing:-0.5px;line-height:1;}
+.tam-count-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);}
+.funnel-horiz{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.fh-cell{background:var(--white);padding:12px 10px;text-align:center;}
+.fh-cell.rev{background:var(--green-pale);}
+.fh-stage{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);margin-bottom:6px;}
+.fh-val{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.5px;line-height:1;}
+.fh-note{font-size:9px;color:var(--muted);margin-top:4px;}
+.fh-note.g{color:var(--sig-g);font-weight:600;}
+.fh-cell.rev .fh-stage{color:var(--green);}
+.fh-cell.rev .fh-note{color:var(--green);font-weight:600;}
+.signal-card{border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.signal-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--rule);background:var(--white);}
+.signal-icon{width:32px;height:32px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.signal-hed{font-size:13px;font-weight:700;color:var(--ink);}
+.signal-sub{font-size:11px;color:var(--muted);margin-top:1px;}
+.signal-tag{margin-left:auto;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;padding:3px 8px;border-radius:2px;}
+.signal-body{padding:14px 18px;background:var(--surface);}
+.signal-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.signal-step{font-size:10px;font-weight:600;color:var(--body);padding:4px 10px;background:var(--white);border:1px solid var(--rule);border-radius:2px;}
+.signal-arrow{color:var(--rule);font-size:12px;}
+.sales-board{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.sb-col{background:var(--white);}
+.sb-head{padding:12px 16px;border-bottom:1px solid var(--rule);background:var(--surface);}
+.sb-head-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--ink);}
+.sb-head-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+.sb-body{padding:12px 16px;display:flex;flex-direction:column;gap:8px;}
+.sb-item{font-size:11px;color:var(--body);padding:6px 0;border-bottom:1px solid var(--surface);display:flex;gap:6px;align-items:flex-start;}
+.sb-item:last-child{border-bottom:none;}
+.sb-bullet{color:var(--green);font-weight:700;flex-shrink:0;}
+.align-grid{display:grid;grid-template-columns:1fr 180px 1fr;gap:0;border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.align-side{background:var(--white);padding:22px;}
+.align-center{background:var(--green);padding:22px 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;}
+.align-center-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.7);text-align:center;margin-bottom:4px;}
+.align-center-val{font-size:12px;font-weight:700;color:var(--white);text-align:center;line-height:1.35;}
+.align-sep{width:24px;height:1px;background:rgba(255,255,255,0.25);margin:1px auto;}
+.align-eye{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;}
+.align-item{font-size:11px;color:var(--body);padding:5px 0;border-bottom:1px solid var(--surface);display:flex;align-items:center;gap:6px;}
+.align-item:last-child{border-bottom:none;}
+.align-item::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0;}
+.persona-primary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.persona-card-lg{border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--white);display:flex;flex-direction:column;}
+.pc-photo{height:130px;overflow:hidden;position:relative;}
+.pc-photo svg{width:100%;height:100%;}
+.pc-photo-badge{position:absolute;bottom:10px;left:12px;background:var(--green);color:var(--white);font-size:9px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
+.pc-body{padding:14px 16px 16px;flex:1;}
+.pc-role{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:3px;}
+.pc-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;margin-bottom:2px;}
+.pc-seg{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--rule);}
+.pc-rows{display:flex;flex-direction:column;gap:6px;}
+.pc-row{display:flex;gap:8px;align-items:flex-start;}
+.pc-key{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);min-width:52px;padding-top:1px;flex-shrink:0;}
+.pc-val{font-size:11px;color:var(--body);line-height:1.4;}
+.return-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.rg-card{background:var(--white);padding:14px 16px;}
+.rg-layer{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--green);margin-bottom:4px;}
+.rg-kpi{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.rg-source{font-size:10px;color:var(--muted);}
+.system-flow{display:flex;flex-direction:column;gap:2px;margin-bottom:20px;}
+.sys-row{display:flex;align-items:center;border:1px solid var(--rule);border-radius:3px;overflow:hidden;}
+.sys-label{background:var(--ink);color:var(--white);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:8px 14px;min-width:160px;flex-shrink:0;}
+.sys-items{display:flex;flex:1;flex-wrap:wrap;}
+.sys-item{font-size:10px;color:var(--body);padding:8px 14px;border-left:1px solid var(--rule);}
+</style>
+</head>
+<body>
+<nav class="site-nav">
+  <div class="site-logo">About <em>Chad</em></div>
+  <ul class="nav-links">
+    <li><a href="/">About</a></li>
+    <li><a href="/approach">My Approach</a></li>
+    <li><a href="/career">Career</a></li>
+    <li><a href="/skills">Skills</a></li>
+    <li><a href="/commercial-strategy" class="active">Work Samples</a></li>
+    <li><a href="/contact">Contact</a></li>
+  </ul>
+</nav>
+
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+
+<div class="shell">
+<aside class="rail" id="rail"></aside>
+<main class="stage-area" id="stageArea">
+
+<!-- CH 1: KPI Foundation -->
+<div class="stage active" id="stage-0">
+  <div class="stage-eyebrow">Chapter 01 — The Scoreboard</div>
+  <h1 class="stage-title">We start with the <em>outcomes that matter.</em></h1>
+  <p class="stage-body">Gainbridge is in a pivotal moment — new brand, new product lineup, significant media investment across linear TV, CTV, digital, billboards, and experiential. The VP of Marketing role is not about running campaigns. It is about proving the machine works. Before a single dollar of incremental budget gets unlocked, the marketing function must demonstrate that it can connect spend to outcomes. These are the KPIs that define what "working" means.</p>
+  <div class="stage-quote">"There is a significant marketing budget to work with and an appetite for significantly more investment. That only gets unlocked by demonstrating the marketing organization can spend efficiently and connect activity to outcomes. Prove that the machine works and there is real capital behind it."</div>
+
+  <div class="kpi-dash">
+    <div class="kd-card"><div class="kd-eye">New Policy Holders</div><div class="kd-val">+42%</div><div class="kd-delta pos">▲ YoY direct acquisition growth</div></div>
+    <div class="kd-card"><div class="kd-eye">Cost Per Acquisition</div><div class="kd-val">$186</div><div class="kd-delta pos">▲ 22% below prior-year baseline</div></div>
+    <div class="kd-card"><div class="kd-eye">Marketing Mix Efficiency</div><div class="kd-val">4.8×</div><div class="kd-delta pos">▲ ROMI across brand + performance</div></div>
+    <div class="kd-card"><div class="kd-eye">Brand Awareness (45+)</div><div class="kd-val">38%</div><div class="kd-delta pos">▲ Unaided recall, target demo</div></div>
+    <div class="kd-card"><div class="kd-eye">Assets Under Management</div><div class="kd-val">$2.4B</div><div class="kd-delta pos">▲ Marketing-attributed AUM growth</div></div>
+    <div class="kd-card"><div class="kd-eye">Conversion Rate</div><div class="kd-val">4.2%</div><div class="kd-delta pos">▲ Visit to funded account</div></div>
+    <div class="kd-card"><div class="kd-eye">Sponsorship Contribution</div><div class="kd-val">$18M</div><div class="kd-delta flat">Fieldhouse + Indy 500 attributed</div></div>
+    <div class="kd-card"><div class="kd-eye">Incrementality (Haus)</div><div class="kd-val">+28%</div><div class="kd-delta pos">▲ Validated lift vs. control</div></div>
+  </div>
+  <p style="font-size:12px;color:var(--muted);">These eight outcomes anchor every channel, campaign, and budget decision. The measurement framework — built on MMM and incrementality testing via Haus — validates which activity is actually driving them.</p>
+</div>
+
+<!-- CH 2: Segmentation -->
+<div class="stage" id="stage-1">
+  <div class="stage-eyebrow">Chapter 02 — Segmentation</div>
+  <h1 class="stage-title">Know the saver. <em>Define the growth.</em></h1>
+  <p class="stage-body">Gainbridge's core customer is an everyday and retirement saver, many of them 45+, who wants control over their financial future without the complexity, hidden fees, or agent pressure of traditional annuity providers. But not all savers are equal in value, in acquisition cost, or in the channels that reach them effectively. Segmentation tells us who to prioritize, how to message each group, and where growth is still available in the market.</p>
+  <div class="stage-quote">"Segmentation is not a targeting exercise. It tells us which customers fund the business and which ones don't — and it defines the growth objective for every channel and campaign that follows."</div>
+
+  <div class="two-col">
+    <div style="border:1px solid var(--rule);border-radius:4px;padding:18px 20px;background:var(--white);">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">What segmentation reveals</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Which saver profiles convert fastest and retain longest</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Which channels source the highest-AUM customers</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Where the largest untapped retirement saver opportunity sits</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Which segments are over-indexed on media spend vs. return</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>How sponsorship assets map to segment reach and affinity</div>
+      </div>
+    </div>
+    <div style="border:1px solid var(--rule);border-radius:4px;padding:18px 20px;background:var(--white);">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;">Growth objectives that follow</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Scale acquisition of high-AUM retirement-ready savers</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Reduce blended CPA by shifting to highest-converting segments</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Expand brand awareness among 45–65 pre-retirement demo</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Build direct channel as primary acquisition engine long-term</div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Convert trial visitors into funded accounts through lifecycle</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="three-col">
+    <div class="card clickable" onclick="expandSeg(this)">
+      <div class="card-eye">Segment A</div>
+      <div class="card-title">Retirement-Ready Savers</div>
+      <div class="card-body">55–70, approaching or in early retirement. Highest AUM deposits, strongest retention, lowest churn. Already seeking guaranteed returns — Gainbridge's product is exactly what they need.</div>
+      <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:94%"></div></div><div style="font-size:10px;color:var(--muted);">AUM index: Very High</div></div>
+      <span class="card-tag tag-g">Protect &amp; Scale</span>
+      <div class="seg-detail"><div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Build lookalike audiences, target through linear TV and CTV, activate via Fieldhouse and Indy 500 sponsorships for trust and awareness.<br><strong>KPI link:</strong> AUM growth, CPA, brand awareness 45+</div></div>
+    </div>
+    <div class="card clickable" onclick="expandSeg(this)">
+      <div class="card-eye">Segment B</div>
+      <div class="card-title">Pre-Retirement Accumulators</div>
+      <div class="card-body">45–55, active earners building toward retirement. Aware of the need to diversify beyond 401K. Moderate deposit size, high growth potential as they approach retirement.</div>
+      <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:65%"></div></div><div style="font-size:10px;color:var(--muted);">AUM index: Medium–High</div></div>
+      <span class="card-tag tag-b">Educate &amp; Convert</span>
+      <div class="seg-detail"><div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Brand awareness through CNBC/MSNBC and CTV, lifecycle nurture after first visit, outcome-led creative focused on guaranteed growth.<br><strong>KPI link:</strong> Conversion rate, CPA, funded account volume</div></div>
+    </div>
+    <div class="card clickable" onclick="expandSeg(this)">
+      <div class="card-eye">Segment C</div>
+      <div class="card-title">Younger Self-Directed Savers</div>
+      <div class="card-body">35–45, digitally native, skeptical of traditional financial institutions. FastBreak™ product ($100 minimum) is purpose-built for this group. Lower AUM now but highest lifetime potential.</div>
+      <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:38%"></div></div><div style="font-size:10px;color:var(--muted);">AUM index: Lower — High LTV potential</div></div>
+      <span class="card-tag tag-a">Acquire &amp; Develop</span>
+      <div class="seg-detail"><div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Paid social, affiliate, SEO — reach self-directed savers where they research. FastBreak™ low barrier to entry as the acquisition product.<br><strong>KPI link:</strong> New accounts, CPA, long-term AUM trajectory</div></div>
+    </div>
+  </div>
+  <p style="font-size:11px;color:var(--muted);">Click each segment to see the growth objective and recommended motion.</p>
+</div>
+
+<!-- CH 3: TAM -->
+<div class="stage" id="stage-2">
+  <div class="stage-eyebrow">Chapter 03 — Total Addressable Market</div>
+  <h1 class="stage-title">Map the <em>retirement savings opportunity.</em></h1>
+  <p class="stage-body">The US annuity market is large and growing — driven by an aging population, rising interest rates making fixed annuities more attractive, and a generation of savers who are increasingly skeptical of traditional financial advisors. Gainbridge sits at a unique intersection: the only fully direct-to-consumer annuity platform in the country. The TAM question is not just how many potential savers exist — it is how many are reachable digitally at efficient cost before competitors close the gap.</p>
+  <div class="stage-quote">"The direct-to-consumer annuity market is still early. Most Americans have never heard of Gainbridge. That is not a liability — it is the opportunity. We are not fighting for share. We are building the category."</div>
+
+  <div class="tam-shell">
+    <div class="tam-map-area" id="tamMap"></div>
+    <div class="map-tooltip" id="mapTooltip"></div>
+    <div class="tam-legend">
+      <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#2a72d5;"></div>Active Gainbridge customer</div>
+      <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#3baf9e;"></div>In funnel / trial visitor</div>
+      <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#9eaab8;"></div>Addressable prospect</div>
+      <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#e8a020;"></div>Lapsed / not converted</div>
+    </div>
+    <div class="tam-count">
+      <div class="tam-count-val">68M</div>
+      <div class="tam-count-lbl">Addressable US savers 45+</div>
+      <div style="margin-top:6px;font-size:10px;color:var(--muted);">~820K active · $32B MYGA market</div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;">
+    <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Total Addressable</div><div style="font-size:22px;font-weight:800;color:var(--ink);">68M</div><div style="font-size:10px;color:var(--muted);">US savers 45+ seeking guaranteed returns</div></div>
+    <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">MYGA Market Size</div><div style="font-size:22px;font-weight:800;color:var(--green);">$32B</div><div style="font-size:10px;color:var(--muted);">Annual fixed annuity sales — Gainbridge direct</div></div>
+    <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Digital-First Segment</div><div style="font-size:22px;font-weight:800;color:var(--ink);">14M</div><div style="font-size:10px;color:var(--muted);">Self-directed online savers — Gainbridge's primary TAM</div></div>
+    <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Competitive Position</div><div style="font-size:22px;font-weight:800;color:var(--ink);">Only 1</div><div style="font-size:10px;color:var(--muted);">Fully direct-to-consumer annuity platform in the US</div></div>
+  </div>
+</div>
+
+<!-- CH 4: Audience Architecture -->
+<div class="stage" id="stage-3">
+  <div class="stage-eyebrow">Chapter 04 — Audience Architecture</div>
+  <h1 class="stage-title">Who gets the message. <em>And what it says.</em></h1>
+  <p class="stage-body">We build the audience in two layers. First, we tier savers by actual or estimated deposit value — this establishes where media investment should be concentrated and where the Haus measurement framework should be most rigorously applied. Then within each tier, we define the personas who make the decision to open a Gainbridge account, based on their financial context, their anxiety, and what message breaks through the trust barrier unique to financial services.</p>
+  <div class="stage-quote">"Financial products require a higher trust threshold than almost any other consumer category. Messaging must meet the saver where they are — their fear, their aspiration, their skepticism — not where the product team wants them to be."</div>
+
+  <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Step 1 — Value Tiering</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:24px;">
+    <div style="background:var(--white);padding:18px 20px;">
+      <div style="font-size:22px;font-weight:800;color:var(--green);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T1</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">High-AUM Depositors</div>
+      <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">$50K+ deposits. Retirement-ready. Highest business value. Reached via linear TV, CTV, and sponsorship activations.</div>
+      <div style="font-size:10px;font-weight:600;color:var(--green);">Messaging: Trust, guarantee, simplicity</div>
+    </div>
+    <div style="background:var(--white);padding:18px 20px;">
+      <div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T2</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Mid-Range Savers</div>
+      <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">$5K–$50K deposits. Pre-retirement, actively comparing options. Reach via search, display, and lifecycle nurture.</div>
+      <div style="font-size:10px;font-weight:600;color:var(--body);">Messaging: Rate, transparency, no fees</div>
+    </div>
+    <div style="background:var(--white);padding:18px 20px;">
+      <div style="font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-1px;line-height:1;margin-bottom:4px;">T3</div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);margin-bottom:6px;">Entry-Level Savers</div>
+      <div style="font-size:12px;color:var(--body);line-height:1.5;margin-bottom:10px;">$100–$5K via FastBreak™. Younger, self-directed, digital-first. Affiliate and paid social primary channels.</div>
+      <div style="font-size:10px;font-weight:600;color:var(--body);">Messaging: Control, accessibility, low barrier</div>
+    </div>
+  </div>
+
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+    <div style="flex:1;height:1px;background:var(--rule);"></div>
+    <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">Step 2 — Personas</div>
+    <div style="flex:1;height:1px;background:var(--rule);"></div>
+  </div>
+
+  <div class="persona-primary">
+    <div class="persona-card-lg">
+      <div class="pc-photo">
+        <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <defs><linearGradient id="pg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#e0ebe4"/><stop offset="100%" style="stop-color:#c8dbd0"/></linearGradient></defs>
+          <rect width="400" height="130" fill="url(#pg1)"/>
+          <circle cx="320" cy="-20" r="100" fill="#4a9e7a" opacity="0.12"/>
+          <circle cx="90" cy="55" r="28" fill="#4a9e7a" opacity="0.7"/>
+          <ellipse cx="90" cy="118" rx="38" ry="22" fill="#4a9e7a" opacity="0.5"/>
+          <line x1="150" y1="40" x2="370" y2="40" stroke="#4a9e7a" stroke-width="1.5" opacity="0.3"/>
+          <line x1="150" y1="55" x2="340" y2="55" stroke="#4a9e7a" stroke-width="1.5" opacity="0.2"/>
+          <line x1="150" y1="70" x2="290" y2="70" stroke="#4a9e7a" stroke-width="1.5" opacity="0.15"/>
+          <rect x="150" y="30" width="160" height="22" rx="3" fill="rgba(255,255,255,0.5)"/>
+          <text x="158" y="45" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2e5c42">BARBARA K. · 61</text>
+        </svg>
+        <div class="pc-photo-badge">T1 · Retirement-Ready Saver</div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-role">Primary Acquisition Persona</div>
+        <div class="pc-name">The Reassured Retiree</div>
+        <div class="pc-seg">Tier 1 · High AUM · Segment A</div>
+        <div class="pc-rows">
+          <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Protect retirement savings with guaranteed returns she can understand and trust</div></div>
+          <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Complexity, hidden fees, and salespeople she doesn't trust — the old model</div></div>
+          <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Simple. Guaranteed. No advisor. No fees. Her money working for her on her terms</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="persona-card-lg">
+      <div class="pc-photo">
+        <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+          <defs><linearGradient id="pg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#e4eaf0"/><stop offset="100%" style="stop-color:#ccd6e0"/></linearGradient></defs>
+          <rect width="400" height="130" fill="url(#pg2)"/>
+          <circle cx="350" cy="20" r="90" fill="#2d6bcd" opacity="0.08"/>
+          <circle cx="90" cy="55" r="28" fill="#2d6bcd" opacity="0.6"/>
+          <ellipse cx="90" cy="118" rx="38" ry="22" fill="#2d6bcd" opacity="0.4"/>
+          <rect x="148" y="32" width="200" height="1.5" fill="#2d6bcd" opacity="0.25"/>
+          <rect x="148" y="46" width="170" height="1.5" fill="#2d6bcd" opacity="0.2"/>
+          <rect x="148" y="60" width="140" height="1.5" fill="#2d6bcd" opacity="0.15"/>
+          <rect x="150" y="72" width="8" height="22" rx="1" fill="#2d6bcd" opacity="0.3"/>
+          <rect x="163" y="80" width="8" height="14" rx="1" fill="#2d6bcd" opacity="0.25"/>
+          <rect x="176" y="68" width="8" height="26" rx="1" fill="#2d6bcd" opacity="0.35"/>
+          <rect x="150" y="30" width="130" height="20" rx="3" fill="rgba(255,255,255,0.5)"/>
+          <text x="158" y="44" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#1e3a5c">MICHAEL R. · 49</text>
+        </svg>
+        <div class="pc-photo-badge">T2 · Pre-Retirement Accumulator</div>
+      </div>
+      <div class="pc-body">
+        <div class="pc-role">Growth Acquisition Persona</div>
+        <div class="pc-name">The Proactive Planner</div>
+        <div class="pc-seg">Tier 2 · Mid-AUM · Segment B</div>
+        <div class="pc-rows">
+          <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Diversify beyond his 401K with a guaranteed vehicle that doesn't require an advisor</div></div>
+          <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Market volatility anxiety, distrust of commission-based advisors, rate comparison fatigue</div></div>
+          <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Competitive guaranteed rate, transparent terms, fully digital — built for people like him</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CH 5: Acquisition Funnel -->
+<div class="stage" id="stage-4">
+  <div class="stage-eyebrow">Chapter 05 — Acquisition Funnel</div>
+  <h1 class="stage-title">From awareness to <em>funded account.</em></h1>
+  <p class="stage-body">The Gainbridge funnel is different from a typical DTC funnel. Financial services require a higher trust threshold and a longer consideration cycle. Someone who sees a Gainbridge ad on the Today Show may take weeks before visiting the site, comparing rates, and opening an account. The funnel must be measured across the full journey — not just the last click — which is exactly what the Haus MMM relationship is built to do.</p>
+
+  <div class="funnel-horiz">
+    <div class="fh-cell"><div class="fh-stage">Reach</div><div class="fh-val">42M</div><div class="fh-note">Monthly media impressions</div></div>
+    <div class="fh-cell"><div class="fh-stage">Site Visit</div><div class="fh-val">680K</div><div class="fh-note g">1.6% visit rate</div></div>
+    <div class="fh-cell"><div class="fh-stage">Rate Check</div><div class="fh-val">210K</div><div class="fh-note g">31% of visitors</div></div>
+    <div class="fh-cell"><div class="fh-stage">Application</div><div class="fh-val">48K</div><div class="fh-note g">23% of rate checkers</div></div>
+    <div class="fh-cell"><div class="fh-stage">Approved</div><div class="fh-val">38K</div><div class="fh-note g">79% approval rate</div></div>
+    <div class="fh-cell"><div class="fh-stage">Funded</div><div class="fh-val">22K</div><div class="fh-note g">58% fund rate</div></div>
+    <div class="fh-cell rev"><div class="fh-stage">AUM Added</div><div class="fh-val">$1.8B</div><div class="fh-note">Monthly deposits</div></div>
+  </div>
+
+  <div class="three-col">
+    <div class="card"><div class="card-eye">T1 Prospects</div><div class="card-title">High-AUM · Retirement-Ready</div><div class="card-body">Driven by linear TV, CTV, and sponsorship exposure. Long consideration window. Reach through Today Show, CNBC, MSNBC — where financial decisions get made by this demo.</div><span class="card-tag tag-g">Brand + Nurture</span></div>
+    <div class="card"><div class="card-eye">T2 Prospects</div><div class="card-title">Mid-AUM · Rate Shoppers</div><div class="card-body">Arrive via paid search and comparison sites. High intent — already looking for a MYGA. CPA optimization and landing page conversion are the primary levers for this group.</div><span class="card-tag tag-b">Performance + Convert</span></div>
+    <div class="card"><div class="card-eye">T3 Prospects</div><div class="card-title">Entry-Level · Self-Directed</div><div class="card-body">Arrive via affiliate, social, and organic search. FastBreak™ $100 minimum removes the barrier. Lifecycle email after first visit is the primary conversion driver.</div><span class="card-tag tag-a">Acquire + Develop</span></div>
+  </div>
+</div>
+
+<!-- CH 6: Signal Intelligence -->
+<div class="stage" id="stage-5">
+  <div class="stage-eyebrow">Chapter 06 — Signal Intelligence</div>
+  <h1 class="stage-title">Read the market. <em>Act before competitors do.</em></h1>
+  <p class="stage-body">In a regulated financial services category, signals are particularly powerful because most competitors are slow to respond to them. Interest rate movements, competitor product changes, macroeconomic anxiety events, and media spend shifts all create windows where the right message at the right moment dramatically improves acquisition efficiency. Building a signal monitoring practice is a competitive advantage the MMM framework is designed to capture.</p>
+  <div class="stage-quote">"The Fed moves rates. Consumers get anxious. Search volume for 'guaranteed savings' spikes. Most brands respond in weeks. We respond in hours. That window is where the CPA advantage is built."</div>
+
+  <div class="two-col">
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Market &amp; Macro Signals</div>
+      <div class="signal-card">
+        <div class="signal-header"><div class="signal-icon">📈</div><div><div class="signal-hed">Fed Rate Decision — Positive</div><div class="signal-sub">Rate hold or increase — MYGA rates improve vs. savings accounts</div></div><span class="signal-tag tag-g">Capitalize</span></div>
+        <div class="signal-body"><div class="signal-flow"><span class="signal-step">Rate signal detected</span><span class="signal-arrow">→</span><span class="signal-step">Update rate creative</span><span class="signal-arrow">→</span><span class="signal-step">Increase search bids</span><span class="signal-arrow">→</span><span class="signal-step">Push CTV burst</span></div></div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-header"><div class="signal-icon">📉</div><div><div class="signal-hed">Stock Market Volatility Event</div><div class="signal-sub">Major index drop — retirement anxiety spikes across 50+ demo</div></div><span class="signal-tag tag-g">Act Now</span></div>
+        <div class="signal-body"><div class="signal-flow"><span class="signal-step">Volatility detected</span><span class="signal-arrow">→</span><span class="signal-step">Deploy "guaranteed" creative</span><span class="signal-arrow">→</span><span class="signal-step">Increase Today Show adjacency</span><span class="signal-arrow">→</span><span class="signal-step">Track lift</span></div></div>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Competitive &amp; Channel Signals</div>
+      <div class="signal-card">
+        <div class="signal-header"><div class="signal-icon">🏦</div><div><div class="signal-hed">Athene / Blueprint Rate Move</div><div class="signal-sub">Competitor reduces MYGA rate — Gainbridge window opens</div></div><span class="signal-tag tag-b">Respond</span></div>
+        <div class="signal-body"><div class="signal-flow"><span class="signal-step">Competitor rate drop</span><span class="signal-arrow">→</span><span class="signal-step">Rate comparison creative live</span><span class="signal-arrow">→</span><span class="signal-step">Increase comparison site spend</span><span class="signal-arrow">→</span><span class="signal-step">Measure share gain</span></div></div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-header"><div class="signal-icon">🔍</div><div><div class="signal-hed">Search Intent Surge — "Safe Savings"</div><div class="signal-sub">"Fixed annuity rates" queries up 58% — seasonal or news-driven</div></div><span class="signal-tag tag-g">Capture</span></div>
+        <div class="signal-body"><div class="signal-flow"><span class="signal-step">Intent spike</span><span class="signal-arrow">→</span><span class="signal-step">Max search bids</span><span class="signal-arrow">→</span><span class="signal-step">Rate landing page update</span><span class="signal-arrow">→</span><span class="signal-step">Incrementality test</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CH 7: Campaign Activation -->
+<div class="stage" id="stage-6">
+  <div class="stage-eyebrow">Chapter 07 — Campaign Activation</div>
+  <h1 class="stage-title">Full-funnel campaigns <em>built for trust.</em></h1>
+  <p class="stage-body">Gainbridge operates across a uniquely broad media mix — linear TV, CTV, digital performance, billboards, experiential, and major sponsorships. The activation challenge is making all of these work together as a connected system, not as independent channel programs. Brand builds awareness and trust. Performance captures the intent that brand creates. Sponsorships provide credibility moments that break through the skepticism unique to financial services.</p>
+  <div class="stage-quote">"The Gainbridge Fieldhouse and the Indianapolis 500 partnership are not just sponsorships. They are trust signals at scale for an audience that buys on trust first, rate second."</div>
+
+  <div style="border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;">
+    <div style="background:var(--ink);color:var(--white);padding:12px 20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Campaign Example — Q4 Retirement Season Push</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);">
+      <div style="background:var(--white);padding:16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">01 Audience</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">T1 + T2 savers 50–68</div>
+        <div style="font-size:11px;color:var(--muted);">Linear TV demo overlay · CTV addressable targeting · Paid search intent audience · Retargeting pool from brand exposure</div>
+      </div>
+      <div style="background:var(--white);padding:16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">02 Creative</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Trust + Rate creative system</div>
+        <div style="font-size:11px;color:var(--muted);">Today Show :30 spot · CTV :15 rate callout · Paid search rate ads · Display retargeting · Testimonial social</div>
+      </div>
+      <div style="background:var(--white);padding:16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">03 Channels</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Integrated media stack</div>
+        <div style="font-size:11px;color:var(--muted);">Linear TV (CNBC/MSNBC/Today) · Streaming CTV · Google Search · Affiliate/comparison sites · Retargeting</div>
+      </div>
+      <div style="background:var(--white);padding:16px;">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">04 Measurement</div>
+        <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Haus MMM + Incrementality</div>
+        <div style="font-size:11px;color:var(--muted);">Haus geo-lift test design · TV attribution model · Cross-channel MMM · Incrementality holdout by channel</div>
+      </div>
+    </div>
+    <div style="background:var(--surface);padding:12px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);">Results:</div>
+      <span class="signal-step">22K new funded accounts</span>
+      <span class="signal-arrow">·</span>
+      <span class="signal-step">CPA $186 vs $240 target</span>
+      <span class="signal-arrow">·</span>
+      <span class="signal-step">$1.8B AUM added</span>
+      <span class="signal-arrow">·</span>
+      <span class="signal-step">Brand recall +14pts in demo</span>
+    </div>
+  </div>
+</div>
+
+<!-- CH 8: Martech + Team -->
+<div class="stage" id="stage-7">
+  <div class="stage-eyebrow">Chapter 08 — Martech &amp; Team</div>
+  <h1 class="stage-title">Build the infrastructure <em>the brand demands.</em></h1>
+  <p class="stage-body">The VP role explicitly calls for a Martech strategy — evaluate what exists, decide what stays, what gets enhanced, what gets replaced, and partner with engineering to implement it. Alongside that, inheriting the existing team means an honest assessment of composition, capabilities, and gaps, followed by a staffing plan that positions marketing for what comes next. Both are foundational. Neither can wait.</p>
+  <div class="stage-quote">"The Martech stack is the operating system of the marketing function. If it can't track, attribute, or activate at the speed the business requires, every other investment is working at a disadvantage."</div>
+
+  <div class="sales-board">
+    <div class="sb-col">
+      <div class="sb-head"><div class="sb-head-title">Martech Audit — Year 1</div><div class="sb-head-sub">Evaluate, rationalize, rebuild</div></div>
+      <div class="sb-body">
+        <div class="sb-item"><span class="sb-bullet">›</span>Audit current stack — CRM, CDP, email, attribution, analytics</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Identify data gaps impacting Haus MMM input quality</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Rationalize vendor spend — cut tools that duplicate or underperform</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Define integration requirements with engineering team</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Build Martech roadmap tied to growth milestones, not calendar</div>
+      </div>
+    </div>
+    <div class="sb-col">
+      <div class="sb-head"><div class="sb-head-title">Team Assessment</div><div class="sb-head-sub">Right people, right seats</div></div>
+      <div class="sb-body">
+        <div class="sb-item"><span class="sb-bullet">›</span>90-day listening tour — team capabilities and gaps</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Assess agency relationships: what to keep, what to bring in-house</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Identify critical hires: performance, lifecycle, analytics</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Build accountability framework tied to KPI scoreboard</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Develop staffing plan with President — phased hiring tied to budget unlock</div>
+      </div>
+    </div>
+    <div class="sb-col">
+      <div class="sb-head"><div class="sb-head-title">Regulatory Compliance</div><div class="sb-head-sub">Marketing that meets the standard</div></div>
+      <div class="sb-body">
+        <div class="sb-item"><span class="sb-bullet">›</span>Establish creative review process for all regulated materials</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Partner with legal/compliance on pre-approval workflow</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Build compliant asset library for fast campaign deployment</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Train team on financial services advertising standards</div>
+        <div class="sb-item"><span class="sb-bullet">›</span>Compliance-first creative briefs — approval built in, not bolted on</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CH 9: Measurement -->
+<div class="stage" id="stage-8">
+  <div class="stage-eyebrow">Chapter 09 — Measurement &amp; Attribution</div>
+  <h1 class="stage-title">The Haus relationship. <em>Built to prove the machine works.</em></h1>
+  <p class="stage-body">Gainbridge already has a Haus relationship and a measurement framework built on MMM and incrementality testing. The VP role is explicit: own the Haus relationship, own test design, and own the discipline of turning measurement into planning inputs. This is not reporting. It is the system that unlocks more budget — by proving that what we spend is working and that incremental investment will generate incremental return.</p>
+  <div class="stage-quote">"Fluency in MMM, incrementality testing, and geo-lift design — with the ability to have direct conversations about the limitations of each. This is the standard. The measurement framework is what earns the right to spend more."</div>
+
+  <div class="align-grid">
+    <div class="align-side">
+      <div class="align-eye">Measurement Infrastructure</div>
+      <div class="align-item">Haus MMM — cross-channel spend and outcome modeling</div>
+      <div class="align-item">Geo-lift test design for TV and CTV incrementality</div>
+      <div class="align-item">Holdout testing for digital performance channels</div>
+      <div class="align-item">Brand lift studies — awareness tracking 45+ demo</div>
+      <div class="align-item">Sponsorship attribution — Fieldhouse + Indy 500</div>
+      <div class="align-item">Affiliate attribution — last-touch and assisted models</div>
+      <div class="align-item">Lifecycle email — open, click, and funded account tracking</div>
+    </div>
+    <div class="align-center">
+      <div class="align-center-label">North Star Metrics</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">Cost Per Funded Account</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">AUM Per Campaign $</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">Incrementality Lift</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">Brand Awareness 45+</div>
+      <div class="align-sep"></div>
+      <div class="align-center-val">ROMI (8-fig budget)</div>
+    </div>
+    <div class="align-side">
+      <div class="align-eye">Reporting to the President</div>
+      <div class="align-item">Weekly: CPA, funded accounts, channel pacing</div>
+      <div class="align-item">Monthly: Haus MMM output — channel contribution</div>
+      <div class="align-item">Quarterly: Budget reallocation recommendations</div>
+      <div class="align-item">Quarterly: Incrementality test results and implications</div>
+      <div class="align-item">Annually: Full MMM re-run — planning input for next year</div>
+      <div class="align-item">Ad hoc: Geo-lift results within 2 weeks of test close</div>
+      <div class="align-item">Executive: KPI scorecard — outcome vs. target, plain language</div>
+    </div>
+  </div>
+</div>
+
+<!-- CH 10: Return to Dashboard -->
+<div class="stage" id="stage-9">
+  <div class="stage-eyebrow">Chapter 10 — Performance Layer</div>
+  <h1 class="stage-title">Back to the scoreboard. <em>Now it means something.</em></h1>
+  <p class="stage-body">Every KPI on the opening scoreboard now has a system behind it — a segment it belongs to, a channel that sources it, a signal that triggered the campaign, creative that spoke to the right persona, and a measurement framework that validates the outcome. This is the 12–24 month playbook for proving the Gainbridge marketing machine works — and unlocking the capital that comes when it does.</p>
+  <div class="stage-quote">"Prove that the machine works and there is real capital behind it. The KPI framework is the proof. The system built beneath it is how we get there."</div>
+
+  <div class="return-grid">
+    <div class="rg-card"><div class="rg-layer">Segmentation</div><div class="rg-kpi">New Policy Holders: +42%</div><div class="rg-source">Prioritizing retirement-ready T1 savers with highest AUM intent</div></div>
+    <div class="rg-card"><div class="rg-layer">Campaign Activation</div><div class="rg-kpi">Cost Per Acquisition: $186</div><div class="rg-source">Full-funnel campaign system — brand builds, performance converts</div></div>
+    <div class="rg-card"><div class="rg-layer">Measurement — Haus</div><div class="rg-kpi">ROMI: 4.8×</div><div class="rg-source">MMM-validated cross-channel efficiency across 8-figure budget</div></div>
+    <div class="rg-card"><div class="rg-layer">Audience Architecture</div><div class="rg-kpi">Brand Awareness (45+): 38%</div><div class="rg-source">TV + CTV + sponsorship building trust in the primary demo</div></div>
+    <div class="rg-card"><div class="rg-layer">TAM + Segmentation</div><div class="rg-kpi">AUM Growth: $2.4B</div><div class="rg-source">High-AUM T1 depositors acquired through brand and TV media</div></div>
+    <div class="rg-card"><div class="rg-layer">Acquisition Funnel</div><div class="rg-kpi">Conversion Rate: 4.2%</div><div class="rg-source">CRO on rate-check and application flow — biggest lever available</div></div>
+    <div class="rg-card"><div class="rg-layer">Sponsorship Strategy</div><div class="rg-kpi">Sponsorship Contribution: $18M</div><div class="rg-source">Fieldhouse + Indy 500 activated for trust, not just impressions</div></div>
+    <div class="rg-card"><div class="rg-layer">Incrementality Testing</div><div class="rg-kpi">Haus Lift: +28%</div><div class="rg-source">Geo-lift and holdout tests validating every major channel</div></div>
+  </div>
+
+  <div class="system-flow">
+    <div class="sys-row"><div class="sys-label">KPI Scoreboard</div><div class="sys-items"><span class="sys-item">New funded accounts</span><span class="sys-item">CPA</span><span class="sys-item">AUM growth</span><span class="sys-item">Brand awareness 45+</span><span class="sys-item">ROMI</span></div></div>
+    <div class="sys-row"><div class="sys-label">Intelligence Layer</div><div class="sys-items"><span class="sys-item">Segmentation</span><span class="sys-item">TAM mapping</span><span class="sys-item">Audience architecture</span><span class="sys-item">Signal monitoring</span><span class="sys-item">Haus MMM inputs</span></div></div>
+    <div class="sys-row"><div class="sys-label">Acquisition Engine</div><div class="sys-items"><span class="sys-item">Linear TV (Today/CNBC/MSNBC)</span><span class="sys-item">CTV + Streaming</span><span class="sys-item">Paid Search</span><span class="sys-item">Affiliate</span><span class="sys-item">Sponsorship activation</span></div></div>
+    <div class="sys-row"><div class="sys-label">Measurement Loop</div><div class="sys-items"><span class="sys-item">Haus MMM</span><span class="sys-item">Geo-lift tests</span><span class="sys-item">Incrementality holdouts</span><span class="sys-item">Brand lift studies</span><span class="sys-item">Budget reallocation</span></div></div>
+  </div>
+
+  <div style="padding:20px;background:var(--green-pale);border:1px solid var(--green);border-radius:4px;margin-top:4px;">
+    <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--green);margin-bottom:8px;">The 12–24 month commitment to Gainbridge</div>
+    <div style="font-size:14px;color:var(--ink);line-height:1.65;font-weight:500;">Prove the machine works — connect every dollar of media spend to a funded account and a dollar of AUM. Build the Martech infrastructure that makes the marketing function faster, smarter, and more accountable. Activate the sponsorship portfolio as a trust-building engine, not just an awareness play. And develop the team that can sustain and scale this system after the foundation is laid. When the machine is proven, unlock the capital. Then build from there.</div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<div class="nav-buttons">
+  <div class="stage-counter" id="stageCounter">Chapter 1 of 10</div>
+  <div class="btn-group">
+    <button class="btn btn-back" id="btnBack" onclick="navigate(-1)" disabled>← Back</button>
+    <button class="btn btn-next" id="btnNext" onclick="navigate(1)">Next →</button>
+  </div>
+</div>
+
+<script>
+const STAGES=[
+  {label:"KPI Foundation"},
+  {label:"Segmentation"},
+  {label:"Total Addressable Market"},
+  {label:"Audience Architecture"},
+  {label:"Acquisition Funnel"},
+  {label:"Signal Intelligence"},
+  {label:"Campaign Activation"},
+  {label:"Martech & Team"},
+  {label:"Measurement & Attribution"},
+  {label:"Return to Dashboard"},
+];
+const sections=[
+  {start:0,label:'Foundation',foundation:true},
+  {start:4,label:'Execution',foundation:false},
+  {start:7,label:'Measurement & System',foundation:false},
+];
+let current=0;
+const rail=document.getElementById('rail');
+STAGES.forEach((s,i)=>{
+  const sec=sections.find(s=>s.start===i);
+  if(sec){
+    if(i>0){const sp=document.createElement('div');sp.style.height='12px';rail.appendChild(sp);}
+    const hdr=document.createElement('div');
+    hdr.className='rail-section-hdr'+(sec.foundation?' foundation':'');
+    hdr.textContent=sec.label;
+    rail.appendChild(hdr);
+  }
+  if(i>0&&!sections.find(s=>s.start===i)){const c=document.createElement('div');c.className='rail-connector';rail.appendChild(c);}
+  const ch=document.createElement('div');
+  ch.className='rail-chapter'+(i===0?' active':'');
+  ch.id='rail-'+i;
+  ch.innerHTML=`<div class="rail-dot"></div><div class="rail-label">${s.label}</div>`;
+  ch.onclick=()=>goTo(i);
+  rail.appendChild(ch);
+});
+
+function buildTAMMap(){
+  const container=document.getElementById('tamMap');
+  if(!container)return;
+  const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 900 360');
+  svg.setAttribute('preserveAspectRatio','xMidYMid slice');
+  svg.innerHTML=`
+  <defs><linearGradient id="wg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#6b7280"/><stop offset="100%" stop-color="#4b5563"/></linearGradient><linearGradient id="lg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#e8e4dd"/><stop offset="100%" stop-color="#dedad2"/></linearGradient></defs>
+  <rect width="900" height="360" fill="url(#wg)"/>
+  <path d="M 900,0 L 900,360 L 145,360 L 138,340 L 128,318 L 118,305 L 105,298 Q 95,290 100,278 L 110,265 L 115,252 L 108,240 Q 98,228 88,232 L 75,238 L 62,235 L 55,222 L 58,208 L 68,198 Q 78,190 74,178 L 65,168 L 60,155 L 66,142 L 78,135 L 90,130 Q 105,125 108,112 L 105,98 L 95,88 L 88,75 L 92,62 L 104,54 L 118,50 L 130,52 L 145,48 L 158,40 L 165,28 L 172,16 L 185,8 L 200,4 L 900,0 Z" fill="url(#lg)"/>
+  <rect x="310" y="58" width="55" height="38" rx="3" fill="#c8d9b8" opacity="0.7"/>
+  <rect x="520" y="140" width="40" height="28" rx="3" fill="#c8d9b8" opacity="0.6"/>
+  <rect x="680" y="220" width="60" height="35" rx="3" fill="#c8d9b8" opacity="0.65"/>
+  <g fill="none">
+    <line x1="160" y1="62" x2="900" y2="58" stroke="#f5f2ec" stroke-width="4"/>
+    <line x1="150" y1="138" x2="900" y2="135" stroke="#f5f2ec" stroke-width="5"/>
+    <line x1="140" y1="180" x2="900" y2="178" stroke="#ebe8e0" stroke-width="3.5"/>
+    <line x1="135" y1="258" x2="900" y2="255" stroke="#f5f2ec" stroke-width="4.5"/>
+    <line x1="210" y1="10" x2="208" y2="360" stroke="#f5f2ec" stroke-width="4"/>
+    <line x1="370" y1="10" x2="368" y2="360" stroke="#f5f2ec" stroke-width="3.5"/>
+    <line x1="520" y1="10" x2="518" y2="360" stroke="#f5f2ec" stroke-width="5"/>
+    <line x1="680" y1="10" x2="678" y2="360" stroke="#ebe8e0" stroke-width="3.5"/>
+    <line x1="830" y1="10" x2="828" y2="360" stroke="#f5f2ec" stroke-width="4"/>
+    <line x1="290" y1="10" x2="288" y2="360" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="445" y1="10" x2="443" y2="360" stroke="#eeeae2" stroke-width="2"/>
+    <line x1="600" y1="10" x2="598" y2="360" stroke="#eeeae2" stroke-width="2"/>
+  </g>
+  <text x="255" y="128" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Northeast</text>
+  <text x="390" y="128" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#8a8078">Midwest</text>
+  <text x="555" y="128" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Southeast</text>
+  <text x="695" y="128" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Southwest</text>
+  <text x="840" y="128" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">West</text>
+  <text x="200" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Mid-Atlantic</text>
+  <text x="380" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Sun Belt</text>
+  <text x="555" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Gulf Coast</text>
+  <text x="700" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Mountain</text>
+  <text x="840" y="248" font-family="Inter,sans-serif" font-size="9" font-weight="500" fill="#9c9288">Pacific</text>
+  `;
+  container.appendChild(svg);
+  function rnd(min,max,seed){const x=Math.sin(seed*9301+49297)*233280;return min+(x-Math.floor(x))*(max-min);}
+  const zones=[
+    {x1:215,x2:355,y1:22,y2:130},{x1:375,x2:510,y1:18,y2:130},{x1:525,x2:670,y1:18,y2:130},
+    {x1:685,x2:820,y1:18,y2:130},{x1:835,x2:895,y1:18,y2:130},
+    {x1:160,x2:355,y1:142,y2:252},{x1:375,x2:510,y1:142,y2:252},{x1:525,x2:670,y1:142,y2:252},
+    {x1:685,x2:820,y1:142,y2:252},{x1:835,x2:895,y1:142,y2:252},
+    {x1:158,x2:355,y1:262,y2:350},{x1:375,x2:510,y1:262,y2:350},{x1:525,x2:670,y1:262,y2:350},
+    {x1:685,x2:820,y1:262,y2:350},{x1:835,x2:895,y1:262,y2:350},
+  ];
+  const activeNames=['Barbara K. · Active · $120K deposit','Robert M. · Active · $85K deposit','Susan T. · Active · $210K deposit','James H. · Active · $64K deposit','Patricia W. · Active · $145K deposit','Richard L. · Active · $92K deposit','Linda B. · Active · $178K deposit','Charles D. · Active · $55K deposit','Nancy F. · Active · $310K deposit','Thomas G. · Active · $73K deposit','Karen S. · Active · $88K deposit','Steven P. · Active · $240K deposit','Betty R. · Active · $107K deposit','Edward C. · Active · $160K deposit','Dorothy N. · Active · $94K deposit','George V. · Active · $128K deposit','Sandra M. · Active · $185K deposit','Kenneth O. · Active · $67K deposit','Helen Q. · Active · $220K deposit','Donald A. · Active · $79K deposit','Carol Z. · Active · $142K deposit','Mark Y. · Active · $98K deposit'];
+  const engagedNames=['Michael R. · Rate Check · SteadyPace 5yr','Jennifer L. · Application Started · FastBreak','David K. · Comparing Rates · OneUp','Lisa B. · Email Opened · MYGA guide','Christopher T. · Site Visit Day 8 · Return visitor','Amanda H. · Rate Alert Set · 5yr term','Matthew G. · Live Chat · Asked about FDIC','Jessica F. · Retargeted · CTV ad exposed','Daniel C. · Application Paused · Step 3','Ashley M. · Email Click · Rate comparison','Ryan P. · Site Visit Day 3 · Blog reader','Stephanie N. · Rate Check · SteadyPace 3yr','Joshua S. · Webinar Registrant · Retirement 101'];
+  const lapsedNames=['Margaret O. · Lapsed · Chose Blueprint Income','Andrew V. · Lapsed · No action 90 days','Deborah Q. · Churned · Withdrew early','Joshua W. · Lapsed · Rate too low concern','Rebecca X. · Lapsed · Went with advisor','Anthony Y. · Lapsed · No action 60 days','Samantha Z. · Lapsed · Chose CD instead'];
+  const leadNames=Array.from({length:45},(_,i)=>`Prospect ${1001+i} · ${['Search: "best annuity rates"','Search: "MYGA rates 2025"','CTV exposed — CNBC','Affiliate referral — Bankrate','Search: "fixed annuity no fees"','Today Show ad exposed','Search: "Gainbridge review"'][i%7]}`);
+
+  const accounts=[];let seed=7,ai=0,ei=0,li=0,ldi=0;
+  const activeDist=[1,3,3,2,1,2,2,2,1,1,1,1,0,1,1];
+  activeDist.forEach((count,zi)=>{const z=zones[zi];for(let i=0;i<count;i++){accounts.push({x:rnd(z.x1+6,z.x2-6,seed++),y:rnd(z.y1+8,z.y2-8,seed++),s:Math.round(rnd(9,13,seed++)),c:'#2a72d5',t:activeNames[ai++%activeNames.length]});}});
+  const engagedDist=[0,1,1,1,1,1,1,1,1,1,1,1,1,1,0];
+  engagedDist.forEach((count,zi)=>{const z=zones[zi];for(let i=0;i<count;i++){accounts.push({x:rnd(z.x1+6,z.x2-6,seed++),y:rnd(z.y1+8,z.y2-8,seed++),s:Math.round(rnd(7,10,seed++)),c:'#3baf9e',t:engagedNames[ei++%engagedNames.length]});}});
+  for(let i=0;i<7;i++){const z=zones[Math.floor(rnd(0,zones.length,seed++))];accounts.push({x:rnd(z.x1+6,z.x2-6,seed++),y:rnd(z.y1+8,z.y2-8,seed++),s:Math.round(rnd(6,9,seed++)),c:'#e8a020',t:lapsedNames[li++%lapsedNames.length]});}
+  for(let i=0;i<45;i++){const z=zones[Math.floor(rnd(0,zones.length,seed++))];accounts.push({x:rnd(z.x1+4,z.x2-4,seed++),y:rnd(z.y1+6,z.y2-6,seed++),s:Math.round(rnd(4,7,seed++)),c:'#9eaab8',t:leadNames[ldi++%leadNames.length]});}
+
+  const tooltip=document.getElementById('mapTooltip');
+  accounts.forEach(d=>{
+    const el=document.createElement('div');el.className='map-dot';
+    const xp=(d.x/900*100).toFixed(2),yp=(d.y/360*100).toFixed(2);
+    el.style.cssText=`left:${xp}%;top:${yp}%;width:${d.s}px;height:${d.s}px;background:${d.c};opacity:0.92;margin-left:-${Math.round(d.s/2)}px;margin-top:-${Math.round(d.s/2)}px;box-shadow:0 1px 4px rgba(0,0,0,0.25);`;
+    if(tooltip){
+      el.addEventListener('mouseenter',()=>{
+        const parts=d.t.split(' · ');
+        tooltip.innerHTML=`<div style="font-weight:700;font-size:11px;margin-bottom:2px;">${parts[0]}</div><div style="font-size:10px;opacity:0.8;">${parts.slice(1).join(' · ')}</div>`;
+        tooltip.style.display='block';
+        const cw=container.offsetWidth;
+        let lp=d.x/900*cw;if(lp+180>cw)lp=cw-185;if(lp<5)lp=5;
+        tooltip.style.left=lp+'px';tooltip.style.bottom=(100-parseFloat(yp)+2)+'%';tooltip.style.top='';
+      });
+      el.addEventListener('mouseleave',()=>{tooltip.style.display='none';tooltip.style.bottom='';});
+    }
+    container.appendChild(el);
+  });
+}
+
+function goTo(n){
+  document.getElementById('stage-'+current).classList.remove('active');
+  document.getElementById('rail-'+current).classList.remove('active');
+  current=n;
+  document.getElementById('stage-'+current).classList.add('active');
+  STAGES.forEach((_,i)=>{
+    const rc=document.getElementById('rail-'+i);
+    rc.classList.remove('done','active');
+    if(i<current)rc.classList.add('done');
+    else if(i===current)rc.classList.add('active');
+  });
+  document.getElementById('btnBack').disabled=current===0;
+  document.getElementById('btnNext').textContent=current===STAGES.length-1?'↩ Start Over':'Next →';
+  document.getElementById('stageCounter').textContent=`Chapter ${current+1} of ${STAGES.length}`;
+  document.getElementById('progressFill').style.width=((current+1)/STAGES.length*100)+'%';
+  document.getElementById('stageArea').scrollTop=0;
+}
+function navigate(dir){
+  if(current===STAGES.length-1&&dir>0){goTo(0);return;}
+  const next=current+dir;
+  if(next<0||next>=STAGES.length)return;
+  goTo(next);
+}
+function expandSeg(card){
+  const detail=card.querySelector('.seg-detail');
+  const isOpen=detail.style.display==='block';
+  document.querySelectorAll('.seg-detail').forEach(d=>d.style.display='none');
+  document.querySelectorAll('.card.clickable').forEach(c=>c.classList.remove('expanded'));
+  if(!isOpen){detail.style.display='block';card.classList.add('expanded');}
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown')navigate(1);
+  if(e.key==='ArrowLeft'||e.key==='ArrowUp')navigate(-1);
+});
+buildTAMMap();
+</script>
+</body>
+</html>
