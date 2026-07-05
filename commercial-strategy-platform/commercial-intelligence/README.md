@@ -1,14 +1,14 @@
 # Commercial Intelligence
 
-Commercial Intelligence is the interpretation layer between Research and the Opportunity Model.
+Commercial Intelligence is the interpretation layer between Discovery and the Opportunity Model.
 
-It turns source material into structured strategic understanding before the Opportunity Model is written.
+It turns discovery output and source material into structured strategic understanding before the Opportunity Model is written.
 
 ## Why This Layer Exists
 
-Research produces facts, observations, and signals. That is not yet a strategy.
+Discovery produces facts, observations, signals, and research priorities. That is not yet a strategy.
 
-Commercial Intelligence translates the raw research into:
+Commercial Intelligence translates the discovery output and supporting evidence into:
 
 - likely commercial priorities
 - implied executive KPIs
@@ -28,7 +28,13 @@ This layer keeps the platform disciplined. It prevents the model from collapsing
 ## Architecture
 
 ```text
-Research
+Opportunity Intake
+  |
+  v
+Intake Engine
+  |
+  v
+Discovery Engine
   |
   v
 Commercial Intelligence

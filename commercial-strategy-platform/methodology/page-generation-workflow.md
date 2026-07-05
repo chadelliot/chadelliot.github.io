@@ -7,7 +7,7 @@ The intended flow is:
 ```text
 Opportunity Intake
 Intake Engine
-Research
+Discovery Engine
 Commercial Intelligence
 Opportunity Model
 Output Generator / Renderer
@@ -43,7 +43,7 @@ Capture what applies:
 - interview or application context
 - language that hints at priorities or pain points
 
-The Opportunity Intake should drive the strategic emphasis of the Intake Engine, research, Commercial Intelligence, Opportunity Model, and the format of the generated output.
+The Opportunity Intake should drive the strategic emphasis of the Intake Engine, Discovery Engine, research, Commercial Intelligence, Opportunity Model, and the format of the generated output.
 
 ## Step 2: Run The Intake Engine
 
@@ -51,22 +51,49 @@ Use `commercial-strategy-platform/intake-engine/workflow.md`.
 
 Normalize the raw opportunity inputs into a common intake object.
 
-Before research begins, confirm:
+Before discovery begins, confirm:
 
 - company name is present
 - engagement type is present
 - a source document or notes exist
 - recruiter or hiring manager details are normalized when available
 - missing information is captured explicitly
-- the intake is ready for research or flagged for review
+- the intake is ready for discovery or flagged for review
 
-## Step 3: Research The Opportunity
+## Step 3: Run The Discovery Engine
+
+Use `commercial-strategy-platform/discovery-engine/workflow.md`.
+
+The Discovery Engine identifies what needs to be researched and how confident each finding is before Commercial Intelligence is created.
+
+Complete `commercial-strategy-platform/discovery-engine/validation-rules.md` and `commercial-strategy-platform/discovery-engine/research-source-map.md` as part of this step.
+
+The discovery output should identify:
+
+- company overview
+- products/services
+- industry
+- competitors
+- customers
+- business model
+- revenue model
+- hiring context
+- marketing maturity
+- technology signals
+- growth signals
+- risks
+- source links
+- confidence levels for each finding
+
+The Discovery Engine should also capture external research needs, internal research needs, and open questions for follow-up.
+
+## Step 4: Research The Opportunity
 
 Use `commercial-strategy-platform/methodology/research-methodology.md`.
 
 Before building Commercial Intelligence and the Opportunity Model, complete `commercial-strategy-platform/methodology/research-checklist.md`.
 
-Produce a short research brief before drafting Commercial Intelligence. The brief should identify:
+Produce a short discovery and research brief before drafting Commercial Intelligence. The brief should identify:
 
 - opportunity context
 - engagement type
@@ -97,9 +124,9 @@ Produce a short research brief before drafting Commercial Intelligence. The brie
 - 12-24 month roadmap
 - assumptions to validate
 
-The normalized intake object is the source material for research. It is not a generator input and should not be used to bypass the intelligence or model layers.
+The normalized intake object is the source material for discovery and research. It is not a generator input and should not be used to bypass the intelligence or model layers.
 
-## Step 4: Build Commercial Intelligence
+## Step 5: Build Commercial Intelligence
 
 Use the research brief and source material to produce a Commercial Intelligence brief that captures:
 
@@ -118,7 +145,7 @@ Use the research brief and source material to produce a Commercial Intelligence 
 
 Commercial Intelligence should separate facts, inferences, assumptions, and recommendations.
 
-## Step 5: Generate The Opportunity Model
+## Step 6: Generate The Opportunity Model
 
 Create exactly one Opportunity Model that follows `commercial-strategy-platform/opportunity-model/opportunity-model.md`.
 
@@ -166,7 +193,7 @@ MEASUREMENT & SYSTEM
 10. Return to Dashboard
 ```
 
-## Step 6: Validate The Opportunity Model
+## Step 7: Validate The Opportunity Model
 
 Before publishing, validate that:
 
@@ -200,7 +227,7 @@ npm run validate:strategies
 
 Until that exists, review the model manually against the Opportunity Model contract and validation rules.
 
-## Step 7: Generate The Output
+## Step 8: Generate The Output
 
 The future Output Generator or Renderer should:
 
@@ -294,6 +321,6 @@ The script should fail fast on missing fields, invalid URLs, invalid map coordin
 
 ### Phase 5: Scale Page Generation
 
-Create additional Opportunity Models using the Opportunity Intake, research, and Commercial Intelligence workflow.
+Create additional Opportunity Models using the Opportunity Intake, Discovery, research, and Commercial Intelligence workflow.
 
 Only refactor components when repeated output generation proves that the refactor will reduce real friction.

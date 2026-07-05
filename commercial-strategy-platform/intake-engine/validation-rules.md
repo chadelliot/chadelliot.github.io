@@ -1,6 +1,6 @@
 # Intake Engine Validation Rules
 
-These rules define what the Intake Engine must check before handing a common intake object to Research.
+These rules define what the Intake Engine must check before handing a common intake object to Discovery.
 
 ## Required Validation
 
@@ -31,13 +31,13 @@ Allowed values:
 
 - `raw`
 - `needs-review`
-- `ready-for-research`
+- `ready-for-discovery`
 
 ### `routing.nextEngine`
 
 Allowed value:
 
-- `research`
+- `discovery`
 
 ### `routing.handoffStatus`
 
@@ -79,8 +79,8 @@ At least one of the following must be present:
 5. Normalize the audience and requested outputs into `normalized`.
 6. Convert gaps into `normalized.missingInformation`.
 7. Convert follow-up questions into `normalized.followUpQuestions`.
-8. Set `routing.nextEngine` to `research`.
-9. Set `status` to `ready-for-research` only when the minimum fields are present.
+8. Set `routing.nextEngine` to `discovery`.
+9. Set `status` to `ready-for-discovery` only when the minimum fields are present.
 
 ## Error Handling
 
@@ -91,7 +91,7 @@ If required data is missing:
 - set `routing.handoffStatus` to `needs-review`
 - populate `normalized.missingInformation`
 - populate `normalized.followUpQuestions`
-- do not route the intake to Research as complete
+- do not route the intake to Discovery as complete
 
 ## Missing Information Handling
 
@@ -106,7 +106,7 @@ Examples:
 
 ## Validation Quality Gate
 
-Before handing off to Research, confirm:
+Before handing off to Discovery, confirm:
 
 - the engagement type is valid
 - the company name is present

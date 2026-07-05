@@ -60,11 +60,12 @@ The project direction is to create a lightweight Commercial Strategy Platform:
 ```text
 Opportunity Intake
 Intake Engine
-Research
+Discovery Engine
 Commercial Intelligence
 Opportunity Model
-Output Generator / Renderer
-Publish
+Engagement Type
+Generators
+Deliverables
 ```
 
 This should prioritize speed of output creation over maximum abstraction.
@@ -96,6 +97,7 @@ The right near-term architecture is:
 
 - one familiar visual strategy template
 - one Intake Engine layer
+- one Discovery Engine layer
 - one Commercial Intelligence layer
 - one canonical Opportunity Model
 - one renderer schema that maps the model into the existing Commercial Strategy template
@@ -103,9 +105,11 @@ The right near-term architecture is:
 - one or more Output Generators or Renderers that map the model into the existing design or other output formats
 - lightweight validation before publishing
 
-The intake layer is documented in `commercial-strategy-platform/intake-engine/README.md`. It normalizes raw opportunity inputs before research begins.
+The intake layer is documented in `commercial-strategy-platform/intake-engine/README.md`. It normalizes raw opportunity inputs before discovery begins.
 
-The intelligence layer is documented in `commercial-strategy-platform/commercial-intelligence/README.md`. It interprets research before the model is written.
+The discovery layer is documented in `commercial-strategy-platform/discovery-engine/README.md`. It identifies what must be researched and what evidence will support Commercial Intelligence.
+
+The intelligence layer is documented in `commercial-strategy-platform/commercial-intelligence/README.md`. It interprets discovery output and supporting evidence before the model is written.
 
 The generator layer is documented in `commercial-strategy-platform/generators/README.md`. Generators consume the same Opportunity Model, do not perform research, and produce specific outputs such as strategy websites, cover letters, outreach, interview preparation, proposals, statements of work, workshops, presentations, follow-up emails, and sales one-pagers.
 

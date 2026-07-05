@@ -15,7 +15,7 @@ Opportunity Intake
 Intake Engine
   |
   v
-Research
+Discovery Engine
   |
   v
 Commercial Intelligence
@@ -30,7 +30,7 @@ Output Generator / Renderer
 Deliverable
 ```
 
-Research creates evidence, Commercial Intelligence interprets it, and the Opportunity Model captures the normalized output. The Strategy Website Renderer then maps that model into the existing Commercial Strategy page structure.
+The Discovery Engine identifies the evidence that should be gathered, Commercial Intelligence interprets it, and the Opportunity Model captures the normalized output. The Strategy Website Renderer then maps that model into the existing Commercial Strategy page structure.
 
 The renderer schema exists only to protect the current website design and section order. It should not become a separate research model or alternate source of truth.
 

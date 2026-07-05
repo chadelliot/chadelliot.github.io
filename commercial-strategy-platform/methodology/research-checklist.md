@@ -1,12 +1,13 @@
 # Research Checklist
 
-Use this checklist after the Intake Engine and before generating Commercial Intelligence and an Opportunity Model for a platform output.
+Use this checklist after the Discovery Engine and before generating Commercial Intelligence and an Opportunity Model for a platform output.
 
 The checklist is designed to be fast and practical. It should confirm that the research is specific enough to support the approved strategy sequence without turning the process into exhaustive diligence.
 
 ## Intake
 
 - [ ] Intake Engine output exists.
+- [ ] Discovery Engine output exists.
 - [ ] Company name is normalized.
 - [ ] Engagement type is normalized.
 - [ ] Job description URL, job description text, or notes are captured.
@@ -16,6 +17,9 @@ The checklist is designed to be fast and practical. It should confirm that the r
 - [ ] Missing information is explicit.
 - [ ] Follow-up questions are explicit.
 - [ ] Intake status is set appropriately.
+- [ ] Discovery research priorities are explicit.
+- [ ] Discovery source links are captured.
+- [ ] Discovery confidence levels are captured.
 
 - [ ] Desired output targets are confirmed.
 - [ ] Target role title is confirmed when relevant.

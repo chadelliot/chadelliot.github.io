@@ -20,7 +20,7 @@ Validate Intake
 Emit Normalized Intake Object
   |
   v
-Research Engine
+Discovery Engine
 ```
 
 ## Step 1: Capture Raw Inputs
@@ -61,15 +61,15 @@ Check for:
 
 ## Step 4: Emit Normalized Intake Object
 
-When the intake is ready, hand the object to Research.
+When the intake is ready, hand the object to Discovery.
 
-Research should not need to re-parse raw notes or infer the basic shape of the engagement.
+Discovery should not need to re-parse raw notes or infer the basic shape of the engagement.
 
-## Step 5: Route To Research
+## Step 5: Route To Discovery
 
-The output of the Intake Engine becomes the input to the Research Engine.
+The output of the Intake Engine becomes the input to the Discovery Engine.
 
-The research process should consume the normalized intake object and then produce source-backed findings for Commercial Intelligence.
+The discovery process should consume the normalized intake object and then produce source-backed findings and research priorities for Commercial Intelligence.
 
 ## Operational Rules
 

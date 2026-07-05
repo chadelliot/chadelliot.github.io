@@ -6,18 +6,19 @@ The platform is content-driven. It is not a CMS, page builder, or broad React re
 
 ## Objective
 
-Create a repeatable system that turns an Opportunity Intake into a normalized intake object, then into research, Commercial Intelligence, and an Opportunity Model, then uses an Output Generator or Renderer to produce the right artifact.
+Create a repeatable system that turns an Opportunity Intake into a normalized intake object, then into discovery, Commercial Intelligence, and an Opportunity Model, then uses generators to produce deliverables.
 
 Target workflow:
 
 ```text
 Opportunity Intake
 Intake Engine
-Research
+Discovery Engine
 Commercial Intelligence
 Opportunity Model
-Output Generator / Renderer
-Publish
+Engagement Type
+Generators
+Deliverables
 ```
 
 The platform supports exactly three engagement types:
@@ -55,8 +56,9 @@ The platform is a small set of conventions:
 
 - a fixed Opportunity Model schema
 - an Intake Engine that normalizes raw opportunity inputs
+- a Discovery Engine that identifies the research needed and collects evidence
 - a repeatable research method
-- a Commercial Intelligence layer that interprets research before the model is written
+- a Commercial Intelligence layer that interprets discovery output and research before the model is written
 - an Opportunity Intake and Intake Engine workflow
 - exactly three engagement type contracts
 - a documented generator layer
@@ -131,13 +133,15 @@ Opportunity research should follow `commercial-strategy-platform/methodology/res
 
 The Intake Engine should follow `commercial-strategy-platform/intake-engine/README.md` and its supporting docs.
 
+Discovery should follow `commercial-strategy-platform/discovery-engine/README.md` and its supporting docs.
+
 Commercial Intelligence should follow `commercial-strategy-platform/commercial-intelligence/README.md` and its supporting docs.
 
-Before generating Commercial Intelligence and the Opportunity Model, use `commercial-strategy-platform/methodology/research-checklist.md` to confirm the intake normalization and research are complete enough for the canonical section contract and selected output targets.
+Before generating Commercial Intelligence and the Opportunity Model, use `commercial-strategy-platform/methodology/research-checklist.md` to confirm the intake normalization, discovery, and research are complete enough for the canonical section contract and selected output targets.
 
 Output copy should follow `commercial-strategy-platform/methodology/writing-style.md`.
 
-The Intake Engine normalizes raw opportunity inputs. Research produces evidence and observations. Commercial Intelligence turns that into strategic interpretation. The Opportunity Model then captures the normalized output for generators and renderers.
+The Intake Engine normalizes raw opportunity inputs. Discovery identifies what should be researched and creates the evidence map. Research produces evidence and observations. Commercial Intelligence turns that into strategic interpretation. The Opportunity Model then captures the normalized output for generators and renderers.
 
 The research phase should produce enough context to support the selected output:
 
@@ -193,13 +197,14 @@ The preferred future model is:
 
 1. Capture the Opportunity Intake.
 2. Run the Intake Engine.
-3. Research the opportunity.
-4. Produce a structured research brief.
-5. Build Commercial Intelligence.
-6. Generate the Opportunity Model.
-7. Validate the model.
-8. Send it through the appropriate Output Generator or Renderer.
-9. Publish, export, or use the output.
+3. Run the Discovery Engine.
+4. Research the opportunity.
+5. Produce a structured discovery and research brief.
+6. Build Commercial Intelligence.
+7. Generate the Opportunity Model.
+8. Validate the model.
+9. Send it through the appropriate Output Generator or Renderer.
+10. Publish, export, or use the output.
 
 ## Future Implementation Boundary
 

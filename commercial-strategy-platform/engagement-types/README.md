@@ -10,12 +10,12 @@ The Opportunity Model stays consistent across all three. The engagement type det
 
 ## How Engagement Types Work
 
-Every engagement starts with an Opportunity Intake, research, Commercial Intelligence, and an Opportunity Model.
+Every engagement starts with an Opportunity Intake, Intake Engine, Discovery Engine, Commercial Intelligence, and an Opportunity Model.
 
 ```text
 Opportunity Intake
 Intake Engine
-Research
+Discovery Engine
 Commercial Intelligence
 Opportunity Model
 Output Generator / Renderer

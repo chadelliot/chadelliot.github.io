@@ -33,11 +33,12 @@ Future implementation should follow this workflow:
 ```text
 Opportunity Intake
 Intake Engine
-Research
+Discovery Engine
 Commercial Intelligence
 Opportunity Model
-Output Generator / Renderer
-Publish
+Engagement Type
+Generators
+Deliverables
 ```
 
 The Commercial Strategy page should become the reference template for website-style strategy outputs. Other outputs should reuse the same Opportunity Model where practical, including proposals, executive dashboards, interview preparation, cover letters, and LinkedIn/recruiter outreach.
@@ -89,6 +90,7 @@ MEASUREMENT & SYSTEM
 
 - `PROJECT_CONTEXT.md` explains the current repository architecture and implementation direction.
 - `commercial-strategy-platform/intake-engine/README.md` defines the Intake Engine layer.
+- `commercial-strategy-platform/discovery-engine/README.md` defines the Discovery Engine layer.
 - `commercial-strategy-platform/commercial-strategy-framework.md` explains the lightweight platform.
 - `commercial-strategy-platform/commercial-intelligence/README.md` defines the Commercial Intelligence layer.
 - `commercial-strategy-platform/opportunity-model/README.md` defines the canonical Opportunity Model layer.

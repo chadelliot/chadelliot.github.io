@@ -28,7 +28,7 @@
       "enum": [
         "raw",
         "needs-review",
-        "ready-for-research"
+        "ready-for-discovery"
       ]
     },
     "engagementType": {
@@ -183,7 +183,7 @@
       "properties": {
         "nextEngine": {
           "type": "string",
-          "const": "research"
+          "const": "discovery"
         },
         "handoffStatus": {
           "type": "string",

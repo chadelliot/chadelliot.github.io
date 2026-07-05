@@ -2,7 +2,7 @@
 
 The Opportunity Model is the canonical source of truth for every Commercial Strategy Platform engagement.
 
-The Intake Engine should normalize raw opportunity inputs before research begins. Research should produce evidence and observations. Commercial Intelligence should interpret that material. The Opportunity Model should then capture the normalized strategy input. Every generator should consume that model. No generator should perform independent research.
+The Intake Engine should normalize raw opportunity inputs before discovery begins. The Discovery Engine should identify what must be researched and gather the supporting evidence. Commercial Intelligence should interpret that material. The Opportunity Model should then capture the normalized strategy input. Every generator should consume that model. No generator should perform independent research.
 
 ## Purpose
 
@@ -43,7 +43,7 @@ Opportunity Intake
 Intake Engine
   |
   v
-Research
+Discovery Engine
   |
   v
 Commercial Intelligence
@@ -58,15 +58,15 @@ Generators
 Deliverables
 ```
 
-## Relationship To Research
+## Relationship To Discovery And Research
 
-Research happens upstream of the Opportunity Model.
+Discovery happens upstream of the Opportunity Model.
 
-Research should collect source material, identify public evidence, document assumptions, and clarify what is known versus inferred. The research phase should not create final deliverables directly.
+The Discovery Engine should identify the research scope, and supporting research should collect source material, identify public evidence, document assumptions, and clarify what is known versus inferred. That work should not create final deliverables directly.
 
 Commercial Intelligence should interpret that source material before the Opportunity Model is written.
 
-The final research output is one Opportunity Model with enough traceability to support validation, writing, and generator-specific formatting.
+The final output is one Opportunity Model, built from discovery and supporting research, with enough traceability to support validation, writing, and generator-specific formatting.
 
 ## Relationship To Engagement Types
 

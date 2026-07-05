@@ -2,7 +2,7 @@
 
 The Intake Engine is the first normalized step in the Commercial Strategy Platform.
 
-It turns raw opportunity inputs into one common intake object that can be handed to Research.
+It turns raw opportunity inputs into one common intake object that can be handed to the Discovery Engine.
 
 ## Purpose
 
@@ -17,7 +17,7 @@ It normalizes:
 - notes
 - missing information
 - follow-up questions
-- research readiness
+- discovery readiness
 
 ## Architecture
 
@@ -31,7 +31,7 @@ Intake Engine
 Normalized Intake Object
   |
   v
-Research Engine
+Discovery Engine
   |
   v
 Commercial Intelligence
@@ -48,7 +48,7 @@ The Intake Engine:
 - validates the minimum required fields
 - normalizes the structure
 - flags gaps and ambiguity
-- routes the intake to Research
+- routes the intake to Discovery
 
 ## What The Intake Engine Does Not Do
 

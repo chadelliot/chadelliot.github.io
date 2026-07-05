@@ -1,6 +1,6 @@
 # Research Methodology
 
-This methodology supports creating Commercial Intelligence and Opportunity Models from a normalized intake object and research.
+This methodology supports collecting the evidence and analysis that follows the Discovery Engine before Commercial Intelligence and Opportunity Models are created.
 
 The goal is not exhaustive diligence. The goal is enough structured insight to generate credible, specific, and useful outputs quickly.
 
@@ -9,6 +9,7 @@ The goal is not exhaustive diligence. The goal is enough structured insight to g
 Start with:
 
 - normalized intake object from the Intake Engine
+- discovery output from the Discovery Engine
 - Opportunity Intake
 - target job description when relevant
 - proposal, consulting, dashboard, interview, cover-letter, or outreach objective when relevant
@@ -207,11 +208,11 @@ Sources:
 Open assumptions:
 ```
 
-This brief is not the final output. It is the bridge between raw research and Commercial Intelligence.
+This brief is not the final output. It is the bridge between discovery, raw research, and Commercial Intelligence.
 
 ## Commercial Intelligence Output
 
-After the research brief, create a Commercial Intelligence brief that identifies:
+After the discovery and research brief, create a Commercial Intelligence brief that identifies:
 
 - likely commercial priorities
 - implied executive KPIs

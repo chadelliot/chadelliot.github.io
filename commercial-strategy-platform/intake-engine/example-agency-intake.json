@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0",
   "intakeId": "revhub-growth-agency",
-  "status": "ready-for-research",
+  "status": "ready-for-discovery",
   "engagementType": "agency-engagement",
   "company": {
     "name": "RevHub Growth",
@@ -55,7 +55,7 @@
     "confidence": "medium"
   },
   "routing": {
-    "nextEngine": "research",
+    "nextEngine": "discovery",
     "handoffStatus": "ready"
   }
 }

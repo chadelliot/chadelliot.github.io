@@ -2,7 +2,7 @@
 
 The Intake Contract defines the common intake object produced by the Intake Engine.
 
-The contract normalizes every engagement into one shape before research begins.
+The contract normalizes every engagement into one shape before discovery begins.
 
 ## Supported Engagement Types
 
@@ -56,7 +56,7 @@ The Intake Engine should normalize raw inputs into:
 - a common `source` object
 - named contact objects
 - a concise `normalized` summary
-- a research handoff in `routing`
+- a discovery handoff in `routing`
 
 ## Common Intake Object
 
@@ -64,7 +64,7 @@ The Intake Engine should normalize raw inputs into:
 {
   "schemaVersion": "1.0",
   "intakeId": "example-company-vp-marketing",
-  "status": "ready-for-research",
+  "status": "ready-for-discovery",
   "engagementType": "executive-hire",
   "company": {
     "name": "Example Company",
@@ -106,7 +106,7 @@ The Intake Engine should normalize raw inputs into:
     "confidence": "medium"
   },
   "routing": {
-    "nextEngine": "research",
+    "nextEngine": "discovery",
     "handoffStatus": "ready"
   }
 }
