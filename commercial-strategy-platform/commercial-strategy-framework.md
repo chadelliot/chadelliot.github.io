@@ -6,21 +6,31 @@ The platform is content-driven. It is not a CMS, page builder, or broad React re
 
 ## Objective
 
-Create a repeatable system that turns an Opportunity Intake and research into a Commercial Strategy Model, then uses an Output Generator or Renderer to produce the right artifact.
+Create a repeatable system that turns an Opportunity Intake into a normalized intake object, then into research, Commercial Intelligence, and an Opportunity Model, then uses an Output Generator or Renderer to produce the right artifact.
 
 Target workflow:
 
 ```text
 Opportunity Intake
+Intake Engine
 Research
-Commercial Strategy Model
+Commercial Intelligence
+Opportunity Model
 Output Generator / Renderer
 Publish
 ```
 
-Supported outputs include:
+The platform supports exactly three engagement types:
 
-- VP Marketing applications
+1. Executive Hire
+2. Consulting Engagement
+3. Agency Engagement
+
+The Opportunity Model stays consistent across engagement types. The engagement type determines audience framing, required inputs, and deliverables. See `commercial-strategy-platform/engagement-types/README.md`.
+
+Common deliverables include:
+
+- VP Marketing application materials
 - RevHub agency work
 - Audaption consulting work
 - proposals
@@ -35,7 +45,7 @@ Supported outputs include:
 - Keep the current visual design and interactions.
 - Use the canonical Commercial Strategy navigation for website and proposal-style outputs.
 - Reuse existing components and CSS classes where practical.
-- Make the Commercial Strategy Model the repeatable part of the system.
+- Make the Opportunity Model the repeatable part of the system.
 - Avoid broad React refactors until repeated content generation proves a real need.
 - Keep the system compatible with GitHub Pages static publishing.
 
@@ -43,9 +53,13 @@ Supported outputs include:
 
 The platform is a small set of conventions:
 
-- a fixed Commercial Strategy Model schema
+- a fixed Opportunity Model schema
+- an Intake Engine that normalizes raw opportunity inputs
 - a repeatable research method
-- an Opportunity Intake workflow
+- a Commercial Intelligence layer that interprets research before the model is written
+- an Opportunity Intake and Intake Engine workflow
+- exactly three engagement type contracts
+- a documented generator layer
 - future validation for generated models
 - future Output Generators or Renderers that map the model into websites, proposals, dashboards, interview materials, cover letters, or outreach
 
@@ -81,7 +95,11 @@ Changes should be driven by structured content unless a later implementation tas
 
 ## Content Model
 
-Commercial Strategy Models should match `commercial-strategy-platform/content-schema.md`.
+Opportunity Models should match `commercial-strategy-platform/opportunity-model/opportunity-model.md`.
+
+The complete placeholder template lives at `commercial-strategy-platform/opportunity-model/company-model-template.json`, field definitions live in `commercial-strategy-platform/opportunity-model/field-dictionary.md`, and validation rules live in `commercial-strategy-platform/opportunity-model/validation-rules.md`.
+
+`commercial-strategy-platform/content-schema.md` is renderer-facing documentation for mapping the Opportunity Model into the existing Commercial Strategy website structure.
 
 Section intent, required components, customizable content, and never-change elements are defined in `commercial-strategy-platform/methodology/page-sections.md`.
 
@@ -111,9 +129,15 @@ This fixed structure keeps rendering simple and protects the current design from
 
 Opportunity research should follow `commercial-strategy-platform/methodology/research-methodology.md`.
 
-Before generating the Commercial Strategy Model, use `commercial-strategy-platform/methodology/research-checklist.md` to confirm the research is complete enough for the canonical section contract and selected output targets.
+The Intake Engine should follow `commercial-strategy-platform/intake-engine/README.md` and its supporting docs.
+
+Commercial Intelligence should follow `commercial-strategy-platform/commercial-intelligence/README.md` and its supporting docs.
+
+Before generating Commercial Intelligence and the Opportunity Model, use `commercial-strategy-platform/methodology/research-checklist.md` to confirm the intake normalization and research are complete enough for the canonical section contract and selected output targets.
 
 Output copy should follow `commercial-strategy-platform/methodology/writing-style.md`.
+
+The Intake Engine normalizes raw opportunity inputs. Research produces evidence and observations. Commercial Intelligence turns that into strategic interpretation. The Opportunity Model then captures the normalized output for generators and renderers.
 
 The research phase should produce enough context to support the selected output:
 
@@ -138,6 +162,29 @@ The research phase should produce enough context to support the selected output:
 
 Research should support practical strategy recommendations, not exhaustive diligence.
 
+## Generator Model
+
+Generators are documented in `commercial-strategy-platform/generators/README.md`.
+
+Every generator consumes the same Opportunity Model. Generators do not perform research. Research happens once upstream, before the model is generated.
+
+The engagement type changes tone, scope, audience framing, and deliverables. It does not change the underlying Opportunity Model.
+
+Current generators:
+
+- Strategy Website
+- Cover Letter
+- LinkedIn Outreach
+- Resume Alignment
+- Interview Preparation
+- Executive Summary
+- Proposal
+- Statement Of Work
+- Discovery Workshop
+- Presentation
+- Follow-Up Email
+- Sales One-Pager
+
 ## Publishing Model
 
 Output creation should follow `commercial-strategy-platform/methodology/page-generation-workflow.md`.
@@ -145,19 +192,21 @@ Output creation should follow `commercial-strategy-platform/methodology/page-gen
 The preferred future model is:
 
 1. Capture the Opportunity Intake.
-2. Research the opportunity.
-3. Produce a structured research brief.
-4. Generate the Commercial Strategy Model.
-5. Validate the model.
-6. Send it through the appropriate Output Generator or Renderer.
-7. Publish, export, or use the output.
+2. Run the Intake Engine.
+3. Research the opportunity.
+4. Produce a structured research brief.
+5. Build Commercial Intelligence.
+6. Generate the Opportunity Model.
+7. Validate the model.
+8. Send it through the appropriate Output Generator or Renderer.
+9. Publish, export, or use the output.
 
 ## Future Implementation Boundary
 
 When implementation is approved, start with the smallest useful code path:
 
 ```text
-public/commercial-strategy-models/{opportunity-slug}.json
+public/opportunity-models/{opportunity-slug}.json
         |
         v
 lightweight route, loader, or output generator
@@ -166,7 +215,7 @@ lightweight route, loader, or output generator
 website, proposal, dashboard, interview, cover-letter, or outreach output
 ```
 
-The first implementation should not migrate every existing static work sample. It should prove that one Commercial Strategy Model can render correctly while the current `/commercial-strategy` page remains intact.
+The first implementation should not migrate every existing static work sample. It should prove that one Opportunity Model can render correctly while the current `/commercial-strategy` page remains intact.
 
 ## Suggested Future File Shape
 
@@ -177,7 +226,7 @@ src/pages/ExecutiveStrategyPage.tsx
 src/data/commercial-strategy-platform/schema.ts
 src/data/commercial-strategy-platform/default-commercial.ts
 src/data/commercial-strategy-platform/registry.ts
-public/commercial-strategy-models/example-opportunity.json
+public/opportunity-models/example-opportunity.json
 scripts/validate-strategies.mjs
 ```
 
@@ -198,7 +247,7 @@ Before adding new schema fields:
 
 - confirm where the field renders
 - confirm whether it is required or optional
-- confirm whether existing Commercial Strategy Models would need migration
+- confirm whether existing Opportunity Models would need migration
 - update schema documentation and validation together
 
 ## Success Criteria

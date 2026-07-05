@@ -59,17 +59,27 @@ The project direction is to create a lightweight Commercial Strategy Platform:
 
 ```text
 Opportunity Intake
+Intake Engine
 Research
-Commercial Strategy Model
+Commercial Intelligence
+Opportunity Model
 Output Generator / Renderer
 Publish
 ```
 
 This should prioritize speed of output creation over maximum abstraction.
 
-The platform should support:
+The platform supports exactly three engagement types:
 
-- VP Marketing applications
+1. Executive Hire
+2. Consulting Engagement
+3. Agency Engagement
+
+The Opportunity Model stays consistent across engagement types. The engagement type determines audience framing, required inputs, and deliverables.
+
+Example deliverables include:
+
+- VP Marketing application materials
 - RevHub agency work
 - Audaption consulting work
 - proposals
@@ -85,10 +95,19 @@ Standardize the content first. Do not over-standardize the application.
 The right near-term architecture is:
 
 - one familiar visual strategy template
-- one content schema that mirrors the template
-- many opportunity-specific Commercial Strategy Models
+- one Intake Engine layer
+- one Commercial Intelligence layer
+- one canonical Opportunity Model
+- one renderer schema that maps the model into the existing Commercial Strategy template
+- many opportunity-specific Opportunity Models
 - one or more Output Generators or Renderers that map the model into the existing design or other output formats
 - lightweight validation before publishing
+
+The intake layer is documented in `commercial-strategy-platform/intake-engine/README.md`. It normalizes raw opportunity inputs before research begins.
+
+The intelligence layer is documented in `commercial-strategy-platform/commercial-intelligence/README.md`. It interprets research before the model is written.
+
+The generator layer is documented in `commercial-strategy-platform/generators/README.md`. Generators consume the same Opportunity Model, do not perform research, and produce specific outputs such as strategy websites, cover letters, outreach, interview preparation, proposals, statements of work, workshops, presentations, follow-up emails, and sales one-pagers.
 
 ## Canonical Commercial Strategy Navigation
 
@@ -145,7 +164,7 @@ src/pages/ExecutiveStrategyPage.tsx
 src/data/commercial-strategy-platform/schema.ts
 src/data/commercial-strategy-platform/default-commercial.ts
 src/data/commercial-strategy-platform/registry.ts
-public/commercial-strategy-models/example-opportunity.json
+public/opportunity-models/example-opportunity.json
 scripts/validate-strategies.mjs
 ```
 

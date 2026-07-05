@@ -1,6 +1,6 @@
 # Writing Style
 
-Use this guide when turning research into a Commercial Strategy Model and generated output copy.
+Use this guide when turning research, Commercial Intelligence, and an Opportunity Model into generated output copy.
 
 The writing should feel executive, direct, directional, data-driven, practical, confident, and curious. It should avoid generic marketing language, never overstate what is known, and preserve the current Commercial Strategy page's concise visual rhythm when generating website or proposal-style outputs.
 
@@ -44,7 +44,7 @@ Avoid:
 
 The primary reader is an executive or hiring leader evaluating strategic judgment.
 
-The output may support VP Marketing applications, RevHub agency work, Audaption consulting work, proposals, executive dashboards, interview preparation, cover letters, or LinkedIn/recruiter outreach.
+The output should be framed by one of three engagement types: Executive Hire, Consulting Engagement, or Agency Engagement. The deliverable may be a strategy page, proposal, executive dashboard, interview preparation brief, cover letter, or LinkedIn/recruiter outreach.
 
 Assume the reader wants to know:
 

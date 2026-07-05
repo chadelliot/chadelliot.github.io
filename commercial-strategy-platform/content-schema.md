@@ -1,182 +1,112 @@
-# Commercial Strategy Model Schema
+# Commercial Strategy Renderer Schema
 
-This document defines the target Commercial Strategy Model contract for future platform outputs.
+This document defines the renderer-facing schema for website and proposal-style Commercial Strategy outputs.
 
-The section contract for website and proposal-style outputs is canonical in `commercial-strategy-platform/methodology/page-sections.md`. This schema must follow that contract when rendering the Commercial Strategy page format.
+It is not the canonical data model. The canonical model is documented in `commercial-strategy-platform/opportunity-model/opportunity-model.md`.
+
+## Relationship To The Opportunity Model
+
+The platform data flow is:
+
+```text
+Opportunity Intake
+  |
+  v
+Intake Engine
+  |
+  v
+Research
+  |
+  v
+Commercial Intelligence
+  |
+  v
+Opportunity Model
+  |
+  v
+Output Generator / Renderer
+  |
+  v
+Deliverable
+```
+
+Research creates evidence, Commercial Intelligence interprets it, and the Opportunity Model captures the normalized output. The Strategy Website Renderer then maps that model into the existing Commercial Strategy page structure.
+
+The renderer schema exists only to protect the current website design and section order. It should not become a separate research model or alternate source of truth.
 
 ## Design Goals
 
 - Preserve the current Commercial Strategy page design.
 - Match the current Commercial Strategy left-side navigation exactly.
-- Make opportunity-specific outputs possible by changing model content, not code.
-- Keep model authoring practical for dozens of future outputs.
-- Support lightweight validation before publishing.
+- Keep website generation predictable.
+- Let broad Opportunity Model fields support many deliverables.
+- Avoid adding page-specific data requirements to every generator.
 
-Supported outputs include VP Marketing applications, RevHub agency work, Audaption consulting work, proposals, executive dashboards, interview preparation, cover letters, and LinkedIn/recruiter outreach.
+## Required Opportunity Model Inputs
 
-## Top-Level Shape
+Website and proposal-style renderers should derive page content from:
 
-```json
-{
-  "schemaVersion": "1.0",
-  "slug": "example-company",
-  "opportunity": {},
-  "company": {},
-  "source": {},
-  "page": {},
-  "stages": {}
-}
-```
-
-## Required Top-Level Fields
-
-| Field | Type | Required | Purpose |
-| --- | --- | --- | --- |
-| `schemaVersion` | string | yes | Allows future content migrations. |
-| `slug` | string | yes | URL-safe opportunity identifier. |
-| `opportunity` | object | yes | Opportunity type, audience, and desired outputs. |
-| `company` | object | yes | Account, company, client, or target organization context. |
-| `source` | object | yes | Inputs used to generate the model. |
-| `page` | object | yes | Website/page display metadata when rendered as a page. |
-| `stages` | object | yes | Content for each Commercial Strategy chapter. |
-
-## Opportunity
-
-```json
-{
-  "type": "vp-marketing-application",
-  "primaryUseCase": "VP Marketing application",
-  "audience": "Hiring leader and executive team",
-  "outputTargets": [
-    "website",
-    "interview-prep",
-    "cover-letter",
-    "linkedin-outreach"
-  ],
-  "intakeSummary": "Opportunity Intake summary, including role, business context, and desired outputs."
-}
-```
-
-Recommended `type` values:
-
-- `vp-marketing-application`
-- `revhub-agency`
-- `audaption-consulting`
-- `proposal`
-- `executive-dashboard`
-- `interview-prep`
-- `cover-letter`
-- `linkedin-outreach`
-
-## Company
-
-```json
-{
-  "name": "Example Company",
-  "industry": "Industrial distribution",
-  "website": "https://www.example.com",
-  "roleTitle": "VP Commercial Strategy",
-  "location": "Atlanta, GA",
-  "businessModel": "B2B distribution",
-  "primaryCustomer": "Multi-site operators"
-}
-```
-
-Recommended fields:
-
-- `name`
+- `opportunity`
+- `company`
 - `industry`
-- `website`
-- `roleTitle`
-- `location`
 - `businessModel`
-- `primaryCustomer`
+- `role`
+- `objectives`
+- `commercialChallenges`
+- `growthOpportunities`
+- `audience`
+- `segmentation`
+- `tam`
+- `personas`
+- `journey`
+- `signals`
+- `campaigns`
+- `salesMotion`
+- `measurement`
+- `technology`
+- `competitiveLandscape`
+- `risks`
+- `assumptions`
+- `recommendations`
 
-## Source
+The renderer may add display metadata, route metadata, or theme defaults, but those are output concerns. They should not replace the Opportunity Model.
+
+## Renderer View Model
+
+A future website renderer may create a view model similar to:
 
 ```json
 {
-  "opportunityIntakeSummary": "Short summary of the opportunity, audience, and requested outputs.",
-  "researchSummary": "Short summary of organization, market, and opportunity research.",
-  "researchContext": {},
-  "sourceUrls": [
-    "https://www.example.com/careers/example-role"
-  ],
-  "generatedAt": "2026-07-04"
-}
-```
-
-Source fields exist for traceability. They should not all be rendered on the page.
-
-## Research Context
-
-The optional `source.researchContext` object should capture the research inputs that inform the rendered strategy. These fields are primarily for traceability and generation quality.
-
-```json
-{
-  "companyOverview": "Example Company provides specialized services for multi-site operators.",
-  "industry": "Industrial distribution",
-  "competitors": [
-    "Competitor A",
-    "Competitor B"
-  ],
-  "customerSegments": [
-    "Enterprise operators",
-    "Regional operators"
-  ],
-  "publicLeadershipPriorities": [
-    "Improve sales productivity",
-    "Expand strategic account penetration"
-  ],
-  "recentAcquisitions": [
-    {
-      "name": "Acquired Company",
-      "date": "2025",
-      "strategicRationale": "Expanded geographic coverage"
+  "slug": "example-opportunity",
+  "modelId": "example-opportunity",
+  "page": {
+    "title": "Commercial Strategy for Example Company",
+    "subtitle": "A practical operating model for segmentation, activation, and measurement.",
+    "navLabel": "Example Company",
+    "theme": {
+      "accent": "#4a9e7a"
     }
-  ],
-  "financialPerformance": "Public results suggest growth investment with margin discipline.",
-  "existingMarketingMaturity": "Moderate maturity with opportunity to improve account-based orchestration.",
-  "probableMarTechStack": [
-    "CRM",
-    "Marketing automation",
-    "Web analytics"
-  ],
-  "aiOpportunities": [
-    "Account research automation",
-    "Signal-based prioritization"
-  ],
-  "risks": [
-    "Long sales cycles",
-    "Fragmented buying committees"
-  ],
-  "growthOpportunities": [
-    "Segment-specific campaigns",
-    "Executive account expansion plays"
-  ]
-}
-```
-
-If a field is inferred rather than sourced, the research notes or value text should make that clear.
-
-## Page
-
-```json
-{
-  "title": "Commercial Strategy for Example Company",
-  "subtitle": "A practical operating model for segmentation, market intelligence, activation, and measurement.",
-  "navLabel": "Example Company",
-  "theme": {
-    "accent": "#4a9e7a"
+  },
+  "stages": {
+    "kpiFoundation": {},
+    "segmentation": {},
+    "totalAddressableMarket": {},
+    "audienceArchitecture": {},
+    "prospectFunnel": {},
+    "signalIntelligence": {},
+    "campaignActivation": {},
+    "salesMotion": {},
+    "marketingSalesAlignment": {},
+    "returnToDashboard": {}
   }
 }
 ```
 
-The `page` object is used by a website Renderer. Proposal, cover-letter, outreach, dashboard, and interview-prep Output Generators may use different display metadata while still reading the same Commercial Strategy Model.
+This view model should be derived from the Opportunity Model and approved renderer defaults.
 
-## Stages
+## Canonical Stage Keys
 
-For website and proposal-style outputs, the `stages` object must use fixed keys that match the canonical Commercial Strategy navigation.
+For website and proposal-style outputs, renderers must use fixed keys that match the canonical Commercial Strategy navigation.
 
 ```json
 {
@@ -195,292 +125,62 @@ For website and proposal-style outputs, the `stages` object must use fixed keys 
 
 Do not add, remove, rename, or reorder stage keys for generated website/proposal-style outputs.
 
-## Stage Metadata
+## Canonical Navigation
 
-Each stage may include shared display metadata:
+The rendered page must preserve this navigation:
 
-```json
-{
-  "eyebrow": "Chapter 01 - The Scoreboard",
-  "title": "We start with the executive outcomes.",
-  "body": "Before a single campaign is built, we align on what the business is actually trying to accomplish.",
-  "quote": "Before we build the strategy, we define the scoreboard."
-}
+```text
+FOUNDATION
+01. KPI Foundation
+02. Segmentation
+03. Total Addressable Market
+04. Audience Architecture
+
+EXECUTION
+05. Prospect Funnel
+06. Signal Intelligence
+07. Campaign Activation
+
+MEASUREMENT & SYSTEM
+08. Sales Motion
+09. M+S Alignment
+10. Return to Dashboard
 ```
 
-Display metadata should preserve the role of each chapter while allowing opportunity-specific language.
+The detailed section contract lives in `commercial-strategy-platform/methodology/page-sections.md`.
 
-## Stage Content Keys
+## Stage Mapping Guidance
 
-These content keys are recommended starting points for the website/proposal Renderer. The required visual components and never-change rules live in `commercial-strategy-platform/methodology/page-sections.md`.
+| Renderer stage | Primary Opportunity Model sources |
+| --- | --- |
+| `kpiFoundation` | `objectives`, `measurement`, `role`, `recommendations` |
+| `segmentation` | `audience`, `segmentation`, `growthOpportunities`, `commercialChallenges` |
+| `totalAddressableMarket` | `industry`, `tam`, `segmentation`, `assumptions` |
+| `audienceArchitecture` | `audience`, `personas`, `journey` |
+| `prospectFunnel` | `journey`, `campaigns`, `salesMotion`, `measurement` |
+| `signalIntelligence` | `signals`, `technology`, `commercialChallenges`, `assumptions` |
+| `campaignActivation` | `campaigns`, `personas`, `growthOpportunities`, `signals` |
+| `salesMotion` | `salesMotion`, `campaigns`, `audience`, `technology` |
+| `marketingSalesAlignment` | `salesMotion`, `measurement`, `technology`, `risks` |
+| `returnToDashboard` | `measurement`, `recommendations`, `risks`, `assumptions` |
 
-### `kpiFoundation`
+## Required Renderer Behavior
 
-```json
-{
-  "metrics": [
-    {
-      "label": "Revenue Growth",
-      "value": "14.3%",
-      "status": "Above target",
-      "tone": "positive"
-    }
-  ],
-  "supportingNote": "These outcomes anchor every layer of the commercial system."
-}
-```
+The Strategy Website Renderer must:
 
-### `segmentation`
+- load one Opportunity Model
+- perform no research
+- derive the 10-stage view model from the Opportunity Model
+- use approved fallback copy only where documented
+- preserve the current Commercial Strategy design, interactions, and route behavior
+- keep generated website outputs static and GitHub Pages compatible
 
-```json
-{
-  "reveals": [
-    "Who the audience actually is",
-    "Where the largest revenue opportunity sits"
-  ],
-  "growthObjectives": [
-    "Revenue growth from highest-value segments",
-    "Market share expansion into whitespace"
-  ],
-  "segments": [
-    {
-      "label": "Segment A",
-      "name": "High-Value Existing Customers",
-      "description": "Top-tier accounts by revenue and category breadth.",
-      "opportunity": "Opportunity size: High",
-      "indicator": "90%",
-      "motion": "Expand & Retain"
-    }
-  ]
-}
-```
+## Validation
 
-### `totalAddressableMarket`
+Before rendering a website output:
 
-```json
-{
-  "summary": {
-    "addressableAccounts": "895",
-    "activeCustomers": "161",
-    "warmPipeline": "314",
-    "whitespace": "420"
-  },
-  "legend": [
-    "Active customer",
-    "Engaged / recent",
-    "Lead / prospect",
-    "Lapsed"
-  ],
-  "mapDots": [
-    {
-      "label": "Active customer",
-      "x": 72,
-      "y": 64,
-      "tone": "active"
-    }
-  ],
-  "assumptions": [
-    "Map coordinates are percentages from 0 to 100."
-  ]
-}
-```
-
-### `audienceArchitecture`
-
-```json
-{
-  "tiers": [
-    {
-      "label": "T1",
-      "name": "Highest-Value Accounts",
-      "segment": "Segment A - Protect & Grow",
-      "description": "Largest revenue contribution and deepest relationship.",
-      "motions": [
-        "Executive relationship management",
-        "Strategic account plans"
-      ]
-    }
-  ],
-  "personas": [
-    {
-      "role": "Executive Buyer",
-      "name": "VP / C-Suite Leader",
-      "segment": "Found in Tier 1 & 2",
-      "badge": "T1 Accounts",
-      "rows": [
-        {
-          "label": "Job to do",
-          "value": "Drive revenue growth and competitive positioning."
-        }
-      ]
-    }
-  ],
-  "additionalBuyerRoles": []
-}
-```
-
-### `prospectFunnel`
-
-```json
-{
-  "stages": [
-    {
-      "label": "Market Reach",
-      "value": "2.4M",
-      "note": "Impressions"
-    }
-  ],
-  "prospectTiers": [
-    {
-      "label": "Tier 1 Prospects",
-      "title": "High-fit / High-value",
-      "description": "Account-based selling, direct outreach, and priority sales assignment.",
-      "motion": "Actively pursue"
-    }
-  ]
-}
-```
-
-### `signalIntelligence`
-
-```json
-{
-  "customerSignals": [
-    {
-      "name": "Declining Purchase Frequency",
-      "description": "Spend down 30%+ versus prior quarter.",
-      "tag": "At Risk",
-      "steps": [
-        "Signal",
-        "Alert seller",
-        "Re-engagement offer",
-        "Track recovery"
-      ]
-    }
-  ],
-  "prospectSignals": []
-}
-```
-
-### `campaignActivation`
-
-```json
-{
-  "campaignName": "Public Funding Recipients - Q4 Outreach",
-  "steps": [
-    {
-      "label": "01 Audience",
-      "value": "14 funded accounts",
-      "description": "Matched to TAM and priority prospects."
-    }
-  ],
-  "performance": [
-    "Open rate 34%",
-    "3 SQLs in week 1"
-  ]
-}
-```
-
-### `salesMotion`
-
-```json
-{
-  "columns": [
-    {
-      "title": "Tier 1 Accounts",
-      "subtitle": "Protect / Grow / Retain",
-      "items": [
-        "Assigned to senior sellers",
-        "Weekly executive touchpoints",
-        "KPI: NRR, LTV growth, wallet share"
-      ]
-    }
-  ]
-}
-```
-
-### `marketingSalesAlignment`
-
-```json
-{
-  "marketingOutputs": [
-    "Segment-targeted campaigns",
-    "Demand generation and content"
-  ],
-  "sharedIntelligenceLayer": [
-    "KPI Framework",
-    "Segmentation",
-    "TAM + Personas",
-    "Tiering",
-    "Signals"
-  ],
-  "salesOutputs": [
-    "Account and territory assignment",
-    "Signal-driven outreach"
-  ]
-}
-```
-
-### `returnToDashboard`
-
-```json
-{
-  "metrics": [
-    {
-      "layer": "Segmentation + TAM",
-      "kpi": "Market Share: 18.0%",
-      "source": "161 active of 895 addressable accounts"
-    }
-  ],
-  "systemFlow": [
-    {
-      "label": "Executive KPIs",
-      "items": [
-        "Revenue growth",
-        "Market share",
-        "Acquisition"
-      ]
-    }
-  ],
-  "finalSummary": "This is how we move from executive goals to market intelligence, from market intelligence to action, and from action back to measurable business performance."
-}
-```
-
-## Validation Guardrails
-
-A future validator should require:
-
-- a valid `schemaVersion`
-- a URL-safe `slug`
-- a valid `opportunity.type`
-- at least one `opportunity.outputTargets` value
-- a non-empty company name
-- a research context that separates sourced facts from inferred assumptions when used
-- all ten fixed stage keys
-- stage keys in canonical order
-- no extra generated website/proposal sections
-- valid URLs in `website` and `sourceUrls`
-- map dot coordinates from 0 to 100
-- no empty rendered strings
-- content that respects the never-change rules in `commercial-strategy-platform/methodology/page-sections.md` when rendered as a Commercial Strategy page
-
-## Authoring Guidance
-
-Content should be specific enough to fit the opportunity, but structured enough to support multiple Output Generators.
-
-Prefer:
-
-- concise labels
-- short strategy statements
-- concrete operating recommendations
-- numbers with clear assumptions
-- role-specific personas
-- measurable next actions
-
-Avoid:
-
-- long paragraphs
-- generic company praise
-- unsupported market claims
-- content that requires new visual layouts
-- adding optional fields without a clear rendering need
+- validate the Opportunity Model against `commercial-strategy-platform/opportunity-model/validation-rules.md`
+- confirm `opportunity.outputTargets` includes `strategy-website`
+- confirm the renderer can populate all 10 canonical sections
+- confirm any unresolved internal unknowns are represented as assumptions or validation questions
+- confirm output copy follows `commercial-strategy-platform/methodology/writing-style.md`

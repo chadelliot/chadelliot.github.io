@@ -1,14 +1,22 @@
 # Research Checklist
 
-Use this checklist before generating a Commercial Strategy Model for a platform output.
+Use this checklist after the Intake Engine and before generating Commercial Intelligence and an Opportunity Model for a platform output.
 
 The checklist is designed to be fast and practical. It should confirm that the research is specific enough to support the approved strategy sequence without turning the process into exhaustive diligence.
 
 ## Intake
 
-- [ ] Company name is confirmed.
-- [ ] Opportunity Intake is captured.
-- [ ] Opportunity type is confirmed.
+- [ ] Intake Engine output exists.
+- [ ] Company name is normalized.
+- [ ] Engagement type is normalized.
+- [ ] Job description URL, job description text, or notes are captured.
+- [ ] Company website is normalized when available.
+- [ ] Recruiter information is normalized when available.
+- [ ] Hiring manager information is normalized when available.
+- [ ] Missing information is explicit.
+- [ ] Follow-up questions are explicit.
+- [ ] Intake status is set appropriately.
+
 - [ ] Desired output targets are confirmed.
 - [ ] Target role title is confirmed when relevant.
 - [ ] Job description has been captured or summarized when relevant.
@@ -40,6 +48,19 @@ The checklist is designed to be fast and practical. It should confirm that the r
 - [ ] Material risks are identified.
 - [ ] Growth opportunities are identified.
 - [ ] Sourced facts are separated from inferred recommendations.
+
+## Commercial Intelligence
+
+- [ ] Likely commercial priorities are identified.
+- [ ] Implied executive KPIs are identified.
+- [ ] Revenue bottlenecks are identified.
+- [ ] Competitive pressures are identified.
+- [ ] Technology gaps are identified.
+- [ ] Sales and marketing alignment needs are identified.
+- [ ] Each inference has a confidence level.
+- [ ] Each recommendation is clearly directional when evidence is incomplete.
+- [ ] Facts, inferences, assumptions, and recommendations are separated.
+- [ ] The intelligence brief explains what would increase confidence.
 
 ## KPI Foundation
 
@@ -144,7 +165,8 @@ The checklist is designed to be fast and practical. It should confirm that the r
 - [ ] Copy does not pretend to know internal priorities.
 - [ ] Strategy acknowledges that recommendations should evolve after internal constraints are learned.
 - [ ] No section relies on a new page layout that has not been approved.
-- [ ] Source URLs and open assumptions are ready to include in the Commercial Strategy Model source metadata.
+- [ ] Source URLs and open assumptions are ready to include in the Opportunity Model source metadata.
+- [ ] Commercial Intelligence confidence scores are ready to carry into the Opportunity Model.
 
 ## Final Review
 

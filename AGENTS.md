@@ -32,19 +32,29 @@ Future implementation should follow this workflow:
 
 ```text
 Opportunity Intake
+Intake Engine
 Research
-Commercial Strategy Model
+Commercial Intelligence
+Opportunity Model
 Output Generator / Renderer
 Publish
 ```
 
-The Commercial Strategy page should become the reference template for website-style strategy outputs. Other outputs should reuse the same Commercial Strategy Model where practical, including proposals, executive dashboards, interview preparation, cover letters, and LinkedIn/recruiter outreach.
+The Commercial Strategy page should become the reference template for website-style strategy outputs. Other outputs should reuse the same Opportunity Model where practical, including proposals, executive dashboards, interview preparation, cover letters, and LinkedIn/recruiter outreach.
 
-## Supported Use Cases
+## Engagement Types
 
-The platform should support:
+The platform supports exactly three engagement types:
 
-- VP Marketing applications
+1. Executive Hire
+2. Consulting Engagement
+3. Agency Engagement
+
+The Opportunity Model stays consistent across engagement types. The engagement type determines audience framing, required inputs, and deliverables.
+
+Example deliverables include:
+
+- VP Marketing application materials
 - RevHub agency work
 - Audaption consulting work
 - proposals
@@ -78,13 +88,20 @@ MEASUREMENT & SYSTEM
 ## Documentation Map
 
 - `PROJECT_CONTEXT.md` explains the current repository architecture and implementation direction.
+- `commercial-strategy-platform/intake-engine/README.md` defines the Intake Engine layer.
 - `commercial-strategy-platform/commercial-strategy-framework.md` explains the lightweight platform.
+- `commercial-strategy-platform/commercial-intelligence/README.md` defines the Commercial Intelligence layer.
+- `commercial-strategy-platform/opportunity-model/README.md` defines the canonical Opportunity Model layer.
+- `commercial-strategy-platform/opportunity-model/opportunity-model.md` defines the canonical Opportunity Model contract.
+- `commercial-strategy-platform/opportunity-model/validation-rules.md` defines model validation.
 - `commercial-strategy-platform/methodology/page-sections.md` defines the canonical Commercial Strategy section contract for generated website and proposal-style outputs.
-- `commercial-strategy-platform/content-schema.md` defines the intended Commercial Strategy Model contract.
+- `commercial-strategy-platform/content-schema.md` defines the renderer-facing schema for mapping an Opportunity Model into the Commercial Strategy page format.
 - `commercial-strategy-platform/methodology/research-methodology.md` defines how opportunity-specific strategy inputs should be researched.
 - `commercial-strategy-platform/methodology/research-checklist.md` defines the pre-generation research completeness checklist.
 - `commercial-strategy-platform/methodology/writing-style.md` defines the copy style for generated strategy outputs.
 - `commercial-strategy-platform/methodology/page-generation-workflow.md` defines the repeatable publishing process.
+- `commercial-strategy-platform/engagement-types/README.md` defines the only supported engagement types.
+- `commercial-strategy-platform/generators/README.md` defines the Output Generator layer.
 
 ## Development Notes
 

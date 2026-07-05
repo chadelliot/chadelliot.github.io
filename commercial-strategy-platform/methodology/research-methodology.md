@@ -1,6 +1,6 @@
 # Research Methodology
 
-This methodology supports creating Commercial Strategy Models from an Opportunity Intake and research.
+This methodology supports creating Commercial Intelligence and Opportunity Models from a normalized intake object and research.
 
 The goal is not exhaustive diligence. The goal is enough structured insight to generate credible, specific, and useful outputs quickly.
 
@@ -8,6 +8,7 @@ The goal is not exhaustive diligence. The goal is enough structured insight to g
 
 Start with:
 
+- normalized intake object from the Intake Engine
 - Opportunity Intake
 - target job description when relevant
 - proposal, consulting, dashboard, interview, cover-letter, or outreach objective when relevant
@@ -26,12 +27,12 @@ Capture source URLs for traceability.
 
 ## Research Questions
 
-Answer these before writing the Commercial Strategy Model.
+Answer these before writing Commercial Intelligence and the Opportunity Model.
 
 ### Opportunity Context
 
-- What type of opportunity is this?
-- Is the output for a VP Marketing application, RevHub agency work, Audaption consulting work, proposal, executive dashboard, interview preparation, cover letter, or LinkedIn/recruiter outreach?
+- Which engagement type applies: Executive Hire, Consulting Engagement, or Agency Engagement?
+- What deliverables are needed: strategy page, proposal, executive dashboard, interview preparation, cover letter, LinkedIn/recruiter outreach, or another output generated from the model?
 - Who is the audience for the output?
 - What decision or next step should the output support?
 - What constraints are known from the Opportunity Intake?
@@ -173,7 +174,7 @@ Every strategy should acknowledge that recommendations will evolve after interna
 The research phase should produce a short working brief:
 
 ```text
-Opportunity type:
+Engagement type:
 Output targets:
 Audience:
 Company:
@@ -206,14 +207,35 @@ Sources:
 Open assumptions:
 ```
 
-This brief is not the final output. It is the bridge between raw research and the structured Commercial Strategy Model.
+This brief is not the final output. It is the bridge between raw research and Commercial Intelligence.
+
+## Commercial Intelligence Output
+
+After the research brief, create a Commercial Intelligence brief that identifies:
+
+- likely commercial priorities
+- implied executive KPIs
+- customer segments
+- market opportunities
+- revenue bottlenecks
+- competitive pressures
+- technology gaps
+- sales and marketing alignment needs
+- risks
+- assumptions
+- confidence levels
+- strategic recommendations
+
+The Commercial Intelligence brief should clearly separate facts, inferences, assumptions, and recommendations.
+
+The Opportunity Model comes after this layer and normalizes the output for generators.
 
 ## Personalization Rules
 
 Strong outputs should include:
 
 - the company name in meaningful strategic places
-- the opportunity type and intended output audience
+- the engagement type and intended output audience
 - industry context and competitive pressure
 - role-specific outcomes from the job description
 - segment names that match the company's market
@@ -247,9 +269,10 @@ Do not use cautious language for generic operating recommendations that do not d
 
 ## Quality Checklist
 
-Before generating the Commercial Strategy Model, confirm:
+Before generating Commercial Intelligence and the Opportunity Model, confirm:
 
 - the Opportunity Intake is clear
+- the engagement type is one of Executive Hire, Consulting Engagement, or Agency Engagement
 - the output targets are clear
 - the company overview is concise and sourced
 - the industry and relevant competitors are identified

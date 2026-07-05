@@ -6,22 +6,21 @@ The intended flow is:
 
 ```text
 Opportunity Intake
+Intake Engine
 Research
-Commercial Strategy Model
+Commercial Intelligence
+Opportunity Model
 Output Generator / Renderer
 Publish / Export / Use
 ```
 
-Supported outputs include:
+Supported engagement types:
 
-- VP Marketing applications
-- RevHub agency work
-- Audaption consulting work
-- proposals
-- executive dashboards
-- interview preparation
-- cover letters
-- LinkedIn/recruiter outreach
+1. Executive Hire
+2. Consulting Engagement
+3. Agency Engagement
+
+The Opportunity Model stays consistent across all three. The engagement type determines audience framing, required inputs, and deliverables. See `commercial-strategy-platform/engagement-types/README.md`.
 
 ## Step 1: Capture The Opportunity Intake
 
@@ -30,7 +29,7 @@ Save the Opportunity Intake as source material.
 Capture what applies:
 
 - company name
-- opportunity type
+- engagement type
 - desired output targets
 - role title
 - location or remote status
@@ -44,17 +43,33 @@ Capture what applies:
 - interview or application context
 - language that hints at priorities or pain points
 
-The Opportunity Intake should drive the strategic emphasis of the Commercial Strategy Model and the format of the generated output.
+The Opportunity Intake should drive the strategic emphasis of the Intake Engine, research, Commercial Intelligence, Opportunity Model, and the format of the generated output.
 
-## Step 2: Research The Opportunity
+## Step 2: Run The Intake Engine
+
+Use `commercial-strategy-platform/intake-engine/workflow.md`.
+
+Normalize the raw opportunity inputs into a common intake object.
+
+Before research begins, confirm:
+
+- company name is present
+- engagement type is present
+- a source document or notes exist
+- recruiter or hiring manager details are normalized when available
+- missing information is captured explicitly
+- the intake is ready for research or flagged for review
+
+## Step 3: Research The Opportunity
 
 Use `commercial-strategy-platform/methodology/research-methodology.md`.
 
-Before drafting the model, complete `commercial-strategy-platform/methodology/research-checklist.md`.
+Before building Commercial Intelligence and the Opportunity Model, complete `commercial-strategy-platform/methodology/research-checklist.md`.
 
-Produce a short research brief before drafting the model. The brief should identify:
+Produce a short research brief before drafting Commercial Intelligence. The brief should identify:
 
 - opportunity context
+- engagement type
 - role context
 - company overview
 - industry
@@ -82,18 +97,43 @@ Produce a short research brief before drafting the model. The brief should ident
 - 12-24 month roadmap
 - assumptions to validate
 
-## Step 3: Generate The Commercial Strategy Model
+The normalized intake object is the source material for research. It is not a generator input and should not be used to bypass the intelligence or model layers.
 
-Create one Commercial Strategy Model that follows `commercial-strategy-platform/content-schema.md`.
+## Step 4: Build Commercial Intelligence
 
-Write page copy using `commercial-strategy-platform/methodology/writing-style.md`.
+Use the research brief and source material to produce a Commercial Intelligence brief that captures:
 
-Use `commercial-strategy-platform/methodology/page-sections.md` to confirm each section has the right strategic purpose, required components, customizable content, and never-change elements.
+- likely commercial priorities
+- implied executive KPIs
+- customer segments
+- market opportunities
+- revenue bottlenecks
+- competitive pressures
+- technology gaps
+- sales and marketing alignment needs
+- risks
+- assumptions
+- confidence levels
+- strategic recommendations
+
+Commercial Intelligence should separate facts, inferences, assumptions, and recommendations.
+
+## Step 5: Generate The Opportunity Model
+
+Create exactly one Opportunity Model that follows `commercial-strategy-platform/opportunity-model/opportunity-model.md`.
+
+Use `commercial-strategy-platform/opportunity-model/company-model-template.json` as the placeholder structure.
+
+Use `commercial-strategy-platform/opportunity-model/field-dictionary.md` to confirm field meaning and generator usage.
+
+Use `commercial-strategy-platform/methodology/writing-style.md` for model language and generated copy.
+
+For website and proposal-style outputs, use `commercial-strategy-platform/methodology/page-sections.md` and `commercial-strategy-platform/content-schema.md` to confirm the renderer can map the model into the current Commercial Strategy section contract.
 
 Recommended future location:
 
 ```text
-public/commercial-strategy-models/{opportunity-slug}.json
+public/opportunity-models/{opportunity-slug}.json
 ```
 
 Use URL-safe lowercase slugs:
@@ -104,7 +144,7 @@ acme-industrial
 gainbridge
 ```
 
-For website and proposal-style outputs, the model should fit the canonical Commercial Strategy navigation. Do not add new stages unless a future implementation explicitly supports them.
+For website and proposal-style outputs, the renderer should fit the canonical Commercial Strategy navigation. Do not add new stages unless a future implementation explicitly supports them.
 
 Canonical sequence:
 
@@ -126,14 +166,13 @@ MEASUREMENT & SYSTEM
 10. Return to Dashboard
 ```
 
-## Step 4: Validate The Commercial Strategy Model
+## Step 6: Validate The Opportunity Model
 
 Before publishing, validate that:
 
 - required top-level fields exist
-- opportunity type and output targets exist
-- company intelligence fields are included in source metadata where useful
-- all fixed stages exist
+- engagement type and output targets exist
+- company intelligence fields are included in the appropriate Opportunity Model sections
 - arrays contain enough content for the visual layout
 - URLs are valid
 - map coordinates are valid
@@ -143,36 +182,54 @@ Before publishing, validate that:
 - no rendered strings are empty
 - website/proposal copy is concise enough for the design
 
+Commercial Intelligence should also be validated for:
+
+- fact versus inference separation
+- confidence scoring
+- evidence support
+- explicit assumptions
+- directional recommendations
+
+Use `commercial-strategy-platform/opportunity-model/validation-rules.md` as the validation authority.
+
 A future script may provide:
 
 ```text
 npm run validate:strategies
 ```
 
-Until that exists, review the model manually against the schema.
+Until that exists, review the model manually against the Opportunity Model contract and validation rules.
 
-## Step 5: Generate The Output
+## Step 7: Generate The Output
 
 The future Output Generator or Renderer should:
 
-- load the Commercial Strategy Model by slug
-- pass content into the existing Commercial Strategy stage layout
-- preserve the current visual classes and page structure
-- preserve the current navigation and interactions
+- load the Opportunity Model by slug
+- use the selected generator contract in `commercial-strategy-platform/generators/`
+- perform no research
+- preserve the Opportunity Model shape
 - use fallback default content only where intentional
+
+The Strategy Website Renderer should derive a 10-section renderer view model from the Opportunity Model, pass content into the existing Commercial Strategy stage layout, preserve the current visual classes and page structure, and preserve the current navigation and interactions.
+
+Available generator contracts:
+
+- `01-strategy-website.md`
+- `02-cover-letter.md`
+- `03-linkedin-outreach.md`
+- `04-resume-alignment.md`
+- `05-interview-preparation.md`
+- `06-executive-summary.md`
+- `07-proposal.md`
+- `08-statement-of-work.md`
+- `09-discovery-workshop.md`
+- `10-presentation.md`
+- `11-follow-up-email.md`
+- `12-sales-one-pager.md`
 
 The Renderer should not require a new component for every opportunity.
 
-For non-website outputs, the Output Generator should map the same model into the appropriate format:
-
-- proposal narrative
-- executive dashboard outline
-- interview preparation brief
-- cover letter
-- LinkedIn or recruiter outreach
-- RevHub or Audaption consulting artifact
-
-## Step 6: Preview Locally
+## Step 8: Preview Locally
 
 For website outputs, run the local site and review the generated page.
 
@@ -191,11 +248,11 @@ Recommended checks:
 
 For non-website outputs, review the generated artifact for audience fit, specificity, tone, and factual discipline.
 
-## Step 7: Publish, Export, Or Use
+## Step 9: Publish, Export, Or Use
 
 Commit:
 
-- the Commercial Strategy Model
+- the Opportunity Model
 - any registry or manifest update
 - any required validation fixture
 
@@ -217,26 +274,26 @@ Add project guidance, schema documentation, research methodology, workflow docum
 
 No React changes.
 
-### Phase 2: Data Contract
+### Phase 2: Commercial Intelligence And Generator Architecture
 
-Add TypeScript schema types and a sample Commercial Strategy Model.
+Document the Commercial Intelligence layer and the generator layer.
 
 Keep the existing Commercial Strategy page unchanged.
 
 ### Phase 3: Lightweight Renderer
 
-Add a new route that loads one Commercial Strategy Model and renders it through the existing Commercial Strategy layout.
+Add a new route that loads one Opportunity Model and renders it through the existing Commercial Strategy layout.
 
 Preserve the existing `/commercial-strategy` page.
 
 ### Phase 4: Validation
 
-Add a small validation script for all Commercial Strategy Models.
+Add a small validation script for all Opportunity Models.
 
 The script should fail fast on missing fields, invalid URLs, invalid map coordinates, and empty rendered content.
 
 ### Phase 5: Scale Page Generation
 
-Create additional Commercial Strategy Models using the Opportunity Intake and research workflow.
+Create additional Opportunity Models using the Opportunity Intake, research, and Commercial Intelligence workflow.
 
 Only refactor components when repeated output generation proves that the refactor will reduce real friction.
