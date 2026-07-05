@@ -1,16 +1,18 @@
-# Executive Strategy Content Schema
+# Commercial Strategy Model Schema
 
-This document defines the target JSON contract for future company-specific Commercial Strategy pages.
+This document defines the target Commercial Strategy Model contract for future platform outputs.
 
-The section contract is canonical in `strategy-framework/methodology/page-sections.md`. This schema must follow that contract and should not introduce new sections, renamed sections, or reordered sections.
+The section contract for website and proposal-style outputs is canonical in `commercial-strategy-platform/methodology/page-sections.md`. This schema must follow that contract when rendering the Commercial Strategy page format.
 
 ## Design Goals
 
 - Preserve the current Commercial Strategy page design.
 - Match the current Commercial Strategy left-side navigation exactly.
-- Make company-specific pages possible by changing content, not code.
-- Keep JSON authoring practical for dozens of future pages.
+- Make opportunity-specific outputs possible by changing model content, not code.
+- Keep model authoring practical for dozens of future outputs.
 - Support lightweight validation before publishing.
+
+Supported outputs include VP Marketing applications, RevHub agency work, Audaption consulting work, proposals, executive dashboards, interview preparation, cover letters, and LinkedIn/recruiter outreach.
 
 ## Top-Level Shape
 
@@ -18,6 +20,7 @@ The section contract is canonical in `strategy-framework/methodology/page-sectio
 {
   "schemaVersion": "1.0",
   "slug": "example-company",
+  "opportunity": {},
   "company": {},
   "source": {},
   "page": {},
@@ -30,11 +33,40 @@ The section contract is canonical in `strategy-framework/methodology/page-sectio
 | Field | Type | Required | Purpose |
 | --- | --- | --- | --- |
 | `schemaVersion` | string | yes | Allows future content migrations. |
-| `slug` | string | yes | URL-safe company page identifier. |
-| `company` | object | yes | Company identity and context. |
-| `source` | object | yes | Inputs used to generate the page. |
-| `page` | object | yes | Page-level display metadata. |
+| `slug` | string | yes | URL-safe opportunity identifier. |
+| `opportunity` | object | yes | Opportunity type, audience, and desired outputs. |
+| `company` | object | yes | Account, company, client, or target organization context. |
+| `source` | object | yes | Inputs used to generate the model. |
+| `page` | object | yes | Website/page display metadata when rendered as a page. |
 | `stages` | object | yes | Content for each Commercial Strategy chapter. |
+
+## Opportunity
+
+```json
+{
+  "type": "vp-marketing-application",
+  "primaryUseCase": "VP Marketing application",
+  "audience": "Hiring leader and executive team",
+  "outputTargets": [
+    "website",
+    "interview-prep",
+    "cover-letter",
+    "linkedin-outreach"
+  ],
+  "intakeSummary": "Opportunity Intake summary, including role, business context, and desired outputs."
+}
+```
+
+Recommended `type` values:
+
+- `vp-marketing-application`
+- `revhub-agency`
+- `audaption-consulting`
+- `proposal`
+- `executive-dashboard`
+- `interview-prep`
+- `cover-letter`
+- `linkedin-outreach`
 
 ## Company
 
@@ -64,8 +96,8 @@ Recommended fields:
 
 ```json
 {
-  "jobDescriptionSummary": "Short summary of the target role.",
-  "researchSummary": "Short summary of company and market research.",
+  "opportunityIntakeSummary": "Short summary of the opportunity, audience, and requested outputs.",
+  "researchSummary": "Short summary of organization, market, and opportunity research.",
   "researchContext": {},
   "sourceUrls": [
     "https://www.example.com/careers/example-role"
@@ -140,11 +172,11 @@ If a field is inferred rather than sourced, the research notes or value text sho
 }
 ```
 
-The initial implementation should treat theme values as optional. The default Commercial Strategy visual system should remain the fallback.
+The `page` object is used by a website Renderer. Proposal, cover-letter, outreach, dashboard, and interview-prep Output Generators may use different display metadata while still reading the same Commercial Strategy Model.
 
 ## Stages
 
-The `stages` object must use fixed keys that match the canonical Commercial Strategy navigation.
+For website and proposal-style outputs, the `stages` object must use fixed keys that match the canonical Commercial Strategy navigation.
 
 ```json
 {
@@ -161,7 +193,7 @@ The `stages` object must use fixed keys that match the canonical Commercial Stra
 }
 ```
 
-Do not add, remove, rename, or reorder stage keys for company-specific generated pages.
+Do not add, remove, rename, or reorder stage keys for generated website/proposal-style outputs.
 
 ## Stage Metadata
 
@@ -176,11 +208,11 @@ Each stage may include shared display metadata:
 }
 ```
 
-Display metadata should preserve the role of each chapter while allowing company-specific language.
+Display metadata should preserve the role of each chapter while allowing opportunity-specific language.
 
 ## Stage Content Keys
 
-These content keys are recommended starting points. The required visual components and never-change rules live in `strategy-framework/methodology/page-sections.md`.
+These content keys are recommended starting points for the website/proposal Renderer. The required visual components and never-change rules live in `commercial-strategy-platform/methodology/page-sections.md`.
 
 ### `kpiFoundation`
 
@@ -420,19 +452,21 @@ A future validator should require:
 
 - a valid `schemaVersion`
 - a URL-safe `slug`
+- a valid `opportunity.type`
+- at least one `opportunity.outputTargets` value
 - a non-empty company name
 - a research context that separates sourced facts from inferred assumptions when used
 - all ten fixed stage keys
 - stage keys in canonical order
-- no extra generated page sections
+- no extra generated website/proposal sections
 - valid URLs in `website` and `sourceUrls`
 - map dot coordinates from 0 to 100
 - no empty rendered strings
-- content that respects the never-change rules in `strategy-framework/methodology/page-sections.md`
+- content that respects the never-change rules in `commercial-strategy-platform/methodology/page-sections.md` when rendered as a Commercial Strategy page
 
 ## Authoring Guidance
 
-Content should be specific enough to feel personalized, but structured enough to fit the existing design.
+Content should be specific enough to fit the opportunity, but structured enough to support multiple Output Generators.
 
 Prefer:
 

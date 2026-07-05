@@ -1,14 +1,18 @@
 # Research Checklist
 
-Use this checklist before generating company JSON for a personalized Executive Strategy page.
+Use this checklist before generating a Commercial Strategy Model for a platform output.
 
 The checklist is designed to be fast and practical. It should confirm that the research is specific enough to support the approved strategy sequence without turning the process into exhaustive diligence.
 
 ## Intake
 
 - [ ] Company name is confirmed.
-- [ ] Target role title is confirmed.
-- [ ] Job description has been captured or summarized.
+- [ ] Opportunity Intake is captured.
+- [ ] Opportunity type is confirmed.
+- [ ] Desired output targets are confirmed.
+- [ ] Target role title is confirmed when relevant.
+- [ ] Job description has been captured or summarized when relevant.
+- [ ] Proposal, consulting, dashboard, interview, cover-letter, or outreach objective is captured when relevant.
 - [ ] Company website has been reviewed.
 - [ ] Product, service, or solution pages have been reviewed.
 - [ ] Investor relations, annual report, or public financial materials have been reviewed when available.
@@ -130,7 +134,7 @@ The checklist is designed to be fast and practical. It should confirm that the r
 - [ ] Dependencies, systems, or operating habits are identified.
 - [ ] Evolution assumptions connect back to the KPI foundation.
 
-## JSON Readiness
+## Model Readiness
 
 - [ ] Content fits the canonical ten-section Commercial Strategy navigation.
 - [ ] Each stage has enough content to render without empty cards or panels.
@@ -140,12 +144,12 @@ The checklist is designed to be fast and practical. It should confirm that the r
 - [ ] Copy does not pretend to know internal priorities.
 - [ ] Strategy acknowledges that recommendations should evolve after internal constraints are learned.
 - [ ] No section relies on a new page layout that has not been approved.
-- [ ] Source URLs and open assumptions are ready to include in the JSON source metadata.
+- [ ] Source URLs and open assumptions are ready to include in the Commercial Strategy Model source metadata.
 
 ## Final Review
 
-- [ ] The page would feel personalized beyond company-name replacement.
-- [ ] The recommendations are specific enough for an executive reader.
-- [ ] The strategy is credible from public research and the job description.
-- [ ] The content can be rendered by existing components or obvious visual mappings.
-- [ ] The generated page should preserve the existing visual design and interactions.
+- [ ] The output would feel specific beyond organization-name replacement.
+- [ ] The recommendations are specific enough for the target audience.
+- [ ] The strategy is credible from research and the Opportunity Intake.
+- [ ] Website/proposal content can be rendered by existing components or obvious visual mappings.
+- [ ] Website outputs should preserve the existing visual design and interactions.

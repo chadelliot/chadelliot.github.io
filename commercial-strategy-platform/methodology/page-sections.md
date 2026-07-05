@@ -1,8 +1,8 @@
 # Page Sections
 
-This file is the canonical section contract for every future company-specific Commercial Strategy page.
+This file is the canonical section contract for every future website or proposal-style Commercial Strategy Platform output.
 
-Future generated pages must preserve this left-side navigation structure, section order, and interaction model unless a later implementation task explicitly changes the Commercial Strategy template itself.
+Future generated website and proposal-style outputs must preserve this left-side navigation structure, section order, and interaction model unless a later implementation task explicitly changes the Commercial Strategy template itself.
 
 Do not use this file to redesign the page. Use it to define which content can change while the current Commercial Strategy design remains stable.
 
@@ -28,15 +28,15 @@ MEASUREMENT & SYSTEM
 
 ## Global Contract
 
-Required for every future company-specific strategy page:
+Required for every future opportunity-specific strategy output that uses the Commercial Strategy page format:
 
 - Preserve all three rail groups: `FOUNDATION`, `EXECUTION`, and `MEASUREMENT & SYSTEM`.
 - Preserve the ten section labels exactly.
 - Preserve the numeric order from 01 through 10.
 - Preserve the chapter-based left rail, active state, completion state, progress bar, Back button, Next button, and Start Over behavior.
 - Preserve the current Commercial Strategy visual language, including compact cards, grids, metrics, map, personas, funnel, signal cards, campaign grid, sales board, alignment grid, and dashboard return.
-- Customize company-specific content inside the existing section patterns.
-- Do not add, remove, rename, or reorder sections for a company-specific page.
+- Customize opportunity-specific content inside the existing section patterns.
+- Do not add, remove, rename, or reorder sections for an opportunity-specific output.
 - Do not imply knowledge of internal priorities, data, systems, budget, team capacity, or constraints unless provided.
 - Acknowledge that recommendations should evolve after internal constraints are learned.
 
@@ -64,7 +64,7 @@ Customizable content:
 - KPI deltas or status labels
 - KPI target language
 - supporting note
-- company-specific executive outcomes
+- opportunity-specific executive outcomes
 - assumptions that need internal validation
 
 Never change elements:
@@ -102,7 +102,7 @@ Customizable content:
 - motion labels
 - insight list copy
 - growth objective list copy
-- company-specific customer and prospect groups
+- opportunity-specific customer and prospect groups
 
 Never change elements:
 
@@ -139,7 +139,7 @@ Customizable content:
 - legend labels
 - market statistic labels
 - market statistic values
-- company-specific market assumptions
+- opportunity-specific market assumptions
 
 Never change elements:
 
@@ -182,7 +182,7 @@ Customizable content:
 - triggers
 - messages
 - additional buyer roles
-- company-specific buying committee assumptions
+- opportunity-specific buying committee assumptions
 
 Never change elements:
 
@@ -220,7 +220,7 @@ Customizable content:
 - prospect tier descriptions
 - prospect motions
 - qualification language
-- company-specific pipeline assumptions
+- opportunity-specific pipeline assumptions
 
 Never change elements:
 
@@ -258,7 +258,7 @@ Customizable content:
 - account or customer examples
 - activation steps
 - ownership language
-- company-specific signals
+- opportunity-specific signals
 
 Never change elements:
 
@@ -294,7 +294,7 @@ Customizable content:
 - sales handoff language
 - performance indicators
 - offer or call to action
-- company-specific campaign example
+- opportunity-specific campaign example
 
 Never change elements:
 
@@ -332,7 +332,7 @@ Customizable content:
 - talk-track guidance
 - sales assets
 - KPIs by motion
-- company-specific sales execution assumptions
+- opportunity-specific sales execution assumptions
 
 Never change elements:
 
@@ -366,7 +366,7 @@ Customizable content:
 - sales output labels
 - handoff language
 - operating cadence references
-- company-specific alignment recommendations
+- opportunity-specific alignment recommendations
 
 Never change elements:
 
@@ -402,7 +402,7 @@ Customizable content:
 - system flow labels
 - system flow items
 - final summary copy
-- company-specific measurement story
+- opportunity-specific measurement story
 
 Never change elements:
 
@@ -416,14 +416,14 @@ Never change elements:
 
 ## Validation Expectations
 
-Every future company-specific page should pass these checks before publish:
+Every future opportunity-specific output using this page format should pass these checks before publish:
 
 - The page has exactly ten sections.
 - The section labels exactly match the canonical navigation structure.
 - The sections appear in the canonical order.
 - The three rail groups appear at the correct positions.
 - Every section includes the required components listed in this contract.
-- Custom content is company-specific and fits the existing design.
+- Custom content is opportunity-specific and fits the existing design.
 - "Never change" elements are unchanged.
 - Public facts, directional hypotheses, and recommendations are distinct.
 - Internal priorities or constraints are not stated as facts unless provided.

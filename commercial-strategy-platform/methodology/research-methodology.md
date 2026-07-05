@@ -1,14 +1,16 @@
 # Research Methodology
 
-This methodology supports creating personalized Executive Strategy pages from a job description and company research.
+This methodology supports creating Commercial Strategy Models from an Opportunity Intake and research.
 
-The goal is not exhaustive diligence. The goal is enough structured insight to generate a credible, specific, and useful strategy page quickly.
+The goal is not exhaustive diligence. The goal is enough structured insight to generate credible, specific, and useful outputs quickly.
 
 ## Inputs
 
 Start with:
 
-- target job description
+- Opportunity Intake
+- target job description when relevant
+- proposal, consulting, dashboard, interview, cover-letter, or outreach objective when relevant
 - company website
 - product or service pages
 - leadership or about page
@@ -24,7 +26,15 @@ Capture source URLs for traceability.
 
 ## Research Questions
 
-Answer these before writing JSON.
+Answer these before writing the Commercial Strategy Model.
+
+### Opportunity Context
+
+- What type of opportunity is this?
+- Is the output for a VP Marketing application, RevHub agency work, Audaption consulting work, proposal, executive dashboard, interview preparation, cover letter, or LinkedIn/recruiter outreach?
+- Who is the audience for the output?
+- What decision or next step should the output support?
+- What constraints are known from the Opportunity Intake?
 
 ### Company Context
 
@@ -163,6 +173,9 @@ Every strategy should acknowledge that recommendations will evolve after interna
 The research phase should produce a short working brief:
 
 ```text
+Opportunity type:
+Output targets:
+Audience:
 Company:
 Role:
 Company overview:
@@ -193,13 +206,14 @@ Sources:
 Open assumptions:
 ```
 
-This brief is not the final page. It is the bridge between raw research and structured company JSON.
+This brief is not the final output. It is the bridge between raw research and the structured Commercial Strategy Model.
 
 ## Personalization Rules
 
-Strong pages should include:
+Strong outputs should include:
 
 - the company name in meaningful strategic places
+- the opportunity type and intended output audience
 - industry context and competitive pressure
 - role-specific outcomes from the job description
 - segment names that match the company's market
@@ -233,8 +247,10 @@ Do not use cautious language for generic operating recommendations that do not d
 
 ## Quality Checklist
 
-Before generating company JSON, confirm:
+Before generating the Commercial Strategy Model, confirm:
 
+- the Opportunity Intake is clear
+- the output targets are clear
 - the company overview is concise and sourced
 - the industry and relevant competitors are identified
 - public leadership priorities are captured when available

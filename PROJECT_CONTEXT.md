@@ -4,7 +4,7 @@
 
 This repository powers the AboutChad GitHub Pages site. It combines a Vite/React application with static HTML work samples and assets served directly from `public/` and `assets/`.
 
-The site includes personal positioning pages, company-specific proposal pages, and interactive commercial strategy work samples.
+The site includes personal positioning pages, proposal pages, interactive commercial strategy work samples, and assets that can support broader commercial strategy outputs.
 
 ## Current Architecture
 
@@ -51,21 +51,32 @@ The Commercial Strategy experience currently has:
 - custom CSS and SVG-heavy visuals
 - current interactions that should be maintained
 
-The short-term strategy is not to redesign this page. It should become the canonical template for future personalized Executive Strategy pages.
+The short-term strategy is not to redesign this page. It should become the canonical template for future website-style Commercial Strategy Platform outputs.
 
 ## Approved Direction
 
-The project direction is to create a lightweight Executive Strategy publishing system:
+The project direction is to create a lightweight Commercial Strategy Platform:
 
 ```text
-Job Description
+Opportunity Intake
 Research
-Company JSON
-Existing Components Render
+Commercial Strategy Model
+Output Generator / Renderer
 Publish
 ```
 
-This should prioritize speed of page creation over maximum abstraction.
+This should prioritize speed of output creation over maximum abstraction.
+
+The platform should support:
+
+- VP Marketing applications
+- RevHub agency work
+- Audaption consulting work
+- proposals
+- executive dashboards
+- interview preparation
+- cover letters
+- LinkedIn/recruiter outreach
 
 ## Architecture Principle
 
@@ -75,8 +86,8 @@ The right near-term architecture is:
 
 - one familiar visual strategy template
 - one content schema that mirrors the template
-- many company-specific JSON files
-- one renderer that maps JSON into the existing design
+- many opportunity-specific Commercial Strategy Models
+- one or more Output Generators or Renderers that map the model into the existing design or other output formats
 - lightweight validation before publishing
 
 ## Canonical Commercial Strategy Navigation
@@ -121,7 +132,7 @@ Future implementation should:
 
 - preserve existing public URLs
 - support browser refreshes on deep links
-- keep generated company content static and cacheable
+- keep generated strategy outputs static and cacheable where they are published to the site
 - avoid server-only assumptions
 - ensure any custom domain file is included in the deployed artifact if required
 
@@ -131,10 +142,10 @@ A later implementation may add files similar to:
 
 ```text
 src/pages/ExecutiveStrategyPage.tsx
-src/data/executive-strategies/schema.ts
-src/data/executive-strategies/default-commercial.ts
-src/data/executive-strategies/registry.ts
-public/executive-strategies/example-company.json
+src/data/commercial-strategy-platform/schema.ts
+src/data/commercial-strategy-platform/default-commercial.ts
+src/data/commercial-strategy-platform/registry.ts
+public/commercial-strategy-models/example-opportunity.json
 scripts/validate-strategies.mjs
 ```
 

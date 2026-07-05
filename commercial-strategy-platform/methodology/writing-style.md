@@ -1,8 +1,8 @@
 # Writing Style
 
-Use this guide when turning research into company JSON and rendered Executive Strategy page copy.
+Use this guide when turning research into a Commercial Strategy Model and generated output copy.
 
-The writing should feel executive, direct, directional, data-driven, practical, confident, and curious. It should avoid generic marketing language, never overstate what is known, and preserve the current Commercial Strategy page's concise visual rhythm.
+The writing should feel executive, direct, directional, data-driven, practical, confident, and curious. It should avoid generic marketing language, never overstate what is known, and preserve the current Commercial Strategy page's concise visual rhythm when generating website or proposal-style outputs.
 
 ## Voice
 
@@ -43,6 +43,8 @@ Avoid:
 ## Audience
 
 The primary reader is an executive or hiring leader evaluating strategic judgment.
+
+The output may support VP Marketing applications, RevHub agency work, Audaption consulting work, proposals, executive dashboards, interview preparation, cover letters, or LinkedIn/recruiter outreach.
 
 Assume the reader wants to know:
 
@@ -257,7 +259,7 @@ Keep this as supporting copy inside the existing sections, not as a new page sec
 
 ## Formatting For The Existing Design
 
-The current Commercial Strategy design works best with compact copy.
+The current Commercial Strategy design works best with compact copy. Apply these limits to website and proposal-style Renderer outputs.
 
 Guidelines:
 
@@ -273,7 +275,7 @@ Avoid:
 - multi-paragraph card bodies
 - nested lists inside content fields
 - very long labels
-- repeated company-name insertion
+- repeated organization-name insertion
 - copy that requires a new layout to fit
 
 ## Terms To Prefer
@@ -309,12 +311,12 @@ If one of these terms appears, the sentence should explain what it means operati
 
 ## Quality Bar
 
-Before finalizing page copy, confirm:
+Before finalizing generated copy, confirm:
 
-- the page would not work unchanged for a different company
-- every section has at least one company-specific insight
+- the output would not work unchanged for a different opportunity
+- every section or artifact has at least one opportunity-specific insight
 - recommendations are tied to business outcomes
-- copy is concise enough for the current design
+- copy is concise enough for the selected output format
 - assumptions are clearly marked
 - sourced facts, directional hypotheses, and recommendations are distinct
 - the copy does not pretend to know internal priorities
