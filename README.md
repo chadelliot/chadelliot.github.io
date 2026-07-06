@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# About Chad
 
 ## Project info
 
