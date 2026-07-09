@@ -387,17 +387,22 @@ function renderSection(section: CommercialStrategySection) {
           <div className="campaign-grid">
             {section.content.map((item) => {
               const parsed = splitLine(item);
+              const investment = parsed.body ?? "Directional investment";
+              const pipeline = parsed.foot ?? "Directional pipeline";
+              const revenue = parsed.extra?.[0] ?? "Directional revenue";
+              const roi = parsed.extra?.[1] ?? "Directional ROI";
               return (
                 <div className="campaign-cell" key={item}>
                   <div className="rg-layer">Channel</div>
                   <div className="card-title">{parsed.title}</div>
-                  <div className="card-body">{parsed.body ?? section.summary}</div>
-                  {parsed.foot ? <div className="card-body">{parsed.foot}</div> : null}
-                  {parsed.extra?.map((line) => (
-                    <div className="tiny" key={line}>
-                      {line}
-                    </div>
-                  ))}
+                  <div className="tiny">Investment</div>
+                  <div className="card-body">{investment}</div>
+                  <div className="tiny">Pipeline</div>
+                  <div className="card-body">{pipeline}</div>
+                  <div className="tiny">Revenue</div>
+                  <div className="card-body">{revenue}</div>
+                  <div className="tiny">ROI</div>
+                  <div className="card-body">{roi}</div>
                 </div>
               );
             })}

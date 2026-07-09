@@ -90,6 +90,7 @@ Use executive, direct, directional, data-driven, practical, confident, and curio
 - All generated content comes from the Opportunity Model or approved fallback defaults.
 - The 10-section renderer view model is derived from the Opportunity Model.
 - Engagement type changes audience framing, not the model shape.
+- Chapter framing should answer how the business grows, not only how the marketing motion executes.
 - Commercial Activation should surface channel economics, pipeline, revenue, and ROI when the source model supports those fields.
 - Internal priorities or constraints are not stated as facts unless provided.
 

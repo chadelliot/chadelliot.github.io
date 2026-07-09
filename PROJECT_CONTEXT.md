@@ -131,7 +131,7 @@ FOUNDATION
 EXECUTION
 05. Prospect Funnel
 06. Signal Intelligence
-07. Campaign Activation
+07. Commercial Activation
 
 MEASUREMENT & SYSTEM
 08. Sales Motion
@@ -140,6 +140,7 @@ MEASUREMENT & SYSTEM
 ```
 
 Future generated strategy pages should restore the three rail headers exactly: `FOUNDATION`, `EXECUTION`, and `MEASUREMENT & SYSTEM`.
+Future generated strategy pages should frame chapter 7 around commercial activation economics, not just campaign execution.
 
 ## What Future Implementation Should Avoid
 

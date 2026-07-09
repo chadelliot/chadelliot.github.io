@@ -53,6 +53,7 @@ Common deliverables include:
 - Reuse existing components and CSS classes where practical.
 - Make the Opportunity Model the repeatable part of the system.
 - Frame each chapter as an executive decision: where to invest, which segments to prioritize, which channels deserve budget, which accounts can grow, where pipeline is slowing, and what to stop doing.
+- Frame the strategy as business growth first: how do we grow the business, not just how do we market.
 - Use financial operating model language where it fits: CAC, LTV, gross margin, EBITDA contribution, payback period, pipeline coverage, revenue mix, market share, and expansion revenue.
 - Treat the commercial operating system as: Market → Signals → Commercial Intelligence → Marketing → Sales → Customer Success → Revenue → Executive Dashboard.
 - Avoid broad React refactors until repeated content generation proves a real need.

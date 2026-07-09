@@ -771,9 +771,9 @@ export const syneosMarketResearchStrategy: CommercialStrategy = {
     },
     commercialActivation: {
       ...baseSections.commercialActivation,
-      title: "Launch Readiness Intelligence",
-      purpose: "Show one activation path for a launch signal and its return.",
-      summary: "New indication activity creates a launch-readiness response with trackable ROI.",
+      title: "Commercial Activation Economics",
+      purpose: "Show how launch signals turn into budgeted commercial investment and return.",
+      summary: "New indication activity creates a launch-readiness response with trackable ROI, pipeline, and revenue.",
       content: [
         "LinkedIn thought leadership / account targeting | $42K | $220K pipeline | $580K revenue | 4.5x ROI",
         "Display retargeting | $18K | $140K pipeline | $320K revenue | 3.6x ROI",
