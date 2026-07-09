@@ -394,6 +394,19 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .sys-item{font-size:10px;color:var(--body);padding:8px 14px;border-left:1px solid var(--rule);}
 .sys-item:first-child{border-left:none;}
 .campaign-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);}
+.activation-head{background:var(--green-pale);color:var(--green);border-bottom:1px solid var(--rule);}
+.activation-summary{background:var(--surface);}
+.activation-summary .section-eye{font-weight:600;color:var(--body);letter-spacing:0;text-transform:none;}
+.activation-card{display:flex;flex-direction:column;gap:8px;min-height:148px;background:var(--white);padding:16px;}
+.activation-card .card-title{font-size:13px;line-height:1.35;}
+.activation-card .card-body{font-size:12px;line-height:1.55;font-weight:400;color:var(--body);}
+.activation-card .tag{margin-top:auto;align-self:flex-start;}
+.activation-table{display:flex;flex-direction:column;gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;}
+.activation-table-head,.activation-table-row{display:grid;grid-template-columns:2.2fr 1fr 1fr 1fr .7fr;gap:1px;background:var(--rule);}
+.activation-table-head div{background:var(--surface);padding:10px 12px;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+.activation-cell{background:var(--white);padding:14px 12px;display:flex;flex-direction:column;gap:4px;min-height:74px;}
+.activation-label{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--green);}
+.activation-value{font-size:12px;line-height:1.45;color:var(--ink);}
 
 @media (max-width: 767px){
   html,body{overflow-x:hidden;}
@@ -406,6 +419,11 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .stage-title{font-size:24px;line-height:1.16;}
   .kpi-dash,.two-col,.three-col,.persona-primary,.persona-secondary,.tier-grid,.sales-board,.return-grid,.align-grid,.funnel-row,.campaign-grid{grid-template-columns:1fr !important;}
   .kpi-dash,.tier-grid,.sales-board,.return-grid,.align-grid,.funnel-row,.campaign-grid{background:transparent;border:none;overflow:visible;}
+  .activation-table{background:transparent;border:none;overflow:visible;}
+  .activation-table-head{display:none;}
+  .activation-table-row{grid-template-columns:1fr;gap:0;background:var(--white);border:1px solid var(--rule);border-radius:4px;overflow:hidden;}
+  .activation-cell{border-top:1px solid var(--rule);}
+  .activation-cell:first-child{border-top:none;}
   .kd-card,.card,.persona-card-lg,.persona-card-sm,.tier-card,.sb-col,.rg-card{min-width:0;}
   .kd-card,.card,.persona-card-lg,.persona-card-sm,.tier-card,.sb-col,.rg-card,.align-side,.align-center{padding:14px;}
   .tam-shell{height:auto;}
@@ -796,30 +814,38 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <div class="stage-quote">"The KPI foundation makes spend accountable. The campaign comes first. Channel investment supports it and must justify pipeline, revenue, and ROI."</div>
 
       <div style="border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;">
-        <div style="background:var(--ink);color:var(--white);padding:12px 20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;">Commercial Activation: Launch Readiness Intelligence Program</div>
-        <div style="background:var(--surface);padding:12px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);">One integrated campaign for launch-stage accounts</div>
+        <div class="activation-head">Commercial Activation: Launch Readiness Intelligence Program</div>
+        <div class="activation-summary" style="padding:12px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="section-eye" style="margin-bottom:0;font-weight:600;color:var(--body);text-transform:none;letter-spacing:0;">One integrated campaign for launch-stage accounts</div>
         </div>
         <div class="campaign-grid">
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Audience</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.45;">Growth pharma and biotech teams preparing launches or indication expansions</div>
+          <div class="activation-card">
+            <div class="rg-layer">Audience</div>
+            <div class="card-title">Growth pharma and biotech teams preparing launches or indication expansions</div>
+            <div class="card-body">Target the right launch-stage accounts before the window closes.</div>
+            <span class="tag">Launch prep</span>
           </div>
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Message</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.45;">Identify market access, field, and stakeholder friction before launch execution</div>
+          <div class="activation-card">
+            <div class="rg-layer">Message</div>
+            <div class="card-title">Identify market access, field, and stakeholder friction before launch execution</div>
+            <div class="card-body">Frame the friction before launch execution starts.</div>
+            <span class="tag">Friction before launch</span>
           </div>
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Channels</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.45;">LinkedIn account targeting, display retargeting, executive email, SDR outreach, workshop invite</div>
+          <div class="activation-card">
+            <div class="rg-layer">Channels</div>
+            <div class="card-title">LinkedIn account targeting, display retargeting, executive email, SDR outreach, workshop invite</div>
+            <div class="card-body">Use a coordinated multi-touch sequence across the account list.</div>
+            <span class="tag">Multi-channel</span>
           </div>
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Sales Handoff / Measurement</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);line-height:1.45;">Workshop conversion, SQLs, proposal rate, pipeline value, executive dashboard adoption</div>
+          <div class="activation-card">
+            <div class="rg-layer">Sales Handoff / Measurement</div>
+            <div class="card-title">Workshop conversion, SQLs, proposal rate, pipeline value, executive dashboard adoption</div>
+            <div class="card-body">Measure response, pipeline value, and executive adoption.</div>
+            <span class="tag">Proof and adoption</span>
           </div>
         </div>
-        <div style="background:var(--surface);padding:12px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-          <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.7px;color:var(--muted);">Channel economics beneath the campaign:</div>
+        <div class="activation-summary" style="padding:12px 20px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div class="section-eye" style="margin-bottom:0;font-weight:700;">Channel economics beneath the campaign:</div>
           <span class="signal-step">LinkedIn account targeting</span>
           <span class="signal-arrow-sm">→</span>
           <span class="signal-step">Display retargeting</span>
@@ -830,46 +856,44 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           <span class="signal-arrow-sm">→</span>
           <span class="signal-step">Executive workshop promotion</span>
         </div>
-        <div class="campaign-grid">
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Channel</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">LinkedIn account targeting</div>
-            <div style="font-size:11px;color:var(--muted);">Investment: $42K</div>
-            <div style="font-size:11px;color:var(--muted);">Pipeline: $220K</div>
-            <div style="font-size:11px;color:var(--muted);">Revenue: $580K</div>
-            <div style="font-size:11px;color:var(--muted);">ROI: 4.5×</div>
+        <div class="activation-table">
+          <div class="activation-table-head">
+            <div>Channel</div><div>Investment</div><div>Pipeline</div><div>Revenue</div><div>ROI</div>
           </div>
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Channel</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Display retargeting</div>
-            <div style="font-size:11px;color:var(--muted);">Investment: $18K</div>
-            <div style="font-size:11px;color:var(--muted);">Pipeline: $140K</div>
-            <div style="font-size:11px;color:var(--muted);">Revenue: $320K</div>
-            <div style="font-size:11px;color:var(--muted);">ROI: 3.6×</div>
+          <div class="activation-table-row">
+            <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">LinkedIn account targeting</span></div>
+            <div class="activation-cell"><span class="activation-label">Investment</span><span class="activation-value">$42K</span></div>
+            <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value">$220K</span></div>
+            <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value">$580K</span></div>
+            <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value">4.5×</span></div>
           </div>
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Channel</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Executive email nurture</div>
-            <div style="font-size:11px;color:var(--muted);">Investment: $12K</div>
-            <div style="font-size:11px;color:var(--muted);">Pipeline: $95K</div>
-            <div style="font-size:11px;color:var(--muted);">Revenue: $210K</div>
-            <div style="font-size:11px;color:var(--muted);">ROI: 2.9×</div>
+          <div class="activation-table-row">
+            <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">Display retargeting</span></div>
+            <div class="activation-cell"><span class="activation-label">Investment</span><span class="activation-value">$18K</span></div>
+            <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value">$140K</span></div>
+            <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value">$320K</span></div>
+            <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value">3.6×</span></div>
           </div>
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Channel</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">SDR-assisted outreach</div>
-            <div style="font-size:11px;color:var(--muted);">Investment: $30K</div>
-            <div style="font-size:11px;color:var(--muted);">Pipeline: $260K</div>
-            <div style="font-size:11px;color:var(--muted);">Revenue: $640K</div>
-            <div style="font-size:11px;color:var(--muted);">ROI: 5.2×</div>
+          <div class="activation-table-row">
+            <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">Executive email nurture</span></div>
+            <div class="activation-cell"><span class="activation-label">Investment</span><span class="activation-value">$12K</span></div>
+            <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value">$95K</span></div>
+            <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value">$210K</span></div>
+            <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value">2.9×</span></div>
           </div>
-          <div style="background:var(--white);padding:16px;">
-            <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;">Channel</div>
-            <div style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px;">Executive workshop promotion</div>
-            <div style="font-size:11px;color:var(--muted);">Investment: $24K</div>
-            <div style="font-size:11px;color:var(--muted);">Pipeline: $210K</div>
-            <div style="font-size:11px;color:var(--muted);">Revenue: $520K</div>
-            <div style="font-size:11px;color:var(--muted);">ROI: 4.1×</div>
+          <div class="activation-table-row">
+            <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">SDR-assisted outreach</span></div>
+            <div class="activation-cell"><span class="activation-label">Investment</span><span class="activation-value">$30K</span></div>
+            <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value">$260K</span></div>
+            <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value">$640K</span></div>
+            <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value">5.2×</span></div>
+          </div>
+          <div class="activation-table-row">
+            <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">Executive workshop promotion</span></div>
+            <div class="activation-cell"><span class="activation-label">Investment</span><span class="activation-value">$24K</span></div>
+            <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value">$210K</span></div>
+            <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value">$520K</span></div>
+            <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value">4.1×</span></div>
           </div>
         </div>
       </div>
