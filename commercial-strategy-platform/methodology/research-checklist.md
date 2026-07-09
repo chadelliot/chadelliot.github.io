@@ -98,7 +98,7 @@ The checklist is designed to be fast and practical. It should confirm that the r
 - [ ] Revenue opportunity indicators are identified.
 - [ ] Expansion, churn-risk, buying-readiness, or growth signals are captured where relevant.
 - [ ] Intelligence can be converted into a recommended action.
-- [ ] Insights are tied to campaign or sales prioritization.
+- [ ] Insights are tied to activation or sales prioritization.
 
 ## Prospect Funnel
 
@@ -116,12 +116,13 @@ The checklist is designed to be fast and practical. It should confirm that the r
 - [ ] Each signal has a recommended activation path.
 - [ ] Signal ownership is clear where possible.
 
-## Campaign Activation
+## Commercial Activation
 
-- [ ] Campaign themes connect to the company's offer and buyer pressure.
-- [ ] Target audience is clear for each campaign.
+- [ ] Activation themes connect to the company's offer and buyer pressure.
+- [ ] Target audience is clear for each activation.
 - [ ] Channels are practical for the target audience.
 - [ ] Offers or calls to action are specific.
+- [ ] Investment, pipeline, revenue, or ROI assumptions are directionalized where relevant.
 - [ ] Success metrics are measurable.
 
 ## Sales Motion

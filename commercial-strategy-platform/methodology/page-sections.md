@@ -6,6 +6,8 @@ Future generated website and proposal-style outputs must preserve this left-side
 
 Do not use this file to redesign the page. Use it to define which content can change while the current Commercial Strategy design remains stable.
 
+Chapter quality rule: every chapter should answer, "What would this look like if we had already built it?"
+
 ## Canonical Navigation Structure
 
 ```text
@@ -18,7 +20,7 @@ FOUNDATION
 EXECUTION
 05. Prospect Funnel
 06. Signal Intelligence
-07. Campaign Activation
+07. Commercial Activation
 
 MEASUREMENT & SYSTEM
 08. Sales Motion
@@ -34,7 +36,10 @@ Required for every future opportunity-specific strategy output that uses the Com
 - Preserve the ten section labels exactly.
 - Preserve the numeric order from 01 through 10.
 - Preserve the chapter-based left rail, active state, completion state, progress bar, Back button, Next button, and Start Over behavior.
-- Preserve the current Commercial Strategy visual language, including compact cards, grids, metrics, map, personas, funnel, signal cards, campaign grid, sales board, alignment grid, and dashboard return.
+- Preserve the current Commercial Strategy visual language, including compact cards, grids, metrics, map, personas, funnel, signal cards, commercial activation grid, sales board, alignment grid, and dashboard return.
+- Preserve the three rail headers exactly: `FOUNDATION`, `EXECUTION`, and `MEASUREMENT & SYSTEM`.
+- Keep content rhythm concise: short headings, short body copy, punchy labels, and minimal paragraph density.
+- Size cards and grids to the available content. Do not introduce empty placeholder cards or force fixed counts that leave blank slots.
 - Customize opportunity-specific content inside the existing section patterns.
 - Do not add, remove, rename, or reorder sections for an opportunity-specific output.
 - Do not imply knowledge of internal priorities, data, systems, budget, team capacity, or constraints unless provided.
@@ -75,6 +80,7 @@ Never change elements:
 - dashboard/card structure
 - role of this section as the opening scoreboard
 - connection between executive outcomes and all later strategy layers
+- concise KPI labels and concrete directional values
 
 ### 02. Segmentation
 
@@ -112,6 +118,7 @@ Never change elements:
 - three-segment visual pattern
 - two insight-card setup
 - role of segmentation as the bridge between audience understanding and growth focus
+- segment-specific behavior and value levers, not generic labels
 
 ### 03. Total Addressable Market
 
@@ -150,6 +157,7 @@ Never change elements:
 - statistic grid pattern
 - use of this section to explain market share, whitespace, and reachable opportunity
 - requirement to label estimates and assumptions clearly
+- descriptive B2B account categories and directional estimates
 
 ### 04. Audience Architecture
 
@@ -193,6 +201,7 @@ Never change elements:
 - primary persona card pattern
 - additional buyer role card pattern
 - distinction between account-level priority and person-level relevance
+- tiering should include estimated account value where reasonable
 
 ## EXECUTION
 
@@ -230,6 +239,7 @@ Never change elements:
 - funnel progression pattern
 - prospect tier card pattern
 - purpose of turning TAM and segmentation into pipeline logic
+- standardized funnel stages: Reach, Leads, MQLs, SQLs, Opportunities, Closed Won, Revenue
 
 ### 06. Signal Intelligence
 
@@ -268,11 +278,12 @@ Never change elements:
 - customer/prospect signal split
 - signal-to-action logic
 - requirement that signals be observable, actionable, and not vague
+- market signals should inform marketing and sales response
 
-### 07. Campaign Activation
+### 07. Commercial Activation
 
 Purpose:
-Turn signals and audience logic into coordinated marketing and sales action.
+Turn signals and audience logic into coordinated commercial action with visible channel economics.
 
 Required components:
 
@@ -280,30 +291,35 @@ Required components:
 - Stage title
 - Stage body
 - Stage quote
-- Campaign container
-- Campaign header
-- Four-part campaign grid
-- Campaign performance strip
+- Commercial activation container
+- Commercial activation header
+- Four-part commercial activation grid
+- Performance strip
+- Channel / investment / pipeline / revenue / ROI labels
 
 Customizable content:
 
-- campaign name
+- activation name
 - audience definition
 - message angle
 - channel mix
+- investment assumptions
+- pipeline and revenue assumptions
+- ROI or payback language
 - sales handoff language
 - performance indicators
 - offer or call to action
-- opportunity-specific campaign example
+- opportunity-specific activation example
 
 Never change elements:
 
-- section label: `Campaign Activation`
+- section label: `Commercial Activation`
 - section number: `07`
 - rail group: `EXECUTION`
-- four-step campaign structure
-- connection from signal to campaign to sales handoff
+- four-step commercial activation structure
+- connection from signal to activation to sales handoff
 - performance strip pattern
+- commercial activations should show audience, channel economics, pipeline, revenue, and ROI
 
 ## MEASUREMENT & SYSTEM
 
@@ -342,6 +358,7 @@ Never change elements:
 - three-column sales board pattern
 - role of shared intelligence across marketing and sales
 - connection to segmentation, TAM, tiering, and signals
+- sales motion should stay concise and action-oriented
 
 ### 09. M+S Alignment
 
@@ -376,6 +393,7 @@ Never change elements:
 - three-part alignment layout
 - marketing left, shared intelligence center, sales right
 - purpose of showing one system with two execution engines
+- shared intelligence should guide both swimlanes
 
 ### 10. Return to Dashboard
 
@@ -413,6 +431,7 @@ Never change elements:
 - system flow pattern
 - final complete-system box
 - role of this section as the closing performance layer
+- dashboard metrics should tie directly back to Chapter 1 KPI Foundation
 
 ## Validation Expectations
 

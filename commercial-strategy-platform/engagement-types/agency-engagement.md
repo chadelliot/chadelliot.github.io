@@ -1,6 +1,6 @@
 # Agency Engagement
 
-Agency Engagement is the engagement type for campaign, growth, demand generation, revenue, or activation work delivered through an agency context.
+Agency Engagement is the engagement type for activation, growth, demand generation, revenue, or commercial strategy work delivered through an agency context.
 
 The Opportunity Model stays consistent. The Agency Engagement changes the audience framing, required inputs, and deliverables.
 
@@ -14,7 +14,7 @@ Primary audience:
 - account stakeholders
 - sales or customer-facing partners
 
-The output should connect market insight, audience architecture, campaign activation, sales motion, and measurement. It should make the agency role clear without turning the strategy into a generic capabilities pitch.
+The output should connect market insight, audience architecture, commercial activation, sales motion, and measurement. It should make the agency role clear without turning the strategy into a generic capabilities pitch.
 
 ## Required Inputs
 
@@ -22,7 +22,7 @@ Required Opportunity Intake inputs:
 
 - client or target organization
 - agency objective
-- campaign or growth challenge
+- activation or growth challenge
 - target audience
 - known channels
 - existing marketing maturity
@@ -33,7 +33,7 @@ Required Opportunity Intake inputs:
 
 Helpful optional inputs:
 
-- current campaign performance
+- current activation performance
 - media budget
 - content inventory
 - CRM or marketing automation notes
@@ -45,12 +45,12 @@ Helpful optional inputs:
 
 Common deliverables:
 
-- campaign strategy
+- activation strategy
 - account plan
 - activation proposal
 - performance dashboard
 - sales enablement narrative
-- signal-based campaign plan
+- signal-based activation plan
 - measurement framework
 
 ## Output Guidance
@@ -58,7 +58,7 @@ Common deliverables:
 Emphasize:
 
 - target audience clarity
-- campaign activation
+- commercial activation
 - sales handoff
 - measurable outcomes
 - practical channel use
@@ -69,4 +69,4 @@ Avoid:
 - channel plans disconnected from revenue motion
 - activity metrics without business outcomes
 - generic agency positioning
-- assuming internal campaign performance without data
+- assuming internal activation performance without data

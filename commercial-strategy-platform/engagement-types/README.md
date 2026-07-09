@@ -34,7 +34,7 @@ FOUNDATION
 EXECUTION
 05. Prospect Funnel
 06. Signal Intelligence
-07. Campaign Activation
+07. Commercial Activation
 
 MEASUREMENT & SYSTEM
 08. Sales Motion

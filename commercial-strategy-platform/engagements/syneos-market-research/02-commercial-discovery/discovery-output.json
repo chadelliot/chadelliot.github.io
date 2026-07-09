@@ -1,0 +1,179 @@
+{
+  "schemaVersion": "1.0.0",
+  "engagementId": "syneos-market-research",
+  "client": {
+    "name": "Syneos Health",
+    "website": "https://www.syneoshealth.com"
+  },
+  "discoveryFocus": "Commercial strategy for Market Research & Analytics",
+  "source": {
+    "type": "job posting",
+    "url": "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+  },
+  "findings": {
+    "companyOverview": {
+      "statement": "Syneos Health positions itself as a fully integrated biopharmaceutical solutions organization with clinical, commercial, consulting, and technology-enabled capabilities.",
+      "confidence": "high",
+      "evidence": [
+        "The public homepage emphasizes commercial delivery, consulting, and technology/data/AI offerings.",
+        "The role posting sits inside a commercial insights context, not a generic corporate function."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com",
+        "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+      ]
+    },
+    "productsServices": {
+      "statement": "Syneos appears to sell commercial, consulting, and evidence-generation services to biopharma clients, with a strong emphasis on commercialization and market access support.",
+      "confidence": "high",
+      "evidence": [
+        "Public site language references commercial delivery, consulting, value and access, and AI-enabled commercial solutions.",
+        "The job posting emphasizes commercial insights generation and strategic decision support."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com",
+        "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+      ]
+    },
+    "industry": {
+      "statement": "The company operates in biopharma services, commercialization, and market access support.",
+      "confidence": "high",
+      "evidence": [
+        "The homepage frames Syneos as a biopharmaceutical solutions organization.",
+        "The solutions menu includes commercial delivery, consulting, and therapeutic depth."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com"
+      ]
+    },
+    "competitors": {
+      "statement": "Likely competitive pressure comes from CROs, commercialization agencies, and specialist analytics/insights providers competing for biopharma client work.",
+      "confidence": "medium",
+      "evidence": [
+        "Syneos competes across clinical, commercial, and consulting service categories.",
+        "The need for integrated commercial insights suggests a crowded category where proof and speed matter."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com"
+      ]
+    },
+    "customers": {
+      "statement": "Primary customers are likely pharmaceutical and biotech organizations, with internal stakeholders spanning commercial, market access, and executive leadership.",
+      "confidence": "high",
+      "evidence": [
+        "The job posting references commercial, market access, and leadership stakeholders.",
+        "The company homepage speaks directly to biopharma customers."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com",
+        "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+      ]
+    },
+    "businessModel": {
+      "statement": "The business model appears to combine specialized services, advisory work, and commercialization support across multiple client programs.",
+      "confidence": "medium",
+      "evidence": [
+        "Syneos lists consulting, commercialization, and data/AI capabilities alongside broader services.",
+        "The job role implies cross-functional delivery across client needs rather than a single product motion."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com"
+      ]
+    },
+    "revenueModel": {
+      "statement": "Revenue is likely driven by client services, project-based work, and retained commercial support rather than a pure software subscription model.",
+      "confidence": "medium",
+      "evidence": [
+        "The role references project management, vendor oversight, and deliverable ownership.",
+        "The company homepage emphasizes services and solutions rather than product packaging."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com",
+        "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+      ]
+    },
+    "hiringContext": {
+      "statement": "The posting suggests Syneos wants a strategic insights leader who can bring structure to fragmented research and analytics inputs.",
+      "confidence": "high",
+      "evidence": [
+        "The job description calls for integrating qualitative, quantitative, syndicated, and advanced analytics inputs.",
+        "The role requires KPI dashboards, executive communication, and cross-functional alignment."
+      ],
+      "sourceLinks": [
+        "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+      ]
+    },
+    "marketingMaturity": {
+      "statement": "Marketing and commercial maturity appears moderate to advanced, but the role suggests the organization still needs a stronger operating model for consistent decision support.",
+      "confidence": "medium",
+      "evidence": [
+        "Syneos publicly highlights AI-driven performance and predictive commercial solutions.",
+        "The role asks for KPI dashboards, performance trackers, and clear executive recommendations."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com",
+        "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+      ]
+    },
+    "technologySignals": {
+      "statement": "Public technology signals point to AI-enabled commercial tooling and data platforms, but the operating detail remains opaque.",
+      "confidence": "medium",
+      "evidence": [
+        "Syneos highlights AI-driven performance on its homepage.",
+        "The site references predictive commercial solutions and named digital offerings."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com"
+      ]
+    },
+    "growthSignals": {
+      "statement": "Growth pressure appears tied to commercialization complexity, AI adoption, and the need to support more client decision-making with better evidence.",
+      "confidence": "medium",
+      "evidence": [
+        "The public site stresses speed, precision, and performance.",
+        "The role includes 30/60/90-day expectations that focus on ramping insight and dashboards quickly."
+      ],
+      "sourceLinks": [
+        "https://www.syneoshealth.com",
+        "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+      ]
+    },
+    "risks": {
+      "statement": "The main risk is an insights function that is too fragmented to support executive-level decision-making at client speed.",
+      "confidence": "high",
+      "evidence": [
+        "The role explicitly calls for integration across multiple data sources and stakeholder groups.",
+        "The work appears to depend on vendor management, methodology selection, and operating cadence."
+      ],
+      "sourceLinks": [
+        "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor"
+      ]
+    }
+  },
+  "researchPlan": {
+    "externalResearchNeeded": [
+      "Review Syneos commercial solutions and commercial delivery messaging",
+      "Review Syneos AI and data offerings",
+      "Review public signals for market access and customer intelligence work"
+    ],
+    "internalResearchNeeded": [
+      "Confirm which stakeholders own market research and analytics today",
+      "Confirm whether the work is client-facing, internal, or both",
+      "Confirm whether the need is build, fix, or scale"
+    ],
+    "openQuestions": [
+      "What is the target operating model for insight production?",
+      "Which client segments need the fastest improvement?",
+      "What metrics do executives actually inspect today?"
+    ]
+  },
+  "confidenceSummary": {
+    "overallLevel": "medium",
+    "overallScore": 74,
+    "lowConfidenceAreas": [
+      "competitors",
+      "revenueModel",
+      "technologySignals"
+    ]
+  }
+}

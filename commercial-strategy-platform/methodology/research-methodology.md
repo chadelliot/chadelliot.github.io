@@ -71,7 +71,7 @@ Answer these before writing Commercial Intelligence and the Opportunity Model.
 ### Commercial Motion
 
 - Is the likely motion enterprise, mid-market, SMB, partner-led, product-led, channel-led, or field-led?
-- Is demand created by campaigns, relationships, procurement events, intent signals, renewals, or expansion?
+- Is demand created by commercial activations, relationships, procurement events, intent signals, renewals, or expansion?
 - What sales cycle complexity should the strategy reflect?
 
 ### KPI Foundation
@@ -108,7 +108,7 @@ Answer these before writing Commercial Intelligence and the Opportunity Model.
 - What public signals indicate revenue opportunity, expansion, churn risk, or buying readiness?
 - What account-level intelligence would help prioritize outreach?
 - What patterns suggest a company is changing budget, leadership, footprint, or operating model?
-- Which insights should affect campaign or sales prioritization?
+- Which insights should affect activation or sales prioritization?
 
 ### Prospect Funnel
 
@@ -123,10 +123,11 @@ Answer these before writing Commercial Intelligence and the Opportunity Model.
 - Which signals are observable from public data?
 - Which signals should trigger marketing, SDR, or sales action?
 
-### Campaign Activation
+### Commercial Activation
 
-- Which campaign themes connect the company's offer to the buyer's current pressure?
+- Which activation themes connect the company's offer to the buyer's current pressure?
 - Which channels are practical for the target audience?
+- What investment, pipeline, revenue, and ROI assumptions should be directionalized?
 - Which offers or proof points should create meeting demand?
 
 ### Sales Motion
@@ -199,7 +200,7 @@ Total addressable market:
 Prospect funnel:
 Buying committee:
 Key signals:
-Recommended campaign themes:
+Recommended activation themes:
 Sales motion:
 M+S alignment:
 Return to dashboard:
@@ -246,7 +247,7 @@ Strong outputs should include:
 - market assumptions that can be explained
 - revenue prioritization connected to the prospect funnel
 - buyer-stage logic that supports the prospect funnel
-- campaign ideas connected to the company's offer
+- activation ideas connected to the company's offer
 - sales plays that match likely deal complexity
 - metrics that reflect the role's expected operating model
 - explicit separation between sourced facts, directional hypotheses, and recommendations
@@ -289,7 +290,7 @@ Before generating Commercial Intelligence and the Opportunity Model, confirm:
 - revenue prioritization can inform the prospect funnel
 - buyer-stage logic can be expressed with clear buyer questions and actions
 - at least four actionable signals are available
-- the campaign ideas are specific to the company and role
+- the activation ideas are specific to the company and role
 - the sales motion fits the likely deal type
 - the executive dashboard includes measurable outcomes
 - the measurement plan includes owners and cadence

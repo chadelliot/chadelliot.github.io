@@ -51,7 +51,7 @@ Assume the reader wants to know:
 - whether the company context is understood
 - whether the strategy is specific to their market
 - how the audience and revenue opportunity will be prioritized
-- how campaigns and sales motions become executable
+- how commercial activations and sales motions become executable
 - how success will be measured
 - what should happen over the next 12-24 months
 
@@ -63,7 +63,7 @@ Use active voice:
 
 - "Prioritize enterprise operators with multi-site complexity."
 - "Use leadership hiring as an expansion signal."
-- "Measure pipeline quality before campaign volume."
+- "Measure pipeline quality before activation volume."
 
 Avoid soft, padded phrasing:
 
@@ -150,7 +150,7 @@ Prefer:
 
 Avoid:
 
-- "Run more campaigns."
+- "Run more activation plays."
 - "Create better dashboards."
 
 ### Audience Architecture
@@ -208,11 +208,13 @@ Prefer:
 - "Expansion into a new region"
 - "Hiring for revenue operations or field sales"
 
-### Campaign Activation
+### Commercial Activation
 
-Campaigns should have a specific audience, offer, channel, and success metric.
+Commercial activations should have a specific audience, offer, channel, investment, pipeline, revenue, and ROI logic.
 
-Avoid campaign names that sound like internal slogans unless they clarify the buyer value.
+Avoid activation names that sound like internal slogans unless they clarify the buyer value.
+
+Prefer language that helps a VP decide where to invest, which accounts to prioritize, and what return to expect.
 
 ### Sales Motion
 

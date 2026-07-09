@@ -13,7 +13,7 @@ This generator must preserve the current 10-section Commercial Strategy structur
 04 Audience Architecture
 05 Prospect Funnel
 06 Signal Intelligence
-07 Campaign Activation
+07 Commercial Activation
 08 Sales Motion
 09 M+S Alignment
 10 Return to Dashboard
@@ -90,6 +90,7 @@ Use executive, direct, directional, data-driven, practical, confident, and curio
 - All generated content comes from the Opportunity Model or approved fallback defaults.
 - The 10-section renderer view model is derived from the Opportunity Model.
 - Engagement type changes audience framing, not the model shape.
+- Commercial Activation should surface channel economics, pipeline, revenue, and ROI when the source model supports those fields.
 - Internal priorities or constraints are not stated as facts unless provided.
 
 ## Success Criteria
@@ -113,7 +114,7 @@ Commercial Strategy Page
   Execution
     05 Prospect Funnel
     06 Signal Intelligence
-    07 Campaign Activation
+    07 Commercial Activation
   Measurement & System
     08 Sales Motion
     09 M+S Alignment

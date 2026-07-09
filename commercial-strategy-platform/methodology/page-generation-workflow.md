@@ -22,6 +22,8 @@ Supported engagement types:
 
 The Opportunity Model stays consistent across all three. The engagement type determines audience framing, required inputs, and deliverables. See `commercial-strategy-platform/engagement-types/README.md`.
 
+Chapter quality rule: every chapter should answer, "What would this look like if we had already built it?"
+
 ## Step 1: Capture The Opportunity Intake
 
 Save the Opportunity Intake as source material.
@@ -117,7 +119,7 @@ Produce a short discovery and research brief before drafting Commercial Intellig
 - customer journey
 - buying committee
 - demand signals
-- campaign themes
+- activation themes
 - sales motion
 - executive dashboard metrics
 - measurement plan
@@ -172,6 +174,7 @@ gainbridge
 ```
 
 For website and proposal-style outputs, the renderer should fit the canonical Commercial Strategy navigation. Do not add new stages unless a future implementation explicitly supports them.
+Preserve the three rail headers exactly, keep content concise, and avoid empty placeholder cards or fixed counts that create blank layout slots.
 
 Canonical sequence:
 
@@ -185,7 +188,7 @@ FOUNDATION
 EXECUTION
 05. Prospect Funnel
 06. Signal Intelligence
-07. Campaign Activation
+07. Commercial Activation
 
 MEASUREMENT & SYSTEM
 08. Sales Motion

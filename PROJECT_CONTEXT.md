@@ -78,6 +78,8 @@ The platform supports exactly three engagement types:
 
 The Opportunity Model stays consistent across engagement types. The engagement type determines audience framing, required inputs, and deliverables.
 
+Chapter quality rule: every chapter should answer, "What would this look like if we had already built it?"
+
 Example deliverables include:
 
 - VP Marketing application materials
@@ -113,6 +115,8 @@ The intelligence layer is documented in `commercial-strategy-platform/commercial
 
 The generator layer is documented in `commercial-strategy-platform/generators/README.md`. Generators consume the same Opportunity Model, do not perform research, and produce specific outputs such as strategy websites, cover letters, outreach, interview preparation, proposals, statements of work, workshops, presentations, follow-up emails, and sales one-pagers.
 
+Real engagement workspaces live under `commercial-strategy-platform/engagements/{engagement-slug}/`. They should follow the local flow `Client Brief -> Commercial Discovery -> Commercial Intelligence -> Commercial Strategy Model -> Generators -> Deliverables`.
+
 ## Canonical Commercial Strategy Navigation
 
 Future generated strategy pages should use the current Commercial Strategy left-side navigation:
@@ -134,6 +138,8 @@ MEASUREMENT & SYSTEM
 09. M+S Alignment
 10. Return to Dashboard
 ```
+
+Future generated strategy pages should restore the three rail headers exactly: `FOUNDATION`, `EXECUTION`, and `MEASUREMENT & SYSTEM`.
 
 ## What Future Implementation Should Avoid
 

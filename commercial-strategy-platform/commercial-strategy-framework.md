@@ -4,6 +4,8 @@ This document defines the lightweight architecture for producing repeatable Comm
 
 The platform is content-driven. It is not a CMS, page builder, or broad React rewrite.
 
+Chapter quality rule for website-style outputs: every chapter should answer, "What would this look like if we had already built it?"
+
 ## Objective
 
 Create a repeatable system that turns an Opportunity Intake into a normalized intake object, then into discovery, Commercial Intelligence, and an Opportunity Model, then uses generators to produce deliverables.
@@ -45,8 +47,14 @@ Common deliverables include:
 - Preserve the existing Commercial Strategy page almost exactly.
 - Keep the current visual design and interactions.
 - Use the canonical Commercial Strategy navigation for website and proposal-style outputs.
+- Preserve the three rail headers exactly: `FOUNDATION`, `EXECUTION`, and `MEASUREMENT & SYSTEM`.
+- Keep content rhythm concise and template-like.
+- Size grids to actual content rather than forcing empty placeholder cards.
 - Reuse existing components and CSS classes where practical.
 - Make the Opportunity Model the repeatable part of the system.
+- Frame each chapter as an executive decision: where to invest, which segments to prioritize, which channels deserve budget, which accounts can grow, where pipeline is slowing, and what to stop doing.
+- Use financial operating model language where it fits: CAC, LTV, gross margin, EBITDA contribution, payback period, pipeline coverage, revenue mix, market share, and expansion revenue.
+- Treat the commercial operating system as: Market → Signals → Commercial Intelligence → Marketing → Sales → Customer Success → Revenue → Executive Dashboard.
 - Avoid broad React refactors until repeated content generation proves a real need.
 - Keep the system compatible with GitHub Pages static publishing.
 
@@ -91,7 +99,7 @@ Future website and proposal-style outputs should inherit its:
 - staged narrative interaction model
 - card and grid styling
 - TAM/map visual language
-- persona, market, signal, campaign, sales, dashboard, measurement, and roadmap visual patterns
+- persona, market, signal, commercial activation, sales, dashboard, measurement, and roadmap visual patterns
 
 Changes should be driven by structured content unless a later implementation task explicitly approves a design change.
 
@@ -104,6 +112,7 @@ The complete placeholder template lives at `commercial-strategy-platform/opportu
 `commercial-strategy-platform/content-schema.md` is renderer-facing documentation for mapping the Opportunity Model into the existing Commercial Strategy website structure.
 
 Section intent, required components, customizable content, and never-change elements are defined in `commercial-strategy-platform/methodology/page-sections.md`.
+That file is the canonical contract for future page generation.
 
 The schema should follow the current Commercial Strategy navigation:
 
@@ -117,7 +126,7 @@ FOUNDATION
 EXECUTION
 05. Prospect Funnel
 06. Signal Intelligence
-07. Campaign Activation
+07. Commercial Activation
 
 MEASUREMENT & SYSTEM
 08. Sales Motion
@@ -158,7 +167,7 @@ The research phase should produce enough context to support the selected output:
 - revenue intelligence
 - customer journey
 - demand signals
-- campaign ideas
+- commercial activation scenarios
 - sales plays
 - executive dashboard metrics
 - measurement cadence
@@ -205,6 +214,23 @@ The preferred future model is:
 8. Validate the model.
 9. Send it through the appropriate Output Generator or Renderer.
 10. Publish, export, or use the output.
+
+## Engagement Workspaces
+
+Real client or prospect engagements should live under `commercial-strategy-platform/engagements/{engagement-slug}/`.
+
+Each workspace should use this local flow:
+
+```text
+Client Brief
+Commercial Discovery
+Commercial Intelligence
+Commercial Strategy Model
+Generators
+Deliverables
+```
+
+The workspace should keep the source posting, discovery notes, strategy model, generator plan, and deliverable definitions together so future output generation stays fast and traceable.
 
 ## Future Implementation Boundary
 

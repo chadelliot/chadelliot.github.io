@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0.0",
+  "engagementId": "syneos-market-research",
+  "client": {
+    "name": "Syneos Health",
+    "website": "https://www.syneoshealth.com",
+    "industry": "Biopharmaceutical solutions"
+  },
+  "engagement": {
+    "primaryType": "Consulting Engagement",
+    "secondaryTypes": ["Agency Engagement"],
+    "workingTitle": "Market Research & Analytics commercial strategy engagement",
+    "sourceRole": "Director/Senior Director, Market Research & Analytics - Part-Time Contractor",
+    "sourceUrl": "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor",
+    "sourceUse": "Use the posting as source material to infer the commercial business problem, not as a candidate application brief."
+  },
+  "commercialHypothesis": {
+    "problemStatement": "Syneos Health likely needs a more scalable, insight-driven market research and analytics operating model to support pharmaceutical and biotech client strategy, customer intelligence, segmentation, performance measurement, and commercial decision-making.",
+    "whyNow": [
+      "The role asks for integration of qualitative, quantitative, secondary, syndicated, and advanced analytics inputs.",
+      "The role requires executive-ready insights, KPI dashboards, and stakeholder alignment.",
+      "Syneos publicly emphasizes AI-driven performance and predictive commercial solutions."
+    ]
+  },
+  "desiredOutcomes": [
+    "Market research operating model",
+    "Customer intelligence framework",
+    "Pharma and biotech stakeholder segmentation",
+    "Analytics maturity assessment",
+    "Measurement framework",
+    "Executive reporting system",
+    "Commercial insights workflow",
+    "Voice of customer program",
+    "Competitive intelligence process",
+    "90-day discovery plan",
+    "12-month analytics roadmap"
+  ],
+  "coreWorkstreams": [
+    "Commercial discovery",
+    "Customer intelligence",
+    "Market research operating model design",
+    "Analytics and KPI architecture",
+    "Executive reporting",
+    "Strategy and operating cadence"
+  ],
+  "successCriteria": [
+    "Stakeholders can see the commercial problem clearly.",
+    "The operating model is specific enough to execute.",
+    "The measurement framework is practical for executive use.",
+    "The roadmap separates immediate discovery from 12-month maturity work."
+  ],
+  "assumptions": [
+    "The role posting is a proxy for a broader commercial need, not just a staffing gap.",
+    "Syneos is likely looking for repeatable insight generation across multiple client contexts.",
+    "The underlying problem is more about scaling decision quality than producing more isolated research."
+  ],
+  "openQuestions": [
+    "Which internal stakeholders own the insight operating model today?",
+    "How are research, analytics, and executive reporting currently organized?",
+    "Which client segments most need this capability first?"
+  ],
+  "sourceLinks": [
+    {
+      "label": "Syneos Health job posting",
+      "url": "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor",
+      "type": "job posting"
+    },
+    {
+      "label": "Syneos Health homepage",
+      "url": "https://www.syneoshealth.com",
+      "type": "company website"
+    }
+  ]
+}

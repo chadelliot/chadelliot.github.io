@@ -4,6 +4,8 @@ Generators turn a validated Opportunity Model into a specific output.
 
 Research happens once upstream. Generators do not perform research. They consume the same Opportunity Model, apply engagement-type framing, and produce the requested deliverable.
 
+Chapter quality rule for website-style generators: every chapter should answer, "What would this look like if we had already built it?"
+
 ## Core Rule
 
 Every generator consumes the same Opportunity Model.
@@ -22,6 +24,7 @@ The engagement type does not change:
 - the canonical Commercial Strategy section contract
 - the distinction between sourced facts, directional hypotheses, and recommendations
 - the requirement to acknowledge internal constraints
+- the requirement to keep content concise, specific, and free of empty placeholder sections
 
 ## Supported Engagement Types
 
@@ -89,6 +92,7 @@ Every generator must verify:
 - no research is performed inside the generator
 - unsupported internal claims are not introduced
 - output copy follows `commercial-strategy-platform/methodology/writing-style.md`
+- renderer-style outputs preserve the canonical rail headers and do not force blank cards or fixed counts
 
 ## Related Docs
 

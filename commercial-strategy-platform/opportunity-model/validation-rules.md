@@ -262,7 +262,7 @@ The generated website must preserve the existing 10-section structure:
 4. Audience Architecture
 5. Prospect Funnel
 6. Signal Intelligence
-7. Campaign Activation
+7. Commercial Activation
 8. Sales Motion
 9. M+S Alignment
 10. Return to Dashboard

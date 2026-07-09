@@ -53,6 +53,8 @@ The platform supports exactly three engagement types:
 
 The Opportunity Model stays consistent across engagement types. The engagement type determines audience framing, required inputs, and deliverables.
 
+Chapter quality rule: every chapter should answer, "What would this look like if we had already built it?"
+
 Example deliverables include:
 
 - VP Marketing application materials
@@ -86,6 +88,8 @@ MEASUREMENT & SYSTEM
 10. Return to Dashboard
 ```
 
+Future strategy pages should also restore the three rail headers exactly: `FOUNDATION`, `EXECUTION`, and `MEASUREMENT & SYSTEM`.
+
 ## Documentation Map
 
 - `PROJECT_CONTEXT.md` explains the current repository architecture and implementation direction.
@@ -104,6 +108,7 @@ MEASUREMENT & SYSTEM
 - `commercial-strategy-platform/methodology/page-generation-workflow.md` defines the repeatable publishing process.
 - `commercial-strategy-platform/engagement-types/README.md` defines the only supported engagement types.
 - `commercial-strategy-platform/generators/README.md` defines the Output Generator layer.
+- `commercial-strategy-platform/engagements/{engagement-slug}/` contains real engagement workspaces that should follow `Client Brief -> Commercial Discovery -> Commercial Intelligence -> Commercial Strategy Model -> Generators -> Deliverables`.
 
 ## Development Notes
 
