@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aboutchad.github.io/schemas/discovery-output.schema.json",
+  "title": "Discovery Output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "discoveryId",
+    "intakeId",
+    "generatedAt",
+    "status",
+    "engagementType",
+    "company",
+    "researchPlan",
+    "findings",
+    "sourceLinks",
+    "confidenceSummary"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "discoveryId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intakeId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["draft", "reviewed", "complete"]
+    },
+    "engagementType": {
+      "type": "string",
+      "enum": ["Executive Hire", "Consulting Engagement", "Agency Engagement"]
+    },
+    "company": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "website": {
+          "type": "string",
+          "format": "uri"
+        },
+        "industry": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        }
+      }
+    },
+    "researchPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["externalResearchNeeded", "internalResearchNeeded", "openQuestions"],
+      "properties": {
+        "externalResearchNeeded": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "internalResearchNeeded": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "openQuestions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "priorityAreas": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "companyOverview",
+        "productsServices",
+        "industry",
+        "competitors",
+        "customers",
+        "businessModel",
+        "revenueModel",
+        "hiringContext",
+        "marketingMaturity",
+        "technologySignals",
+        "growthSignals",
+        "risks"
+      ],
+      "properties": {
+        "companyOverview": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "productsServices": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "industry": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "competitors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "customers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "businessModel": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "revenueModel": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "hiringContext": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "marketingMaturity": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "technologySignals": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "growthSignals": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        },
+        "risks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/finding" }
+        }
+      }
+    },
+    "sourceLinks": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/sourceLink" }
+    },
+    "confidenceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overallLevel", "overallScore", "lowConfidenceAreas"],
+      "properties": {
+        "overallLevel": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "overallScore": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "lowConfidenceAreas": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "findingId",
+        "statement",
+        "findingType",
+        "confidenceLevel",
+        "confidenceScore",
+        "evidence",
+        "sourceLinks"
+      ],
+      "properties": {
+        "findingId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1
+        },
+        "findingType": {
+          "type": "string",
+          "enum": ["fact", "inference", "assumption", "recommendation"]
+        },
+        "confidenceLevel": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "confidenceScore": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sourceLinks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sourceLink" }
+        },
+        "notes": {
+          "type": "string"
+        },
+        "followUpQuestions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "usedBy": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["Commercial Intelligence", "Opportunity Model"]
+          }
+        }
+      }
+    },
+    "sourceLink": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "label"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

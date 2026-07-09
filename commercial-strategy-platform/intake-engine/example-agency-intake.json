@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "intakeId": "revhub-growth-agency",
+  "status": "ready-for-discovery",
+  "engagementType": "agency-engagement",
+  "company": {
+    "name": "RevHub Growth",
+    "website": "https://example.com"
+  },
+  "source": {
+    "jobDescriptionUrl": "https://example.com/briefs/agency-engagement",
+    "jobDescriptionText": "RevHub Growth needs an agency engagement to sharpen positioning, identify account opportunities, and define a sales-to-marketing motion.",
+    "notes": [
+      "The intake suggests account-based work and leadership reporting.",
+      "The brief appears to be performance-oriented."
+    ]
+  },
+  "recruiterInformation": {
+    "name": "Avery Chen",
+    "title": "Agency contact",
+    "email": "avery@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/avery-chen"
+  },
+  "hiringManager": {
+    "name": "Sam Patel",
+    "title": "Revenue leader",
+    "email": "sam@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/sam-patel"
+  },
+  "normalized": {
+    "roleTitle": "Agency Engagement",
+    "primaryAudience": "Client marketing and revenue leadership",
+    "decisionToSupport": "Whether the client should advance the agency engagement.",
+    "requestedOutputs": [
+      "strategy-website",
+      "proposal",
+      "statement-of-work",
+      "presentation",
+      "sales-one-pager",
+      "follow-up-email"
+    ],
+    "sourceSummary": "Agency intake focused on positioning, account opportunities, and measurable commercial motion.",
+    "missingInformation": [
+      {
+        "field": "existing channel mix",
+        "reason": "Not stated in the intake.",
+        "impact": "medium",
+        "question": "Which channels are currently in play?"
+      }
+    ],
+    "followUpQuestions": [
+      "What revenue outcome is the agency engagement expected to support?",
+      "Which segments or accounts are highest priority?"
+    ],
+    "confidence": "medium"
+  },
+  "routing": {
+    "nextEngine": "discovery",
+    "handoffStatus": "ready"
+  }
+}

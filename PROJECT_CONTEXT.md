@@ -4,7 +4,7 @@
 
 This repository powers the AboutChad GitHub Pages site. It combines a Vite/React application with static HTML work samples and assets served directly from `public/` and `assets/`.
 
-The site includes personal positioning pages, company-specific proposal pages, and interactive commercial strategy work samples.
+The site includes personal positioning pages, proposal pages, interactive commercial strategy work samples, and assets that can support broader commercial strategy outputs.
 
 ## Current Architecture
 
@@ -51,21 +51,45 @@ The Commercial Strategy experience currently has:
 - custom CSS and SVG-heavy visuals
 - current interactions that should be maintained
 
-The short-term strategy is not to redesign this page. It should become the canonical template for future personalized Executive Strategy pages.
+The short-term strategy is not to redesign this page. It should become the canonical template for future website-style Commercial Strategy Platform outputs.
 
 ## Approved Direction
 
-The project direction is to create a lightweight Executive Strategy publishing system:
+The project direction is to create a lightweight Commercial Strategy Platform:
 
 ```text
-Job Description
-Research
-Company JSON
-Existing Components Render
-Publish
+Opportunity Intake
+Intake Engine
+Discovery Engine
+Commercial Intelligence
+Opportunity Model
+Engagement Type
+Generators
+Deliverables
 ```
 
-This should prioritize speed of page creation over maximum abstraction.
+This should prioritize speed of output creation over maximum abstraction.
+
+The platform supports exactly three engagement types:
+
+1. Executive Hire
+2. Consulting Engagement
+3. Agency Engagement
+
+The Opportunity Model stays consistent across engagement types. The engagement type determines audience framing, required inputs, and deliverables.
+
+Chapter quality rule: every chapter should answer, "What would this look like if we had already built it?"
+
+Example deliverables include:
+
+- VP Marketing application materials
+- RevHub agency work
+- Audaption consulting work
+- proposals
+- executive dashboards
+- interview preparation
+- cover letters
+- LinkedIn/recruiter outreach
 
 ## Architecture Principle
 
@@ -74,10 +98,24 @@ Standardize the content first. Do not over-standardize the application.
 The right near-term architecture is:
 
 - one familiar visual strategy template
-- one content schema that mirrors the template
-- many company-specific JSON files
-- one renderer that maps JSON into the existing design
+- one Intake Engine layer
+- one Discovery Engine layer
+- one Commercial Intelligence layer
+- one canonical Opportunity Model
+- one renderer schema that maps the model into the existing Commercial Strategy template
+- many opportunity-specific Opportunity Models
+- one or more Output Generators or Renderers that map the model into the existing design or other output formats
 - lightweight validation before publishing
+
+The intake layer is documented in `commercial-strategy-platform/intake-engine/README.md`. It normalizes raw opportunity inputs before discovery begins.
+
+The discovery layer is documented in `commercial-strategy-platform/discovery-engine/README.md`. It identifies what must be researched and what evidence will support Commercial Intelligence.
+
+The intelligence layer is documented in `commercial-strategy-platform/commercial-intelligence/README.md`. It interprets discovery output and supporting evidence before the model is written.
+
+The generator layer is documented in `commercial-strategy-platform/generators/README.md`. Generators consume the same Opportunity Model, do not perform research, and produce specific outputs such as strategy websites, cover letters, outreach, interview preparation, proposals, statements of work, workshops, presentations, follow-up emails, and sales one-pagers.
+
+Real engagement workspaces live under `commercial-strategy-platform/engagements/{engagement-slug}/`. They should follow the local flow `Client Brief -> Commercial Discovery -> Commercial Intelligence -> Commercial Strategy Model -> Generators -> Deliverables`.
 
 ## Canonical Commercial Strategy Navigation
 
@@ -101,6 +139,8 @@ MEASUREMENT & SYSTEM
 10. Return to Dashboard
 ```
 
+Future generated strategy pages should restore the three rail headers exactly: `FOUNDATION`, `EXECUTION`, and `MEASUREMENT & SYSTEM`.
+
 ## What Future Implementation Should Avoid
 
 Avoid:
@@ -121,7 +161,7 @@ Future implementation should:
 
 - preserve existing public URLs
 - support browser refreshes on deep links
-- keep generated company content static and cacheable
+- keep generated strategy outputs static and cacheable where they are published to the site
 - avoid server-only assumptions
 - ensure any custom domain file is included in the deployed artifact if required
 
@@ -131,10 +171,10 @@ A later implementation may add files similar to:
 
 ```text
 src/pages/ExecutiveStrategyPage.tsx
-src/data/executive-strategies/schema.ts
-src/data/executive-strategies/default-commercial.ts
-src/data/executive-strategies/registry.ts
-public/executive-strategies/example-company.json
+src/data/commercial-strategy-platform/schema.ts
+src/data/commercial-strategy-platform/default-commercial.ts
+src/data/commercial-strategy-platform/registry.ts
+public/opportunity-models/example-opportunity.json
 scripts/validate-strategies.mjs
 ```
 

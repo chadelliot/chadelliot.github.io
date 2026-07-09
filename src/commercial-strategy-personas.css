@@ -286,3 +286,56 @@
 .commercial-page .cs-stage:has(.audience-step) .pc-row:nth-of-type(n+4) {
   display: none !important;
 }
+
+@media (max-width: 767px) {
+  .commercial-page .persona-primary {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  .commercial-page .persona-primary .persona-card .pc-photo {
+    height: auto !important;
+    min-width: 0 !important;
+    padding: 14px !important;
+    grid-template-columns: 58px minmax(0, 1fr) !important;
+    column-gap: 12px !important;
+    row-gap: 0 !important;
+  }
+
+  .commercial-page .persona-primary .pc-head {
+    width: 58px !important;
+    height: 58px !important;
+  }
+
+  .commercial-page .persona-primary .pc-lines {
+    min-height: 0 !important;
+    margin-left: 0 !important;
+    width: auto !important;
+  }
+
+  .commercial-page .persona-primary .pc-lines::before {
+    font-size: 14px !important;
+    line-height: 1.2 !important;
+    white-space: normal !important;
+  }
+
+  .commercial-page .persona-primary .pc-lines::after {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .commercial-page .persona-primary .pc-photo::after {
+    display: none !important;
+  }
+
+  .commercial-page .tam-shell {
+    overflow: hidden !important;
+  }
+
+  .commercial-page .map-dot:hover,
+  .commercial-page .map-dot:hover::before,
+  .commercial-page .map-dot:hover::after {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+}

@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aboutchad.github.io/commercial-strategy-platform/intake-engine/company-intake-schema.json",
+  "title": "Commercial Strategy Intake Engine Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "intakeId",
+    "status",
+    "engagementType",
+    "company",
+    "source",
+    "normalized",
+    "routing"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "intakeId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "raw",
+        "needs-review",
+        "ready-for-discovery"
+      ]
+    },
+    "engagementType": {
+      "type": "string",
+      "enum": [
+        "executive-hire",
+        "consulting-engagement",
+        "agency-engagement"
+      ]
+    },
+    "company": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "website": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "jobDescriptionUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "jobDescriptionText": {
+          "type": "string",
+          "minLength": 1
+        },
+        "notes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "jobDescriptionUrl"
+          ]
+        },
+        {
+          "required": [
+            "jobDescriptionText"
+          ]
+        },
+        {
+          "required": [
+            "notes"
+          ]
+        }
+      ]
+    },
+    "recruiterInformation": {
+      "$ref": "#/$defs/contact"
+    },
+    "hiringManager": {
+      "$ref": "#/$defs/contact"
+    },
+    "normalized": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceSummary",
+        "primaryAudience",
+        "requestedOutputs",
+        "missingInformation",
+        "followUpQuestions",
+        "confidence"
+      ],
+      "properties": {
+        "roleTitle": {
+          "type": "string"
+        },
+        "primaryAudience": {
+          "type": "string"
+        },
+        "decisionToSupport": {
+          "type": "string"
+        },
+        "requestedOutputs": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": [
+              "strategy-website",
+              "cover-letter",
+              "linkedin-outreach",
+              "resume-alignment",
+              "interview-preparation",
+              "executive-summary",
+              "proposal",
+              "statement-of-work",
+              "discovery-workshop",
+              "presentation",
+              "follow-up-email",
+              "sales-one-pager"
+            ]
+          }
+        },
+        "sourceSummary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "missingInformation": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/missingInformation"
+          },
+          "default": []
+        },
+        "followUpQuestions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "default": []
+        },
+        "confidence": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nextEngine",
+        "handoffStatus"
+      ],
+      "properties": {
+        "nextEngine": {
+          "type": "string",
+          "const": "discovery"
+        },
+        "handoffStatus": {
+          "type": "string",
+          "enum": [
+            "ready",
+            "needs-review"
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "contact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "linkedinUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "missingInformation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "reason",
+        "impact",
+        "question"
+      ],
+      "properties": {
+        "field": {
+          "type": "string"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "impact": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high"
+          ]
+        },
+        "question": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

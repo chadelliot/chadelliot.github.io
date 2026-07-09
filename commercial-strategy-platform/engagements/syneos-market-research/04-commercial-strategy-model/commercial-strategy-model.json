@@ -1,0 +1,156 @@
+{
+  "schemaVersion": "1.0.0",
+  "engagementId": "syneos-market-research",
+  "client": {
+    "name": "Syneos Health",
+    "website": "https://www.syneoshealth.com"
+  },
+  "engagementType": [
+    "Consulting Engagement",
+    "Agency Engagement"
+  ],
+  "strategyModel": {
+    "commercialThesis": "Syneos needs a scalable market research and analytics operating model that turns fragmented evidence into executive-ready commercial decisions.",
+    "businessProblem": "The current insight workflow likely needs tighter integration, clearer KPI ownership, and a more repeatable customer intelligence system.",
+    "objectives": [
+      "Improve market research operating discipline",
+      "Create a reusable customer intelligence framework",
+      "Increase analytics maturity and reporting clarity",
+      "Support executive decision-making with a stronger measurement layer",
+      "Institutionalize voice of customer and competitive intelligence"
+    ],
+    "audienceArchitecture": {
+      "primaryStakeholders": [
+        "Commercial leadership",
+        "Market access leadership",
+        "Analytics leadership",
+        "Executive sponsors"
+      ],
+      "secondaryStakeholders": [
+        "Research teams",
+        "Program managers",
+        "Vendor partners",
+        "Client-facing strategy teams"
+      ]
+    },
+    "marketResearchOperatingModel": {
+      "currentStateHypothesis": "Research inputs are valuable but may be distributed across methods, teams, and reporting habits.",
+      "targetState": "A repeatable workflow that frames the question, selects the method, synthesizes evidence, and routes decisions to leadership.",
+      "capabilities": [
+        "Research prioritization",
+        "Evidence synthesis",
+        "Method selection",
+        "Insight governance",
+        "Executive communication"
+      ]
+    },
+    "customerIntelligenceFramework": {
+      "segments": [
+        "HCP",
+        "Patient",
+        "Payer",
+        "Commercial client stakeholders"
+      ],
+      "questions": [
+        "What does each stakeholder need to decide?",
+        "What evidence changes the decision?",
+        "What segment needs the fastest support?"
+      ]
+    },
+    "analyticsMaturity": {
+      "level": "moderate-to-advanced",
+      "gaps": [
+        "Potentially inconsistent KPI definitions",
+        "Potentially fragmented reporting cadence",
+        "Potentially low reuse of research outputs"
+      ]
+    },
+    "measurementFramework": {
+      "northStar": "Executive decision support quality",
+      "leadingIndicators": [
+        "Insight turnaround time",
+        "Dashboard adoption",
+        "Research reuse rate",
+        "VOC coverage"
+      ],
+      "laggingIndicators": [
+        "Commercial decision confidence",
+        "Stakeholder satisfaction",
+        "Client response quality"
+      ],
+      "cadence": [
+        "Weekly operating review",
+        "Monthly executive readout",
+        "Quarterly roadmap review"
+      ]
+    },
+    "voiceOfCustomer": {
+      "channels": [
+        "HCP",
+        "Patient",
+        "Payer"
+      ],
+      "useCases": [
+        "Segmentation",
+        "Messaging",
+        "Commercial planning",
+        "Market access support"
+      ]
+    },
+    "competitiveIntelligence": {
+      "purpose": "Track market movement, client objections, and competitor positioning as reusable decision inputs.",
+      "signals": [
+        "Category shifts",
+        "Competitive claims",
+        "Client objections",
+        "Segment pressure"
+      ]
+    },
+    "executiveReporting": {
+      "outputs": [
+        "Executive dashboard",
+        "Monthly performance narrative",
+        "Decision memo",
+        "Priority insight log"
+      ]
+    },
+    "risks": [
+      "Fragmented insight workflow",
+      "Unclear KPI ownership",
+      "Slow translation from evidence to action",
+      "Overreliance on individual contributors"
+    ],
+    "assumptions": [
+      "The role posting is a proxy for a broader commercial operating model issue.",
+      "Leadership wants faster and clearer decision support.",
+      "A shared insight system will improve both speed and consistency."
+    ],
+    "openQuestions": [
+      "What is the current decision cadence?",
+      "Which segments matter most first?",
+      "What reporting is trusted today?"
+    ],
+    "ninetyDayPlan": [
+      "Map the current workflow",
+      "Audit the KPI set",
+      "Review VOC and competitive intelligence assets",
+      "Identify priority stakeholders and segments",
+      "Define the first operating model upgrade"
+    ],
+    "twelveMonthRoadmap": [
+      "Standardize intake and synthesis",
+      "Build a reusable customer intelligence framework",
+      "Formalize executive reporting",
+      "Create a consistent VOC and competitive intelligence process",
+      "Scale the model across priority contexts"
+    ]
+  },
+  "generatorTargets": [
+    "executive-summary",
+    "commercial-strategy",
+    "market-research-operating-model",
+    "analytics-roadmap",
+    "executive-dashboard",
+    "statement-of-work"
+  ]
+}

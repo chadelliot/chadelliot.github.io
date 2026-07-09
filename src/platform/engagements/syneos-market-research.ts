@@ -1,0 +1,837 @@
+import { commercialStrategyGenerator } from "@/platform/generators";
+import {
+  BusinessLogic,
+  CommercialBlueprint,
+  CommercialIntelligence,
+  CommercialStrategy,
+  OpportunityModel,
+} from "@/platform/models";
+
+const sourceUrl =
+  "https://jp.syneoshealth.com/careers/jobs/17892708-director-slash-senior-director-market-research-and-analytics-part-time-contractor";
+
+const company = {
+  name: "Syneos Health",
+  website: "https://www.syneoshealth.com",
+};
+
+const commercialIntelligence: CommercialIntelligence = {
+  schemaVersion: "1.0.0",
+  intelligenceId: "intelligence-syneos-market-research",
+  discoveryId: "discovery-syneos-market-research",
+  intakeId: "intake-syneos-market-research",
+  generatedAt: "2026-07-05T00:00:00Z",
+  status: "complete",
+  engagementType: "Consulting Engagement",
+  company,
+  sourceLinks: [
+    { label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" },
+    { label: "Syneos Health job posting", url: sourceUrl, type: "job posting" },
+  ],
+  commercialPriorities: [
+    {
+      label: "Commercialization intelligence operating model",
+      statement:
+        "Create a repeatable market research and analytics workflow that Syneos can reuse across pharma and biotech client contexts.",
+      confidenceLevel: "high",
+      confidenceScore: 86,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+      notes: "The scope implies a reusable commercial intelligence system, not a one-off research role.",
+    },
+    {
+      label: "Executive reporting layer",
+      statement:
+        "Translate research into concise executive recommendations, KPI visibility, and account-level growth signals.",
+      confidenceLevel: "high",
+      confidenceScore: 84,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Commercial expansion influence",
+      statement:
+        "Use market research, customer intelligence, and analytics to influence client retention, upsell, and expansion motions.",
+      confidenceLevel: "medium",
+      confidenceScore: 76,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+  ],
+  executiveKpis: [
+    {
+      label: "Study-to-insight cycle time",
+      statement: "Reduce the average cycle time to 12 business days, with urgent launch work completed in 5-7 business days.",
+      confidenceLevel: "high",
+      confidenceScore: 85,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Client decision adoption rate",
+      statement: "Target 68% of recommendations being accepted or actioned in the first leadership review.",
+      confidenceLevel: "high",
+      confidenceScore: 82,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Insight reuse across teams",
+      statement: "Drive 42% of analyses to be reused by commercial, market access, or medical affairs teams.",
+      confidenceLevel: "high",
+      confidenceScore: 80,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+    {
+      label: "Executive dashboard adoption",
+      statement: "Reach 74% weekly dashboard usage among account and strategy leads.",
+      confidenceLevel: "high",
+      confidenceScore: 81,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+  ],
+  customerSegments: [
+    {
+      label: "Emerging biotech",
+      statement: "Emerging biotech clients need launch-ready segmentation, access evidence, and first-brand planning support.",
+      confidenceLevel: "high",
+      confidenceScore: 82,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Mid-market pharma",
+      statement: "Mid-market pharma teams need indication expansion, portfolio optimization, and growth planning support.",
+      confidenceLevel: "high",
+      confidenceScore: 81,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Enterprise pharma",
+      statement: "Enterprise pharma teams need mature portfolio prioritization, market access intelligence, and executive reporting.",
+      confidenceLevel: "high",
+      confidenceScore: 81,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+    {
+      label: "Market access / HEOR",
+      statement: "Market access and HEOR teams need payer evidence, access barriers, and value narrative clarity.",
+      confidenceLevel: "high",
+      confidenceScore: 79,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Medical affairs",
+      statement: "Medical affairs teams need evidence readiness, publication planning, and stakeholder-specific storylines.",
+      confidenceLevel: "high",
+      confidenceScore: 79,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+    {
+      label: "Commercial launch / omnichannel",
+      statement: "Launch and field teams need faster insight activation, targeting guidance, and channel measurement.",
+      confidenceLevel: "high",
+      confidenceScore: 80,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+  ],
+  marketOpportunities: [
+    {
+      label: "Enterprise pharma accounts",
+      statement: "Estimated 20-25 enterprise pharma accounts can support high-value, multi-workstream engagements.",
+      confidenceLevel: "high",
+      confidenceScore: 77,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Mid-market pharma accounts",
+      statement: "Estimated 40-60 mid-market pharma accounts can support repeatable growth and expansion work.",
+      confidenceLevel: "high",
+      confidenceScore: 76,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Emerging biotech / launch-stage accounts",
+      statement: "Estimated 50-70 launch-stage biotech accounts can support launch readiness and first-brand planning.",
+      confidenceLevel: "high",
+      confidenceScore: 75,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+    {
+      label: "Market access / HEOR opportunities",
+      statement: "Estimated 25-35 annual opportunities exist for access evidence, payer intelligence, and HEOR support.",
+      confidenceLevel: "medium",
+      confidenceScore: 71,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+    {
+      label: "Medical affairs opportunities",
+      statement: "Estimated 30-45 annual opportunities exist for medical affairs analytics and evidence planning.",
+      confidenceLevel: "medium",
+      confidenceScore: 70,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+    {
+      label: "Commercial launch analytics opportunities",
+      statement: "Estimated 35-50 annual opportunities exist for launch analytics, field readiness, and dashboarding.",
+      confidenceLevel: "medium",
+      confidenceScore: 72,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+  ],
+  revenueBottlenecks: [
+    {
+      label: "Fragmented insight production",
+      statement: "Custom research requests can slow decision-making if they are not standardized into a reusable workflow.",
+      confidenceLevel: "medium",
+      confidenceScore: 75,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Weak activation",
+      statement: "Insights that do not reach marketing, field, or market access teams will underperform as commercial assets.",
+      confidenceLevel: "medium",
+      confidenceScore: 73,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+  ],
+  competitivePressures: [
+    {
+      label: "Proof-driven competition",
+      statement: "Biopharma commercialization support is crowded, so Syneos needs visible evidence, speed, and executive confidence.",
+      confidenceLevel: "medium",
+      confidenceScore: 72,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+  ],
+  technologyGaps: [
+    {
+      label: "Workflow standardization",
+      statement: "The opportunity is less about new tooling and more about standardizing how insights move from question to action.",
+      confidenceLevel: "medium",
+      confidenceScore: 71,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+    {
+      label: "Dashboard consistency",
+      statement: "Executive dashboards likely need a tighter metric definition layer before they can be broadly adopted.",
+      confidenceLevel: "medium",
+      confidenceScore: 70,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+  ],
+  salesMarketingAlignmentNeeds: [
+    {
+      label: "Shared account prioritization",
+      statement: "Commercial, marketing, and market access teams need one recurring account and signal view.",
+      confidenceLevel: "high",
+      confidenceScore: 83,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Shared executive reporting",
+      statement: "Both swimlanes should use the same KPI definitions, dashboard cadence, and expansion language.",
+      confidenceLevel: "high",
+      confidenceScore: 82,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+  ],
+  risks: [
+    {
+      label: "Workflow fragmentation",
+      statement: "Multiple research methods without a shared operating model can dilute decision quality and slow activation.",
+      confidenceLevel: "high",
+      confidenceScore: 85,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Ambiguous ownership",
+      statement: "Without clear metric ownership, dashboard trust and executive follow-through can weaken.",
+      confidenceLevel: "medium",
+      confidenceScore: 78,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+  ],
+  assumptions: [
+    {
+      label: "Proxy problem",
+      statement: "The role posting likely reflects a broader operating model need, not just a staffing gap.",
+      confidenceLevel: "medium",
+      confidenceScore: 74,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Directional ranges",
+      statement: "Opportunity counts and value ranges are directional estimates based on public positioning, not internal Syneos facts.",
+      confidenceLevel: "high",
+      confidenceScore: 90,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+  ],
+  recommendations: [
+    {
+      label: "Build the operating model",
+      statement: "Define a repeatable market research and analytics workflow with governance, cadence, and reusable outputs.",
+      confidenceLevel: "high",
+      confidenceScore: 87,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Standardize reporting",
+      statement: "Create executive-ready KPIs and dashboards that leadership can inspect consistently across client teams.",
+      confidenceLevel: "high",
+      confidenceScore: 85,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Institutionalize VOC",
+      statement: "Turn voice of customer, market access, and competitive intelligence into standing inputs.",
+      confidenceLevel: "high",
+      confidenceScore: 84,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+    {
+      label: "Scale account expansion",
+      statement: "Use the insight system to identify follow-on scopes, workshop opportunities, and expansion motions.",
+      confidenceLevel: "medium",
+      confidenceScore: 77,
+      sourceLinks: [{ label: "Syneos Health homepage", url: "https://www.syneoshealth.com", type: "company website" }],
+    },
+    {
+      label: "Tighten executive visibility",
+      statement: "Anchor the operating rhythm to a dashboard and monthly review that shows client growth, adoption, and velocity.",
+      confidenceLevel: "medium",
+      confidenceScore: 79,
+      sourceLinks: [{ label: "Job posting", url: sourceUrl, type: "job posting" }],
+    },
+  ],
+  confidenceSummary: {
+    overallLevel: "high",
+    overallScore: 83,
+    lowConfidenceAreas: ["marketOpportunities", "technologyGaps"],
+  },
+};
+
+const blueprint: CommercialBlueprint = {
+  schemaVersion: "1.0.0",
+  blueprintId: "blueprint-syneos-market-research",
+  intelligenceId: commercialIntelligence.intelligenceId,
+  intakeId: commercialIntelligence.intakeId,
+  generatedAt: "2026-07-05T00:00:00Z",
+  status: "complete",
+  engagementType: "Consulting Engagement",
+  client: company,
+  sourceLinks: commercialIntelligence.sourceLinks,
+  summary:
+    "Syneos needs a repeatable commercialization intelligence operating model that turns market research into executive decisions.",
+  businessObjectives: [
+    "Improve the commercial research workflow across client teams",
+    "Increase decision-support quality for launch, access, and growth planning",
+    "Make KPI reporting repeatable and executive-visible",
+    "Strengthen voice-of-customer reuse across marketing, sales, and market access",
+  ],
+  audienceArchitecture: {
+    primaryStakeholders: ["Commercial leadership", "Market access leadership", "Insights leadership"],
+    secondaryStakeholders: ["Medical affairs leadership", "Launch teams", "Client-facing strategy teams"],
+    decisionQuestions: [
+      "Which client segment should receive the next investment?",
+      "What evidence changes the launch, access, or expansion decision?",
+      "Which KPI view should leadership trust every month?",
+    ],
+  },
+  marketOpportunity: [
+    "Enterprise pharma commercialization intelligence",
+    "Mid-market pharma growth and indication expansion",
+    "Emerging biotech launch readiness and market access support",
+    "Medical affairs and HEOR evidence planning",
+    "Executive reporting and dashboard design",
+  ],
+  operatingModel: {
+    currentStateHypothesis: "Research and analytics inputs are valuable but often customized per client and slower to reuse.",
+    targetState:
+      "A repeatable question-to-recommendation workflow with clear governance, reusability, and executive cadence.",
+    capabilities: [
+      "Research prioritization",
+      "Evidence synthesis",
+      "Method selection",
+      "Executive communication",
+      "Insight governance",
+      "Account segmentation",
+    ],
+    cadence: ["Weekly signal review", "Monthly executive readout", "Quarterly roadmap review"],
+  },
+  measurementFramework: {
+    northStar: "Executive decision support quality with visible account expansion impact",
+    leadingIndicators: ["Insight turnaround time", "Dashboard adoption", "VOC coverage", "Field activation rate"],
+    laggingIndicators: ["Stakeholder trust", "Commercial decision speed", "Client satisfaction"],
+    reviewCadence: ["Weekly", "Monthly", "Quarterly"],
+  },
+  roadmap: [
+    "Map the current research and analytics workflow by client segment",
+    "Audit KPI and reporting needs for launch, access, and commercial teams",
+    "Stand up a monthly executive reporting rhythm",
+    "Turn VOC and market access evidence into reusable inputs",
+    "Scale the model across priority pharma and biotech contexts",
+  ],
+  risks: [
+    "Insight fragmentation across client workstreams",
+    "Unclear KPI ownership across teams",
+    "Slow translation from evidence to action",
+  ],
+  assumptions: [
+    "The role posting signals a broader operating model issue, not just a backfill.",
+    "Leadership wants faster, cleaner decision support with better reuse.",
+  ],
+  recommendations: [
+    "Define a repeatable market research operating model",
+    "Standardize reporting and KPIs",
+    "Institutionalize VOC and competitive intelligence",
+    "Create account-specific expansion pathways",
+  ],
+  confidenceSummary: commercialIntelligence.confidenceSummary,
+};
+
+const opportunityModel: OpportunityModel = {
+  schemaVersion: "1.0.0",
+  opportunityId: "opportunity-syneos-market-research",
+  blueprintId: blueprint.blueprintId,
+  intelligenceId: commercialIntelligence.intelligenceId,
+  intakeId: commercialIntelligence.intakeId,
+  generatedAt: "2026-07-05T00:00:00Z",
+  status: "complete",
+  engagementType: "Consulting Engagement",
+  client: company,
+  sourceLinks: commercialIntelligence.sourceLinks,
+  role: {
+    title: "Director / Senior Director, Market Research & Analytics",
+    summary:
+      "A consulting and agency engagement focused on commercialization intelligence, market research, and executive decision support.",
+  },
+  objectives: blueprint.businessObjectives,
+  commercialChallenges: [
+    "Fragmented research and analytics inputs across client programs",
+    "Need for executive-ready recommendations that can be reused across teams",
+    "Need for a repeatable operating cadence tied to launch, access, and growth decisions",
+  ],
+  growthOpportunities: [
+    "Standardize market research delivery",
+    "Improve customer intelligence reuse",
+    "Build a clear executive reporting layer",
+    "Expand into market access, medical affairs, and launch analytics scopes",
+  ],
+  audience: {
+    customerSegments: [
+      "Emerging biotech preparing first launch",
+      "Mid-market pharma expanding indications",
+      "Enterprise pharma optimizing mature portfolios",
+      "Medical affairs and market access teams",
+      "Commercial launch teams",
+      "Field sales and omnichannel teams",
+    ],
+    buyingCommittee: ["Executive sponsor", "Insights leader", "Commercial leader", "Market access leader"],
+    personaNeeds: [
+      "Executive-ready insight",
+      "Clear KPIs",
+      "Fast synthesis",
+      "Cross-functional alignment",
+      "Evidence-ready access storytelling",
+      "Launch confidence",
+    ],
+  },
+  segmentation: [
+    "Emerging biotech preparing first launch",
+    "Mid-market pharma expanding indications",
+    "Enterprise pharma optimizing mature portfolios",
+    "Medical affairs and market access teams",
+    "Commercial launch teams",
+    "Field sales and omnichannel teams",
+  ],
+  tam: {
+    marketDefinition: "Directional opportunity model for pharma and biotech commercialization intelligence work",
+    addressableUnits: [
+      "Enterprise pharma accounts: 20-25 directional targets",
+      "Mid-market pharma accounts: 40-60 directional targets",
+      "Emerging biotech / launch-stage accounts: 50-70 directional targets",
+      "Market access / HEOR opportunities: 25-35 annual opportunities",
+      "Medical affairs analytics opportunities: 30-45 annual opportunities",
+      "Commercial launch analytics opportunities: 35-50 annual opportunities",
+    ],
+    assumptions: [
+      "Demand is tied to commercialization complexity and timing pressure",
+      "Decision speed matters more than large-scale custom reporting volume",
+    ],
+  },
+  personas: [
+    "Executive sponsor",
+    "Insights leader",
+    "Commercial leader",
+    "Market access leader",
+    "Medical affairs leader",
+    "Launch operations leader",
+  ],
+  journey: [
+    "Frame the business question",
+    "Choose the right research method",
+    "Synthesize evidence",
+    "Issue an executive recommendation",
+    "Activate the commercial response",
+  ],
+  signals: [
+    "Need for integrated data sources across launch, access, and commercial planning",
+    "Executive-ready recommendations required",
+    "KPI dashboards and performance trackers requested",
+    "Client teams asking for faster, reusable insight output",
+  ],
+  campaigns: [
+    "VOC synthesis program",
+    "Competitive intelligence cadence",
+    "Executive dashboard rollout",
+    "Market access evidence package",
+    "Launch readiness sprint",
+  ],
+  salesMotion: [
+    "Consultative discovery",
+    "Executive workshop",
+    "Operating model design",
+    "Proposal scoping and follow-on workplan",
+  ],
+  measurement: [
+    "Insight turnaround time",
+    "Dashboard adoption",
+    "Research reuse rate",
+    "Opportunity conversion",
+  ],
+  technology: [
+    "AI-driven commercial performance",
+    "Predictive commercial solutions",
+    "Dashboard tooling",
+    "Signal scoring and workflow automation",
+  ],
+  competitiveLandscape: [
+    "CROs",
+    "Commercial consultancies",
+    "Analytics vendors",
+    "Specialty market access advisory firms",
+  ],
+  risks: [
+    "Research fragmentation",
+    "Unclear KPI ownership",
+    "Slow decision support",
+    "Low reuse across client teams",
+  ],
+  assumptions: [
+    "The posting is a proxy for a broader operating need.",
+    "The right solution is a repeatable insight system, not just more data.",
+    "Opportunity counts are directional estimates, not internal Syneos facts.",
+  ],
+  recommendations: [
+    "Build the operating model",
+    "Standardize reporting",
+    "Institutionalize VOC",
+    "Create expansion pathways by segment",
+  ],
+  outputTargets: ["executive-summary", "commercial-strategy", "statement-of-work"],
+  blueprintSnapshot: blueprint,
+  intelligenceSnapshot: commercialIntelligence,
+  confidenceSummary: commercialIntelligence.confidenceSummary,
+};
+
+const businessLogic: BusinessLogic = {
+  opportunityScore: {
+    opportunityId: opportunityModel.opportunityId,
+    engagementType: opportunityModel.engagementType,
+    overallScore: 84,
+    dimensions: {
+      commercialFit: 88,
+      urgency: 82,
+      evidenceStrength: 83,
+      executionReadiness: 79,
+    },
+    rationale: ["Syneos shows a strong need for commercialization intelligence and executive reporting."],
+  },
+  recommendations: {
+    opportunityId: opportunityModel.opportunityId,
+    engagementType: opportunityModel.engagementType,
+    primary: [
+      "Define a repeatable commercialization intelligence operating model",
+      "Standardize executive reporting and KPI definitions",
+      "Institutionalize VOC, market access, and competitive intelligence",
+    ],
+    secondary: ["Build the first 90-day discovery plan", "Sequence the 12-month analytics roadmap"],
+    notes: ["Recommendations are directional and derived from the public role scope and company positioning."],
+  },
+  priorityAssessment: {
+    opportunityId: opportunityModel.opportunityId,
+    engagementType: opportunityModel.engagementType,
+    topPriorities: ["Speed to insight", "Executive adoption", "Account expansion"],
+    sequencing: [
+      "Validate the commercialization problem and success criteria.",
+      "Align stakeholder priorities and reporting cadence.",
+      "Sequence the highest-value insight and implementation work first.",
+    ],
+    rationale: ["Priorities are informed by the public role scope and the stated need for analytics leadership."],
+  },
+  riskAssessment: {
+    opportunityId: opportunityModel.opportunityId,
+    engagementType: opportunityModel.engagementType,
+    risks: [
+      {
+        area: "Insight workflow fragmentation",
+        severity: "high",
+        description: "Multiple research inputs can slow or blur executive decision-making.",
+        mitigation: ["Standardize intake", "Define synthesis gates", "Clarify ownership"],
+      },
+      {
+        area: "KPI ambiguity",
+        severity: "medium",
+        description: "Inconsistent definitions can weaken dashboard trust.",
+        mitigation: ["Agree on metric definitions", "Publish a reporting cadence"],
+      },
+      {
+        area: "Reuse gap",
+        severity: "medium",
+        description: "If outputs stay custom, they will not compound across client teams.",
+        mitigation: ["Build reusable templates", "Codify segment playbooks"],
+      },
+    ],
+    summary: "The primary risk is a fragmented workflow that is too slow to support leadership decisions.",
+  },
+  implementationRoadmap: {
+    opportunityId: opportunityModel.opportunityId,
+    engagementType: opportunityModel.engagementType,
+    summary: "A phased roadmap for clarifying the problem, proving the model, and scaling the operating system.",
+    phases: [
+      {
+        name: "30 days",
+        duration: "0-30",
+        goals: ["Map the current workflow", "Audit KPI definitions", "Confirm stakeholder priorities"],
+        dependencies: ["Discovery completion"],
+      },
+      {
+        name: "60 days",
+        duration: "31-60",
+        goals: ["Launch the first executive reporting rhythm", "Stand up the signal view"],
+        dependencies: ["Agreement on KPI definitions"],
+      },
+      {
+        name: "90 days",
+        duration: "61-90",
+        goals: ["Roll out VOC reuse", "Define the next-phase roadmap"],
+        dependencies: ["Adoption of the reporting layer"],
+      },
+      {
+        name: "12 months",
+        duration: "3-12 months",
+        goals: ["Scale across priority client segments", "Institutionalize the operating model"],
+        dependencies: ["Leadership sponsorship", "Operating cadence"],
+      },
+    ],
+  },
+  successMetrics: {
+    opportunityId: opportunityModel.opportunityId,
+    engagementType: opportunityModel.engagementType,
+    northStar: "Executive decision support quality with visible account expansion impact",
+    metrics: [
+      {
+        name: "Study-to-insight cycle time: 12 business days",
+        definition: "Time from question framing to executive recommendation",
+        type: "leading",
+      },
+      {
+        name: "Client decision adoption rate: 68%",
+        definition: "Recommendations accepted or actioned in the first review",
+        type: "leading",
+      },
+      {
+        name: "Insight reuse across teams: 42%",
+        definition: "Analyses reused by commercial, market access, or medical affairs teams",
+        type: "leading",
+      },
+      {
+        name: "Dashboard adoption: 74%",
+        definition: "Weekly usage across account and strategy leads",
+        type: "leading",
+      },
+      {
+        name: "Forecast accuracy improvement: +9 points",
+        definition: "Improvement where insight is embedded in quarterly planning",
+        type: "lagging",
+      },
+    ],
+  },
+};
+
+const syneosMarketResearchStrategyBase = commercialStrategyGenerator(opportunityModel, businessLogic);
+const baseSections = syneosMarketResearchStrategyBase.sections;
+
+export const syneosMarketResearchStrategy: CommercialStrategy = {
+  ...syneosMarketResearchStrategyBase,
+  title: "Syneos Health Commercial Intelligence Strategy",
+  subtitle: "Directional market research and analytics engagement for pharma and biotech commercialization",
+  sections: {
+    ...baseSections,
+    kpiFoundation: {
+      ...baseSections.kpiFoundation,
+      purpose: "Executive scoreboard for Syneos commercialization intelligence.",
+      summary: "Track speed, adoption, reuse, forecast impact, and expansion influence.",
+      content: [
+        "Study-to-insight cycle time | 12 business days | launch work in 5-7",
+        "Client decision adoption rate | 68% | first-review action",
+        "Insight reuse | 42% | commercial, access, med affairs",
+        "Segment sizing | directional ranges | enterprise, mid-market, biotech",
+        "Forecast accuracy | +9 points | quarterly planning",
+        "Dashboard adoption | 74% weekly use | account and strategy leads",
+        "Expansion influence | 3-5 motions | retention and upsell",
+      ],
+      metrics: [
+        "12 business days",
+        "68% adoption",
+        "42% reuse",
+        "+9 pts forecast accuracy",
+        "74% dashboard adoption",
+        "3-5 motions",
+      ],
+      notes: [
+        "Directional estimates are based on the public role scope and Syneos' commercialization footprint, not internal facts.",
+      ],
+    },
+    segmentation: {
+      ...baseSections.segmentation,
+      purpose: "Segment pharma and biotech audiences by behavior and value.",
+      summary: "Each segment behaves differently and buys for a different reason.",
+      content: [
+        "Emerging biotech | board pressure or filing window | launch readiness, HCP / payer segmentation | scenario modeling and message testing | faster launch confidence",
+        "Mid-market pharma | indication approval or rollout | indication sizing, channel mix, payer sensitivity | opportunity sizing and prioritization | better spend allocation",
+        "Enterprise pharma | growth slowdown or LOE pressure | portfolio performance and forecast scenarios | portfolio defense and share protection | protect revenue",
+        "Market access / HEOR | label change or access gap | payer evidence and storyline support | evidence mapping and objection tracking | reduce friction",
+        "Commercial launch | pre-launch or launch slippage | launch barriers and channel guidance | readiness scoring and field planning | accelerate activation",
+        "Field sales / omnichannel | low response or channel inefficiency | next-best-action and response patterns | field optimization and measurement | improve productivity",
+      ],
+      notes: [
+        "Each segment should be read as a directional operating need, not a claim of internal Syneos client mix.",
+      ],
+    },
+    totalAddressableMarket: {
+      ...baseSections.totalAddressableMarket,
+      purpose: "Estimate the addressable commercialization opportunity.",
+      summary: "Use a segmented serviceable market, not a generic world map.",
+      content: [
+        "Enterprise Pharma | 20-25 accounts | multi-workstream engagements",
+        "Mid-Market Pharma | 40-60 accounts | growth and expansion work",
+        "Emerging Biotech | 50-70 accounts | launch readiness and first-brand planning",
+        "Market Access / HEOR | 25-35 opportunities | payer evidence and access strategy",
+        "Medical Affairs Analytics | 30-45 opportunities | evidence planning and publication support",
+        "Commercial Launch Analytics | 35-50 opportunities | launch readiness and measurement",
+      ],
+      notes: ["These are directional estimates for prioritization and sizing, not internal Syneos counts."],
+    },
+    audienceArchitecture: {
+      ...baseSections.audienceArchitecture,
+      purpose: "Tier accounts by value and define who controls the buying decision.",
+      summary: "Segment by value, buying power, and commercial pressure.",
+      content: [
+        "Tier 1 Strategic Enterprise | $750K-$2M+ | multi-stakeholder accounts with margin and share upside",
+        "Tier 2 Growth Pharma | $250K-$750K | indication expansion and portfolio prioritization",
+        "Tier 3 Emerging Biotech / Launch-Stage | $100K-$250K | launch confidence, speed, and evidence readiness",
+        "VP Commercial Strategy | growth, margin, and market-share decisions",
+        "Head of Market Access | payer evidence and access pressure",
+        "Medical Affairs Lead | evidence readiness and stakeholder storylines",
+        "Commercial Analytics Director | dashboard adoption and forecast confidence",
+        "Insights / Market Research Lead | faster synthesis and insight reuse",
+        "Launch Excellence Leader | readiness, activation timing, and pull-through",
+      ],
+      metrics: ["Tier 1", "Tier 2", "Tier 3"],
+      notes: ["Tiering should support account prioritization, margin allocation, and executive review."],
+    },
+    prospectFunnel: {
+      ...baseSections.prospectFunnel,
+      purpose: "Show the funnel from target accounts to revenue and expansion.",
+      summary: "Read it like a live account model with clear drop-off points.",
+      content: [
+        "Reach | 2.4M | market, account, and stakeholder visibility",
+        "Leads | 12,400 | named accounts and contacts",
+        "MQL | 3,840 | signal-qualified interest",
+        "SQL | 1,228 | discovery-ready and prioritized",
+        "Opportunity | 614 | scoped commercial intelligence work",
+        "Closed Won | 196 | live engagements",
+        "Revenue | 84.2M | annualized closed revenue",
+      ],
+      notes: ["The counts are directional planning assumptions intended to show funnel shape, conversion pressure, and revenue mix."],
+    },
+    signalIntelligence: {
+      ...baseSections.signalIntelligence,
+      purpose: "Translate market and account signals into commercial response.",
+      summary: "Show what changed, why it matters, and what to do next.",
+      content: [
+        "New Trial Launch | launch or first-brand activity | launch-readiness sprint",
+        "Indication Expansion | portfolio shift or new evidence | opportunity sizing and testing",
+        "Market Access Pressure | formulary friction or payer pushback | evidence and access support",
+        "Competitive Vendor Search | benchmark or RFP activity | proof-backed outreach",
+        "Dashboard Request | leadership wants visibility | executive reporting conversation",
+        "Workshop Attendance | strong attendance | proposal scoping and next step",
+      ],
+      notes: [
+        "Use observable signals to time outreach and choose the next motion.",
+        "Confidence should stay directional unless supported by source links and cross-checked evidence.",
+      ],
+    },
+    commercialActivation: {
+      ...baseSections.commercialActivation,
+      title: "Launch Readiness Intelligence",
+      purpose: "Show one activation path for a launch signal and its return.",
+      summary: "New indication activity creates a launch-readiness response with trackable ROI.",
+      content: [
+        "LinkedIn thought leadership / account targeting | $42K | $220K pipeline | $580K revenue | 4.5x ROI",
+        "Display retargeting | $18K | $140K pipeline | $320K revenue | 3.6x ROI",
+        "Email nurture | $12K | $95K pipeline | $210K revenue | 2.9x ROI",
+        "Executive workshop outreach / SDR-assisted account activation | $30K | $260K pipeline | $640K revenue | 5.2x ROI",
+      ],
+      notes: ["Trigger: new indication activity, launch filing, or executive planning reset."],
+    },
+    salesMotion: {
+      ...baseSections.salesMotion,
+      purpose: "Show how intelligence shapes the sales motion and commercial value story.",
+      summary: "Use evidence to shape the discovery conversation and next step.",
+      content: [
+        "Account prioritization | launch-stage biotech and mid-market pharma",
+        "Discovery talk track | cost of slow insight cycles, weak access evidence, and poor signal use",
+        "Stakeholder messaging | launch confidence, access evidence, forecast guidance, EBITDA support",
+      ],
+      notes: [
+        "Proof points: 12-day cycle time, 68% adoption, 74% dashboard use, +9 forecast points, 4.0x ROI.",
+        "Handoff: workshop, then scoped 90-day plan.",
+      ],
+    },
+    marketingSalesAlignment: {
+      ...baseSections.marketingSalesAlignment,
+      purpose: "Show one system with two swimlanes and one financial model.",
+      summary: "Marketing, sales, and customer success work from one account view, one signal view, and one measurement layer.",
+      content: [
+        "Shared account priority | launch-stage biotech and mid-market pharma",
+        "Shared signal view | approval timing, leader changes, access barriers, competitive moves",
+        "Marketing activation | insight-led content, previews, executive briefs",
+        "Sales action | workshop, discovery, proposal motion",
+        "Feedback loop | response quality, workshop uptake, insight reuse",
+        "Executive measurement | adoption, conversion, expansion, speed-to-decision",
+      ],
+      metrics: ["74% dashboard use", "2x follow-up speed", "$1.4M expansion"],
+      notes: ["The shared intelligence layer should make both swimlanes act from the same commercial truth."],
+    },
+    returnToDashboard: {
+      ...baseSections.returnToDashboard,
+      purpose: "Close the loop on the KPI foundation and enterprise value.",
+      summary: "Show whether the strategy improved growth, adoption, velocity, conversion, expansion, margin, and alignment.",
+      content: [
+        "Insight Cycle Time | 12 business days | faster decisions",
+        "Decision Adoption | 68% | accepted on first review",
+        "Insight Reuse | 42% | cross-team reuse",
+        "Forecast Accuracy | +9 points | quarterly planning",
+        "Qualified Pipeline | 24 opportunities | from 58 research-qualified accounts",
+        "Expansion Influence | 3-5 motions | retention and upsell",
+        "Dashboard Adoption | 74% weekly use | leadership visibility",
+        "Workshop Conversion | 14 workshops | proposal-ready conversion",
+      ],
+      notes: [
+        "Tie every metric back to Chapter 1.",
+        "Keep executive review monthly.",
+        "Reduce handoff loss.",
+      ],
+    },
+  },
+};
+
+export const syneosMarketResearchCommercialStrategy = syneosMarketResearchStrategy;

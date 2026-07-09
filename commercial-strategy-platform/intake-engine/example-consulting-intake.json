@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "1.0",
+  "intakeId": "atlas-revops-consulting",
+  "status": "ready-for-discovery",
+  "engagementType": "consulting-engagement",
+  "company": {
+    "name": "Atlas RevOps",
+    "website": "https://example.com"
+  },
+  "source": {
+    "jobDescriptionUrl": "https://example.com/briefs/revops-consulting",
+    "jobDescriptionText": "Atlas RevOps needs a consulting engagement to clarify commercial priorities, align sales and marketing, and create a dashboard for leadership.",
+    "notes": [
+      "The work appears to begin with a diagnostic and roadmap.",
+      "The request emphasizes alignment over execution."
+    ]
+  },
+  "recruiterInformation": {
+    "name": "Taylor Reed",
+    "title": "Engagement lead",
+    "email": "taylor@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/taylor-reed"
+  },
+  "hiringManager": {
+    "name": "Morgan Price",
+    "title": "Executive sponsor",
+    "email": "morgan@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/morgan-price"
+  },
+  "normalized": {
+    "roleTitle": "Consulting Engagement",
+    "primaryAudience": "Executive sponsor and functional leaders",
+    "decisionToSupport": "Whether the client should move forward with the consulting engagement.",
+    "requestedOutputs": [
+      "strategy-website",
+      "proposal",
+      "statement-of-work",
+      "discovery-workshop",
+      "presentation",
+      "follow-up-email"
+    ],
+    "sourceSummary": "Consulting intake focused on commercial priorities, alignment, and leadership reporting.",
+    "missingInformation": [
+      {
+        "field": "timeline",
+        "reason": "Not stated in the intake.",
+        "impact": "medium",
+        "question": "What delivery timeline should the proposal assume?"
+      }
+    ],
+    "followUpQuestions": [
+      "What decision must the first workshop support?",
+      "Which teams need to be aligned before execution starts?"
+    ],
+    "confidence": "medium"
+  },
+  "routing": {
+    "nextEngine": "discovery",
+    "handoffStatus": "ready"
+  }
+}

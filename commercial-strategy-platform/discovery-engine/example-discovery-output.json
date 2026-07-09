@@ -1,0 +1,366 @@
+{
+  "schemaVersion": "1.0.0",
+  "discoveryId": "discovery_exampleco_001",
+  "intakeId": "intake_exampleco_001",
+  "generatedAt": "2026-07-04T09:00:00Z",
+  "status": "complete",
+  "engagementType": "Executive Hire",
+  "company": {
+    "name": "ExampleCo",
+    "website": "https://example.com",
+    "industry": "B2B software",
+    "location": "Remote"
+  },
+  "researchPlan": {
+    "externalResearchNeeded": [
+      "Review company website and product pages",
+      "Review leadership messaging and recent press",
+      "Review public hiring signals and competitor context"
+    ],
+    "internalResearchNeeded": [
+      "Confirm role priorities from the job description",
+      "Confirm audience expectations from recruiter notes"
+    ],
+    "openQuestions": [
+      "Which customer segment is the highest priority?",
+      "Which revenue motion is most important to the role?"
+    ],
+    "priorityAreas": [
+      "companyOverview",
+      "productsServices",
+      "industry",
+      "customers",
+      "marketingMaturity"
+    ]
+  },
+  "findings": {
+    "companyOverview": [
+      {
+        "findingId": "co-001",
+        "statement": "ExampleCo appears to sell workflow software for mid-market operations teams.",
+        "findingType": "inference",
+        "confidenceLevel": "medium",
+        "confidenceScore": 74,
+        "evidence": [
+          "Company website language emphasizes workflow automation.",
+          "Product pages reference operations use cases."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/market",
+            "label": "ExampleCo market context",
+            "type": "market research"
+          },
+          {
+            "url": "https://example.com",
+            "label": "ExampleCo home page",
+            "type": "company website"
+          }
+        ],
+        "notes": "Framing should stay directional until more product detail is confirmed.",
+        "followUpQuestions": [
+          "What is the primary buyer persona?",
+          "What is the main product bundle?"
+        ],
+        "usedBy": ["Commercial Intelligence", "Opportunity Model"]
+      }
+    ],
+    "productsServices": [
+      {
+        "findingId": "ps-001",
+        "statement": "The public offer appears centered on a core platform plus implementation support.",
+        "findingType": "inference",
+        "confidenceLevel": "medium",
+        "confidenceScore": 68,
+        "evidence": [
+          "Product navigation suggests both software and services.",
+          "Case studies mention onboarding support."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/products",
+            "label": "ExampleCo products page",
+            "type": "product page"
+          }
+        ],
+        "notes": "This should be verified against the intake and hiring context.",
+        "followUpQuestions": [
+          "Is services revenue material?",
+          "Is onboarding handled in-house?"
+        ],
+        "usedBy": ["Commercial Intelligence"]
+      }
+    ],
+    "industry": [
+      {
+        "findingId": "ind-001",
+        "statement": "ExampleCo competes in B2B software for operations and productivity workflows.",
+        "findingType": "inference",
+        "confidenceLevel": "medium",
+        "confidenceScore": 71,
+        "evidence": [
+          "Website copy uses B2B positioning language.",
+          "Customer stories reference internal teams rather than consumers."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/about",
+            "label": "ExampleCo about page",
+            "type": "company website"
+          }
+        ],
+        "usedBy": ["Commercial Intelligence", "Opportunity Model"]
+      }
+    ],
+    "competitors": [
+      {
+        "findingId": "comp-001",
+        "statement": "Competitor set likely includes adjacent workflow and operations platforms.",
+        "findingType": "assumption",
+        "confidenceLevel": "low",
+        "confidenceScore": 52,
+        "evidence": [
+          "Positioning suggests a crowded category.",
+          "No explicit competitor list was found in intake materials."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/market",
+            "label": "ExampleCo market context",
+            "type": "market research"
+          }
+        ],
+        "notes": "Confirm with market research before treating as a definitive set.",
+        "followUpQuestions": [
+          "Which competitors appear in sales conversations?",
+          "Which competitors are mentioned by leadership?"
+        ],
+        "usedBy": ["Commercial Intelligence"]
+      }
+    ],
+    "customers": [
+      {
+        "findingId": "cust-001",
+        "statement": "The most likely customer segment is mid-market operations leaders.",
+        "findingType": "inference",
+        "confidenceLevel": "medium",
+        "confidenceScore": 73,
+        "evidence": [
+          "Case studies focus on team efficiency and internal process improvement.",
+          "Messaging emphasizes cross-functional workflow coordination."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/customers",
+            "label": "ExampleCo customers page",
+            "type": "customer page"
+          }
+        ],
+        "usedBy": ["Commercial Intelligence", "Opportunity Model"]
+      }
+    ],
+    "businessModel": [
+      {
+        "findingId": "bm-001",
+        "statement": "The business model appears to combine software subscriptions with professional services.",
+        "findingType": "inference",
+        "confidenceLevel": "medium",
+        "confidenceScore": 66,
+        "evidence": [
+          "Offer pages reference packaged implementation help.",
+          "Pricing language suggests recurring software revenue."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/pricing",
+            "label": "ExampleCo pricing page",
+            "type": "pricing page"
+          }
+        ],
+        "usedBy": ["Commercial Intelligence"]
+      }
+    ],
+    "revenueModel": [
+      {
+        "findingId": "rev-001",
+        "statement": "Recurring revenue likely matters more than one-time project revenue.",
+        "findingType": "assumption",
+        "confidenceLevel": "low",
+        "confidenceScore": 55,
+        "evidence": [
+          "Pricing language appears subscription-oriented.",
+          "Growth messaging emphasizes retention and expansion."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/pricing",
+            "label": "ExampleCo pricing page",
+            "type": "pricing page"
+          }
+        ],
+        "followUpQuestions": [
+          "What portion of revenue is recurring?",
+          "What is the average contract term?"
+        ],
+        "usedBy": ["Commercial Intelligence", "Opportunity Model"]
+      }
+    ],
+    "hiringContext": [
+      {
+        "findingId": "hire-001",
+        "statement": "The role appears designed to improve commercial clarity and growth execution.",
+        "findingType": "inference",
+        "confidenceLevel": "medium",
+        "confidenceScore": 77,
+        "evidence": [
+          "The job description emphasizes KPI ownership and cross-functional coordination.",
+          "Hiring language references growth and alignment."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/job-description",
+            "label": "Job description",
+            "type": "job description"
+          }
+        ],
+        "usedBy": ["Commercial Intelligence", "Opportunity Model"]
+      }
+    ],
+    "marketingMaturity": [
+      {
+        "findingId": "mm-001",
+        "statement": "Marketing maturity appears moderate, with clear messaging but limited proof of advanced orchestration.",
+        "findingType": "inference",
+        "confidenceLevel": "medium",
+        "confidenceScore": 63,
+        "evidence": [
+          "Website content is organized but not highly segmented.",
+          "There is visible content, but limited evidence of sophisticated lifecycle design."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com",
+            "label": "ExampleCo home page",
+            "type": "company website"
+          }
+        ],
+        "usedBy": ["Commercial Intelligence"]
+      }
+    ],
+    "technologySignals": [
+      {
+        "findingId": "tech-001",
+        "statement": "The stack likely includes common SaaS marketing and analytics tools.",
+        "findingType": "assumption",
+        "confidenceLevel": "low",
+        "confidenceScore": 49,
+        "evidence": [
+          "Public technical signals are limited.",
+          "Hiring language implies the need for reporting and campaign tooling."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/tech",
+            "label": "ExampleCo technology context",
+            "type": "technology signal"
+          }
+        ],
+        "notes": "Confirm with public pixels, job posts, or leadership references before using as fact.",
+        "usedBy": ["Commercial Intelligence"]
+      }
+    ],
+    "growthSignals": [
+      {
+        "findingId": "growth-001",
+        "statement": "The company appears to be in an active growth phase based on hiring and public messaging.",
+        "findingType": "inference",
+        "confidenceLevel": "medium",
+        "confidenceScore": 70,
+        "evidence": [
+          "Hiring activity suggests expansion.",
+          "Leadership language emphasizes growth and execution."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/careers",
+            "label": "ExampleCo careers page",
+            "type": "careers page"
+          }
+        ],
+        "usedBy": ["Commercial Intelligence", "Opportunity Model"]
+      }
+    ],
+    "risks": [
+      {
+        "findingId": "risk-001",
+        "statement": "Category crowding may make differentiation and proof more important than broad positioning.",
+        "findingType": "recommendation",
+        "confidenceLevel": "medium",
+        "confidenceScore": 76,
+        "evidence": [
+          "The market appears competitive from public positioning.",
+          "Messaging relies on broad workflow value."
+        ],
+        "sourceLinks": [
+          {
+            "url": "https://example.com/competitors",
+            "label": "ExampleCo competitor context",
+            "type": "market research"
+          }
+        ],
+        "usedBy": ["Commercial Intelligence", "Opportunity Model"]
+      }
+    ]
+  },
+  "sourceLinks": [
+    {
+      "url": "https://example.com",
+      "label": "ExampleCo home page",
+      "type": "company website"
+    },
+    {
+      "url": "https://example.com/products",
+      "label": "ExampleCo products page",
+      "type": "product page"
+    },
+    {
+      "url": "https://example.com/about",
+      "label": "ExampleCo about page",
+      "type": "company website"
+    },
+    {
+      "url": "https://example.com/pricing",
+      "label": "ExampleCo pricing page",
+      "type": "pricing page"
+    },
+    {
+      "url": "https://example.com/market",
+      "label": "ExampleCo market context",
+      "type": "market research"
+    },
+    {
+      "url": "https://example.com/job-description",
+      "label": "Job description",
+      "type": "job description"
+    },
+    {
+      "url": "https://example.com/tech",
+      "label": "ExampleCo technology context",
+      "type": "technology signal"
+    },
+    {
+      "url": "https://example.com/careers",
+      "label": "ExampleCo careers page",
+      "type": "careers page"
+    }
+  ],
+  "confidenceSummary": {
+    "overallLevel": "medium",
+    "overallScore": 68,
+    "lowConfidenceAreas": [
+      "competitors",
+      "technologySignals",
+      "revenueModel"
+    ]
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "intakeId": "northstar-vice-president-marketing",
+  "status": "ready-for-discovery",
+  "engagementType": "executive-hire",
+  "company": {
+    "name": "Northstar Industrial",
+    "website": "https://example.com"
+  },
+  "source": {
+    "jobDescriptionUrl": "https://example.com/jobs/vp-marketing",
+    "jobDescriptionText": "Northstar Industrial is hiring a VP Marketing to improve pipeline creation, sharpen segmentation, and align marketing with sales.",
+    "notes": [
+      "Hiring manager appears to report into the CEO.",
+      "The role appears to have cross-functional commercial ownership."
+    ]
+  },
+  "recruiterInformation": {
+    "name": "Jordan Lee",
+    "title": "Recruiter",
+    "email": "jordan@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/jordan-lee"
+  },
+  "hiringManager": {
+    "name": "Casey Morgan",
+    "title": "Chief Executive Officer",
+    "email": "casey@example.com",
+    "linkedinUrl": "https://www.linkedin.com/in/casey-morgan"
+  },
+  "normalized": {
+    "roleTitle": "VP Marketing",
+    "primaryAudience": "Hiring leader and executive team",
+    "decisionToSupport": "Whether the company should advance the candidate conversation.",
+    "requestedOutputs": [
+      "strategy-website",
+      "cover-letter",
+      "interview-preparation",
+      "linkedin-outreach",
+      "resume-alignment"
+    ],
+    "sourceSummary": "Executive hire intake centered on marketing leadership, segmentation, and sales alignment.",
+    "missingInformation": [
+      {
+        "field": "company growth metrics",
+        "reason": "Not stated in the intake.",
+        "impact": "medium",
+        "question": "What revenue or pipeline targets should the strategy assume?"
+      }
+    ],
+    "followUpQuestions": [
+      "What outcome would make this role a clear priority?",
+      "Which customer segments matter most?"
+    ],
+    "confidence": "medium"
+  },
+  "routing": {
+    "nextEngine": "discovery",
+    "handoffStatus": "ready"
+  }
+}

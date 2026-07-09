@@ -1,0 +1,357 @@
+{
+  "schemaVersion": "1.0",
+  "modelId": "placeholder-opportunity",
+  "createdAt": "YYYY-MM-DD",
+  "updatedAt": "YYYY-MM-DD",
+  "sourceStatus": "draft",
+  "opportunity": {
+    "name": "Placeholder Opportunity",
+    "engagementType": "executive-hire",
+    "stage": "intake",
+    "primaryAudience": "Placeholder executive audience",
+    "outputTargets": [
+      "strategy-website"
+    ],
+    "decisionToSupport": "Placeholder decision this strategy should support.",
+    "intakeSummary": "Placeholder summary of the opportunity intake.",
+    "owner": "Placeholder owner",
+    "sourceUrls": [
+      "https://example.com/source"
+    ]
+  },
+  "company": {
+    "name": "Placeholder Company",
+    "website": "https://example.com",
+    "description": "Placeholder company description.",
+    "headquarters": "Placeholder headquarters",
+    "size": "Placeholder company size",
+    "ownership": "Placeholder ownership model",
+    "sourceNotes": "Placeholder notes about company sources."
+  },
+  "industry": {
+    "name": "Placeholder industry",
+    "category": "Placeholder category",
+    "trends": [
+      "Placeholder industry trend"
+    ],
+    "regulatoryFactors": [
+      "Placeholder regulatory factor"
+    ],
+    "marketDynamics": [
+      "Placeholder market dynamic"
+    ],
+    "sourceNotes": "Placeholder notes about industry sources."
+  },
+  "businessModel": {
+    "type": "Placeholder business model type",
+    "revenueStreams": [
+      "Placeholder revenue stream"
+    ],
+    "pricingModel": "Placeholder pricing model",
+    "salesMotion": "Placeholder sales motion",
+    "customerEconomics": "Placeholder customer economics.",
+    "sourceNotes": "Placeholder notes about business model sources."
+  },
+  "role": {
+    "title": "Placeholder role title",
+    "function": "Placeholder function",
+    "seniority": "Placeholder seniority",
+    "responsibilities": [
+      "Placeholder responsibility"
+    ],
+    "successMetrics": [
+      "Placeholder success metric"
+    ],
+    "stakeholders": [
+      "Placeholder stakeholder"
+    ],
+    "sourceNotes": "Placeholder notes about role sources."
+  },
+  "objectives": {
+    "primaryObjective": "Placeholder primary objective.",
+    "businessOutcomes": [
+      {
+        "label": "Placeholder outcome",
+        "target": "Placeholder target",
+        "rationale": "Placeholder rationale."
+      }
+    ],
+    "operatingPrinciples": [
+      "Placeholder operating principle"
+    ],
+    "validationQuestions": [
+      "Placeholder validation question?"
+    ]
+  },
+  "commercialChallenges": [
+    {
+      "name": "Placeholder challenge",
+      "description": "Placeholder challenge description.",
+      "evidence": "Placeholder evidence or note.",
+      "impact": "Placeholder impact.",
+      "confidence": "medium"
+    }
+  ],
+  "growthOpportunities": [
+    {
+      "name": "Placeholder growth opportunity",
+      "description": "Placeholder growth opportunity description.",
+      "segment": "Placeholder segment",
+      "impact": "Placeholder impact.",
+      "activationPath": "Placeholder activation path.",
+      "confidence": "medium"
+    }
+  ],
+  "audience": {
+    "icp": "Placeholder ideal customer profile.",
+    "customerSegmentsSummary": "Placeholder customer segment summary.",
+    "buyingCommittee": [
+      {
+        "role": "Placeholder buyer role",
+        "influence": "Placeholder influence level",
+        "priorities": [
+          "Placeholder priority"
+        ],
+        "objections": [
+          "Placeholder objection"
+        ]
+      }
+    ],
+    "notes": "Placeholder audience notes."
+  },
+  "segmentation": {
+    "segmentLogic": "Placeholder segmentation logic.",
+    "segments": [
+      {
+        "label": "Segment A",
+        "name": "Placeholder segment name",
+        "description": "Placeholder segment description.",
+        "priority": "high",
+        "opportunitySize": "Placeholder opportunity size.",
+        "painPoints": [
+          "Placeholder pain point"
+        ],
+        "recommendedMotion": "Placeholder recommended motion."
+      }
+    ],
+    "exclusions": [
+      "Placeholder excluded segment or rationale"
+    ]
+  },
+  "tam": {
+    "headlineMetric": "Placeholder TAM headline.",
+    "addressableAccounts": "Placeholder account count or range.",
+    "assumptions": [
+      "Placeholder TAM assumption"
+    ],
+    "marketSegments": [
+      {
+        "label": "Placeholder market segment",
+        "value": "Placeholder value",
+        "assumption": "Placeholder segment assumption."
+      }
+    ],
+    "mapDots": [
+      {
+        "label": "Placeholder map point",
+        "x": 50,
+        "y": 50,
+        "tone": "primary"
+      }
+    ],
+    "sourceNotes": "Placeholder TAM source notes."
+  },
+  "personas": [
+    {
+      "role": "Placeholder persona role",
+      "name": "Placeholder persona name",
+      "decisionLens": "Placeholder decision lens.",
+      "jobToDo": "Placeholder job to be done.",
+      "painPoints": [
+        "Placeholder pain point"
+      ],
+      "triggers": [
+        "Placeholder trigger"
+      ],
+      "message": "Placeholder message.",
+      "proofNeeded": [
+        "Placeholder proof point"
+      ]
+    }
+  ],
+  "journey": {
+    "stages": [
+      {
+        "name": "Placeholder journey stage",
+        "buyerQuestion": "Placeholder buyer question?",
+        "contentNeed": "Placeholder content need.",
+        "salesAction": "Placeholder sales action.",
+        "friction": "Placeholder friction."
+      }
+    ],
+    "frictionNotes": "Placeholder journey friction notes."
+  },
+  "signals": {
+    "customerSignals": [
+      {
+        "name": "Placeholder customer signal",
+        "description": "Placeholder signal description.",
+        "threshold": "Placeholder threshold.",
+        "interpretation": "Placeholder interpretation.",
+        "activationSteps": [
+          "Placeholder activation step"
+        ]
+      }
+    ],
+    "prospectSignals": [
+      {
+        "name": "Placeholder prospect signal",
+        "description": "Placeholder signal description.",
+        "threshold": "Placeholder threshold.",
+        "interpretation": "Placeholder interpretation.",
+        "activationSteps": [
+          "Placeholder activation step"
+        ]
+      }
+    ],
+    "dataGaps": [
+      "Placeholder data gap"
+    ]
+  },
+  "campaigns": [
+    {
+      "name": "Placeholder campaign",
+      "audience": "Placeholder campaign audience.",
+      "message": "Placeholder campaign message.",
+      "channels": [
+        "Placeholder channel"
+      ],
+      "offer": "Placeholder campaign offer.",
+      "salesHandoff": "Placeholder sales handoff.",
+      "successMetric": "Placeholder success metric."
+    }
+  ],
+  "salesMotion": {
+    "plays": [
+      {
+        "name": "Placeholder sales play",
+        "owner": "Placeholder owner",
+        "entryPoint": "Placeholder entry point.",
+        "stakeholders": [
+          "Placeholder stakeholder"
+        ],
+        "assets": [
+          "Placeholder asset"
+        ],
+        "exitCriteria": "Placeholder exit criteria.",
+        "kpis": [
+          "Placeholder KPI"
+        ]
+      }
+    ],
+    "enablementNeeds": [
+      "Placeholder enablement need"
+    ],
+    "constraints": [
+      "Placeholder sales motion constraint"
+    ]
+  },
+  "measurement": {
+    "northStarMetric": "Placeholder north star metric.",
+    "dashboardMetrics": [
+      {
+        "label": "Placeholder metric",
+        "value": "Placeholder value",
+        "source": "Placeholder source",
+        "cadence": "monthly",
+        "owner": "Placeholder owner"
+      }
+    ],
+    "reviewCadence": [
+      {
+        "meeting": "Placeholder review meeting",
+        "frequency": "monthly",
+        "participants": [
+          "Placeholder participant"
+        ],
+        "decisions": [
+          "Placeholder decision"
+        ]
+      }
+    ],
+    "reportingRisks": [
+      "Placeholder reporting risk"
+    ]
+  },
+  "technology": {
+    "currentSignals": [
+      "Placeholder technology signal"
+    ],
+    "probableStack": [
+      "Placeholder platform or system"
+    ],
+    "dataNeeds": [
+      "Placeholder data need"
+    ],
+    "automationOpportunities": [
+      "Placeholder automation opportunity"
+    ],
+    "aiOpportunities": [
+      "Placeholder AI opportunity"
+    ],
+    "constraints": [
+      "Placeholder technology constraint"
+    ]
+  },
+  "competitiveLandscape": {
+    "competitors": [
+      {
+        "name": "Placeholder competitor",
+        "type": "Placeholder competitor type",
+        "positioning": "Placeholder positioning.",
+        "implication": "Placeholder strategic implication."
+      }
+    ],
+    "differentiators": [
+      "Placeholder differentiator"
+    ],
+    "threats": [
+      "Placeholder competitive threat"
+    ],
+    "sourceNotes": "Placeholder competitive source notes."
+  },
+  "risks": [
+    {
+      "name": "Placeholder risk",
+      "description": "Placeholder risk description.",
+      "likelihood": "medium",
+      "impact": "medium",
+      "mitigation": "Placeholder mitigation.",
+      "assumptionFlag": true
+    }
+  ],
+  "assumptions": [
+    {
+      "id": "A1",
+      "statement": "Placeholder assumption statement.",
+      "basis": "Placeholder basis for assumption.",
+      "validationMethod": "Placeholder validation method.",
+      "owner": "Placeholder owner",
+      "status": "unvalidated"
+    }
+  ],
+  "recommendations": [
+    {
+      "name": "Placeholder recommendation",
+      "rationale": "Placeholder rationale.",
+      "action": "Placeholder action.",
+      "stage": "near-term",
+      "priority": "high",
+      "dependencies": [
+        "Placeholder dependency"
+      ],
+      "expectedOutcome": "Placeholder expected outcome.",
+      "measure": "Placeholder measure."
+    }
+  ]
+}
