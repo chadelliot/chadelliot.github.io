@@ -384,29 +384,62 @@ function renderSection(section: CommercialStrategySection) {
               {section.summary}
             </span>
           </div>
-          <div className="campaign-grid">
-            {section.content.map((item) => {
-              const parsed = splitLine(item);
-              const investment = parsed.body ?? "Directional investment";
-              const pipeline = parsed.foot ?? "Directional pipeline";
-              const revenue = parsed.extra?.[0] ?? "Directional revenue";
-              const roi = parsed.extra?.[1] ?? "Directional ROI";
-              return (
-                <div className="campaign-cell" key={item}>
-                  <div className="rg-layer">Channel</div>
-                  <div className="card-title">{parsed.title}</div>
-                  <div className="tiny">Investment</div>
-                  <div className="card-body">{investment}</div>
-                  <div className="tiny">Pipeline</div>
-                  <div className="card-body">{pipeline}</div>
-                  <div className="tiny">Revenue</div>
-                  <div className="card-body">{revenue}</div>
-                  <div className="tiny">ROI</div>
-                  <div className="card-body">{roi}</div>
-                </div>
-              );
-            })}
-          </div>
+          {section.content.length > 0 ? (
+            <>
+              <div className="section-eye" style={{ margin: "0 0 10px" }}>
+                Primary campaign example
+              </div>
+              <div className="campaign-grid">
+                {(() => {
+                  const primary = splitLine(section.content[0]);
+                  const primaryCells = [
+                    ["Audience", primary.body ?? "Directional audience"],
+                    ["Message", primary.foot ?? "Directional message"],
+                    ["Channels", primary.extra?.[0] ?? "Directional channels"],
+                    ["Sales Handoff / Measurement", primary.extra?.[1] ?? "Directional measurement"],
+                  ] as const;
+                  return primaryCells.map(([label, value]) => (
+                    <div className="campaign-cell" key={label}>
+                      <div className="rg-layer">{label}</div>
+                      <div className="card-body" style={{ fontWeight: 600, color: "var(--ink)" }}>
+                        {value}
+                      </div>
+                    </div>
+                  ));
+                })()}
+              </div>
+            </>
+          ) : null}
+          {section.content.length > 1 ? (
+            <>
+              <div className="section-eye" style={{ margin: "18px 0 10px" }}>
+                Channel economics
+              </div>
+              <div className="campaign-grid">
+                {section.content.slice(1).map((item) => {
+                  const parsed = splitLine(item);
+                  const investment = parsed.body ?? "Directional investment";
+                  const pipeline = parsed.foot ?? "Directional pipeline";
+                  const revenue = parsed.extra?.[0] ?? "Directional revenue";
+                  const roi = parsed.extra?.[1] ?? "Directional ROI";
+                  return (
+                    <div className="campaign-cell" key={item}>
+                      <div className="rg-layer">Channel</div>
+                      <div className="card-title">{parsed.title}</div>
+                      <div className="tiny">Investment</div>
+                      <div className="card-body">{investment}</div>
+                      <div className="tiny">Pipeline</div>
+                      <div className="card-body">{pipeline}</div>
+                      <div className="tiny">Revenue</div>
+                      <div className="card-body">{revenue}</div>
+                      <div className="tiny">ROI</div>
+                      <div className="card-body">{roi}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          ) : null}
         </div>
       );
 

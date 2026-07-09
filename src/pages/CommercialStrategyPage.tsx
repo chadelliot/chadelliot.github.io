@@ -679,32 +679,51 @@ function Signals() {
 function CommercialActivation() {
   return (
     <div className="campaign">
-      <div className="campaign-head">Commercial Activation: Launch Readiness Intelligence</div>
+      <div className="campaign-head">Commercial Activation: Launch Readiness Intelligence Program</div>
+      <div className="campaign-perf">
+        <span className="section-eye" style={{ marginBottom: 0 }}>
+          One integrated campaign creates launch momentum. Channel economics broaden the reach.
+        </span>
+      </div>
+
+      <div className="section-eye" style={{ margin: "0 0 10px" }}>
+        Primary campaign example
+      </div>
       <div className="campaign-grid">
         {[
-          ["LinkedIn thought leadership / account targeting", "$42K", "$220K pipeline", "$580K revenue"],
-          ["Display retargeting", "$18K", "$140K pipeline", "$320K revenue"],
-          ["Email nurture", "$12K", "$95K pipeline", "$210K revenue"],
-          ["Executive workshop outreach / SDR-assisted account activation", "$30K", "$260K pipeline", "$640K revenue"],
-        ].map(([a, b, c, d]) => (
+          ["Audience", "Growth pharma and biotech teams preparing launches or indication expansions"],
+          ["Message", "Identify market access, field, and stakeholder friction before launch execution"],
+          ["Channels", "LinkedIn account targeting, display retargeting, executive email, SDR outreach, workshop invite"],
+          ["Sales Handoff / Measurement", "Workshop conversion, SQLs, proposal rate, pipeline value, executive dashboard adoption"],
+        ].map(([label, value]) => (
+          <div className="campaign-cell" key={label}>
+            <div className="rg-layer">{label}</div>
+            <div className="card-body" style={{ fontWeight: 600, color: "var(--ink)" }}>
+              {value}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="section-eye" style={{ margin: "18px 0 10px" }}>
+        Channel economics
+      </div>
+      <div className="campaign-grid">
+        {[
+          ["LinkedIn account targeting", "$42K", "$220K pipeline", "$580K revenue", "4.5×"],
+          ["Display retargeting", "$18K", "$140K pipeline", "$320K revenue", "3.6×"],
+          ["Executive email nurture", "$12K", "$95K pipeline", "$210K revenue", "2.9×"],
+          ["SDR-assisted outreach", "$30K", "$260K pipeline", "$640K revenue", "5.2×"],
+          ["Executive workshop promotion", "$24K", "$210K pipeline", "$520K revenue", "4.1×"],
+        ].map(([a, b, c, d, e]) => (
           <div className="campaign-cell" key={a}>
             <div className="rg-layer">Channel</div>
             <div className="card-title">{a}</div>
             <div className="card-body">Investment: {b}</div>
             <div className="card-body">Pipeline: {c}</div>
             <div className="card-body">Revenue: {d}</div>
-            <div className="card-body">ROI: {a === "Email nurture" ? "2.9×" : a === "Display retargeting" ? "3.6×" : a === "LinkedIn thought leadership / account targeting" ? "4.5×" : "5.2×"}</div>
+            <div className="card-body">ROI: {e}</div>
           </div>
-        ))}
-      </div>
-      <div className="campaign-perf">
-        <span className="section-eye" style={{ marginBottom: 0 }}>
-          Channel economics:
-        </span>
-        {["LinkedIn CAC payback 6.4 months", "Workshop-to-opportunity 28%", "Pipeline influenced $715K", "ROI weighted at 4.0×"].map((x) => (
-          <span className="sig-step" key={x}>
-            {x}
-          </span>
         ))}
       </div>
     </div>
