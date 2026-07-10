@@ -771,11 +771,11 @@ export const syneosMarketResearchStrategy: CommercialStrategy = {
     },
     commercialActivation: {
       ...baseSections.commercialActivation,
-      title: "Launch Readiness Intelligence Program",
+      title: "Launch Readiness Intelligence Campaign",
       purpose: "Show one integrated campaign that turns launch signals into commercial investment and return.",
       summary: "Growth pharma and biotech launch teams need one campaign tied to access, field, stakeholder, and executive outcomes.",
       content: [
-        "Launch Readiness Intelligence Program | Growth pharma and biotech teams preparing launches or indication expansions | Identify market access, field, and stakeholder friction before launch execution | LinkedIn account targeting, display retargeting, executive email, SDR outreach, workshop invite | Workshop conversion, SQLs, proposal rate, pipeline value, executive dashboard adoption",
+        "Launch Readiness Intelligence Campaign | Launch-stage growth accounts | Identify market access, field, and stakeholder friction before launch execution | LinkedIn account targeting, display retargeting, executive email, SDR outreach, workshop invite | Workshop conversion, SQLs, proposal rate, pipeline value, executive dashboard adoption",
         "LinkedIn account targeting | $42K | $220K pipeline | $580K revenue | 4.5x ROI",
         "Display retargeting | $18K | $140K pipeline | $320K revenue | 3.6x ROI",
         "Executive email nurture | $12K | $95K pipeline | $210K revenue | 2.9x ROI",
