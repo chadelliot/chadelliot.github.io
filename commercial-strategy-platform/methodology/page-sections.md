@@ -81,6 +81,7 @@ Never change elements:
 - role of this section as the opening scoreboard
 - connection between executive outcomes and all later strategy layers
 - concise KPI labels and concrete directional values
+- balance the grid to the KPI count instead of forcing a fixed slot count — six KPIs should read as a 3×2 grid, not be stretched or padded to fill an 8-card layout
 
 ### 02. Segmentation
 
@@ -131,18 +132,23 @@ Required components:
 - Stage title
 - Stage body
 - Stage quote
-- TAM map area
-- Opportunity/account markers
+- One strong TAM visualization (see below)
 - TAM summary card
-- Map legend
 - Market statistic grid
+
+Visualization choice (added — pick one, don't force the dot-map):
+
+- The account dot-map (`buildTAMMap()` / `.tam-shell`) works well when the addressable market is genuinely a scatter of individual named accounts.
+- When the opportunity is better described by a handful of named categories (e.g. "Strategic Enterprise Pharma", "Launch-Stage Biotech"), use tiered opportunity cards instead (`.tam-cat-grid` / `.tam-cat-card`) — each card shows estimated accounts, estimated addressable revenue, priority, and a fit tag. This reads far better than forcing generic "Market 1 / Market 2" placeholders into a map that doesn't fit the data.
+- If neither fits, a TAM/SAM/SOM concentric model or a whitespace matrix are also acceptable — the requirement is one strong, well-labeled visual, never a placeholder.
+- If the map is unused on a given page, remove its dead code (`buildTAMMap()` and related DOM hooks) rather than leaving it disconnected.
 
 Customizable content:
 
 - addressable account count
 - active customer count
 - lead, prospect, whitespace, or warm-pipeline counts
-- map marker distribution
+- map marker distribution, or category card values if using the card layout
 - legend labels
 - market statistic labels
 - market statistic values
@@ -153,11 +159,10 @@ Never change elements:
 - section label: `Total Addressable Market`
 - section number: `03`
 - rail group: `FOUNDATION`
-- TAM/map visual pattern
 - statistic grid pattern
 - use of this section to explain market share, whitespace, and reachable opportunity
 - requirement to label estimates and assumptions clearly
-- descriptive B2B account categories and directional estimates
+- descriptive B2B account categories and directional estimates — never generic "Market 1 / Market 2 / Market 3" labels
 
 ### 04. Audience Architecture
 
@@ -171,11 +176,20 @@ Required components:
 - Stage body
 - Stage quote
 - Step 1 revenue tiering section
-- Tier grid
+- Tier grid — each tier card is clickable and hoverable (`.tier-card.selectable`), calling `selectTier(tierId)`
 - Step 2 personas section
 - Audience explainer
-- Primary persona cards
+- Primary persona cards, each tagged `data-tier` and toggled visible/hidden by the active tier (`.persona-card-lg.show`)
 - Additional buyer role cards
+
+Interaction contract (added — do not omit on future pages):
+
+- Exactly one tier is active by default (Tier 1). Clicking or hovering a tier card sets it active and swaps the persona cards below to that tier's personas.
+- The active tier uses a solid green background with white text; inactive tiers stay neutral.
+- Two personas are shown per tier (six total), never all six at once.
+- The swap animates in with a short fade (reuse the existing `fadeIn` keyframe) rather than popping.
+- On touch devices this must work via `click`, not rely on `mouseenter` alone.
+- Keyboard users can tab to a tier (`tabindex="0"`, `role="button"`) and activate it with Enter or Space.
 
 Customizable content:
 
@@ -202,6 +216,7 @@ Never change elements:
 - additional buyer role card pattern
 - distinction between account-level priority and person-level relevance
 - tiering should include estimated account value where reasonable
+- the interactive tier → persona toggle described above
 
 ## EXECUTION
 
@@ -217,6 +232,7 @@ Required components:
 - Stage body
 - Funnel stage breakdown
 - Funnel metric row/grid
+- Tier composition bridge — a labeled connector (`.funnel-bridge`) plus a stacked composition bar (`.tier-comp-bar`) showing the tier mix behind Closed Won revenue, placed directly beneath the funnel and directly above the prospect tier cards
 - Prospect tier cards
 - Tier-specific recommended motion
 
@@ -230,6 +246,7 @@ Customizable content:
 - prospect motions
 - qualification language
 - opportunity-specific pipeline assumptions
+- tier composition percentages
 
 Never change elements:
 
@@ -240,6 +257,7 @@ Never change elements:
 - prospect tier card pattern
 - purpose of turning TAM and segmentation into pipeline logic
 - standardized funnel stages: Reach, Leads, MQLs, SQLs, Opportunities, Closed Won, Revenue
+- the tier composition bridge connecting the funnel to the prospect tier cards — tier callouts must never float as an unrelated second concept
 
 ### 06. Signal Intelligence
 
@@ -292,19 +310,29 @@ Required components:
 - Stage body
 - Stage quote
 - Commercial activation container
-- Commercial activation header
+- Commercial activation header with a specific campaign name (never a generic label like "commercial activation program")
 - Four-part commercial activation grid
-- Performance strip
-- Channel / investment / pipeline / revenue / ROI labels
+- Connector/bridge from Step 03 (Channels) down to a visually separate Channel Economics panel
+- Channel Economics: a live budget summary strip (total investment / pipeline / revenue / blended ROI), a budget-allocated progress bar, and an editable table — one number input per channel, min/max constrained
+- "Optimize Mix" button
+- Directional-scenario disclaimer text
+
+Interaction contract (added — do not omit on future pages):
+
+- Investment is editable per channel. Editing recalculates that row's pipeline, revenue, and ROI immediately, plus the summary totals and budget bar.
+- Pipeline and revenue follow a diminishing-returns curve — `pipeline(spend) = cap * (1 - e^(-spend / k))`, `revenue = pipeline * winRate` — never a flat linear multiplier. Calibrate `cap`, `k`, and `winRate` per channel so the default allocation's ROI matches the story you're telling.
+- The sum of all channel investments can never exceed the stated max budget; an over-limit edit clamps to the remaining headroom.
+- No single channel can exceed 45% of the total allocated budget. Channels that represent a strategic/relationship motion (e.g. executive email nurture, executive workshops) should carry a small minimum floor rather than being allowed to hit zero.
+- "Optimize Mix" reallocates the full budget using marginal-return logic (spend flows to whichever channel has the highest marginal dollar return next), respecting the same min/max constraints — it must never dump the entire budget into the single highest-ROI channel, and every channel must retain meaningful spend after optimizing.
+- All of this is illustrative and must say so — pair it with a disclaimer such as "Directional scenario based on illustrative response and conversion assumptions."
 
 Customizable content:
 
 - activation name
 - audience definition
 - message angle
-- channel mix
-- investment assumptions
-- pipeline and revenue assumptions
+- channel mix (names, cap/k/winRate parameters, default allocation)
+- max total budget
 - ROI or payback language
 - sales handoff language
 - performance indicators
@@ -318,8 +346,9 @@ Never change elements:
 - rail group: `EXECUTION`
 - four-step commercial activation structure
 - connection from signal to activation to sales handoff
-- performance strip pattern
 - commercial activations should show audience, channel economics, pipeline, revenue, and ROI
+- the editable, diminishing-returns budget optimizer and the "Optimize Mix" behavior described above
+- the campaign name convention — always a specific named campaign, never a generic program label
 
 ## MEASUREMENT & SYSTEM
 
@@ -375,6 +404,14 @@ Required components:
 - Marketing outputs column
 - Shared intelligence layer center column
 - Sales outputs column
+- 30–60–90 day executive roadmap (`.roadmap-grid`), placed after the alignment grid within this section
+
+Roadmap contract (added — do not omit on future pages):
+
+- Three columns: 30 Days / Align, 60 Days / Activate, 90 Days / Optimize.
+- This is a standalone roadmap block, not an eleventh section — it lives inside M+S Alignment (or, alternatively, inside Sales Motion or immediately before Return to Dashboard, but pick one placement and keep it consistent).
+- Five short bullets per phase, executive-level, never a granular project-management task list.
+- Tailor the language per opportunity (e.g. for a research/analytics engagement: operating-model baseline, insight adoption, launch readiness) while keeping the Align → Activate → Optimize arc intact.
 
 Customizable content:
 
@@ -384,6 +421,7 @@ Customizable content:
 - handoff language
 - operating cadence references
 - opportunity-specific alignment recommendations
+- roadmap bullet language per phase
 
 Never change elements:
 
@@ -394,6 +432,7 @@ Never change elements:
 - marketing left, shared intelligence center, sales right
 - purpose of showing one system with two execution engines
 - shared intelligence should guide both swimlanes
+- the 30–60–90 day roadmap and its three-phase structure
 
 ### 10. Return to Dashboard
 
@@ -447,3 +486,8 @@ Every future opportunity-specific output using this page format should pass thes
 - Public facts, directional hypotheses, and recommendations are distinct.
 - Internal priorities or constraints are not stated as facts unless provided.
 - The final strategy acknowledges that recommendations should evolve after internal constraints are learned.
+- Audience Architecture's tier cards are interactive and swap the correct two personas per tier, with a clear active state.
+- The Prospect Funnel's tier callouts are visibly connected to the funnel (composition bridge/bar), never floating as an unrelated block.
+- Commercial Activation's Channel Economics table is editable, enforces the budget cap and the 45%-per-channel cap, and "Optimize Mix" produces a believable mixed allocation.
+- A 30–60–90 day roadmap is present in exactly one of: M+S Alignment, Sales Motion, or immediately before Return to Dashboard.
+- No pharma/industry-specific language has leaked into the generic canonical template, and no generic placeholder language ("Market 1", "commercial activation program") has leaked into an opportunity-specific page.
