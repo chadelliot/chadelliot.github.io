@@ -116,7 +116,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   line-height:1.1;margin-bottom:8px;
 }
 
-.stage-title em{font-style:italic;color:var(--green);}
+.stage-title em{font-style:italic;color:var(--ink);}
 
 .stage-body{
   font-size:14px;color:var(--body);
@@ -295,6 +295,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .signal-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .signal-step{font-size:10px;font-weight:600;color:var(--body);padding:4px 10px;background:var(--white);border:1px solid var(--rule);border-radius:2px;}
 .signal-arrow-sm{color:var(--rule);font-size:12px;}
+.signal-why{font-size:11px;color:var(--body);margin-bottom:9px;line-height:1.4;}
+.signal-actions{display:flex;flex-direction:column;gap:5px;}
+.signal-action{font-size:11px;color:var(--ink);}
+.signal-action b{color:var(--green);font-weight:700;margin-right:5px;}
 
 /* Alignment grid — true fixed three-col, green always centered */
 .align-grid{
@@ -401,8 +405,16 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .activation-card .card-title{font-size:13px;line-height:1.32;font-weight:800;}
 .activation-card .card-body{font-size:12px;line-height:1.55;font-weight:400;color:var(--body);}
 .activation-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;}
+.tag{display:inline-block;font-size:9.5px;font-weight:700;padding:4px 11px;border-radius:11px;background:var(--surface);color:var(--body);border:1px solid var(--rule);letter-spacing:0.2px;}
+.tag.blue{background:#eef3fc;color:#2d6bcd;border-color:transparent;}
+.tag.amber{background:#fef3c7;color:var(--sig-a);border-color:transparent;}
 .activation-card .tag{margin-top:0;align-self:flex-start;}
-.activation-economics{margin-top:22px;padding:18px 18px 16px;background:#fff;border:1px solid var(--rule);border-radius:4px;box-shadow:0 1px 0 rgba(0,0,0,.02);}
+.decision-framework{border:1px solid var(--green);background:var(--green-pale);border-radius:4px;overflow:hidden;margin-top:4px;}
+.decision-row{display:grid;grid-template-columns:220px 1fr;gap:16px;padding:12px 20px;border-bottom:1px solid rgba(74,158,122,0.25);}
+.decision-row:last-child{border-bottom:none;}
+.decision-q{font-size:11px;font-weight:700;color:var(--green);line-height:1.4;}
+.decision-a{font-size:12.5px;font-weight:600;color:var(--ink);line-height:1.4;}
+.activation-economics{margin-top:34px;padding:20px 18px 16px;background:#fff;border:1px solid var(--rule);border-radius:4px;box-shadow:0 1px 0 rgba(0,0,0,.02);}
 .activation-bridge{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));align-items:end;margin:0 0 12px;}
 .activation-bridge-pin{grid-column:3;justify-self:center;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--green);}
 .activation-bridge-caret{font-size:14px;line-height:1;}
@@ -472,6 +484,29 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .roadmap-list li{font-size:11px;color:var(--body);line-height:1.4;padding-left:12px;position:relative;}
 .roadmap-list li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:800;}
 
+/* Segmentation — executive decision chapter */
+.exec-reco{border:1px solid var(--green);background:var(--green-pale);border-radius:4px;padding:16px 18px;margin-bottom:22px;}
+.exec-reco-eye{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;}
+.exec-reco-body{font-size:13px;color:var(--ink);line-height:1.55;font-weight:500;}
+.section-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;}
+.invest-matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:22px;}
+.invest-col{background:var(--white);padding:14px 16px;}
+.invest-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;}
+.invest-segs{font-size:12px;font-weight:700;color:var(--ink);}
+.profile-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:8px;}
+.profile-card{position:relative;border:1px solid var(--rule);border-radius:4px;padding:16px 16px 14px;background:var(--white);}
+.profile-rank{position:absolute;top:14px;right:14px;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;}
+.profile-reason{font-size:10.5px;color:var(--muted);margin:2px 0 10px;padding-right:26px;line-height:1.35;}
+.profile-name{font-size:12.5px;font-weight:800;color:var(--ink);margin-bottom:6px;}
+.profile-stars{color:var(--green);font-size:11px;letter-spacing:1px;margin-bottom:10px;}
+.profile-row{display:flex;justify-content:space-between;gap:8px;font-size:10.5px;padding:6px 0;border-top:1px solid var(--rule);}
+.profile-row:first-of-type{border-top:none;}
+.profile-key{color:var(--muted);font-weight:600;flex-shrink:0;}
+.profile-val{color:var(--ink);font-weight:600;text-align:right;}
+.exec-takeaways{border:1px solid var(--rule);border-radius:4px;padding:16px 18px;margin:20px 0 16px;background:var(--surface);}
+.chapter-transition{font-size:11px;color:var(--muted);padding-top:12px;border-top:1px solid var(--rule);margin-top:4px;}
+.chapter-transition strong{color:var(--ink);font-weight:700;}
+
 @media (max-width: 767px){
   html,body{overflow-x:hidden;}
   .site-nav{padding:0 16px;}
@@ -481,7 +516,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .stage-area{padding:16px 16px 132px;overflow-x:hidden;}
   .stage-body,.stage-quote{max-width:none;}
   .stage-title{font-size:24px;line-height:1.16;}
-  .kpi-dash,.two-col,.three-col,.persona-primary,.persona-secondary,.tier-grid,.sales-board,.return-grid,.align-grid,.funnel-row,.campaign-grid,.budget-summary,.roadmap-grid{grid-template-columns:1fr !important;}
+  .kpi-dash,.two-col,.three-col,.persona-primary,.persona-secondary,.tier-grid,.sales-board,.return-grid,.align-grid,.funnel-row,.campaign-grid,.budget-summary,.roadmap-grid,.invest-matrix,.profile-grid{grid-template-columns:1fr !important;}
   .kpi-dash,.tier-grid,.sales-board,.return-grid,.align-grid,.funnel-row,.campaign-grid,.budget-summary,.roadmap-grid{background:transparent;border:none;overflow:visible;}
   .tier-comp-bar{height:auto;flex-direction:column;}
   .tier-comp-seg{padding:6px 8px;justify-content:flex-start;}
@@ -512,6 +547,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .align-center{width:auto;}
   .sys-label{min-width:0;width:100%;}
   .sys-item{border-left:none;border-top:1px solid var(--rule);width:100%;}
+  .decision-row{grid-template-columns:1fr;gap:4px;}
   .nav-buttons{width:100%;padding:12px 16px;flex-direction:column;align-items:stretch;gap:10px;}
   .btn-group{display:grid;grid-template-columns:1fr;gap:8px;width:100%;}
   .btn{width:100%;padding:12px 14px;}
@@ -548,9 +584,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     <!-- ══ STAGE 1: KPI Foundation ══ -->
     <div class="stage active" id="stage-0">
       <div class="stage-eyebrow">Chapter 01 — The Scoreboard</div>
-      <h1 class="stage-title">We start with the <em>executive outcomes.</em></h1>
-      <p class="stage-body">Before any activation starts, the executive team needs a scoreboard that connects revenue growth, market share, gross margin, CAC payback, pipeline coverage, and expansion revenue. That scoreboard becomes the operating system for every commercial decision that follows.</p>
-      <div class="stage-quote">"Before we build the strategy, we define the scoreboard. What does the business need to move? Revenue growth? Margin? Share? Payback? Expansion? Every segment, activation, and sales motion should be measured against those outcomes."</div>
+      <h1 class="stage-title">What defines <em>success?</em></h1>
+      <p class="stage-body">Before any activation starts, leadership needs a scoreboard connecting revenue growth, market share, margin, payback, pipeline coverage, and expansion. That scoreboard is the operating system every commercial decision is measured against.</p>
 
       <div class="kpi-dash" id="dash-1">
         <div class="kd-card"><div class="kd-eye">Revenue Growth</div><div class="kd-val">14.3%</div><div class="kd-delta pos">▲ Above 12% target</div></div>
@@ -563,82 +598,106 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         <div class="kd-card"><div class="kd-eye">Marketing ROI</div><div class="kd-val">5.0×</div><div class="kd-delta pos">▲ Above 4.5× target</div></div>
       </div>
 
-      <p style="font-size:12px;color:var(--muted);">These eight outcomes anchor every layer of the commercial system. Click <strong>Next</strong> to begin building the strategy beneath them.</p>
+      <div class="exec-reco">
+        <div class="exec-reco-eye">Executive Recommendation</div>
+        <div class="exec-reco-body">Prioritize Sales Conversion and Pipeline Contribution first — both sit below target and gate every other number on this board. Revenue Growth, Retention, and LTV are already ahead of plan; protect them, don't optimize them further this cycle.</div>
+      </div>
+
+      <div class="chapter-transition">Next: <strong>Segmentation</strong> determines where those outcomes can be created.</div>
     </div>
 
     <!-- ══ STAGE 2: Segmentation (merged Ch 2 + 3) ══ -->
     <div class="stage" id="stage-1">
       <div class="stage-eyebrow">Chapter 02 — Segmentation</div>
-      <h1 class="stage-title">Know the audience. <em>Define the growth.</em></h1>
-      <p class="stage-body">Segmentation is where strategy begins to take shape. Before we can define a growth objective, we need to understand who is in the market — who is already a customer, who should be, and what each group needs. The segments themselves answer the growth question: they tell us what to pursue, in what order, and with what motion.</p>
-      <div class="stage-quote">"Segmentation turns a broad market into actionable groups. It tells us who we are speaking to, what they care about, how they buy, and where the largest opportunities exist — and in doing so, it defines the growth objective itself."</div>
+      <h1 class="stage-title">Where Should We <em>Compete?</em></h1>
+      <p class="stage-body">Commercial segmentation identifies where incremental investment is most likely to create profitable growth. Rather than treating every customer equally, we prioritize the markets that create the highest enterprise value.</p>
 
-      <!-- Growth objective flows from segmentation — shown as outcome, not input -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
-        <div style="border:1px solid var(--rule);border-radius:4px;padding:16px 18px;background:var(--white);">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">What segmentation reveals</div>
-          <div style="display:flex;flex-direction:column;gap:7px;">
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Who the audience actually is</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>What each group needs and how they buy</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Where the largest revenue opportunity sits</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Which customers to grow, protect, or acquire</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>How to prioritize marketing and sales motion</div>
-          </div>
+      <div class="exec-reco">
+        <div class="exec-reco-eye">Executive Recommendation</div>
+        <div class="exec-reco-body">Increase investment toward Enterprise and Growth segments, where expansion revenue, strategic account value, and long-term commercial opportunity are highest. Maintain efficient acquisition in Mid-Market while selectively investing in Emerging opportunities.</div>
+      </div>
+
+      <div class="section-label">Investment Matrix</div>
+      <div class="invest-matrix">
+        <div class="invest-col">
+          <div class="invest-label" style="color:var(--green);">Increase Investment</div>
+          <div class="invest-segs">Enterprise, Growth Accounts</div>
         </div>
-        <div style="border:1px solid var(--rule);border-radius:4px;padding:16px 18px;background:var(--white);">
-          <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Growth objectives that follow</div>
-          <div style="display:flex;flex-direction:column;gap:7px;">
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Revenue growth from highest-value segments</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Market share expansion into whitespace</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>New customer acquisition from high-fit prospects</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Retention and expansion of existing customers</div>
-            <div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;border-radius:50%;background:#2d6bcd;flex-shrink:0;"></span>Profitability from the most efficient motions</div>
-          </div>
+        <div class="invest-col">
+          <div class="invest-label" style="color:var(--ink);">Maintain</div>
+          <div class="invest-segs">Mid-Market</div>
+        </div>
+        <div class="invest-col">
+          <div class="invest-label" style="color:#b45309;">Selective</div>
+          <div class="invest-segs">Emerging</div>
         </div>
       </div>
 
-      <!-- Segment cards — clickable -->
-      <div class="three-col">
-        <div class="card clickable" onclick="expandSeg(this,'A')">
-          <div class="card-eye">Segment A</div>
-          <div class="card-title">High-Value Existing Customers</div>
-          <div class="card-body">Top-tier accounts by revenue and category breadth. Strong relationship depth and repurchase behavior.</div>
-          <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:90%"></div></div><div style="font-size:10px;color:var(--muted);">Opportunity size: High</div></div>
-          <span class="card-tag tag-g">Expand &amp; Retain</span>
-          <div class="seg-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);">
-            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Revenue growth and NRR through expansion.<br><strong>Motion:</strong> Executive relationship management, loyalty programs, personalized cross-sell, seller-assisted expansion plays.<br><strong>KPI link:</strong> NRR, LTV, revenue growth</div>
-          </div>
+      <div class="section-label">Segment Profiles</div>
+      <div class="profile-grid">
+        <div class="profile-card">
+          <div class="profile-rank" style="background:var(--green);">1</div>
+          <div class="profile-name">Enterprise</div>
+          <div class="profile-reason">Highest expansion opportunity</div>
+          <div class="profile-stars">★★★★★</div>
+          <div class="profile-row"><span class="profile-key">Opportunity</span><span class="profile-val">$250K–$1M+ ACV</span></div>
+          <div class="profile-row"><span class="profile-key">Buying committee</span><span class="profile-val">C-suite + Procurement</span></div>
+          <div class="profile-row"><span class="profile-key">Sales cycle</span><span class="profile-val">6–9 months</span></div>
+          <div class="profile-row"><span class="profile-key">Growth motion</span><span class="profile-val">Expansion-led</span></div>
+          <div class="profile-row"><span class="profile-key">Expansion potential</span><span class="profile-val">High</span></div>
         </div>
-        <div class="card clickable" onclick="expandSeg(this,'B')">
-          <div class="card-eye">Segment B</div>
-          <div class="card-title">Mid-Tier Growth Customers</div>
-          <div class="card-body">Strong fit, moderate purchase frequency. Significant potential to expand category penetration.</div>
-          <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:62%"></div></div><div style="font-size:10px;color:var(--muted);">Opportunity size: Medium–High</div></div>
-          <span class="card-tag tag-b">Move Tier 3 → Tier 2</span>
-          <div class="seg-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);">
-            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Revenue per customer through category expansion.<br><strong>Motion:</strong> Category expansion campaigns, lifecycle nurture, cross-sell enablement, seller-assisted growth plays.<br><strong>KPI link:</strong> Revenue per customer, pipeline contribution</div>
-          </div>
+        <div class="profile-card">
+          <div class="profile-rank" style="background:#5aa886;">2</div>
+          <div class="profile-name">Growth Accounts</div>
+          <div class="profile-reason">Highest acquisition efficiency</div>
+          <div class="profile-stars">★★★★☆</div>
+          <div class="profile-row"><span class="profile-key">Opportunity</span><span class="profile-val">$50K–$250K ACV</span></div>
+          <div class="profile-row"><span class="profile-key">Buying committee</span><span class="profile-val">VP + Category Owner</span></div>
+          <div class="profile-row"><span class="profile-key">Sales cycle</span><span class="profile-val">2–4 months</span></div>
+          <div class="profile-row"><span class="profile-key">Growth motion</span><span class="profile-val">Land &amp; expand</span></div>
+          <div class="profile-row"><span class="profile-key">Expansion potential</span><span class="profile-val">High</span></div>
         </div>
-        <div class="card clickable" onclick="expandSeg(this,'C')">
-          <div class="card-eye">Segment C</div>
-          <div class="card-title">High-Fit Prospects</div>
-          <div class="card-body">Not yet customers. Strong fit by industry, size, and buying profile. Highest new revenue potential.</div>
-          <div style="margin-top:10px;"><div class="track"><div class="tf g" style="width:45%"></div></div><div style="font-size:10px;color:var(--muted);">Opportunity size: Large</div></div>
-          <span class="card-tag tag-a">Acquire</span>
-          <div class="seg-detail" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);">
-            <div style="font-size:11px;color:var(--body);line-height:1.6;"><strong>Growth objective:</strong> Market share and new customer acquisition.<br><strong>Motion:</strong> Lead generation, intent-based campaigns, account-based selling, outbound sequencing.<br><strong>KPI link:</strong> New customers, CAC, pipeline, market share</div>
-          </div>
+        <div class="profile-card">
+          <div class="profile-rank" style="background:#8fbfa9;">3</div>
+          <div class="profile-name">Mid-Market</div>
+          <div class="profile-reason">Largest addressable volume</div>
+          <div class="profile-stars">★★★☆☆</div>
+          <div class="profile-row"><span class="profile-key">Opportunity</span><span class="profile-val">$10K–$50K ACV</span></div>
+          <div class="profile-row"><span class="profile-key">Buying committee</span><span class="profile-val">Manager + Ops</span></div>
+          <div class="profile-row"><span class="profile-key">Sales cycle</span><span class="profile-val">3–6 weeks</span></div>
+          <div class="profile-row"><span class="profile-key">Growth motion</span><span class="profile-val">Volume acquisition</span></div>
+          <div class="profile-row"><span class="profile-key">Expansion potential</span><span class="profile-val">Moderate</span></div>
+        </div>
+        <div class="profile-card">
+          <div class="profile-rank" style="background:#b7d3c4;color:#2e5c42;">4</div>
+          <div class="profile-name">Emerging</div>
+          <div class="profile-reason">Selective investment</div>
+          <div class="profile-stars">★★☆☆☆</div>
+          <div class="profile-row"><span class="profile-key">Opportunity</span><span class="profile-val">Under $10K ACV</span></div>
+          <div class="profile-row"><span class="profile-key">Buying committee</span><span class="profile-val">Owner-operator</span></div>
+          <div class="profile-row"><span class="profile-key">Sales cycle</span><span class="profile-val">1–3 weeks</span></div>
+          <div class="profile-row"><span class="profile-key">Growth motion</span><span class="profile-val">Selective pilot</span></div>
+          <div class="profile-row"><span class="profile-key">Expansion potential</span><span class="profile-val">Unproven</span></div>
         </div>
       </div>
-      <p style="font-size:11px;color:var(--muted);">Click each segment to see the growth objective and recommended motion.</p>
+
+      <div class="exec-takeaways">
+        <div class="section-label" style="margin-bottom:8px;">Executive Takeaways</div>
+        <div style="display:flex;flex-direction:column;gap:7px;">
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;margin-top:5px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Invest first in Enterprise and Growth Accounts — that's where expansion economics are strongest.</div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;margin-top:5px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Mid-Market funds volume; it doesn't need more investment, just efficient execution.</div>
+          <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;margin-top:5px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Selective Emerging bets protect optionality without diluting focus on the segments that move the P&amp;L today.</div>
+        </div>
+      </div>
+
+      <div class="chapter-transition">Next: <strong>Total Addressable Market</strong> quantifies the opportunity inside these prioritized segments.</div>
     </div>
 
     <!-- ══ STAGE 3: TAM ══ -->
     <div class="stage" id="stage-2">
       <div class="stage-eyebrow">Chapter 03 — Total Addressable Market</div>
       <h1 class="stage-title">Map the full <em>market opportunity.</em></h1>
-      <p class="stage-body">With segments defined, we map the Total Addressable Market for each one. This is how the executive team begins to understand market share, whitespace, and where growth is still available. The TAM layer answers the questions a dashboard alone cannot.</p>
-      <div class="stage-quote">"How many companies are in the addressable market? Which ones are already customers? Which ones are prospects? Where do we have share? Where do we have whitespace? And who are the contacts we need to reach?"</div>
+      <p class="stage-body">With segments defined, we map the Total Addressable Market for each one — where we already have share, where whitespace remains, and who's still left to reach.</p>
 
       <div class="tam-shell">
         <div class="tam-map-area" id="tamMap"></div>
@@ -662,6 +721,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Warm Pipeline</div><div style="font-size:22px;font-weight:800;color:var(--ink);">314</div><div style="font-size:10px;color:var(--muted);">Engaged + outreach</div></div>
         <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Whitespace</div><div style="font-size:22px;font-weight:800;color:var(--ink);">420</div><div style="font-size:10px;color:var(--muted);">Unworked leads</div></div>
       </div>
+
+      <div class="exec-reco">
+        <div class="exec-reco-eye">Executive Recommendation</div>
+        <div class="exec-reco-body">Focus first on the 420 unworked leads inside Enterprise and Growth Accounts — that's where whitespace overlaps with the segments we've already committed to fund.</div>
+      </div>
+
+      <div class="chapter-transition">Next: <strong>Audience Architecture</strong> defines who inside these accounts we need to reach.</div>
     </div>
 
     <!-- ══ STAGE 5: Personas ══ -->
@@ -669,8 +735,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     <div class="stage" id="stage-3">
       <div class="stage-eyebrow">Chapter 04 — Audience Architecture</div>
       <h1 class="stage-title">Who gets the message. <em>And what it says.</em></h1>
-      <p class="stage-body">We structure the audience in two layers. First, we tier accounts by revenue value to establish where effort should be focused. Then within each tier, we define the personas making the decisions — so messaging is personalized by business context and by the job each person is there to do.</p>
-      <div class="stage-quote">"Tier tells us who matters most. Persona tells us what to say to each person inside that account."</div>
+      <p class="stage-body">We tier accounts by revenue value to focus effort, then define the personas making decisions inside each tier — so messaging matches both the account's value and the buyer's job to be done.</p>
 
       <!-- TIER SECTION — interactive: click or hover a tier to reveal its personas below -->
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Step 1 — Revenue Tiering</div>
@@ -698,12 +763,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         </div>
 
       </div>
-      <div class="tier-hint">Click or hover a tier to see the personas inside it.</div>
+      <div class="tier-hint">Click or hover a tier — the personas below update to match it.</div>
 
       <!-- DIVIDER -->
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
         <div style="flex:1;height:1px;background:var(--rule);"></div>
-        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);">Step 2 — Personas</div>
+        <div id="personaStepLabel" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);white-space:nowrap;">Personas inside T1 — Highest-Value Accounts</div>
         <div style="flex:1;height:1px;background:var(--rule);"></div>
       </div>
 
@@ -907,13 +972,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         </div>
 
       </div>
+
+      <div class="chapter-transition">Next: <strong>Prospect Funnel</strong> shows how these tiers convert into pipeline.</div>
     </div>
 
     <!-- ══ STAGE 4: Prospect Funnel ══ -->
     <div class="stage" id="stage-4">
       <div class="stage-eyebrow">Chapter 05 — Prospect Funnel</div>
       <h1 class="stage-title">Turn market opportunity into <em>qualified pipeline.</em></h1>
-      <p class="stage-body">For prospects, the goal is to convert TAM into pipeline. We use segmentation, TAM fit, intent signals, and engagement data to prioritize who marketing should target and who sales should pursue — at each stage of the funnel.</p>
+      <p class="stage-body">For prospects, the goal is converting TAM into pipeline. Segmentation, TAM fit, and signal data prioritize who marketing targets and who sales pursues, at every stage of the funnel.</p>
 
       <div style="margin-bottom:20px;">
         <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Funnel Stage Breakdown</div>
@@ -984,47 +1051,93 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         <div class="card"><div class="card-eye">Tier 2</div><div class="card-title">High-Fit Leads</div><div class="card-body">Demand generation campaigns, content nurture, intent monitoring, seller follow-up on signal.</div><span class="card-tag tag-b">Nurture to SQL</span></div>
         <div class="card"><div class="card-eye">Tier 3</div><div class="card-title">Early-Stage Leads</div><div class="card-body">Broad awareness, category education, low-cost digital programs. Move to Tier 2 on engagement signal.</div><span class="card-tag tag-a">Qualify and promote</span></div>
       </div>
+
+      <div class="invest-matrix" style="grid-template-columns:repeat(3,1fr);margin-top:20px;">
+        <div class="invest-col">
+          <div class="invest-label" style="color:#b45309;">Primary Bottleneck</div>
+          <div class="invest-segs">Opportunity → Closed Won, 31.9% win rate</div>
+        </div>
+        <div class="invest-col">
+          <div class="invest-label" style="color:var(--ink);">Highest-Leverage Fix</div>
+          <div class="invest-segs">Win-rate enablement on active opportunities</div>
+        </div>
+        <div class="invest-col">
+          <div class="invest-label" style="color:var(--green);">Expected Lift</div>
+          <div class="invest-segs">+37 deals, ~$16M at the 38% target rate</div>
+        </div>
+      </div>
+
+      <div class="exec-reco">
+        <div class="exec-reco-eye">Executive Recommendation</div>
+        <div class="exec-reco-body">Fund win-rate enablement before adding top-of-funnel spend. The funnel already produces enough qualified opportunity; the leak is late-stage, and it's the same gap flagged in the KPI Foundation.</div>
+      </div>
+
+      <div class="chapter-transition">Next: <strong>Signal Intelligence</strong> shows which accounts to act on and when.</div>
     </div>
 
     <!-- ══ STAGE 8: Signal Intelligence ══ -->
     <div class="stage" id="stage-5">
       <div class="stage-eyebrow">Chapter 06 — Signal Intelligence</div>
       <h1 class="stage-title">Act on the right signal <em>at the right moment.</em></h1>
-      <p class="stage-body">Signals tell us when to act. Instead of treating every customer or prospect the same, we monitor market, account, and contact-level activity to understand when there is a real reason to engage — and when waiting means losing.</p>
-      <div class="stage-quote">"Instead of treating every customer or prospect the same, we monitor market, account, and contact-level activity to understand when there is a reason to engage."</div>
+      <p class="stage-body">Signals tell us when to act — market, account, and contact-level activity that separates a real reason to engage from noise.</p>
 
       <div class="two-col">
         <div>
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Customer Signals</div>
           <div class="signal-card">
-            <div class="signal-header"><div class="signal-icon">📉</div><div><div class="signal-hed">Declining Purchase Frequency</div><div class="signal-sub">Spend down 30%+ vs. prior quarter</div></div><span class="signal-tag tag-r">At Risk</span></div>
-            <div class="signal-body"><div class="signal-flow"><span class="signal-step">Signal</span><span class="signal-arrow-sm">→</span><span class="signal-step">Alert seller</span><span class="signal-arrow-sm">→</span><span class="signal-step">Re-engagement offer</span><span class="signal-arrow-sm">→</span><span class="signal-step">Track recovery</span></div></div>
+            <div class="signal-header"><div class="signal-icon">📉</div><div><div class="signal-hed">Declining Spend</div><div class="signal-sub">Down 30%+ vs. prior quarter</div></div><span class="signal-tag tag-r">At Risk</span></div>
+            <div class="signal-body">
+              <div class="signal-why">Early churn indicator — the longer it runs, the harder the account is to save.</div>
+              <div class="signal-actions">
+                <div class="signal-action"><b>Marketing</b>Re-engagement offer</div>
+                <div class="signal-action"><b>Sales</b>Alert seller, schedule save call</div>
+              </div>
+            </div>
           </div>
           <div class="signal-card">
-            <div class="signal-header"><div class="signal-icon">🛒</div><div><div class="signal-hed">Cross-Sell Opportunity</div><div class="signal-sub">High-value customer buying in only 1 of 4 categories</div></div><span class="signal-tag tag-b">Expand</span></div>
-            <div class="signal-body"><div class="signal-flow"><span class="signal-step">Signal</span><span class="signal-arrow-sm">→</span><span class="signal-step">Personalized offer</span><span class="signal-arrow-sm">→</span><span class="signal-step">Seller play</span><span class="signal-arrow-sm">→</span><span class="signal-step">Measure lift</span></div></div>
+            <div class="signal-header"><div class="signal-icon">🛒</div><div><div class="signal-hed">Cross-Sell Gap</div><div class="signal-sub">High-value account in only 1 of 4 categories</div></div><span class="signal-tag tag-b">Expand</span></div>
+            <div class="signal-body">
+              <div class="signal-why">Wallet share is open — the account already trusts us in one category.</div>
+              <div class="signal-actions">
+                <div class="signal-action"><b>Marketing</b>Personalized cross-sell offer</div>
+                <div class="signal-action"><b>Sales</b>Seller-led category intro</div>
+              </div>
+            </div>
           </div>
         </div>
         <div>
           <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Prospect Signals</div>
           <div class="signal-card">
-            <div class="signal-header"><div class="signal-icon">💰</div><div><div class="signal-hed">Public Funding Received</div><div class="signal-sub">14 target accounts awarded contracts this quarter</div></div><span class="signal-tag tag-g">Act Now</span></div>
-            <div class="signal-body"><div class="signal-flow"><span class="signal-step">Signal detected</span><span class="signal-arrow-sm">→</span><span class="signal-step">Accounts matched</span><span class="signal-arrow-sm">→</span><span class="signal-step">Campaign launched</span><span class="signal-arrow-sm">→</span><span class="signal-step">Sales alerted</span></div></div>
+            <div class="signal-header"><div class="signal-icon">💰</div><div><div class="signal-hed">Funding Received</div><div class="signal-sub">14 target accounts awarded contracts this quarter</div></div><span class="signal-tag tag-g">Act Now</span></div>
+            <div class="signal-body">
+              <div class="signal-why">New budget just unlocked — the buying window is open now, not next quarter.</div>
+              <div class="signal-actions">
+                <div class="signal-action"><b>Marketing</b>Targeted campaign to matched accounts</div>
+                <div class="signal-action"><b>Sales</b>Immediate outreach, priority flag</div>
+              </div>
+            </div>
           </div>
           <div class="signal-card">
-            <div class="signal-header"><div class="signal-icon">🔍</div><div><div class="signal-hed">Intent Signal Detected</div><div class="signal-sub">Prospect actively searching category keywords</div></div><span class="signal-tag tag-a">Engage</span></div>
-            <div class="signal-body"><div class="signal-flow"><span class="signal-step">Signal</span><span class="signal-arrow-sm">→</span><span class="signal-step">Retargeting on</span><span class="signal-arrow-sm">→</span><span class="signal-step">Sales priority ↑</span><span class="signal-arrow-sm">→</span><span class="signal-step">Track conversion</span></div></div>
+            <div class="signal-header"><div class="signal-icon">🔍</div><div><div class="signal-hed">Active Intent</div><div class="signal-sub">Prospect actively searching category keywords</div></div><span class="signal-tag tag-a">Engage</span></div>
+            <div class="signal-body">
+              <div class="signal-why">Already evaluating — the question is who they choose, not whether they buy.</div>
+              <div class="signal-actions">
+                <div class="signal-action"><b>Marketing</b>Retargeting activated</div>
+                <div class="signal-action"><b>Sales</b>Priority raised, faster follow-up</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <div class="chapter-transition">Next: <strong>Commercial Activation</strong> turns these signals into funded campaigns.</div>
     </div>
 
     <!-- ══ STAGE 9: Commercial Activation ══ -->
     <div class="stage" id="stage-6">
       <div class="stage-eyebrow">Chapter 07 — Commercial Activation</div>
-      <h1 class="stage-title">From signal to <em>coordinated action.</em></h1>
-      <p class="stage-body">Once a signal is detected, the system turns insight into a campaign decision. Commercial activation shows one integrated campaign first, then the channel economics that broaden its reach and justify budget.</p>
-      <div class="stage-quote">"The KPI foundation makes spend accountable. The campaign comes first. Channel investment supports it and must justify pipeline, revenue, and ROI."</div>
+      <h1 class="stage-title">Where should we <em>invest?</em></h1>
+      <p class="stage-body">Once a signal is detected, insight becomes a funded campaign decision — one named campaign first, then the channel economics that justify the spend behind it.</p>
 
       <div style="border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;">
         <div class="activation-head">Commercial Activation: Priority Account Growth Campaign</div>
@@ -1136,14 +1249,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </div>
         </div>
       </div>
+
+      <div class="chapter-transition">Next: <strong>Sales Motion</strong> shows how these accounts get worked once marketing hands them off.</div>
     </div>
 
     <!-- ══ STAGE 10: Sales Motion ══ -->
     <div class="stage" id="stage-7">
       <div class="stage-eyebrow">Chapter 08 — Sales Motion</div>
-      <h1 class="stage-title">Sales execution built on the <em>same intelligence.</em></h1>
-      <p class="stage-body">The same segmentation, TAM, tiering, and signals that power marketing should also power sales execution. Account assignment, territory coverage, seller prioritization, and talk tracks all connect back to the customer segment, opportunity tier, and active signals.</p>
-      <div class="stage-quote">"Sales motions become stronger when they are built from the same intelligence layer as marketing."</div>
+      <h1 class="stage-title">One intelligence layer. <em>Two teams acting on it.</em></h1>
+      <p class="stage-body">Account assignment, seller prioritization, and talk tracks connect back to the same segment, tier, and signal data driving marketing — not a separate sales-only view of the account.</p>
 
       <div class="sales-board">
         <div class="sb-col">
@@ -1177,14 +1291,20 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </div>
         </div>
       </div>
+
+      <div class="exec-reco">
+        <div class="exec-reco-eye">Executive Recommendation</div>
+        <div class="exec-reco-body">Deploy senior sellers against Tier 1 Prospects showing funding or intent signals first — that's where the funnel's win-rate gap is fixable with people, not more spend.</div>
+      </div>
+
+      <div class="chapter-transition">Next: <strong>M+S Alignment</strong> shows how marketing and sales share one system instead of two.</div>
     </div>
 
     <!-- ══ STAGE 11: Alignment ══ -->
     <div class="stage" id="stage-8">
       <div class="stage-eyebrow">Chapter 09 — Marketing + Sales Alignment</div>
       <h1 class="stage-title">One system. <em>Two engines.</em></h1>
-      <p class="stage-body">The power of this model is alignment. Marketing and sales are not working from separate plans. They are operating from the same KPI framework, the same customer intelligence, and the same market opportunity model — feeding performance back into the executive dashboard together.</p>
-      <div class="stage-quote">"Marketing and sales are not working from separate plans. They are operating from the same intelligence layer."</div>
+      <p class="stage-body">Marketing and sales aren't working from separate plans — both run on the same KPI framework, segmentation, and signal data, feeding one dashboard together.</p>
 
       <div class="align-grid">
         <div class="align-side">
@@ -1199,7 +1319,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           <div class="align-item">Campaign ROI measurement</div>
         </div>
         <div class="align-center">
-          <div class="align-center-label">Shared Intelligence Layer</div>
+          <div class="align-center-label">Commercial Intelligence</div>
           <div class="align-sep"></div>
           <div class="align-center-val">KPI Framework</div>
           <div class="align-sep"></div>
@@ -1261,14 +1381,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </ul>
         </div>
       </div>
+
+      <div class="chapter-transition">Next: <strong>Return to Dashboard</strong> proves the system worked.</div>
     </div>
 
     <!-- ══ STAGE 12: Return to Dashboard ══ -->
     <div class="stage" id="stage-9">
       <div class="stage-eyebrow">Chapter 10 — Performance Layer</div>
       <h1 class="stage-title">Back to the dashboard. <em>Now it means something.</em></h1>
-      <p class="stage-body">We return to where we started — but the dashboard looks different now. Every KPI has a system behind it: a segment it belongs to, a tier it represents, a signal that activated it, and a commercial activation or sales motion that drove it. The dashboard is the performance layer of a complete commercial system.</p>
-      <div class="stage-quote">"The dashboard is not the starting point and it is not the strategy by itself. It is the performance layer of a complete commercial system."</div>
+      <p class="stage-body">Every KPI here traces to a system behind it — a segment, a tier, a signal, an activation or sales motion that drove it. This is the performance layer of the operating system, not a separate scoreboard.</p>
 
       <div class="return-grid">
         <div class="rg-card"><div class="rg-layer">Segmentation + TAM</div><div class="rg-kpi">Market Share: 18.0%</div><div class="rg-source">161 active of 895 addressable accounts</div></div>
@@ -1288,9 +1409,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         <div class="sys-row"><div class="sys-label">Sales Engine</div><div class="sys-items"><span class="sys-item">Account prioritization</span><span class="sys-item">Territory motions</span><span class="sys-item">Talk tracks</span><span class="sys-item">Pipeline management</span><span class="sys-item">Closed-won revenue</span></div></div>
       </div>
 
-      <div style="padding:20px;background:var(--green-pale);border:1px solid var(--green);border-radius:4px;margin-top:4px;">
-        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--green);margin-bottom:8px;">The complete system</div>
-        <div style="font-size:14px;color:var(--ink);line-height:1.65;font-weight:500;">This is how we move from executive goals to market intelligence, from market intelligence to marketing and sales action, and from action back to measurable business performance.</div>
+      <div class="section-label" style="margin-top:6px;">Executive Decision Framework</div>
+      <div class="decision-framework">
+        <div class="decision-row"><div class="decision-q">Where should we invest?</div><div class="decision-a">Enterprise and Growth Accounts — highest expansion and acquisition efficiency.</div></div>
+        <div class="decision-row"><div class="decision-q">What should we stop?</div><div class="decision-a">Adding top-of-funnel spend into Mid-Market and Emerging beyond current levels.</div></div>
+        <div class="decision-row"><div class="decision-q">Which segments deserve more funding?</div><div class="decision-a">Enterprise and Growth Accounts, per the Investment Matrix in Segmentation.</div></div>
+        <div class="decision-row"><div class="decision-q">Where is pipeline slowing?</div><div class="decision-a">Opportunity → Closed Won. Win rate sits at 31.9%, below the 38% target.</div></div>
+        <div class="decision-row"><div class="decision-q">What should leadership do next?</div><div class="decision-a">Fund win-rate enablement now; protect what's already ahead of plan; revisit at the 90-day mark.</div></div>
       </div>
     </div>
 
@@ -1910,19 +2035,8 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
 });
 
-// Segment expand
-function expandSeg(card, seg) {
-  const detail = card.querySelector('.seg-detail');
-  const isOpen = detail.style.display === 'block';
-  document.querySelectorAll('.seg-detail').forEach(d => d.style.display = 'none');
-  document.querySelectorAll('.card.clickable').forEach(c => c.classList.remove('expanded'));
-  if (!isOpen) {
-    detail.style.display = 'block';
-    card.classList.add('expanded');
-  }
-}
-
 // ── Audience Architecture: interactive tier → persona ──
+const TIER_NAMES = { T1: 'Highest-Value Accounts', T2: 'Growth Accounts', T3: 'Early-Stage Accounts' };
 function selectTier(tier) {
   document.querySelectorAll('.tier-card.selectable').forEach(c => {
     const isActive = c.dataset.tier === tier;
@@ -1932,6 +2046,8 @@ function selectTier(tier) {
   document.querySelectorAll('.persona-card-lg').forEach(c => {
     c.classList.toggle('show', c.dataset.tier === tier);
   });
+  const label = document.getElementById('personaStepLabel');
+  if (label) label.textContent = `Personas inside ${tier} — ${TIER_NAMES[tier]}`;
 }
 document.querySelectorAll('.tier-card.selectable').forEach(c => {
   c.addEventListener('click', () => selectTier(c.dataset.tier));
