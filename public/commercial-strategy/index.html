@@ -209,7 +209,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .card.clickable.expanded{border-color:var(--green);background:var(--green-pale);}
 
 /* Tier cards */
-.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
 .tier-card{background:var(--white);padding:20px;}
 .tier-num{font-size:28px;font-weight:800;color:var(--ink);letter-spacing:-1px;margin-bottom:4px;}
 .tier-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:12px;}
@@ -219,47 +219,31 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .tier-bullets li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:700;}
 
 /* TAM Map */
-.tam-shell{
-  border:1px solid var(--rule);border-radius:4px;overflow:hidden;
-  margin-bottom:20px;
-  position:relative;height:360px;
-  background:#e8edf2;
+.tam-visual{
+  display:grid;grid-template-columns:220px 1fr;gap:36px;align-items:center;
+  border:1px solid var(--rule);border-radius:4px;
+  padding:28px 32px;margin-bottom:20px;background:var(--white);
 }
-.tam-map-area{width:100%;height:100%;position:relative;overflow:hidden;}
-.tam-map-area svg{position:absolute;top:0;left:0;width:100%;height:100%;}
-
-/* Account dots layered on top of SVG */
-.map-dot{position:absolute;border-radius:50%;transition:all 0.3s;cursor:pointer;z-index:2;}
-.map-dot:hover{transform:scale(1.6);z-index:10;}
-
-/* Tooltip on hover */
-.map-tooltip{
-  position:absolute;background:var(--ink);color:var(--white);
-  font-size:10px;font-weight:500;padding:7px 10px;border-radius:4px;
-  pointer-events:none;white-space:nowrap;z-index:20;
-  display:none;line-height:1.4;
-  box-shadow:0 2px 8px rgba(0,0,0,0.3);
-  min-width:160px;
-}
-
-.tam-legend{
-  position:absolute;bottom:12px;left:12px;
-  background:rgba(255,255,255,0.97);border:1px solid var(--rule);border-radius:3px;
-  padding:10px 14px;
-  display:flex;flex-direction:column;gap:5px;
-  z-index:5;box-shadow:0 1px 4px rgba(0,0,0,0.08);
-}
-.tam-leg-item{display:flex;align-items:center;gap:6px;font-size:10px;font-weight:500;color:var(--body);}
-.tam-leg-dot{width:8px;height:8px;border-radius:50%;}
-
-.tam-count{
-  position:absolute;top:12px;right:12px;
-  background:rgba(255,255,255,0.97);border:1px solid var(--rule);border-radius:3px;
-  padding:10px 14px;text-align:right;
-  z-index:5;box-shadow:0 1px 4px rgba(0,0,0,0.08);
-}
-.tam-count-val{font-size:22px;font-weight:800;color:var(--green);letter-spacing:-0.5px;line-height:1;}
-.tam-count-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted);}
+.tam-rings{width:100%;}
+.tam-breakdown{display:flex;flex-direction:column;}
+.tam-tier-row{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--rule);}
+.tam-tier-row:last-child{border-bottom:none;}
+.tam-tier-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0;}
+.tam-tier-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.9px;color:var(--muted);margin-bottom:2px;}
+.tam-tier-name{font-size:13px;font-weight:700;color:var(--ink);}
+.tam-tier-desc{font-size:10.5px;color:var(--muted);margin-top:2px;}
+.tam-tier-val{font-size:20px;font-weight:800;color:var(--ink);margin-left:auto;letter-spacing:-0.4px;flex-shrink:0;}
+.tam-seg-head{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+.tam-seg-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.tam-seg-name{font-size:12.5px;font-weight:800;color:var(--ink);}
+.tam-seg-stat{margin-bottom:12px;}
+.tam-seg-stat:last-child{margin-bottom:0;}
+.tam-seg-stat-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:3px;}
+.tam-seg-stat-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--muted);}
+.tam-seg-stat-pct{font-size:10px;font-weight:700;color:var(--muted);}
+.tam-seg-stat-val{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;margin-bottom:6px;}
+.tam-seg-bar-track{height:5px;background:var(--surface);border-radius:3px;overflow:hidden;}
+.tam-seg-bar-fill{height:100%;border-radius:3px;}
 
 /* Funnel */
 .funnel-row{
@@ -324,14 +308,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .persona-primary{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;}
 .persona-secondary{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:4px;}
 
-.persona-card-lg{border:1px solid var(--rule);border-radius:6px;overflow:hidden;background:var(--white);display:flex;flex-direction:column;}
-.pc-photo{height:130px;overflow:hidden;position:relative;background:var(--surface);display:flex;align-items:center;justify-content:center;}
-.pc-photo svg{width:100%;height:100%;}
-.pc-photo-badge{position:absolute;bottom:10px;left:12px;background:var(--green);color:var(--white);font-size:9px;font-weight:700;letter-spacing:0.7px;text-transform:uppercase;padding:3px 8px;border-radius:2px;}
-.pc-body{padding:14px 16px 16px;flex:1;display:flex;flex-direction:column;}
+.persona-card-lg{border:1px solid var(--rule);border-top:3px solid var(--pc-accent, var(--green));border-radius:6px;overflow:hidden;background:var(--white);display:flex;flex-direction:column;}
+.pc-header{display:flex;align-items:flex-start;gap:14px;padding:18px 18px 14px;}
+.pc-avatar{width:50px;height:50px;border-radius:50%;background:var(--pc-accent, var(--green));display:flex;align-items:center;justify-content:center;color:var(--pc-accent-text, #fff);font-size:15px;font-weight:800;letter-spacing:-0.2px;flex-shrink:0;}
+.pc-header-text{min-width:0;padding-top:1px;}
 .pc-role{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:3px;}
-.pc-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;margin-bottom:2px;}
-.pc-seg{font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--rule);}
+.pc-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-0.3px;margin-bottom:1px;}
+.pc-title{font-size:11px;color:var(--body);margin-bottom:4px;}
+.pc-seg{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+.pc-body{padding:0 18px 18px;flex:1;display:flex;flex-direction:column;border-top:1px solid var(--rule);margin-top:2px;padding-top:14px;}
 .pc-rows{display:flex;flex-direction:column;gap:6px;flex:1;}
 .pc-row{display:flex;gap:8px;align-items:flex-start;}
 .pc-key{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);min-width:52px;padding-top:1px;flex-shrink:0;}
@@ -346,7 +331,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .pcs-val{font-size:10px;color:var(--body);line-height:1.4;}
 
 /* Tier cards */
-.tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
+.tier-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;}
 .tier-card{background:var(--white);padding:20px;}
 .tier-num{font-size:26px;font-weight:800;color:var(--ink);letter-spacing:-1px;margin-bottom:2px;}
 .tier-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px;}
@@ -431,15 +416,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 /* Interactive tier → persona (Audience Architecture) */
 .tier-card.selectable{cursor:pointer;transition:background .2s ease,color .2s ease;}
 .tier-card.selectable:hover{background:var(--green-pale);}
-.tier-card.selectable.active{background:var(--green);}
+.tier-card.selectable.active{background:var(--tc, var(--green));}
 .tier-card.selectable.active .tier-num,
 .tier-card.selectable.active .tier-label,
 .tier-card.selectable.active .tier-seg,
 .tier-card.selectable.active .tier-desc,
-.tier-card.selectable.active .tier-msg{color:var(--white);}
+.tier-card.selectable.active .tier-msg{color:var(--tc-text, var(--white));}
 .tier-card .tier-msg{font-size:10px;font-weight:700;color:var(--green);}
-.tier-card.selectable.active .tier-msg{color:rgba(255,255,255,.92);}
+.tier-card.selectable.active .tier-msg{color:var(--tc-text, rgba(255,255,255,.92));}
 .tier-hint{font-size:11px;color:var(--muted);margin:-10px 0 18px;}
+.tier-persona-bridge-wrap{position:relative;height:34px;margin-bottom:2px;}
+.tier-persona-bridge{position:absolute;top:0;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--green);white-space:nowrap;transition:left .28s ease;}
 .persona-primary .persona-card-lg{display:none;}
 .persona-primary .persona-card-lg.show{display:flex;animation:fadeIn .3s ease;}
 
@@ -489,6 +476,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .exec-reco-eye{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;}
 .exec-reco-body{font-size:13px;color:var(--ink);line-height:1.55;font-weight:500;}
 .section-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;}
+.tiny{font-size:10px;color:var(--muted);}
 .invest-matrix{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:22px;}
 .invest-col{background:var(--white);padding:14px 16px;}
 .invest-label{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;}
@@ -560,10 +548,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .activation-cell{min-height:0;}
   .kd-card,.card,.persona-card-lg,.persona-card-sm,.tier-card,.sb-col,.rg-card{min-width:0;}
   .kd-card,.card,.persona-card-lg,.persona-card-sm,.tier-card,.sb-col,.rg-card,.align-side,.align-center{padding:14px;}
-  .tam-shell{height:auto;}
-  .tam-map-area{height:240px;}
-  .tam-count,.tam-legend{position:static;margin-top:12px;}
-  .tam-legend{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;}
+  .tam-visual{grid-template-columns:1fr;text-align:center;padding:22px 18px;}
+  .tam-rings{max-width:200px;margin:0 auto;}
+  .tam-tier-row{text-align:left;}
   .funnel-layout{display:block;}
   .funnel-cell{padding:14px;text-align:left;}
   .funnel-num{font-size:22px;}
@@ -577,6 +564,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .decision-row{grid-template-columns:1fr;gap:4px;}
   .next-bubble{left:16px;right:16px;max-width:none;bottom:158px;}
   .next-bubble-caret{left:50%;right:auto;transform:translateX(-50%) rotate(45deg);}
+  .tier-persona-bridge{left:50% !important;}
   .nav-buttons{width:100%;padding:12px 16px;flex-direction:column;align-items:stretch;gap:10px;}
   .btn-group{display:grid;grid-template-columns:1fr;gap:8px;width:100%;}
   .btn{width:100%;padding:12px 14px;}
@@ -725,35 +713,111 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     <!-- ══ STAGE 3: TAM ══ -->
     <div class="stage" id="stage-2">
       <div class="stage-eyebrow">Chapter 03 — Total Addressable Market</div>
-      <h1 class="stage-title">Map the full <em>market opportunity.</em></h1>
-      <p class="stage-body">With segments defined, we map the Total Addressable Market for each one — where we already have share, where whitespace remains, and who's still left to reach.</p>
+      <h1 class="stage-title">How big is this, <em>really?</em></h1>
+      <p class="stage-body">With segments defined, we size the addressable market in three layers — the full universe, what we can realistically reach today, and what we already hold.</p>
 
-      <div class="tam-shell">
-        <div class="tam-map-area" id="tamMap"></div>
-        <div class="map-tooltip" id="mapTooltip"></div>
-        <div class="tam-legend">
-          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#2a72d5;"></div>Active customer</div>
-          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#3baf9e;"></div>Engaged / recent</div>
-          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#9eaab8;"></div>Lead / prospect</div>
-          <div class="tam-leg-item"><div class="tam-leg-dot" style="background:#e8a020;"></div>Lapsed</div>
+      <div class="tam-visual">
+        <div class="tam-rings">
+          <svg viewBox="0 0 240 240" style="width:100%;height:auto;" role="img" aria-label="Total addressable market of 895 accounts, narrowing to a serviceable addressable market of 475, narrowing to a serviceable obtainable market of 161 active today.">
+            <circle cx="120" cy="120" r="108" fill="#edf6f1" stroke="#dfe9e3" stroke-width="1"/>
+            <circle cx="120" cy="120" r="74" fill="#bfe0cd" stroke="#a8d4bd" stroke-width="1"/>
+            <circle cx="120" cy="120" r="42" fill="#4a9e7a"/>
+            <text x="120" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="26" font-weight="800" fill="#ffffff">161</text>
+            <text x="120" y="131" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" font-weight="700" fill="rgba(255,255,255,0.88)" letter-spacing="1.2">SOM TODAY</text>
+          </svg>
         </div>
-        <div class="tam-count">
-          <div class="tam-count-val">895</div>
-          <div class="tam-count-lbl">Addressable accounts</div>
-          <div style="margin-top:6px;font-size:10px;color:var(--muted);">161 active · 420 leads</div>
+        <div class="tam-breakdown">
+          <div class="tam-tier-row">
+            <div class="tam-tier-dot" style="background:#edf6f1;border:1px solid #dfe9e3;"></div>
+            <div>
+              <div class="tam-tier-label">TAM</div>
+              <div class="tam-tier-name">Total Addressable Market</div>
+              <div class="tam-tier-desc">Every account that fits our target profile</div>
+            </div>
+            <div class="tam-tier-val">895</div>
+          </div>
+          <div class="tam-tier-row">
+            <div class="tam-tier-dot" style="background:#bfe0cd;"></div>
+            <div>
+              <div class="tam-tier-label">SAM</div>
+              <div class="tam-tier-name">Serviceable Addressable Market</div>
+              <div class="tam-tier-desc">Reachable with today's motion and coverage</div>
+            </div>
+            <div class="tam-tier-val">475</div>
+          </div>
+          <div class="tam-tier-row">
+            <div class="tam-tier-dot" style="background:var(--green);"></div>
+            <div>
+              <div class="tam-tier-label">SOM</div>
+              <div class="tam-tier-name">Serviceable Obtainable Market</div>
+              <div class="tam-tier-desc">Active today — 18% share of TAM</div>
+            </div>
+            <div class="tam-tier-val">161</div>
+          </div>
         </div>
       </div>
 
-      <div class="kpi-dash">
-        <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Total Market</div><div style="font-size:22px;font-weight:800;color:var(--ink);">895</div><div style="font-size:10px;color:var(--muted);">Addressable accounts</div></div>
-        <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Active Customers</div><div style="font-size:22px;font-weight:800;color:var(--green);">161</div><div style="font-size:10px;color:var(--muted);">18% account share</div></div>
-        <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Warm Pipeline</div><div style="font-size:22px;font-weight:800;color:var(--ink);">314</div><div style="font-size:10px;color:var(--muted);">Engaged + outreach</div></div>
-        <div style="background:var(--white);padding:14px 16px;"><div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;">Whitespace</div><div style="font-size:22px;font-weight:800;color:var(--ink);">420</div><div style="font-size:10px;color:var(--muted);">Unworked leads</div></div>
+      <div class="section-label">TAM by Segment</div>
+      <div class="tiny" style="margin-bottom:14px;">The same 895 accounts, cut by the priority segments from Chapter 02.</div>
+
+      <div class="profile-grid" style="margin-bottom:20px;">
+        <div class="profile-card">
+          <div class="tam-seg-head"><div class="tam-seg-dot" style="background:var(--green);"></div><div class="tam-seg-name">Enterprise</div></div>
+          <div class="tam-seg-stat">
+            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Accounts</span><span class="tam-seg-stat-pct">8%</span></div>
+            <div class="tam-seg-stat-val">70</div>
+            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:8%;background:var(--green);"></div></div>
+          </div>
+          <div class="tam-seg-stat">
+            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Opportunity</span><span class="tam-seg-stat-pct">49%</span></div>
+            <div class="tam-seg-stat-val">$42M</div>
+            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:49%;background:var(--green);"></div></div>
+          </div>
+        </div>
+        <div class="profile-card">
+          <div class="tam-seg-head"><div class="tam-seg-dot" style="background:#5aa886;"></div><div class="tam-seg-name">Growth Accounts</div></div>
+          <div class="tam-seg-stat">
+            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Accounts</span><span class="tam-seg-stat-pct">22%</span></div>
+            <div class="tam-seg-stat-val">195</div>
+            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:22%;background:#5aa886;"></div></div>
+          </div>
+          <div class="tam-seg-stat">
+            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Opportunity</span><span class="tam-seg-stat-pct">34%</span></div>
+            <div class="tam-seg-stat-val">$29M</div>
+            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:34%;background:#5aa886;"></div></div>
+          </div>
+        </div>
+        <div class="profile-card">
+          <div class="tam-seg-head"><div class="tam-seg-dot" style="background:#8fbfa9;"></div><div class="tam-seg-name">Mid-Market</div></div>
+          <div class="tam-seg-stat">
+            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Accounts</span><span class="tam-seg-stat-pct">52%</span></div>
+            <div class="tam-seg-stat-val">465</div>
+            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:52%;background:#8fbfa9;"></div></div>
+          </div>
+          <div class="tam-seg-stat">
+            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Opportunity</span><span class="tam-seg-stat-pct">16%</span></div>
+            <div class="tam-seg-stat-val">$14M</div>
+            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:16%;background:#8fbfa9;"></div></div>
+          </div>
+        </div>
+        <div class="profile-card">
+          <div class="tam-seg-head"><div class="tam-seg-dot" style="background:#b7d3c4;"></div><div class="tam-seg-name">Emerging</div></div>
+          <div class="tam-seg-stat">
+            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Accounts</span><span class="tam-seg-stat-pct">18%</span></div>
+            <div class="tam-seg-stat-val">165</div>
+            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:18%;background:#b7d3c4;"></div></div>
+          </div>
+          <div class="tam-seg-stat">
+            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Opportunity</span><span class="tam-seg-stat-pct">1%</span></div>
+            <div class="tam-seg-stat-val">$1M</div>
+            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:1%;background:#b7d3c4;"></div></div>
+          </div>
+        </div>
       </div>
 
       <div class="exec-reco">
         <div class="exec-reco-eye">Executive Recommendation</div>
-        <div class="exec-reco-body">Focus first on the 420 unworked leads inside Enterprise and Growth Accounts — that's where whitespace overlaps with the segments we've already committed to fund.</div>
+        <div class="exec-reco-body">Enterprise is 8% of accounts but ~49% of addressable revenue — investment should follow value, not volume. Mid-Market carries the accounts but not the return; keep it efficient, don't overfund it.</div>
       </div>
 
       <div class="chapter-transition">Next: <strong>Audience Architecture</strong> defines who inside these accounts we need to reach.</div>
@@ -766,71 +830,63 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <h1 class="stage-title">Who gets the message. <em>And what it says.</em></h1>
       <p class="stage-body">We tier accounts by revenue value to focus effort, then define the personas making decisions inside each tier — so messaging matches both the account's value and the buyer's job to be done.</p>
 
-      <!-- TIER SECTION — interactive: click or hover a tier to reveal its personas below -->
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Step 1 — Revenue Tiering</div>
+      <!-- TIER SECTION — interactive: click a tier to reveal its personas below -->
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Step 1 — Account Tiering</div>
       <div class="tier-grid" style="margin-bottom:8px;">
 
-        <div class="tier-card selectable active" data-tier="T1" tabindex="0" role="button" aria-pressed="true">
-          <div class="tier-num">T1</div>
-          <div class="tier-label">Highest-Value Accounts</div>
+        <div class="tier-card selectable active" data-tier="T1" tabindex="0" role="button" aria-pressed="true" style="--tc:#4a9e7a;">
+          <div class="tier-num">1</div>
+          <div class="tier-label">Enterprise</div>
           <div class="tier-desc">Largest revenue, deepest relationship. Goal is expansion, not just retention.</div>
           <div class="tier-msg">Messaging: Outcomes &amp; ROI</div>
         </div>
 
-        <div class="tier-card selectable" data-tier="T2" tabindex="0" role="button" aria-pressed="false">
-          <div class="tier-num">T2</div>
+        <div class="tier-card selectable" data-tier="T2" tabindex="0" role="button" aria-pressed="false" style="--tc:#5aa886;">
+          <div class="tier-num">2</div>
           <div class="tier-label">Growth Accounts</div>
-          <div class="tier-desc">Solid base, underpenetrated category. Right motion moves these to Tier 1.</div>
+          <div class="tier-desc">Solid base, underpenetrated category. Right motion moves these to Enterprise.</div>
           <div class="tier-msg">Messaging: Value &amp; Availability</div>
         </div>
 
-        <div class="tier-card selectable" data-tier="T3" tabindex="0" role="button" aria-pressed="false">
-          <div class="tier-num">T3</div>
-          <div class="tier-label">Early-Stage Accounts</div>
+        <div class="tier-card selectable" data-tier="T3" tabindex="0" role="button" aria-pressed="false" style="--tc:#8fbfa9;">
+          <div class="tier-num">3</div>
+          <div class="tier-label">Mid-Market</div>
+          <div class="tier-desc">Steady volume, standard needs. Efficient service retains them without executive reach.</div>
+          <div class="tier-msg">Messaging: Availability &amp; Ease</div>
+        </div>
+
+        <div class="tier-card selectable" data-tier="T4" tabindex="0" role="button" aria-pressed="false" style="--tc:#b7d3c4;--tc-text:#2e5c42;">
+          <div class="tier-num">4</div>
+          <div class="tier-label">Emerging</div>
           <div class="tier-desc">Narrow engagement or low frequency. Education-first motions activate the relationship.</div>
           <div class="tier-msg">Messaging: Problem &amp; Need</div>
         </div>
 
       </div>
-      <div class="tier-hint">Click or hover a tier — the personas below update to match it.</div>
+      <div class="tier-hint">Click a tier — the personas below update to match it.</div>
 
-      <!-- DIVIDER -->
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
-        <div style="flex:1;height:1px;background:var(--rule);"></div>
-        <div id="personaStepLabel" style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);white-space:nowrap;">Personas inside T1 — Highest-Value Accounts</div>
-        <div style="flex:1;height:1px;background:var(--rule);"></div>
+      <!-- BRIDGE — caret tracks and points up to the selected tier -->
+      <div class="tier-persona-bridge-wrap">
+        <div class="tier-persona-bridge" id="tierPersonaBridge" style="left:12.5%;">
+          <div class="funnel-bridge-caret">⌃</div>
+          <div class="funnel-bridge-label" id="personaStepLabel">Personas inside Enterprise</div>
+        </div>
       </div>
 
       <!-- Persona cards — two per tier, toggled by the tier selection above -->
       <div class="persona-primary">
 
-        <div class="persona-card-lg show" data-tier="T1">
-          <div class="pc-photo">
-            <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-              <rect width="400" height="130" fill="#e8f0ea"/>
-              <circle cx="320" cy="-20" r="100" fill="#4a9e7a" opacity="0.12"/>
-              <circle cx="380" cy="140" r="80" fill="#4a9e7a" opacity="0.08"/>
-              <rect x="0" y="0" width="400" height="130" fill="url(#grad1)"/>
-              <defs>
-                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#e0ebe4;stop-opacity:1"/>
-                  <stop offset="100%" style="stop-color:#c8dbd0;stop-opacity:1"/>
-                </linearGradient>
-              </defs>
-              <circle cx="90" cy="55" r="28" fill="#4a9e7a" opacity="0.7"/>
-              <ellipse cx="90" cy="118" rx="38" ry="22" fill="#4a9e7a" opacity="0.5"/>
-              <line x1="150" y1="40" x2="370" y2="40" stroke="#4a9e7a" stroke-width="1.5" opacity="0.3"/>
-              <line x1="150" y1="55" x2="340" y2="55" stroke="#4a9e7a" stroke-width="1.5" opacity="0.2"/>
-              <line x1="150" y1="70" x2="290" y2="70" stroke="#4a9e7a" stroke-width="1.5" opacity="0.15"/>
-              <rect x="150" y="30" width="130" height="22" rx="3" fill="rgba(255,255,255,0.5)"/>
-              <text x="158" y="45" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2e5c42">ALEXANDRA M.</text>
-            </svg>
-            <div class="pc-photo-badge">T1 Accounts · Decision-Maker</div>
+        <div class="persona-card-lg show" data-tier="T1" style="--pc-accent:#4a9e7a;">
+          <div class="pc-header">
+            <div class="pc-avatar">AM</div>
+            <div class="pc-header-text">
+              <div class="pc-role">Executive Buyer</div>
+              <div class="pc-name">Alexandra M.</div>
+              <div class="pc-title">VP / C-Suite Leader</div>
+              <div class="pc-seg">Enterprise · Decision-Maker</div>
+            </div>
           </div>
           <div class="pc-body">
-            <div class="pc-role">Executive Buyer</div>
-            <div class="pc-name">VP / C-Suite Leader</div>
-            <div class="pc-seg">Tier 1 · Segment A</div>
             <div class="pc-rows">
               <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Drive revenue growth and competitive positioning</div></div>
               <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Suppliers that don't scale or speak to strategic outcomes</div></div>
@@ -839,30 +895,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </div>
         </div>
 
-        <div class="persona-card-lg show" data-tier="T1">
-          <div class="pc-photo">
-            <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id="grad1b" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#eef2ea;stop-opacity:1"/>
-                  <stop offset="100%" style="stop-color:#d7e2cf;stop-opacity:1"/>
-                </linearGradient>
-              </defs>
-              <rect width="400" height="130" fill="url(#grad1b)"/>
-              <circle cx="340" cy="10" r="90" fill="#6f9e4a" opacity="0.1"/>
-              <circle cx="90" cy="55" r="28" fill="#6f9e4a" opacity="0.65"/>
-              <ellipse cx="90" cy="118" rx="38" ry="22" fill="#6f9e4a" opacity="0.45"/>
-              <rect x="150" y="34" width="150" height="12" rx="2" fill="#6f9e4a" opacity="0.22"/>
-              <rect x="150" y="52" width="110" height="12" rx="2" fill="#6f9e4a" opacity="0.16"/>
-              <rect x="150" y="30" width="120" height="20" rx="3" fill="rgba(255,255,255,0.55)"/>
-              <text x="158" y="44" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#3d5c2e">DEREK P.</text>
-            </svg>
-            <div class="pc-photo-badge">T1 Accounts · Influencer</div>
+        <div class="persona-card-lg show" data-tier="T1" style="--pc-accent:#4a9e7a;">
+          <div class="pc-header">
+            <div class="pc-avatar">DP</div>
+            <div class="pc-header-text">
+              <div class="pc-role">Procurement / Strategic Sourcing</div>
+              <div class="pc-name">Derek P.</div>
+              <div class="pc-title">VP Procurement</div>
+              <div class="pc-seg">Enterprise · Influencer</div>
+            </div>
           </div>
           <div class="pc-body">
-            <div class="pc-role">Procurement / Strategic Sourcing</div>
-            <div class="pc-name">VP Procurement</div>
-            <div class="pc-seg">Tier 1 · Segment A</div>
             <div class="pc-rows">
               <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Protect margin and consolidate supplier risk</div></div>
               <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Fragmented vendors and unpredictable pricing</div></div>
@@ -871,34 +914,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </div>
         </div>
 
-        <div class="persona-card-lg" data-tier="T2">
-          <div class="pc-photo">
-            <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id="grad2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#e4eaf0;stop-opacity:1"/>
-                  <stop offset="100%" style="stop-color:#ccd6e0;stop-opacity:1"/>
-                </linearGradient>
-              </defs>
-              <rect width="400" height="130" fill="url(#grad2)"/>
-              <circle cx="350" cy="20" r="90" fill="#2d6bcd" opacity="0.08"/>
-              <circle cx="90" cy="55" r="28" fill="#2d6bcd" opacity="0.6"/>
-              <ellipse cx="90" cy="118" rx="38" ry="22" fill="#2d6bcd" opacity="0.4"/>
-              <rect x="148" y="32" width="200" height="1.5" fill="#2d6bcd" opacity="0.25"/>
-              <rect x="148" y="46" width="170" height="1.5" fill="#2d6bcd" opacity="0.2"/>
-              <rect x="148" y="60" width="140" height="1.5" fill="#2d6bcd" opacity="0.15"/>
-              <rect x="150" y="72" width="8" height="22" rx="1" fill="#2d6bcd" opacity="0.3"/>
-              <rect x="163" y="80" width="8" height="14" rx="1" fill="#2d6bcd" opacity="0.25"/>
-              <rect x="176" y="68" width="8" height="26" rx="1" fill="#2d6bcd" opacity="0.35"/>
-              <rect x="150" y="30" width="120" height="20" rx="3" fill="rgba(255,255,255,0.5)"/>
-              <text x="158" y="44" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#1e3a5c">MARCUS T.</text>
-            </svg>
-            <div class="pc-photo-badge">T2 Accounts · Operational Buyer</div>
+        <div class="persona-card-lg" data-tier="T2" style="--pc-accent:#5aa886;">
+          <div class="pc-header">
+            <div class="pc-avatar">MT</div>
+            <div class="pc-header-text">
+              <div class="pc-role">Operational Buyer</div>
+              <div class="pc-name">Marcus T.</div>
+              <div class="pc-title">Category / Ops Manager</div>
+              <div class="pc-seg">Growth Accounts · Decision-Maker</div>
+            </div>
           </div>
           <div class="pc-body">
-            <div class="pc-role">Operational Buyer</div>
-            <div class="pc-name">Category / Ops Manager</div>
-            <div class="pc-seg">Tier 2 · Segment B</div>
             <div class="pc-rows">
               <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Keep operations running — right product, right time</div></div>
               <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Stockouts, unreliable suppliers, limited category options</div></div>
@@ -907,29 +933,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </div>
         </div>
 
-        <div class="persona-card-lg" data-tier="T2">
-          <div class="pc-photo">
-            <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id="grad2b" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#eef1f6;stop-opacity:1"/>
-                  <stop offset="100%" style="stop-color:#d3ddea;stop-opacity:1"/>
-                </linearGradient>
-              </defs>
-              <rect width="400" height="130" fill="url(#grad2b)"/>
-              <circle cx="90" cy="55" r="28" fill="#4a6d9e" opacity="0.6"/>
-              <ellipse cx="90" cy="118" rx="38" ry="22" fill="#4a6d9e" opacity="0.4"/>
-              <rect x="150" y="34" width="150" height="12" rx="2" fill="#4a6d9e" opacity="0.2"/>
-              <rect x="150" y="52" width="110" height="12" rx="2" fill="#4a6d9e" opacity="0.14"/>
-              <rect x="150" y="30" width="120" height="20" rx="3" fill="rgba(255,255,255,0.55)"/>
-              <text x="158" y="44" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#1e3a5c">PRIYA S.</text>
-            </svg>
-            <div class="pc-photo-badge">T2 Accounts · Category Lead</div>
+        <div class="persona-card-lg" data-tier="T2" style="--pc-accent:#5aa886;">
+          <div class="pc-header">
+            <div class="pc-avatar">PS</div>
+            <div class="pc-header-text">
+              <div class="pc-role">Category Manager</div>
+              <div class="pc-name">Priya S.</div>
+              <div class="pc-title">Category / Merchandising Lead</div>
+              <div class="pc-seg">Growth Accounts · Influencer</div>
+            </div>
           </div>
           <div class="pc-body">
-            <div class="pc-role">Category Manager</div>
-            <div class="pc-name">Category / Merchandising Lead</div>
-            <div class="pc-seg">Tier 2 · Segment B</div>
             <div class="pc-rows">
               <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Expand category penetration and assortment fit</div></div>
               <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Slow-moving SKUs and limited vendor support</div></div>
@@ -938,29 +952,55 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </div>
         </div>
 
-        <div class="persona-card-lg" data-tier="T3">
-          <div class="pc-photo">
-            <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id="grad3a" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#f2ede1;stop-opacity:1"/>
-                  <stop offset="100%" style="stop-color:#e3d5b8;stop-opacity:1"/>
-                </linearGradient>
-              </defs>
-              <rect width="400" height="130" fill="url(#grad3a)"/>
-              <circle cx="90" cy="55" r="28" fill="#b4841f" opacity="0.55"/>
-              <ellipse cx="90" cy="118" rx="38" ry="22" fill="#b4841f" opacity="0.38"/>
-              <rect x="150" y="34" width="150" height="12" rx="2" fill="#b4841f" opacity="0.2"/>
-              <rect x="150" y="52" width="110" height="12" rx="2" fill="#b4841f" opacity="0.14"/>
-              <rect x="150" y="30" width="120" height="20" rx="3" fill="rgba(255,255,255,0.55)"/>
-              <text x="158" y="44" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#6b4e14">JORDAN K.</text>
-            </svg>
-            <div class="pc-photo-badge">T3 Accounts · Decision-Maker</div>
+        <div class="persona-card-lg" data-tier="T3" style="--pc-accent:#8fbfa9;">
+          <div class="pc-header">
+            <div class="pc-avatar">MD</div>
+            <div class="pc-header-text">
+              <div class="pc-role">Operations Manager</div>
+              <div class="pc-name">Morgan D.</div>
+              <div class="pc-title">Ops / Facilities Manager</div>
+              <div class="pc-seg">Mid-Market · Decision-Maker</div>
+            </div>
           </div>
           <div class="pc-body">
-            <div class="pc-role">Founder / Owner</div>
-            <div class="pc-name">Founder or Small Business Owner</div>
-            <div class="pc-seg">Tier 3 · Segment C</div>
+            <div class="pc-rows">
+              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Keep day-to-day operations running within a fixed budget</div></div>
+              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Juggling multiple vendors without dedicated account support</div></div>
+              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Reliable service and simple terms, no executive overhead needed</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="persona-card-lg" data-tier="T3" style="--pc-accent:#8fbfa9;">
+          <div class="pc-header">
+            <div class="pc-avatar">CL</div>
+            <div class="pc-header-text">
+              <div class="pc-role">Purchasing Coordinator</div>
+              <div class="pc-name">Casey L.</div>
+              <div class="pc-title">Purchasing / Procurement Coordinator</div>
+              <div class="pc-seg">Mid-Market · Influencer</div>
+            </div>
+          </div>
+          <div class="pc-body">
+            <div class="pc-rows">
+              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Process orders quickly and keep reordering simple</div></div>
+              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Manual processes and slow vendor response times</div></div>
+              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Streamlined ordering and fast turnaround</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="persona-card-lg" data-tier="T4" style="--pc-accent:#b7d3c4;--pc-accent-text:#2e5c42;">
+          <div class="pc-header">
+            <div class="pc-avatar">JK</div>
+            <div class="pc-header-text">
+              <div class="pc-role">Founder / Owner</div>
+              <div class="pc-name">Jordan K.</div>
+              <div class="pc-title">Founder or Small Business Owner</div>
+              <div class="pc-seg">Emerging · Decision-Maker</div>
+            </div>
+          </div>
+          <div class="pc-body">
             <div class="pc-rows">
               <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Find a reliable, affordable partner to get started</div></div>
               <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Limited budget, limited time to evaluate options</div></div>
@@ -969,29 +1009,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </div>
         </div>
 
-        <div class="persona-card-lg" data-tier="T3">
-          <div class="pc-photo">
-            <svg viewBox="0 0 400 130" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
-              <defs>
-                <linearGradient id="grad3b" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#eef2f0;stop-opacity:1"/>
-                  <stop offset="100%" style="stop-color:#cfdcd6;stop-opacity:1"/>
-                </linearGradient>
-              </defs>
-              <rect width="400" height="130" fill="url(#grad3b)"/>
-              <circle cx="90" cy="55" r="28" fill="#3f8a72" opacity="0.55"/>
-              <ellipse cx="90" cy="118" rx="38" ry="22" fill="#3f8a72" opacity="0.38"/>
-              <rect x="150" y="34" width="150" height="12" rx="2" fill="#3f8a72" opacity="0.2"/>
-              <rect x="150" y="52" width="110" height="12" rx="2" fill="#3f8a72" opacity="0.14"/>
-              <rect x="150" y="30" width="120" height="20" rx="3" fill="rgba(255,255,255,0.55)"/>
-              <text x="158" y="44" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#204a3c">TAYLOR B.</text>
-            </svg>
-            <div class="pc-photo-badge">T3 Accounts · Operator</div>
+        <div class="persona-card-lg" data-tier="T4" style="--pc-accent:#b7d3c4;--pc-accent-text:#2e5c42;">
+          <div class="pc-header">
+            <div class="pc-avatar">TB</div>
+            <div class="pc-header-text">
+              <div class="pc-role">Ops Coordinator</div>
+              <div class="pc-name">Taylor B.</div>
+              <div class="pc-title">Frontline Operator</div>
+              <div class="pc-seg">Emerging · Influencer</div>
+            </div>
           </div>
           <div class="pc-body">
-            <div class="pc-role">Ops Coordinator</div>
-            <div class="pc-name">Frontline Operator</div>
-            <div class="pc-seg">Tier 3 · Segment C</div>
             <div class="pc-rows">
               <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Get set up quickly without heavy onboarding lift</div></div>
               <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Confusing tools and unclear next steps</div></div>
@@ -1177,7 +1205,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           <div class="activation-card">
             <div class="rg-layer">01 Audience</div>
             <div class="card-title">High-fit prospects and growth accounts</div>
-            <div class="card-body">Segment C prospects and Tier 2 growth accounts primed for expansion or acquisition.</div>
+            <div class="card-body">Emerging prospects and Growth Accounts primed for expansion or acquisition.</div>
             <span class="tag">Priority accounts</span>
           </div>
           <div class="activation-card">
@@ -1515,512 +1543,6 @@ STAGES.forEach((s, i) => {
 });
 
 // Build TAM map — SVG street grid + account dots
-function buildTAMMap() {
-  const container = document.getElementById('tamMap');
-  if (!container) return;
-
-  // ── SVG base map — realistic coastal city map ────────────────────
-  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
-  svg.setAttribute('viewBox','0 0 900 360');
-  svg.setAttribute('preserveAspectRatio','xMidYMid slice');
-
-  svg.innerHTML = `
-  <defs>
-    <linearGradient id="waterG" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6b7280"/>
-      <stop offset="100%" stop-color="#4b5563"/>
-    </linearGradient>
-    <linearGradient id="landG" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#e8e4dd"/>
-      <stop offset="100%" stop-color="#dedad2"/>
-    </linearGradient>
-    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
-      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#00000030"/>
-    </filter>
-  </defs>
-
-  <!-- ── WATER — full background, dark grey like a real map ── -->
-  <rect width="900" height="360" fill="url(#waterG)"/>
-
-  <!-- Water texture — subtle depth variation -->
-  <rect x="0" y="0" width="220" height="360" fill="#5a6170" opacity="0.3"/>
-  <path d="M0,0 L180,0 L140,360 L0,360 Z" fill="#3f4754" opacity="0.25"/>
-
-  <!-- ── LAND MASS — irregular coastal shape, left-side bay ── -->
-  <!--
-    The coastline runs roughly north-south with:
-    - A deep bay/inlet on the upper-left (like San Francisco Bay)
-    - A peninsula jutting down
-    - Irregular rocky outcrops
-    - The main land mass filling the right 75% of the frame
-  -->
-  <path d="
-    M 900,0
-    L 900,360
-    L 145,360
-    L 138,340
-    L 128,318
-    L 118,305
-    L 105,298
-    Q 95,290 100,278
-    L 110,265
-    L 115,252
-    L 108,240
-    Q 98,228 88,232
-    L 75,238
-    L 62,235
-    L 55,222
-    L 58,208
-    L 68,198
-    Q 78,190 74,178
-    L 65,168
-    L 60,155
-    L 66,142
-    L 78,135
-    L 90,130
-    Q 105,125 108,112
-    L 105,98
-    L 95,88
-    L 88,75
-    L 92,62
-    L 104,54
-    L 118,50
-    L 130,52
-    L 145,48
-    L 158,40
-    L 165,28
-    L 172,16
-    L 185,8
-    L 200,4
-    L 900,0
-    Z
-  " fill="url(#landG)" filter="url(#shadow)"/>
-
-  <!-- ── SECONDARY LAND — peninsula / island on the bay ── -->
-  <path d="
-    M 52,140
-    L 62,135
-    L 72,130
-    L 80,122
-    L 82,110
-    L 76,100
-    L 66,96
-    L 55,98
-    L 46,106
-    L 44,118
-    L 48,130
-    Z
-  " fill="#e0dbd3"/>
-
-  <!-- Small island in bay -->
-  <ellipse cx="44" cy="200" rx="14" ry="8" fill="#d8d4cc" transform="rotate(-15,44,200)"/>
-
-  <!-- ── PARKS / GREEN AREAS ── -->
-  <rect x="310" y="58"  width="55"  height="38" rx="3" fill="#c8d9b8" opacity="0.7"/>
-  <rect x="520" y="140" width="40"  height="28" rx="3" fill="#c8d9b8" opacity="0.6"/>
-  <rect x="680" y="220" width="60"  height="35" rx="3" fill="#c8d9b8" opacity="0.65"/>
-  <rect x="200" y="260" width="45"  height="30" rx="3" fill="#c8d9b8" opacity="0.6"/>
-  <ellipse cx="820" cy="80" rx="32" ry="22" fill="#c8d9b8" opacity="0.5"/>
-
-  <!-- ── WATER BODY INLAND — bay inlet / estuary ── -->
-  <path d="
-    M 58,208
-    L 68,198
-    L 78,192
-    L 90,188
-    L 100,185
-    L 112,188
-    L 118,196
-    L 120,208
-    L 116,220
-    L 108,230
-    L 96,236
-    L 82,238
-    L 70,234
-    L 60,226
-    Z
-  " fill="#6b7890" opacity="0.8"/>
-
-  <!-- River/channel running inland -->
-  <path d="M 108,230 Q 130,250 125,275 Q 120,298 130,315 Q 138,330 145,360"
-        stroke="#7a8898" stroke-width="8" fill="none" opacity="0.6"/>
-
-  <!-- ── CITY BLOCKS — varying sizes, realistic urban texture ── -->
-  <!-- Dense urban core, center-right -->
-  <rect x="420" y="90"  width="28" height="18" rx="1" fill="#d4cfc8" opacity="0.8"/>
-  <rect x="452" y="90"  width="22" height="18" rx="1" fill="#d4cfc8" opacity="0.8"/>
-  <rect x="478" y="90"  width="30" height="18" rx="1" fill="#cec9c2" opacity="0.8"/>
-  <rect x="420" y="112" width="28" height="22" rx="1" fill="#d0cbc4" opacity="0.75"/>
-  <rect x="452" y="112" width="22" height="22" rx="1" fill="#d4cfc8" opacity="0.75"/>
-  <rect x="478" y="112" width="30" height="22" rx="1" fill="#cec9c2" opacity="0.75"/>
-  <rect x="512" y="90"  width="25" height="18" rx="1" fill="#d4cfc8" opacity="0.8"/>
-  <rect x="541" y="90"  width="28" height="18" rx="1" fill="#cec9c2" opacity="0.75"/>
-  <rect x="512" y="112" width="25" height="22" rx="1" fill="#d0cbc4" opacity="0.75"/>
-  <rect x="541" y="112" width="28" height="22" rx="1" fill="#d4cfc8" opacity="0.75"/>
-
-  <!-- Mid-density blocks -->
-  <rect x="230" y="80"  width="40" height="26" rx="1" fill="#d8d3cc" opacity="0.7"/>
-  <rect x="275" y="80"  width="32" height="26" rx="1" fill="#d4cfc8" opacity="0.7"/>
-  <rect x="230" y="110" width="40" height="22" rx="1" fill="#d8d3cc" opacity="0.65"/>
-  <rect x="275" y="110" width="32" height="22" rx="1" fill="#d4cfc8" opacity="0.65"/>
-  <rect x="370" y="80"  width="46" height="26" rx="1" fill="#d4cfc8" opacity="0.7"/>
-  <rect x="370" y="110" width="46" height="22" rx="1" fill="#d8d3cc" opacity="0.65"/>
-
-  <!-- Suburb blocks — eastern zone -->
-  <rect x="620" y="70"  width="50" height="30" rx="2" fill="#dedad2" opacity="0.6"/>
-  <rect x="675" y="70"  width="40" height="30" rx="2" fill="#d8d3cc" opacity="0.6"/>
-  <rect x="620" y="105" width="50" height="28" rx="2" fill="#dedad2" opacity="0.55"/>
-  <rect x="675" y="105" width="40" height="28" rx="2" fill="#d8d3cc" opacity="0.55"/>
-  <rect x="720" y="70"  width="55" height="30" rx="2" fill="#dedad2" opacity="0.6"/>
-  <rect x="780" y="70"  width="45" height="30" rx="2" fill="#d8d3cc" opacity="0.6"/>
-  <rect x="720" y="105" width="55" height="28" rx="2" fill="#dedad2" opacity="0.55"/>
-  <rect x="780" y="105" width="45" height="28" rx="2" fill="#d8d3cc" opacity="0.55"/>
-
-  <!-- Lower zone blocks -->
-  <rect x="200" y="195" width="42" height="28" rx="1" fill="#d4cfc8" opacity="0.65"/>
-  <rect x="246" y="195" width="35" height="28" rx="1" fill="#d8d3cc" opacity="0.65"/>
-  <rect x="285" y="195" width="40" height="28" rx="1" fill="#d4cfc8" opacity="0.6"/>
-  <rect x="200" y="228" width="42" height="26" rx="1" fill="#d8d3cc" opacity="0.6"/>
-  <rect x="246" y="228" width="35" height="26" rx="1" fill="#d4cfc8" opacity="0.6"/>
-  <rect x="285" y="228" width="40" height="26" rx="1" fill="#d8d3cc" opacity="0.55"/>
-
-  <rect x="380" y="185" width="48" height="30" rx="1" fill="#d4cfc8" opacity="0.65"/>
-  <rect x="432" y="185" width="38" height="30" rx="1" fill="#d8d3cc" opacity="0.65"/>
-  <rect x="474" y="185" width="42" height="30" rx="1" fill="#d4cfc8" opacity="0.6"/>
-  <rect x="380" y="220" width="48" height="26" rx="1" fill="#d8d3cc" opacity="0.6"/>
-  <rect x="432" y="220" width="38" height="26" rx="1" fill="#d4cfc8" opacity="0.6"/>
-  <rect x="474" y="220" width="42" height="26" rx="1" fill="#d8d3cc" opacity="0.55"/>
-
-  <rect x="580" y="185" width="52" height="32" rx="2" fill="#dedad2" opacity="0.6"/>
-  <rect x="636" y="185" width="42" height="32" rx="2" fill="#d8d3cc" opacity="0.6"/>
-  <rect x="580" y="222" width="52" height="28" rx="2" fill="#dedad2" opacity="0.55"/>
-  <rect x="636" y="222" width="42" height="28" rx="2" fill="#d8d3cc" opacity="0.55"/>
-
-  <rect x="750" y="185" width="55" height="32" rx="2" fill="#dedad2" opacity="0.6"/>
-  <rect x="810" y="185" width="48" height="32" rx="2" fill="#d8d3cc" opacity="0.6"/>
-  <rect x="750" y="222" width="55" height="28" rx="2" fill="#dedad2" opacity="0.55"/>
-  <rect x="810" y="222" width="48" height="28" rx="2" fill="#d8d3cc" opacity="0.55"/>
-
-  <!-- Southern zone blocks -->
-  <rect x="180" y="295" width="50" height="34" rx="1" fill="#d4cfc8" opacity="0.6"/>
-  <rect x="234" y="295" width="42" height="34" rx="1" fill="#d8d3cc" opacity="0.6"/>
-  <rect x="280" y="295" width="38" height="34" rx="1" fill="#d4cfc8" opacity="0.55"/>
-  <rect x="380" y="290" width="48" height="35" rx="1" fill="#d8d3cc" opacity="0.6"/>
-  <rect x="432" y="290" width="40" height="35" rx="1" fill="#d4cfc8" opacity="0.6"/>
-  <rect x="476" y="290" width="45" height="35" rx="1" fill="#d8d3cc" opacity="0.55"/>
-  <rect x="580" y="285" width="55" height="35" rx="2" fill="#dedad2" opacity="0.55"/>
-  <rect x="638" y="285" width="42" height="35" rx="2" fill="#d8d3cc" opacity="0.55"/>
-  <rect x="750" y="285" width="58" height="35" rx="2" fill="#dedad2" opacity="0.55"/>
-  <rect x="812" y="285" width="44" height="35" rx="2" fill="#d8d3cc" opacity="0.55"/>
-
-  <!-- ── ROAD NETWORK — realistic street grid with arterials ── -->
-  <g fill="none">
-
-    <!-- Major arterials — wide, cream/white -->
-    <!-- Horizontal arterials -->
-    <line x1="160" y1="62"  x2="900" y2="58"  stroke="#f5f2ec" stroke-width="4"/>
-    <line x1="150" y1="138" x2="900" y2="135" stroke="#f5f2ec" stroke-width="5"/>
-    <line x1="140" y1="180" x2="900" y2="178" stroke="#ebe8e0" stroke-width="3.5"/>
-    <line x1="135" y1="258" x2="900" y2="255" stroke="#f5f2ec" stroke-width="4.5"/>
-    <line x1="148" y1="328" x2="900" y2="325" stroke="#ebe8e0" stroke-width="3"/>
-
-    <!-- Vertical arterials -->
-    <line x1="210" y1="10"  x2="208" y2="360" stroke="#f5f2ec" stroke-width="4"/>
-    <line x1="370" y1="10"  x2="368" y2="360" stroke="#f5f2ec" stroke-width="3.5"/>
-    <line x1="520" y1="10"  x2="518" y2="360" stroke="#f5f2ec" stroke-width="5"/>
-    <line x1="680" y1="10"  x2="678" y2="360" stroke="#ebe8e0" stroke-width="3.5"/>
-    <line x1="830" y1="10"  x2="828" y2="360" stroke="#f5f2ec" stroke-width="4"/>
-
-    <!-- Secondary streets — thinner -->
-    <line x1="170" y1="100" x2="900" y2="97"  stroke="#eeeae2" stroke-width="2"/>
-    <line x1="160" y1="160" x2="900" y2="158" stroke="#eeeae2" stroke-width="2"/>
-    <line x1="155" y1="220" x2="900" y2="218" stroke="#eeeae2" stroke-width="2"/>
-    <line x1="152" y1="295" x2="900" y2="292" stroke="#eeeae2" stroke-width="1.5"/>
-
-    <line x1="290" y1="10"  x2="288" y2="360" stroke="#eeeae2" stroke-width="2"/>
-    <line x1="445" y1="10"  x2="443" y2="360" stroke="#eeeae2" stroke-width="2"/>
-    <line x1="600" y1="10"  x2="598" y2="360" stroke="#eeeae2" stroke-width="2"/>
-    <line x1="755" y1="10"  x2="753" y2="360" stroke="#eeeae2" stroke-width="1.5"/>
-
-    <!-- Diagonal arterial — cuts across grid, common in real cities -->
-    <path d="M 165,50 Q 300,110 370,138 Q 450,165 520,178" stroke="#f0ece4" stroke-width="3.5" fill="none"/>
-    <path d="M 520,178 Q 590,190 680,200 Q 750,208 830,215"  stroke="#eceae0" stroke-width="3" fill="none"/>
-
-    <!-- Local streets — very thin -->
-    <line x1="175" y1="78"  x2="900" y2="76"  stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="168" y1="118" x2="900" y2="116" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="158" y1="200" x2="900" y2="198" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="155" y1="238" x2="900" y2="236" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="152" y1="315" x2="900" y2="312" stroke="#e8e4dc" stroke-width="1"/>
-
-    <line x1="250" y1="10"  x2="248" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="330" y1="10"  x2="328" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="410" y1="10"  x2="408" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="480" y1="10"  x2="478" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="560" y1="10"  x2="558" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="640" y1="10"  x2="638" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="720" y1="10"  x2="718" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="795" y1="10"  x2="793" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-    <line x1="865" y1="10"  x2="863" y2="360" stroke="#e8e4dc" stroke-width="1.2"/>
-  </g>
-
-  <!-- ── COASTLINE EDGE — crisp shore detail ── -->
-  <!-- Main shore edge with slight shadow to water -->
-  <path d="
-    M 172,16 L 165,28 L 158,40 L 145,48 L 130,52 L 118,50
-    L 104,54 L 92,62 L 88,75 L 95,88 L 105,98 L 108,112
-    Q 105,125 90,130 L 78,135 L 66,142 L 60,155 L 65,168
-    Q 74,178 68,198 L 58,208
-  " stroke="#b0a898" stroke-width="1.5" fill="none" opacity="0.8"/>
-  <path d="
-    M 58,208 L 55,222 L 62,235 L 75,238 L 88,232
-    Q 98,228 108,240 L 115,252 L 110,265 L 100,278
-    Q 95,290 105,298 L 118,305 L 128,318 L 138,340 L 145,360
-  " stroke="#b0a898" stroke-width="1.5" fill="none" opacity="0.8"/>
-
-  <!-- Slight wave/shore texture in water near coast -->
-  <path d="M 30,80  Q 50,85  35,95"  stroke="#7a8898" stroke-width="1" fill="none" opacity="0.4"/>
-  <path d="M 25,140 Q 45,148 30,158" stroke="#7a8898" stroke-width="1" fill="none" opacity="0.4"/>
-  <path d="M 20,300 Q 40,308 25,318" stroke="#7a8898" stroke-width="1" fill="none" opacity="0.4"/>
-
-  <!-- ── PLACE NAME LABELS — sparse, like real map ── -->
-  <text x="255" y="128" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Northgate</text>
-  <text x="390" y="128" font-family="Inter,sans-serif" font-size="10" font-weight="600" fill="#8a8078" letter-spacing="0.4" opacity="0.9">Central District</text>
-  <text x="555" y="128" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Eastside</text>
-  <text x="695" y="128" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Hillcrest</text>
-  <text x="840" y="128" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Ridgeline</text>
-  <text x="200" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Bayside</text>
-  <text x="380" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Midtown</text>
-  <text x="555" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Southpark</text>
-  <text x="700" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Valleyview</text>
-  <text x="840" y="248" font-family="Inter,sans-serif" font-size="9"  font-weight="500" fill="#9c9288" letter-spacing="0.3" opacity="0.9">Farpoint</text>
-
-  <!-- Bay label in water -->
-  <text x="20" y="192" font-family="Inter,sans-serif" font-size="8" font-weight="400" fill="#9aaabb" letter-spacing="1" opacity="0.7" transform="rotate(-75,20,192)">COASTAL BAY</text>
-  `;
-  container.appendChild(svg);
-
-  // ── Account dots — placed only on land areas ──────────────────────
-  function rnd(min, max, seed) {
-    const x = Math.sin(seed * 9301 + 49297) * 233280;
-    return min + (x - Math.floor(x)) * (max - min);
-  }
-
-  // Land zones — rectangles clear of the water/coast on the left
-  const zones = [
-    // Upper band
-    {x1:215,x2:355,y1:22, y2:130},
-    {x1:375,x2:510,y1:18, y2:130},
-    {x1:525,x2:670,y1:18, y2:130},
-    {x1:685,x2:820,y1:18, y2:130},
-    {x1:835,x2:895,y1:18, y2:130},
-    // Middle band
-    {x1:160,x2:355,y1:142,y2:252},
-    {x1:375,x2:510,y1:142,y2:252},
-    {x1:525,x2:670,y1:142,y2:252},
-    {x1:685,x2:820,y1:142,y2:252},
-    {x1:835,x2:895,y1:142,y2:252},
-    // Lower band
-    {x1:158,x2:355,y1:262,y2:350},
-    {x1:375,x2:510,y1:262,y2:350},
-    {x1:525,x2:670,y1:262,y2:350},
-    {x1:685,x2:820,y1:262,y2:350},
-    {x1:835,x2:895,y1:262,y2:350},
-  ];
-
-  // Named fictional companies for rich hover tooltips
-  const activeNames = [
-    'Meridian Apparel Co · Active · $142K TTM',
-    'Crestline Fashion Group · Active · $284K TTM',
-    'Holloway Retail Partners · Active · $198K TTM',
-    'Summit Style Inc · Active · $310K TTM',
-    'Parkview Clothing Co · Active · $88K TTM',
-    'Lakeshore Brands LLC · Active · $176K TTM',
-    'Northgate Outfitters · Active · $224K TTM',
-    'Ridgeline Retail Group · Active · $156K TTM',
-    'Bayside Fashion Co · Active · $342K TTM',
-    'Central Ave Clothiers · Active · $412K TTM',
-    'Westfield Style House · Active · $267K TTM',
-    'Eastpoint Garments · Active · $193K TTM',
-    'Cornerstone Apparel · Active · $128K TTM',
-    'Harborview Brands · Active · $88K TTM',
-    'Clearwater Retail LLC · Active · $74K TTM',
-    'Highline Fashion Group · Active · $165K TTM',
-    'Bridgepoint Clothiers · Active · $209K TTM',
-    'Valleyview Style Co · Active · $118K TTM',
-    'Foxhill Apparel Inc · Active · $94K TTM',
-    'Wavecrest Retail Group · Active · $236K TTM',
-    'Stillwater Brands · Active · $148K TTM',
-    'Copperfield Fashion Co · Active · $82K TTM',
-  ];
-
-  const engagedNames = [
-    'Ashford Retail Co · Engaged · Last order 42 days ago',
-    'Brookdale Style Group · Recent · Last order 28 days ago',
-    'Cloverton Apparel · Engaged · Category expansion opportunity',
-    'Dunmore Fashion LLC · Recent · Last order 31 days ago',
-    'Elmwood Clothiers · Engaged · Cross-sell signal active',
-    'Fairfield Retail Inc · Recent · Last order 19 days ago',
-    'Glenwood Style Co · Engaged · Reorder reminder sent',
-    'Hartfield Brands · Recent · Last order 55 days ago',
-    'Ironwood Apparel · Engaged · Meeting scheduled',
-    'Juniper Retail Group · Recent · Last order 37 days ago',
-    'Kingsway Fashion · Engaged · Category expansion opportunity',
-    'Lakewood Clothiers · Recent · Last order 22 days ago',
-    'Maplecrest Style · Engaged · Upsell in progress',
-  ];
-
-  const lapsedNames = [
-    'Norwood Apparel Co · Lapsed · No order in 180 days',
-    'Oakdale Retail LLC · Lapsed · No order in 210 days',
-    'Pinecrest Fashion · Lapsed · No order in 165 days',
-    'Queensbury Style · Lapsed · Win-back campaign active',
-    'Riverside Brands · Lapsed · No order in 240 days',
-    'Stonefield Clothiers · Lapsed · No order in 195 days',
-    'Thornwood Retail · Lapsed · Re-engagement sent',
-  ];
-
-  const leadNames = [
-    'Alderwood Style Group · Lead · High fit score',
-    'Birchwood Fashion Co · Lead · Website visit detected',
-    'Cedarfield Apparel · Lead · Trade show contact',
-    'Driftwood Retail Inc · Lead · LinkedIn outreach sent',
-    'Elmdale Clothiers · Lead · Intent signal active',
-    'Fernwood Style LLC · Lead · RFI submitted',
-    'Greenfield Brands · Lead · Cold — no engagement',
-    'Harewood Fashion · Lead · Email opened ×3',
-    'Irondale Retail · Lead · Referral source',
-    'Junewood Apparel · Lead · Trade show contact',
-    'Kestrel Style Group · Lead · Cold — no engagement',
-    'Lynwood Clothiers · Lead · Intent signal active',
-    'Millwood Retail Co · Lead · Website visit detected',
-    'Northwood Brands · Lead · High fit score',
-    'Oakwood Fashion · Lead · Cold — no engagement',
-    'Pinewood Style Inc · Lead · LinkedIn outreach sent',
-    'Quarryfield Apparel · Lead · Email opened ×1',
-    'Riverwood Retail · Lead · Cold — no engagement',
-    'Stonewood Clothiers · Lead · Trade show contact',
-    'Timberfield Style · Lead · RFI submitted',
-    'Underwood Brands · Lead · Cold — no engagement',
-    'Valewood Fashion · Lead · Intent signal active',
-    'Westwood Retail LLC · Lead · Website visit detected',
-    'Ximwood Apparel Co · Lead · High fit score',
-    'Yarwood Style Group · Lead · Cold — no engagement',
-    'Zenwood Clothiers · Lead · Email opened ×2',
-    'Ashwood Retail Inc · Lead · Cold — no engagement',
-    'Bramblewood Fashion · Lead · LinkedIn outreach sent',
-    'Creekwood Brands · Lead · Cold — no engagement',
-    'Dawnwood Style · Lead · Trade show contact',
-    'Edgewood Apparel · Lead · Intent signal active',
-    'Fallwood Retail Co · Lead · Cold — no engagement',
-    'Glennwood Clothiers · Lead · Website visit detected',
-    'Hazelwood Fashion · Lead · Cold — no engagement',
-    'Ivywood Style LLC · Lead · High fit score',
-    'Jadewood Brands · Lead · Cold — no engagement',
-    'Knollwood Retail · Lead · Email opened ×1',
-    'Laurelwood Apparel · Lead · Cold — no engagement',
-    'Mosswood Style Co · Lead · LinkedIn outreach sent',
-    'Nettlewood Fashion · Lead · Cold — no engagement',
-    'Olivewood Clothiers · Lead · Intent signal active',
-    'Parsewood Retail · Lead · Cold — no engagement',
-    'Quakewood Brands · Lead · Website visit detected',
-    'Rowanwood Style · Lead · Cold — no engagement',
-    'Sycamore Apparel Co · Lead · Trade show contact',
-  ];
-
-  const accounts = [];
-  let seed = 7;
-  let ai = 0, ei = 0, li = 0, ldi = 0;
-
-  // Active customers — blue, 22 total
-  const activeDist = [1,3,3,2,1, 2,2,2,1,1, 1,1,0,1,1];
-  activeDist.forEach((count, zi) => {
-    const z = zones[zi];
-    for (let i = 0; i < count; i++) {
-      accounts.push({
-        x: rnd(z.x1 + 6, z.x2 - 6, seed++),
-        y: rnd(z.y1 + 8, z.y2 - 8, seed++),
-        s: Math.round(rnd(9, 13, seed++)),
-        c: '#2a72d5',
-        t: activeNames[ai++ % activeNames.length]
-      });
-    }
-  });
-
-  // Engaged — teal, 13 total
-  const engagedDist = [0,1,1,1,1, 1,1,1,1,1, 1,1,1,1,0];
-  engagedDist.forEach((count, zi) => {
-    const z = zones[zi];
-    for (let i = 0; i < count; i++) {
-      accounts.push({
-        x: rnd(z.x1 + 6, z.x2 - 6, seed++),
-        y: rnd(z.y1 + 8, z.y2 - 8, seed++),
-        s: Math.round(rnd(7, 10, seed++)),
-        c: '#3baf9e',
-        t: engagedNames[ei++ % engagedNames.length]
-      });
-    }
-  });
-
-  // Lapsed — amber, 7
-  for (let i = 0; i < 7; i++) {
-    const z = zones[Math.floor(rnd(0, zones.length, seed++))];
-    accounts.push({
-      x: rnd(z.x1 + 6, z.x2 - 6, seed++),
-      y: rnd(z.y1 + 8, z.y2 - 8, seed++),
-      s: Math.round(rnd(6, 9, seed++)),
-      c: '#e8a020',
-      t: lapsedNames[li++ % lapsedNames.length]
-    });
-  }
-
-  // Leads — grey, 45 scattered
-  for (let i = 0; i < 45; i++) {
-    const z = zones[Math.floor(rnd(0, zones.length, seed++))];
-    accounts.push({
-      x: rnd(z.x1 + 4, z.x2 - 4, seed++),
-      y: rnd(z.y1 + 6, z.y2 - 6, seed++),
-      s: Math.round(rnd(4, 7, seed++)),
-      c: '#9eaab8',
-      t: leadNames[ldi++ % leadNames.length]
-    });
-  }
-
-  const tooltip = document.getElementById('mapTooltip');
-  accounts.forEach(d => {
-    const el = document.createElement('div');
-    el.className = 'map-dot';
-    const xp = (d.x / 900 * 100).toFixed(2);
-    const yp = (d.y / 360 * 100).toFixed(2);
-    el.style.cssText = `left:${xp}%;top:${yp}%;width:${d.s}px;height:${d.s}px;background:${d.c};opacity:0.92;margin-left:-${Math.round(d.s/2)}px;margin-top:-${Math.round(d.s/2)}px;box-shadow:0 1px 4px rgba(0,0,0,0.25);`;
-    if (tooltip) {
-      el.addEventListener('mouseenter', (e) => {
-        // Split "Company Name · Status · Detail" into two lines
-        const parts = d.t.split(' · ');
-        const name = parts[0] || '';
-        const rest = parts.slice(1).join(' · ');
-        tooltip.innerHTML = `<div style="font-weight:700;font-size:11px;margin-bottom:2px;">${name}</div><div style="font-size:10px;opacity:0.8;">${rest}</div>`;
-        tooltip.style.display = 'block';
-        // Position above dot, clamp to stay inside container
-        const container = tooltip.parentElement;
-        const cw = container.offsetWidth;
-        let leftPx = d.x / 900 * cw;
-        if (leftPx + 180 > cw) leftPx = cw - 185;
-        if (leftPx < 5) leftPx = 5;
-        tooltip.style.left = leftPx + 'px';
-        tooltip.style.top = '';
-        const topPct = parseFloat(yp);
-        tooltip.style.bottom = (100 - topPct + 2) + '%';
-      });
-      el.addEventListener('mouseleave', () => {
-        tooltip.style.display = 'none';
-        tooltip.style.bottom = '';
-      });
-    }
-    container.appendChild(el);
-  });
-}
-
 function goTo(n) {
   document.getElementById('stage-' + current).classList.remove('active');
   document.getElementById('rail-' + current).classList.remove('active');
@@ -2073,7 +1595,8 @@ document.addEventListener('keydown', e => {
 });
 
 // ── Audience Architecture: interactive tier → persona ──
-const TIER_NAMES = { T1: 'Highest-Value Accounts', T2: 'Growth Accounts', T3: 'Early-Stage Accounts' };
+const TIER_ORDER = ['T1', 'T2', 'T3', 'T4'];
+const TIER_NAMES = { T1: 'Enterprise', T2: 'Growth Accounts', T3: 'Mid-Market', T4: 'Emerging' };
 function selectTier(tier) {
   document.querySelectorAll('.tier-card.selectable').forEach(c => {
     const isActive = c.dataset.tier === tier;
@@ -2084,11 +1607,17 @@ function selectTier(tier) {
     c.classList.toggle('show', c.dataset.tier === tier);
   });
   const label = document.getElementById('personaStepLabel');
-  if (label) label.textContent = `Personas inside ${tier} — ${TIER_NAMES[tier]}`;
+  if (label) label.textContent = `Personas inside ${TIER_NAMES[tier]}`;
+  // Move the caret bridge to sit under the selected tier's column
+  const bridge = document.getElementById('tierPersonaBridge');
+  if (bridge) {
+    const index = TIER_ORDER.indexOf(tier);
+    const columnCenter = ((index + 0.5) / TIER_ORDER.length) * 100;
+    bridge.style.left = columnCenter + '%';
+  }
 }
 document.querySelectorAll('.tier-card.selectable').forEach(c => {
   c.addEventListener('click', () => selectTier(c.dataset.tier));
-  c.addEventListener('mouseenter', () => selectTier(c.dataset.tier));
   c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTier(c.dataset.tier); } });
 });
 
@@ -2211,7 +1740,6 @@ document.getElementById('nextBubbleClose').addEventListener('click', () => {
 });
 updateNextBubble();
 
-buildTAMMap();
 </script>
 </body>
 </html>
