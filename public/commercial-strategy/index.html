@@ -504,8 +504,35 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .profile-key{color:var(--muted);font-weight:600;flex-shrink:0;}
 .profile-val{color:var(--ink);font-weight:600;text-align:right;}
 .exec-takeaways{border:1px solid var(--rule);border-radius:4px;padding:16px 18px;margin:20px 0 16px;background:var(--surface);}
-.chapter-transition{font-size:11px;color:var(--muted);padding-top:12px;border-top:1px solid var(--rule);margin-top:4px;}
-.chapter-transition strong{color:var(--ink);font-weight:700;}
+.chapter-transition{display:none;}
+
+.next-bubble{
+  position:fixed;right:48px;bottom:84px;
+  max-width:270px;
+  background:var(--white);border:1px solid var(--rule);border-radius:8px;
+  padding:13px 32px 13px 15px;
+  box-shadow:0 10px 28px rgba(17,17,17,0.14);
+  font-size:12px;line-height:1.5;color:var(--ink);
+  z-index:95;
+  opacity:0;transform:translateY(10px);
+  pointer-events:none;
+  transition:opacity .35s ease, transform .35s ease;
+}
+.next-bubble.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+.next-bubble strong{color:var(--green);font-weight:700;}
+.next-bubble-caret{
+  position:absolute;bottom:-7px;right:30px;
+  width:13px;height:13px;background:var(--white);
+  border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  transform:rotate(45deg);
+}
+.next-bubble-close{
+  position:absolute;top:6px;right:8px;
+  width:18px;height:18px;border:none;background:transparent;
+  color:var(--muted);font-size:15px;line-height:1;cursor:pointer;padding:0;
+  font-family:'Inter',sans-serif;
+}
+.next-bubble-close:hover{color:var(--ink);}
 
 @media (max-width: 767px){
   html,body{overflow-x:hidden;}
@@ -548,6 +575,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .sys-label{min-width:0;width:100%;}
   .sys-item{border-left:none;border-top:1px solid var(--rule);width:100%;}
   .decision-row{grid-template-columns:1fr;gap:4px;}
+  .next-bubble{left:16px;right:16px;max-width:none;bottom:158px;}
+  .next-bubble-caret{left:50%;right:auto;transform:translateX(-50%) rotate(45deg);}
   .nav-buttons{width:100%;padding:12px 16px;flex-direction:column;align-items:stretch;gap:10px;}
   .btn-group{display:grid;grid-template-columns:1fr;gap:8px;width:100%;}
   .btn{width:100%;padding:12px 14px;}
@@ -1422,6 +1451,13 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   </main>
 </div>
 
+<!-- NEXT-CHAPTER BUBBLE -->
+<div class="next-bubble" id="nextBubble">
+  <button class="next-bubble-close" id="nextBubbleClose" aria-label="Dismiss">×</button>
+  <div class="next-bubble-text" id="nextBubbleText"></div>
+  <div class="next-bubble-caret"></div>
+</div>
+
 <!-- NAV BUTTONS -->
 <div class="nav-buttons">
   <div class="stage-counter" id="stageCounter">Chapter 1 of 10</div>
@@ -2016,6 +2052,7 @@ function goTo(n) {
   document.getElementById('progressFill').style.width = ((current + 1) / STAGES.length * 100) + '%';
 
   document.getElementById('stageArea').scrollTop = 0;
+  updateNextBubble();
 }
 
 function navigate(dir) {
@@ -2150,6 +2187,29 @@ function renderEconomics() {
   if (lblEl) lblEl.textContent = '$' + Math.round(totalSpend) + 'K of $' + MAX_BUDGET + 'K allocated';
 }
 renderEconomics();
+
+// ── Next-chapter bubble: shows the transition text above the Next button ──
+function updateNextBubble() {
+  const bubble = document.getElementById('nextBubble');
+  const textEl = document.getElementById('nextBubbleText');
+  const activeTransition = document.querySelector('.stage.active .chapter-transition');
+
+  bubble.classList.remove('show');
+
+  if (!activeTransition) return; // last chapter has no "next"
+
+  textEl.innerHTML = activeTransition.innerHTML;
+
+  // Wait a frame so the removal above actually paints before re-adding —
+  // otherwise the browser can collapse both changes and skip the transition.
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => bubble.classList.add('show'));
+  });
+}
+document.getElementById('nextBubbleClose').addEventListener('click', () => {
+  document.getElementById('nextBubble').classList.remove('show');
+});
+updateNextBubble();
 
 buildTAMMap();
 </script>
