@@ -11,7 +11,7 @@ const certifications = [
 const EducationSection = () => {
   return (
     <section className="bg-background px-6 pb-[60px] md:px-20">
-      <SectionHeader num="06" title="Education &" em="Credentials" />
+      <SectionHeader num="08" title="Education &" em="Credentials" />
 
       {/* Education cards */}
       <div

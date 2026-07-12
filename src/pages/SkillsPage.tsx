@@ -1,5 +1,7 @@
 import Navbar from "@/components/Navbar";
 import ExpertiseSection from "@/components/ExpertiseSection";
+import TrackRecordSection from "@/components/TrackRecordSection";
+import ToolsSection from "@/components/ToolsSection";
 import EducationSection from "@/components/EducationSection";
 import Footer from "@/components/Footer";
 import PublicReadableStyles from "@/components/PublicReadableStyles";
@@ -11,6 +13,8 @@ const SkillsPage = () => {
       <Navbar />
       <div className="animate-fadeUp">
         <ExpertiseSection />
+        <TrackRecordSection />
+        <ToolsSection />
         <EducationSection />
       </div>
       <Footer />
