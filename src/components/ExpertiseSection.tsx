@@ -1,18 +1,18 @@
-import { SectionHeader } from "./PillarsSection";
+import ChapterHeader from "./ChapterHeader";
 
 const expertiseItems = [
-  { num: "01", title: "AI-Driven Marketing Systems", desc: "Designing and deploying AI-powered ecosystems including predictive segmentation, next-best-action engines, and automated lifecycle campaigns." },
-  { num: "02", title: "Customer Data Platforms", desc: "Enterprise CDP architecture, customer identity resolution, and unified data infrastructure powering personalization and real-time activation." },
-  { num: "03", title: "Marketing Operations & RevOps", desc: "Building full-funnel marketing operations frameworks that align marketing, sales, and analytics teams around shared revenue metrics." },
-  { num: "04", title: "CLV & Segmentation Modeling", desc: "RFM analysis, customer lifetime value modeling, and behavioral segmentation frameworks that drive differentiated lifecycle strategies." },
-  { num: "05", title: "Revenue Attribution", desc: "Multi-channel attribution systems and Marketing ROI dashboards connecting digital campaigns, branch sales, loyalty, and partner channels." },
-  { num: "06", title: "Ecommerce & Digital Commerce", desc: "Built and operate a fully autonomous ecommerce business generating $250K+ annually across multiple marketplaces using data-driven automation." },
+  { num: "01", title: "Commercial Strategy & GTM Design", desc: "Connecting segmentation, TAM analysis, signal intelligence, and channel activation into one operating system that tells leadership where to invest next." },
+  { num: "02", title: "Customer Segmentation & Tiering", desc: "RFM analysis, customer lifetime value modeling, and account-tier frameworks that turn a broad market into a prioritized, fundable growth plan." },
+  { num: "03", title: "Signal Intelligence & Customer Data", desc: "Enterprise CDP architecture and behavioral signal detection — funding events, intent surges, engagement shifts — that tell marketing and sales when to act." },
+  { num: "04", title: "Marketing & Sales Alignment", desc: "Building the shared KPI framework and handoff model that connect marketing activation to sales execution around one revenue number." },
+  { num: "05", title: "Attribution & Executive Reporting", desc: "Multi-channel attribution and ROI dashboards that translate campaign data into the decisions a CEO or board actually needs to make." },
+  { num: "06", title: "Margin & EBITDA Impact Modeling", desc: "Connecting marketing investment directly to margin and EBITDA — not just pipeline — to prove commercial impact in the language finance already speaks." },
 ];
 
 const ExpertiseSection = () => {
   return (
-    <section className="bg-background px-6 py-[60px] md:px-20 md:py-[120px]">
-      <SectionHeader num="05" title="Core" em="Expertise" />
+    <section className="bg-background px-6 py-[50px] md:px-20 md:py-[90px]">
+      <ChapterHeader eyebrow="Chapter 01 — Core Expertise" title="Where I create" emphasis="the most value." />
 
       <div
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 overflow-hidden rounded-lg"
@@ -22,17 +22,16 @@ const ExpertiseSection = () => {
           <div
             key={item.num}
             className="bg-card hover:bg-secondary transition-colors relative overflow-hidden group"
-            style={{ padding: "36px 32px" }}
+            style={{ padding: "28px 26px" }}
           >
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-primary transform scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100" />
-            <div
-              className="font-display text-[48px] font-extrabold leading-none mb-4 transition-colors duration-300"
-              style={{ color: "hsl(var(--border))" }}
-            >
-              {item.num}
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-primary transform scale-x-0 origin-left transition-transform duration-400 group-hover:scale-x-100" />
+            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center mb-4">
+              <span className="font-sans text-[11px] font-extrabold" style={{ color: "hsl(var(--primary-foreground))" }}>
+                {item.num}
+              </span>
             </div>
-            <div className="font-display text-[15px] font-bold mb-2.5 leading-[1.3]">{item.title}</div>
-            <div className="font-sans text-[12px] text-muted-foreground leading-[1.7]">{item.desc}</div>
+            <div className="font-sans text-[14px] font-bold mb-2 leading-[1.3]">{item.title}</div>
+            <div className="font-sans text-[11.5px] text-muted-foreground leading-[1.65]">{item.desc}</div>
           </div>
         ))}
       </div>
