@@ -33,7 +33,7 @@ const App = () => (
         <ContactSlideout />
         <Routes>
           <Route path="/" element={<HomeRoute />} />
-          <Route path="/marketing-approach" element={<ApproachPage />} />
+          <Route path="/approach" element={<ApproachPage />} />
           <Route path="/career" element={<CareerPage />} />
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/contact" element={<ContactPage />} />
