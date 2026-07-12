@@ -19,31 +19,20 @@ const Footer = () => (
     <div className="flex flex-wrap justify-center gap-4 md:gap-8">
       {[
         { label: "About", href: "/" },
-        { label: "My Approach", href: "/approach", staticPage: true },
+        { label: "My Approach", href: "/approach" },
         { label: "Career", href: "/career" },
         { label: "Skills", href: "/skills" },
         { label: "Contact", href: "/contact" },
-      ].map((link) =>
-        link.staticPage ? (
-          <a
-            key={link.label}
-            href={link.href}
-            className="font-sans text-[11px] tracking-[0.12em] uppercase no-underline transition-all pb-0.5 hover:text-primary hover:border-b hover:border-primary"
-            style={{ color: "#888", borderBottom: "1px solid transparent" }}
-          >
-            {link.label}
-          </a>
-        ) : (
-          <Link
-            key={link.label}
-            to={link.href}
-            className="font-sans text-[11px] tracking-[0.12em] uppercase no-underline transition-all pb-0.5 hover:text-primary hover:border-b hover:border-primary"
-            style={{ color: "#888", borderBottom: "1px solid transparent" }}
-          >
-            {link.label}
-          </Link>
-        )
-      )}
+      ].map((link) => (
+        <Link
+          key={link.label}
+          to={link.href}
+          className="font-sans text-[11px] tracking-[0.12em] uppercase no-underline transition-all pb-0.5 hover:text-primary hover:border-b hover:border-primary"
+          style={{ color: "#888", borderBottom: "1px solid transparent" }}
+        >
+          {link.label}
+        </Link>
+      ))}
     </div>
   </footer>
 );
