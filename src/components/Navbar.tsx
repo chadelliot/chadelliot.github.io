@@ -4,7 +4,7 @@ import { Menu, X } from "lucide-react";
 
 const navItems = [
   { label: "About", href: "/" },
-  { label: "My Approach", href: "/approach" },
+  { label: "My Approach", href: "/approach", external: true },
   { label: "Career", href: "/career" },
   { label: "Skills", href: "/skills" },
   { label: "Contact", href: "/contact" },
@@ -33,17 +33,31 @@ const Navbar = () => {
       <ul className="hidden md:flex gap-8 list-none">
         {navItems.map((item) => (
           <li key={item.label}>
-            <Link
-              to={item.href}
-              className={`no-underline text-[11px] font-medium tracking-[0.15em] uppercase transition-colors ${
-                location.pathname === item.href
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-primary"
-              }`}
-              style={{ fontSize: "11px" }}
-            >
-              {item.label}
-            </Link>
+            {item.external ? (
+              <a
+                href={item.href}
+                className={`no-underline text-[11px] font-medium tracking-[0.15em] uppercase transition-colors ${
+                  location.pathname === item.href
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+                style={{ fontSize: "11px" }}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <Link
+                to={item.href}
+                className={`no-underline text-[11px] font-medium tracking-[0.15em] uppercase transition-colors ${
+                  location.pathname === item.href
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+                style={{ fontSize: "11px" }}
+              >
+                {item.label}
+              </Link>
+            )}
           </li>
         ))}
       </ul>
@@ -67,21 +81,36 @@ const Navbar = () => {
             borderBottom: "1px solid hsl(var(--border))",
           }}
         >
-          {navItems.map((item) => (
-            <Link
-              key={item.label}
-              to={item.href}
-              onClick={() => setMobileOpen(false)}
-              className={`no-underline text-[11px] font-medium tracking-[0.12em] uppercase py-3 px-2 transition-colors ${
-                location.pathname === item.href
-                  ? "text-primary"
-                  : "text-muted-foreground hover:text-primary"
-              }`}
-              style={{ borderBottom: "1px solid hsl(var(--border))", fontSize: "11px" }}
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map((item) =>
+            item.external ? (
+              <a
+                key={item.label}
+                href={item.href}
+                className={`no-underline text-[11px] font-medium tracking-[0.12em] uppercase py-3 px-2 transition-colors ${
+                  location.pathname === item.href
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+                style={{ borderBottom: "1px solid hsl(var(--border))", fontSize: "11px" }}
+              >
+                {item.label}
+              </a>
+            ) : (
+              <Link
+                key={item.label}
+                to={item.href}
+                onClick={() => setMobileOpen(false)}
+                className={`no-underline text-[11px] font-medium tracking-[0.12em] uppercase py-3 px-2 transition-colors ${
+                  location.pathname === item.href
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-primary"
+                }`}
+                style={{ borderBottom: "1px solid hsl(var(--border))", fontSize: "11px" }}
+              >
+                {item.label}
+              </Link>
+            )
+          )}
         </div>
       )}
     </nav>

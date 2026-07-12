@@ -19,6 +19,7 @@ const pillars = [
     statLabel: "Digital Revenue Influence",
     link: "/approach",
     linkLabel: "View My Approach →",
+    staticPage: true,
   },
   {
     num: "02",
@@ -120,6 +121,13 @@ const PillarsSection = () => {
                 href={p.link}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 text-[11px] font-sans tracking-[0.12em] uppercase text-primary border border-primary/50 px-[18px] py-[10px] rounded bg-primary/[0.06] hover:bg-primary/[0.14] hover:border-primary transition-all cursor-pointer no-underline"
+              >
+                {p.linkLabel}
+              </a>
+            ) : p.staticPage ? (
+              <a
+                href={p.link}
                 className="mt-4 inline-flex items-center gap-2 text-[11px] font-sans tracking-[0.12em] uppercase text-primary border border-primary/50 px-[18px] py-[10px] rounded bg-primary/[0.06] hover:bg-primary/[0.14] hover:border-primary transition-all cursor-pointer no-underline"
               >
                 {p.linkLabel}
