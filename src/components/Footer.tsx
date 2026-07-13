@@ -19,7 +19,7 @@ const Footer = () => (
     <div className="flex flex-wrap justify-center gap-4 md:gap-8">
       {[
         { label: "About", href: "/" },
-        { label: "My Approach", href: "/approach" },
+        { label: "My Approach", href: "/my-approach" },
         { label: "Career", href: "/career" },
         { label: "Skills", href: "/skills" },
         { label: "Contact", href: "/contact" },
