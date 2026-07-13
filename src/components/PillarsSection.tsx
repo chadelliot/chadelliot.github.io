@@ -17,7 +17,7 @@ const pillars = [
     ],
     stat: "$1B+",
     statLabel: "Digital Revenue Influence",
-    link: "/approach",
+    link: "/my-approach",
     linkLabel: "View My Approach →",
     staticPage: true,
   },
