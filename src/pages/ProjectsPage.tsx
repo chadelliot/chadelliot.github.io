@@ -499,6 +499,55 @@ const ProjectsPage = () => {
             </div>
           </div>
         ) : null}
+
+        {meetingPrompt ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-md rounded-2xl border border-border bg-background p-6 shadow-lg">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Log this meeting</p>
+              <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{meetingPrompt.contact_name} · {meetingPrompt.company}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">This records who set the meeting, so it's easy to sort out attribution later.</p>
+              <div className="mt-4 grid gap-3">
+                <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+                  Meeting date
+                  <input type="date" value={meetingDate} onChange={(e) => setMeetingDate(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+                </label>
+                <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+                  Notes (optional)
+                  <textarea value={meetingNotes} onChange={(e) => setMeetingNotes(e.target.value)} rows={3} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+                </label>
+              </div>
+              <div className="mt-5 flex justify-end gap-2">
+                <button type="button" onClick={() => setMeetingPrompt(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Skip</button>
+                <button type="button" onClick={handleSaveMeeting} disabled={!meetingDate} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground disabled:opacity-50">Save meeting</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
+        {messageEditor ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-lg rounded-2xl border border-border bg-background p-6 shadow-lg">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{messageEditor.label}</p>
+              <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{messageEditor.contact.contact_name} · {messageEditor.contact.company}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">Feel free to edit this before copying — it's just a starting point.</p>
+              <textarea
+                value={messageEditor.text}
+                onChange={(e) => setMessageEditor((current) => (current ? { ...current, text: e.target.value } : current))}
+                rows={6}
+                className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+              {messageEditor.field === "linkedin_connect_message" ? (
+                <p className={`mt-1 text-xs ${messageEditor.text.length > 300 ? "font-semibold text-[#B45309]" : "text-muted-foreground"}`}>
+                  {messageEditor.text.length}/300 characters {messageEditor.text.length > 300 ? "— over LinkedIn's connection note limit" : ""}
+                </p>
+              ) : null}
+              <div className="mt-4 flex justify-end gap-2">
+                <button type="button" onClick={() => setMessageEditor(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
+                <button type="button" onClick={handleCopyFromEditor} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Copy</button>
+              </div>
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }
