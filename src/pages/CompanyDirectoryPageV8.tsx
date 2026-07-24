@@ -1,10 +1,18 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
 import { proposalOutreachResearch } from "@/data/proposalOutreachResearch";
 import { trackEvent } from "@/lib/analytics";
+import {
+  getStoredProposalSession,
+  fetchAllCompanyStatuses,
+  upsertCompanyStatus,
+  getNextBestAction,
+  type CompanyStatusRecord,
+  type CompanyStatusValue,
+} from "@/lib/companyStatus";
 
 type DraftChannel = "email" | "linkedin";
 type PageSize = 10 | 25 | 50 | 100;
@@ -263,6 +271,27 @@ const CompanyDirectoryPageV8 = () => {
   const [selectedDraft, setSelectedDraft] = useState<{ page: CompanyPage; contact: DirectoryContact } | null>(null);
   const [draftChannel, setDraftChannel] = useState<DraftChannel>("email");
   const [copyStatus, setCopyStatus] = useState("Copy message");
+  const [companyStatuses, setCompanyStatuses] = useState<Record<string, CompanyStatusRecord>>({});
+
+  useEffect(() => {
+    const session = getStoredProposalSession();
+    if (!session) return;
+    fetchAllCompanyStatuses(session).then(setCompanyStatuses);
+  }, []);
+
+  const updateCompanyStatus = async (slug: string, status: CompanyStatusValue) => {
+    const session = getStoredProposalSession();
+    if (!session) return;
+    // Optimistic update so the UI feels instant; Supabase call happens in the background.
+    setCompanyStatuses((current) => ({
+      ...current,
+      [slug]: { slug, status, updated_at: new Date().toISOString(), notes: current[slug]?.notes ?? null },
+    }));
+    const saved = await upsertCompanyStatus(session, slug, status);
+    if (saved) {
+      setCompanyStatuses((current) => ({ ...current, [slug]: saved }));
+    }
+  };
 
   const records = useMemo(() => {
     const rows = Object.values(allCompanyLandingPages as Record<string, CompanyPage>).map((page) => {
@@ -380,6 +409,25 @@ const CompanyDirectoryPageV8 = () => {
                 const isExpanded = Boolean(expandedContactCompanies[page.slug]);
                 const displayedContacts = isExpanded ? visibleContacts : visibleContacts.slice(0, 2);
                 const hasMoreContacts = visibleContacts.length > 2;
+                const hasContactedContact = visibleContacts.some(
+                  (contact) => Boolean(contact.isDefaultContacted || contactedContacts[getContactKey(page, contact)])
+                );
+                const hasEmailPath = visibleContacts.some(
+                  (contact) =>
+                    Boolean(
+                      contact.email ||
+                        contact.emailStatus === "exact" ||
+                        contact.emailStatus === "pattern_supported" ||
+                        contact.emailStatus === "not_stored_in_repo"
+                    )
+                );
+                const currentStatus = companyStatuses[page.slug]?.status ?? "new";
+                const nextAction = getNextBestAction({
+                  status: currentStatus,
+                  contactCount: visibleContacts.length,
+                  hasContactedContact,
+                  hasEmailPath,
+                });
                 return (
                   <article key={page.slug} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm transition-colors hover:border-primary/60">
                     <div className="grid gap-4 border-b border-[#E2E8F0] bg-white px-4 py-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:px-5">
@@ -396,6 +444,27 @@ const CompanyDirectoryPageV8 = () => {
                       <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Commitment</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{getCommitmentLength(page)}</p></div>
                       <div className="border-b border-[#E2E8F0] px-4 py-3 md:border-b-0 md:border-r md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Job posted</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(jobPostedDate)}</p></div>
                       <div className="px-4 py-3 md:px-5"><p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Round added</p><p className="mt-1 text-sm leading-relaxed text-[#0F172A]">{formatDate(roundDate, "Round date pending")}</p></div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 border-b border-[#E2E8F0] bg-white px-4 py-3 md:flex-row md:items-center md:justify-between md:px-5">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Next: {nextAction.label}</span>
+                        <span className="hidden text-xs text-muted-foreground md:inline">{nextAction.reason}</span>
+                      </div>
+                      <label className="inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+                        Status
+                        <select
+                          value={currentStatus}
+                          onChange={(event) => updateCompanyStatus(page.slug, event.target.value as CompanyStatusValue)}
+                          className="h-8 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary"
+                        >
+                          <option value="new">New</option>
+                          <option value="responded">Responded</option>
+                          <option value="meeting_scheduled">Meeting scheduled</option>
+                          <option value="proposal_shared">Proposal shared</option>
+                          <option value="closed">Closed</option>
+                        </select>
+                      </label>
                     </div>
 
                     {visibleContacts.length ? (
