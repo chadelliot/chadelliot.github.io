@@ -48,6 +48,14 @@ export type TeamMember = {
   role: "owner" | "member";
 };
 
+export type CompanySignal = {
+  company: string;
+  role_title?: string | null;
+  posted_date?: string | null;
+  source_url?: string | null;
+  notes?: string | null;
+};
+
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 
@@ -85,6 +93,16 @@ export const fetchTeamMembers = async (session: ProposalSession): Promise<TeamMe
   });
   if (!response.ok) return [];
   return (await response.json()) as TeamMember[];
+};
+
+export const fetchCompanySignals = async (session: ProposalSession): Promise<Record<string, CompanySignal>> => {
+  if (!DB_URL) return {};
+  const response = await fetch(`${DB_URL}/rest/v1/company_signals?select=*`, {
+    headers: authHeaders(session),
+  });
+  if (!response.ok) return {};
+  const rows = (await response.json()) as CompanySignal[];
+  return Object.fromEntries(rows.map((row) => [row.company, row]));
 };
 
 export const updateContactProgress = async (

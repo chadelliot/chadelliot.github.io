@@ -6,6 +6,7 @@ import {
   fetchProjectContacts,
   fetchContactProgress,
   fetchTeamMembers,
+  fetchCompanySignals,
   updateContactProgress,
   logContactActivity,
   STATUS_LABELS,
@@ -14,6 +15,7 @@ import {
   type ContactProgress,
   type ContactStatus,
   type TeamMember,
+  type CompanySignal,
 } from "@/lib/projectContacts";
 
 type ProposalSession = { access_token: string; user: { id: string; email?: string } };
@@ -44,7 +46,7 @@ const signIn = async (email: string, password: string) => {
   return session;
 };
 
-type FilterKey = "all" | "not_started" | "meeting_set" | "responded" | "needs_research";
+type FilterKey = "all" | "warm_signal" | "not_started" | "meeting_set" | "responded" | "needs_research";
 
 const PRIORITY_ORDER: Record<string, number> = { A: 0, "A/B": 1, B: 2, C: 3, D: 4, needs_review: 5, "": 6 };
 
@@ -68,6 +70,7 @@ const ProjectsPage = () => {
   const [contacts, setContacts] = useState<ProjectContact[]>([]);
   const [progress, setProgress] = useState<Record<string, ContactProgress>>({});
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [signals, setSignals] = useState<Record<string, CompanySignal>>({});
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
@@ -78,14 +81,18 @@ const ProjectsPage = () => {
   useEffect(() => {
     if (!session) return;
     setIsLoadingData(true);
-    Promise.all([fetchProjectContacts(session), fetchContactProgress(session), fetchTeamMembers(session)]).then(
-      ([contactRows, progressRows, teamRows]) => {
-        setContacts(contactRows);
-        setProgress(progressRows);
-        setTeamMembers(teamRows);
-        setIsLoadingData(false);
-      }
-    );
+    Promise.all([
+      fetchProjectContacts(session),
+      fetchContactProgress(session),
+      fetchTeamMembers(session),
+      fetchCompanySignals(session),
+    ]).then(([contactRows, progressRows, teamRows, signalRows]) => {
+      setContacts(contactRows);
+      setProgress(progressRows);
+      setTeamMembers(teamRows);
+      setSignals(signalRows);
+      setIsLoadingData(false);
+    });
   }, [session]);
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -113,12 +120,14 @@ const ProjectsPage = () => {
     const meetingsSet = actionable.filter((c) => progress[c.id]?.status === "meeting_set").length;
     const responded = actionable.filter((c) => progress[c.id]?.status === "responded").length;
     const needsResearch = contacts.filter((c) => c.needs_research).length;
-    return { notStarted, meetingsSet, responded, needsResearch };
-  }, [contacts, progress]);
+    const warmSignal = actionable.filter((c) => signals[c.company]).length;
+    return { notStarted, meetingsSet, responded, needsResearch, warmSignal };
+  }, [contacts, progress, signals]);
 
   const filteredContacts = useMemo(() => {
     let rows = contacts.filter((c) => !c.do_not_contact);
 
+    if (activeFilter === "warm_signal") rows = rows.filter((c) => !c.needs_research && signals[c.company]);
     if (activeFilter === "not_started") rows = rows.filter((c) => !c.needs_research && (progress[c.id]?.status ?? "not_started") === "not_started");
     if (activeFilter === "meeting_set") rows = rows.filter((c) => progress[c.id]?.status === "meeting_set");
     if (activeFilter === "responded") rows = rows.filter((c) => progress[c.id]?.status === "responded");
@@ -137,13 +146,29 @@ const ProjectsPage = () => {
       );
     }
 
+    // A warm hiring signal outranks priority tier entirely - a B-priority
+    // company with an active signal sorts above an A-priority company with
+    // none. Within the same signal status, priority tier breaks the tie,
+    // and the most recently posted signal sorts first among signal companies.
     return rows.sort((a, b) => {
+      const signalA = signals[a.company];
+      const signalB = signals[b.company];
+      const hasSignalA = signalA ? 0 : 1;
+      const hasSignalB = signalB ? 0 : 1;
+      if (hasSignalA !== hasSignalB) return hasSignalA - hasSignalB;
+
+      if (signalA && signalB) {
+        const dateA = signalA.posted_date ?? "";
+        const dateB = signalB.posted_date ?? "";
+        if (dateA !== dateB) return dateA > dateB ? -1 : 1;
+      }
+
       const pa = PRIORITY_ORDER[a.priority ?? ""] ?? 6;
       const pb = PRIORITY_ORDER[b.priority ?? ""] ?? 6;
       if (pa !== pb) return pa - pb;
       return a.company.localeCompare(b.company);
     });
-  }, [contacts, progress, activeFilter, priorityFilter, search]);
+  }, [contacts, progress, signals, activeFilter, priorityFilter, search]);
 
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
@@ -216,6 +241,7 @@ const ProjectsPage = () => {
   }
 
   const statTiles: { key: FilterKey; label: string; value: number }[] = [
+    { key: "warm_signal", label: "Warm signal", value: stats.warmSignal },
     { key: "not_started", label: "Not started", value: stats.notStarted },
     { key: "responded", label: "Responded", value: stats.responded },
     { key: "meeting_set", label: "Meetings set", value: stats.meetingsSet },
@@ -235,18 +261,24 @@ const ProjectsPage = () => {
             <button type="button" onClick={handleSignOut} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">Sign out</button>
           </div>
 
-          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
-            {statTiles.map((tile) => (
-              <button
-                key={tile.key}
-                type="button"
-                onClick={() => setActiveFilter(activeFilter === tile.key ? "all" : tile.key)}
-                className={`rounded-2xl border p-4 text-left transition-colors ${activeFilter === tile.key ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
-              >
-                <p className="font-mono text-3xl font-bold text-foreground">{tile.value}</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{tile.label}</p>
-              </button>
-            ))}
+          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
+            {statTiles.map((tile) => {
+              const isWarm = tile.key === "warm_signal";
+              const isActive = activeFilter === tile.key;
+              const warmClass = isActive ? "border-[#B45309] bg-[#FFFBEB]" : "border-[#FDE68A] bg-[#FFFBEB] hover:border-[#B45309]";
+              const normalClass = isActive ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50";
+              return (
+                <button
+                  key={tile.key}
+                  type="button"
+                  onClick={() => setActiveFilter(activeFilter === tile.key ? "all" : tile.key)}
+                  className={`rounded-2xl border p-4 text-left transition-colors ${isWarm ? warmClass : normalClass}`}
+                >
+                  <p className={`font-mono text-3xl font-bold ${isWarm ? "text-[#B45309]" : "text-foreground"}`}>{tile.value}</p>
+                  <p className={`mt-1 text-xs font-semibold uppercase tracking-[0.1em] ${isWarm ? "text-[#92400E]" : "text-muted-foreground"}`}>{tile.label}</p>
+                </button>
+              );
+            })}
           </div>
 
           <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-[#E2E8F0] bg-white px-4 py-3">
@@ -281,8 +313,9 @@ const ProjectsPage = () => {
               {filteredContacts.slice(0, 50).map((contact) => {
                 const contactProgress = progress[contact.id];
                 const status = contact.needs_research ? null : contactProgress?.status ?? "not_started";
+                const signal = signals[contact.company];
                 return (
-                  <article key={contact.id} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm">
+                  <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${signal ? "border-[#FDE68A]" : "border-[#E2E8F0]"}`}>
                     <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
                       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">
                         {contact.needs_research ? "?" : getInitials(contact.contact_name)}
@@ -305,6 +338,11 @@ const ProjectsPage = () => {
                             </div>
                             <p className="text-sm font-semibold text-primary">{contact.title}</p>
                             <p className="text-sm text-muted-foreground">{contact.company}</p>
+                            {signal ? (
+                              <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[11px] font-semibold text-[#92400E]">
+                                Hiring{signal.role_title ? `: ${signal.role_title}` : ""}{signal.posted_date ? ` · posted ${new Date(signal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
+                              </p>
+                            ) : null}
                           </>
                         )}
                       </div>
@@ -339,20 +377,21 @@ const ProjectsPage = () => {
                     </div>
 
                     {!contact.needs_research && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
-                      <div className="flex flex-wrap gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
+                      <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Outreach:</span>
                         {contact.linkedin_connect_message ? (
-                          <button type="button" onClick={() => handleCopy(contact, "linkedin_connect_message", "Copy connect message")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
-                            {copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "Copy connect message"}
+                          <button type="button" onClick={() => handleCopy(contact, "linkedin_connect_message", "1. Connection note")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
+                            {copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}
                           </button>
                         ) : null}
                         {contact.intro_message ? (
-                          <button type="button" onClick={() => handleCopy(contact, "intro_message", "Copy intro message")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
-                            {copyFeedback[`${contact.id}-intro_message`] ?? "Copy intro message"}
+                          <button type="button" onClick={() => handleCopy(contact, "intro_message", "2. After accepted")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
+                            {copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}
                           </button>
                         ) : null}
                         {contact.follow_up_message ? (
-                          <button type="button" onClick={() => handleCopy(contact, "follow_up_message", "Copy follow-up")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
-                            {copyFeedback[`${contact.id}-follow_up_message`] ?? "Copy follow-up"}
+                          <button type="button" onClick={() => handleCopy(contact, "follow_up_message", "3. If no response")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
+                            {copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}
                           </button>
                         ) : null}
                       </div>
