@@ -85,24 +85,37 @@ const authHeaders = (session: ProposalSession) => ({
   "Content-Type": "application/json",
 });
 
-export { getStoredProposalSession };
-
-export const fetchProjectContacts = async (session: ProposalSession): Promise<ProjectContact[]> => {
+// Supabase's API caps a single request at ~1,000 rows by default. With
+// 1,000+ contacts already, and more added regularly, a plain fetch silently
+// drops everything past that cutoff - which is exactly what made newly
+// assigned contacts vanish. This pages through with the Range header until
+// a request comes back with fewer rows than requested, meaning there's
+// nothing left to fetch.
+const PAGE_SIZE = 1000;
+const fetchAllRows = async <T>(session: ProposalSession, path: string): Promise<T[]> => {
   if (!DB_URL) return [];
-  const response = await fetch(`${DB_URL}/rest/v1/project_contacts?select=*&order=company.asc`, {
-    headers: authHeaders(session),
-  });
-  if (!response.ok) return [];
-  return (await response.json()) as ProjectContact[];
+  const results: T[] = [];
+  let offset = 0;
+  while (true) {
+    const response = await fetch(`${DB_URL}/rest/v1/${path}`, {
+      headers: { ...authHeaders(session), Range: `${offset}-${offset + PAGE_SIZE - 1}` },
+    });
+    if (!response.ok) break;
+    const page = (await response.json()) as T[];
+    results.push(...page);
+    if (page.length < PAGE_SIZE) break;
+    offset += PAGE_SIZE;
+  }
+  return results;
 };
 
+export { getStoredProposalSession };
+
+export const fetchProjectContacts = async (session: ProposalSession): Promise<ProjectContact[]> =>
+  fetchAllRows<ProjectContact>(session, "project_contacts?select=*&order=company.asc");
+
 export const fetchContactProgress = async (session: ProposalSession): Promise<Record<string, ContactProgress>> => {
-  if (!DB_URL) return {};
-  const response = await fetch(`${DB_URL}/rest/v1/contact_progress?select=*`, {
-    headers: authHeaders(session),
-  });
-  if (!response.ok) return {};
-  const rows = (await response.json()) as ContactProgress[];
+  const rows = await fetchAllRows<ContactProgress>(session, "contact_progress?select=*");
   return Object.fromEntries(rows.map((row) => [row.contact_id, row]));
 };
 
