@@ -13,6 +13,8 @@ import {
   createMeeting,
   createClosedDeal,
   findCurrentTeamMember,
+  updateTeamMemberName,
+  updateTeamMemberRole,
   updateContactProgress,
   logContactActivity,
   getContactTier,
@@ -82,6 +84,8 @@ const ProjectsPage = () => {
   const [newContactLinkedIn, setNewContactLinkedIn] = useState("");
   const [isRequestingBatch, setIsRequestingBatch] = useState(false);
   const [hasAutoRequestedFirstBatch, setHasAutoRequestedFirstBatch] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [nameInput, setNameInput] = useState("");
 
   useEffect(() => {
     if (!session) return;
@@ -138,6 +142,25 @@ const ProjectsPage = () => {
       handleRequestMoreContacts();
     }
   }, [session, currentTeamMember, isOwner, isLoadingData, myAssignedContacts.length, contacts.length, hasAutoRequestedFirstBatch]);
+
+  const handleSaveName = async () => {
+    if (!session || !currentTeamMember || !nameInput.trim()) return;
+    const updated = await updateTeamMemberName(session, currentTeamMember.id, nameInput.trim());
+    if (updated) setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+    setIsEditingName(false);
+  };
+
+  const handleChangeRole = async (memberId: string, role: "owner" | "member") => {
+    if (!session) return;
+    const target = teamMembers.find((m) => m.id === memberId);
+    const ownerCount = teamMembers.filter((m) => m.role === "owner").length;
+    if (target?.role === "owner" && role === "member" && ownerCount <= 1) {
+      window.alert("You can't remove the last owner — add another owner first.");
+      return;
+    }
+    const updated = await updateTeamMemberRole(session, memberId, role);
+    if (updated) setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+  };
 
   const handleAddContact = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -344,7 +367,28 @@ const ProjectsPage = () => {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
                 <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Your assignments.</h1>
-                {currentTeamMember ? <p className="mt-1 text-sm text-muted-foreground">Signed in as {currentTeamMember.name}</p> : (
+                {currentTeamMember ? (
+                  isEditingName ? (
+                    <div className="mt-1 flex items-center gap-2">
+                      <input
+                        type="text"
+                        defaultValue={currentTeamMember.name}
+                        onChange={(e) => setNameInput(e.target.value)}
+                        autoFocus
+                        className="h-8 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary"
+                      />
+                      <button type="button" onClick={handleSaveName} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Save</button>
+                      <button type="button" onClick={() => setIsEditingName(false)} className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground hover:underline">Cancel</button>
+                    </div>
+                  ) : (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Signed in as {currentTeamMember.name}{" "}
+                      <button type="button" onClick={() => { setNameInput(currentTeamMember.name); setIsEditingName(true); }} className="font-semibold text-primary hover:underline">
+                        (not you? update name)
+                      </button>
+                    </p>
+                  )
+                ) : (
                   <p className="mt-1 text-sm text-[#B45309]">Your account isn't set up as a team member yet — contact Chad.</p>
                 )}
               </div>
@@ -479,6 +523,29 @@ const ProjectsPage = () => {
           {isOwner && showAttribution ? (
             <div className="mb-8 border border-[#E2E8F0] bg-white p-5">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Attribution (owner only)</p>
+
+              <div className="mb-6 border-b border-[#E2E8F0] pb-6">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Team members</p>
+                <div className="grid gap-2">
+                  {teamMembers.map((member) => (
+                    <div key={member.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#E2E8F0] px-3 py-2">
+                      <div>
+                        <span className="font-semibold text-foreground">{member.name}</span>
+                        <span className="ml-2 text-sm text-muted-foreground">{member.email}</span>
+                      </div>
+                      <select
+                        value={member.role}
+                        onChange={(e) => handleChangeRole(member.id, e.target.value as "owner" | "member")}
+                        className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary"
+                      >
+                        <option value="member">Member</option>
+                        <option value="owner">Owner</option>
+                      </select>
+                    </div>
+                  ))}
+                  {teamMembers.length === 0 ? <p className="text-sm text-muted-foreground">No team members yet.</p> : null}
+                </div>
+              </div>
 
               <form onSubmit={handleSaveClosedDeal} className="mb-6 grid gap-3 border-b border-[#E2E8F0] pb-6 md:grid-cols-[1fr_1fr_1fr_2fr_auto] md:items-end">
                 <label className="grid gap-1 text-xs font-semibold text-muted-foreground">

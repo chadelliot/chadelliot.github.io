@@ -115,6 +115,37 @@ export const fetchTeamMembers = async (session: ProposalSession): Promise<TeamMe
   return (await response.json()) as TeamMember[];
 };
 
+export const updateTeamMemberName = async (session: ProposalSession, teamMemberId: string, name: string): Promise<TeamMember | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}`, {
+    method: "PATCH",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as TeamMember[];
+  return rows[0] ?? null;
+};
+
+// Only actually works if the signed-in user is an owner - enforced by a
+// database trigger, not just this function, so this can't be bypassed by
+// calling the API directly.
+export const updateTeamMemberRole = async (
+  session: ProposalSession,
+  teamMemberId: string,
+  role: "owner" | "member"
+): Promise<TeamMember | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}`, {
+    method: "PATCH",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify({ role }),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as TeamMember[];
+  return rows[0] ?? null;
+};
+
 export const fetchCompanySignals = async (session: ProposalSession): Promise<Record<string, CompanySignal>> => {
   if (!DB_URL) return {};
   const response = await fetch(`${DB_URL}/rest/v1/company_signals?select=*`, {
