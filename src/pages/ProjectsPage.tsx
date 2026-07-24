@@ -1,12 +1,18 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useProposalSession } from "@/hooks/useProposalSession";
+import { signInToProposalDirectory, clearStoredProposalSession } from "@/lib/companyStatus";
 import {
-  getStoredProposalSession,
   fetchProjectContacts,
   fetchContactProgress,
   fetchTeamMembers,
   fetchCompanySignals,
+  fetchMeetings,
+  fetchClosedDeals,
+  createMeeting,
+  createClosedDeal,
+  findCurrentTeamMember,
   updateContactProgress,
   logContactActivity,
   STATUS_LABELS,
@@ -16,35 +22,13 @@ import {
   type ContactStatus,
   type TeamMember,
   type CompanySignal,
+  type Meeting,
+  type ClosedDeal,
 } from "@/lib/projectContacts";
 
-type ProposalSession = { access_token: string; user: { id: string; email?: string } };
-
-const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
-
-const saveStoredSession = (session: ProposalSession) => window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
-const clearStoredSession = () => window.localStorage.removeItem(SESSION_STORAGE_KEY);
-
-const readApiJson = async <T,>(response: Response) => {
-  const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!response.ok) throw new Error(data?.message || data?.msg || data?.error_description || "Authentication failed.");
-  return data as T;
-};
-
-const signIn = async (email: string, password: string) => {
-  const response = await fetch(`${DB_URL}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: { apikey: DB_PUBLIC || "", "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
-  });
-  const session = await readApiJson<ProposalSession>(response);
-  saveStoredSession(session);
-  return session;
-};
 
 type FilterKey = "all" | "warm_signal" | "not_started" | "meeting_set" | "responded" | "needs_research";
 
@@ -61,7 +45,7 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
 };
 
 const ProjectsPage = () => {
-  const [session, setSession] = useState<ProposalSession | null>(() => getStoredProposalSession());
+  const [session, setSession] = useProposalSession();
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
@@ -71,12 +55,22 @@ const ProjectsPage = () => {
   const [progress, setProgress] = useState<Record<string, ContactProgress>>({});
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [signals, setSignals] = useState<Record<string, CompanySignal>>({});
+  const [meetings, setMeetings] = useState<Meeting[]>([]);
+  const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [copyFeedback, setCopyFeedback] = useState<Record<string, string>>({});
+  const [meetingPrompt, setMeetingPrompt] = useState<ProjectContact | null>(null);
+  const [meetingDate, setMeetingDate] = useState("");
+  const [meetingNotes, setMeetingNotes] = useState("");
+  const [showAttribution, setShowAttribution] = useState(false);
+  const [dealCompany, setDealCompany] = useState("");
+  const [dealCreditedTo, setDealCreditedTo] = useState("");
+  const [dealDate, setDealDate] = useState("");
+  const [dealNotes, setDealNotes] = useState("");
 
   useEffect(() => {
     if (!session) return;
@@ -86,21 +80,28 @@ const ProjectsPage = () => {
       fetchContactProgress(session),
       fetchTeamMembers(session),
       fetchCompanySignals(session),
-    ]).then(([contactRows, progressRows, teamRows, signalRows]) => {
+      fetchMeetings(session),
+      fetchClosedDeals(session),
+    ]).then(([contactRows, progressRows, teamRows, signalRows, meetingRows, dealRows]) => {
       setContacts(contactRows);
       setProgress(progressRows);
       setTeamMembers(teamRows);
       setSignals(signalRows);
+      setMeetings(meetingRows);
+      setClosedDeals(dealRows);
       setIsLoadingData(false);
     });
   }, [session]);
+
+  const currentTeamMember = useMemo(() => (session ? findCurrentTeamMember(session, teamMembers) : null), [session, teamMembers]);
+  const isOwner = currentTeamMember?.role === "owner";
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsAuthLoading(true);
     setAuthMessage("");
     try {
-      const nextSession = await signIn(authEmail, authPassword);
+      const nextSession = await signInToProposalDirectory(authEmail, authPassword);
       if (nextSession?.access_token) setSession(nextSession);
     } catch (error) {
       setAuthMessage(error instanceof Error ? error.message : "Authentication failed.");
@@ -110,7 +111,7 @@ const ProjectsPage = () => {
   };
 
   const handleSignOut = () => {
-    clearStoredSession();
+    clearStoredProposalSession();
     setSession(null);
   };
 
@@ -179,6 +180,11 @@ const ProjectsPage = () => {
     const saved = await updateContactProgress(session, contact.id, { status });
     if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
     logContactActivity(session, contact.id, "status_changed", status);
+    if (status === "meeting_set") {
+      setMeetingPrompt(contact);
+      setMeetingDate("");
+      setMeetingNotes("");
+    }
   };
 
   const handleAssign = async (contact: ProjectContact, assignedTo: string) => {
@@ -196,6 +202,27 @@ const ProjectsPage = () => {
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "message_copied", field);
+  };
+
+  const handleSaveMeeting = async () => {
+    if (!session || !meetingPrompt || !meetingDate) return;
+    const setBy = currentTeamMember?.id ?? null;
+    const saved = await createMeeting(session, meetingPrompt.id, setBy, meetingDate, meetingNotes);
+    if (saved) setMeetings((current) => [saved, ...current]);
+    setMeetingPrompt(null);
+  };
+
+  const handleSaveClosedDeal = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!session || !dealCompany || !dealDate) return;
+    const saved = await createClosedDeal(session, dealCompany, dealCreditedTo || null, dealDate, dealNotes);
+    if (saved) {
+      setClosedDeals((current) => [saved, ...current]);
+      setDealCompany("");
+      setDealCreditedTo("");
+      setDealDate("");
+      setDealNotes("");
+    }
   };
 
   if (!IS_DB_READY) {
@@ -258,8 +285,78 @@ const ProjectsPage = () => {
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
               <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Your contact queue.</h1>
             </div>
-            <button type="button" onClick={handleSignOut} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">Sign out</button>
+            <div className="flex items-center gap-2">
+              {isOwner ? (
+                <button type="button" onClick={() => setShowAttribution((v) => !v)} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
+                  {showAttribution ? "Hide attribution" : "Meetings & closed deals"}
+                </button>
+              ) : null}
+              <button type="button" onClick={handleSignOut} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">Sign out</button>
+            </div>
           </div>
+
+          {isOwner && showAttribution ? (
+            <div className="mb-8 border border-[#E2E8F0] bg-white p-5">
+              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Attribution (owner only)</p>
+
+              <form onSubmit={handleSaveClosedDeal} className="mb-6 grid gap-3 border-b border-[#E2E8F0] pb-6 md:grid-cols-[1fr_1fr_1fr_2fr_auto] md:items-end">
+                <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
+                  Company
+                  <input type="text" value={dealCompany} onChange={(e) => setDealCompany(e.target.value)} required className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
+                </label>
+                <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
+                  Credit to
+                  <select value={dealCreditedTo} onChange={(e) => setDealCreditedTo(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary">
+                    <option value="">Unassigned</option>
+                    {teamMembers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                  </select>
+                </label>
+                <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
+                  Contract signed
+                  <input type="date" value={dealDate} onChange={(e) => setDealDate(e.target.value)} required className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
+                </label>
+                <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
+                  Notes
+                  <input type="text" value={dealNotes} onChange={(e) => setDealNotes(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
+                </label>
+                <button type="submit" className="h-9 rounded-md bg-primary px-4 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Log closed deal</button>
+              </form>
+
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Meetings set ({meetings.length})</p>
+                  <div className="grid gap-2">
+                    {meetings.map((m) => {
+                      const contact = contacts.find((c) => c.id === m.contact_id);
+                      const setter = teamMembers.find((t) => t.id === m.set_by);
+                      return (
+                        <div key={m.id} className="border border-[#E2E8F0] px-3 py-2 text-sm">
+                          <span className="font-semibold text-foreground">{contact?.company ?? "Unknown company"}</span> — {contact?.contact_name ?? ""}
+                          <span className="ml-2 text-xs text-muted-foreground">{m.meeting_date} · set by {setter?.name ?? "unassigned"}</span>
+                        </div>
+                      );
+                    })}
+                    {meetings.length === 0 ? <p className="text-sm text-muted-foreground">No meetings logged yet.</p> : null}
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Closed deals ({closedDeals.length})</p>
+                  <div className="grid gap-2">
+                    {closedDeals.map((d) => {
+                      const credited = teamMembers.find((t) => t.id === d.credited_to);
+                      return (
+                        <div key={d.id} className="border border-[#E2E8F0] px-3 py-2 text-sm">
+                          <span className="font-semibold text-foreground">{d.company}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">{d.contract_signed_date} · credited to {credited?.name ?? "unassigned"}</span>
+                        </div>
+                      );
+                    })}
+                    {closedDeals.length === 0 ? <p className="text-sm text-muted-foreground">No closed deals logged yet.</p> : null}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ) : null}
 
           <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
             {statTiles.map((tile) => {
@@ -407,6 +504,30 @@ const ProjectsPage = () => {
         </div>
       </main>
       <Footer />
+
+      {meetingPrompt ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-background p-6 shadow-lg">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Log this meeting</p>
+            <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{meetingPrompt.contact_name} · {meetingPrompt.company}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">This records who set the meeting, so it's easy to sort out attribution later.</p>
+            <div className="mt-4 grid gap-3">
+              <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+                Meeting date
+                <input type="date" value={meetingDate} onChange={(e) => setMeetingDate(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+              </label>
+              <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+                Notes (optional)
+                <textarea value={meetingNotes} onChange={(e) => setMeetingNotes(e.target.value)} rows={3} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+              </label>
+            </div>
+            <div className="mt-5 flex justify-end gap-2">
+              <button type="button" onClick={() => setMeetingPrompt(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Skip</button>
+              <button type="button" onClick={handleSaveMeeting} disabled={!meetingDate} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground disabled:opacity-50">Save meeting</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

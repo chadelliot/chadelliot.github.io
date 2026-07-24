@@ -56,6 +56,25 @@ export type CompanySignal = {
   notes?: string | null;
 };
 
+export type Meeting = {
+  id: string;
+  contact_id: string;
+  set_by?: string | null;
+  meeting_date?: string | null;
+  confirmed: boolean;
+  notes?: string | null;
+  created_at: string;
+};
+
+export type ClosedDeal = {
+  id: string;
+  company: string;
+  credited_to?: string | null;
+  contract_signed_date?: string | null;
+  notes?: string | null;
+  created_at: string;
+};
+
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 
@@ -133,6 +152,69 @@ export const logContactActivity = async (
     headers: authHeaders(session),
     body: JSON.stringify({ contact_id: contactId, event_type: eventType, event_detail: eventDetail, actor: session.user.id }),
   });
+};
+
+export const fetchMeetings = async (session: ProposalSession): Promise<Meeting[]> => {
+  if (!DB_URL) return [];
+  const response = await fetch(`${DB_URL}/rest/v1/meetings?select=*&order=meeting_date.desc`, {
+    headers: authHeaders(session),
+  });
+  if (!response.ok) return [];
+  return (await response.json()) as Meeting[];
+};
+
+export const createMeeting = async (
+  session: ProposalSession,
+  contactId: string,
+  setBy: string | null,
+  meetingDate: string,
+  notes: string
+): Promise<Meeting | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/meetings`, {
+    method: "POST",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify({ contact_id: contactId, set_by: setBy, meeting_date: meetingDate, notes, confirmed: true }),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as Meeting[];
+  return rows[0] ?? null;
+};
+
+export const fetchClosedDeals = async (session: ProposalSession): Promise<ClosedDeal[]> => {
+  if (!DB_URL) return [];
+  const response = await fetch(`${DB_URL}/rest/v1/closed_deals?select=*&order=contract_signed_date.desc`, {
+    headers: authHeaders(session),
+  });
+  if (!response.ok) return [];
+  return (await response.json()) as ClosedDeal[];
+};
+
+export const createClosedDeal = async (
+  session: ProposalSession,
+  company: string,
+  creditedTo: string | null,
+  contractSignedDate: string,
+  notes: string
+): Promise<ClosedDeal | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/closed_deals`, {
+    method: "POST",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify({ company, credited_to: creditedTo, contract_signed_date: contractSignedDate, notes }),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as ClosedDeal[];
+  return rows[0] ?? null;
+};
+
+// Matches the signed-in session to a team_members row by email, since that's
+// what the person actually logs in with - avoids needing team_members.id to
+// be manually set to match their Supabase Auth user ID.
+export const findCurrentTeamMember = (session: ProposalSession, teamMembers: TeamMember[]): TeamMember | null => {
+  const email = session.user.email?.toLowerCase();
+  if (!email) return null;
+  return teamMembers.find((m) => m.email.toLowerCase() === email) ?? null;
 };
 
 export const STATUS_LABELS: Record<ContactStatus, string> = {

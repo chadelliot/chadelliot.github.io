@@ -16,11 +16,28 @@ export type CompanyStatusRecord = {
   updated_at: string;
 };
 
-export type ProposalSession = { access_token: string; user: { id: string; email?: string } };
+export type ProposalSession = {
+  access_token: string;
+  refresh_token?: string;
+  expires_at?: number; // unix seconds when the access token stops working
+  user: { id: string; email?: string };
+};
 
 const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
+
+// Supabase login sessions expire (about an hour, by default). Without this,
+// every page silently starts failing every data request once that happens -
+// no error banner, just empty-looking data, until the person happens to sign
+// out and back in. This computes a real expiry time so we know to refresh
+// *before* that happens, in the background, without interrupting anyone.
+const withComputedExpiry = (raw: any): ProposalSession => ({
+  access_token: raw.access_token,
+  refresh_token: raw.refresh_token,
+  expires_at: Math.floor(Date.now() / 1000) + (raw.expires_in ?? 3600),
+  user: raw.user,
+});
 
 export const getStoredProposalSession = (): ProposalSession | null => {
   if (typeof window === "undefined") return null;
@@ -29,6 +46,57 @@ export const getStoredProposalSession = (): ProposalSession | null => {
     return stored ? (JSON.parse(stored) as ProposalSession) : null;
   } catch {
     return null;
+  }
+};
+
+export const saveStoredProposalSession = (session: ProposalSession) =>
+  window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
+
+export const clearStoredProposalSession = () => window.localStorage.removeItem(SESSION_STORAGE_KEY);
+
+const readAuthResponse = async (response: Response) => {
+  const text = await response.text();
+  const data = text ? JSON.parse(text) : null;
+  if (!response.ok) throw new Error(data?.message || data?.msg || data?.error_description || "Authentication failed.");
+  return data;
+};
+
+export const signInToProposalDirectory = async (email: string, password: string): Promise<ProposalSession> => {
+  const response = await fetch(`${DB_URL}/auth/v1/token?grant_type=password`, {
+    method: "POST",
+    headers: { apikey: DB_PUBLIC || "", "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const session = withComputedExpiry(await readAuthResponse(response));
+  saveStoredProposalSession(session);
+  return session;
+};
+
+// Checks whether the current access token is close to expiring and, if so,
+// silently exchanges the refresh token for a new one. Called on page load
+// and on a recurring timer so a session basically never goes stale while
+// someone's actively using the tool.
+export const refreshProposalSessionIfNeeded = async (session: ProposalSession): Promise<ProposalSession | null> => {
+  const bufferSeconds = 120;
+  const nowSeconds = Math.floor(Date.now() / 1000);
+  if ((session.expires_at ?? 0) - nowSeconds > bufferSeconds) return session;
+  if (!session.refresh_token) return session; // nothing we can do without one - will need a real re-login
+
+  try {
+    const response = await fetch(`${DB_URL}/auth/v1/token?grant_type=refresh_token`, {
+      method: "POST",
+      headers: { apikey: DB_PUBLIC || "", "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: session.refresh_token }),
+    });
+    if (!response.ok) {
+      clearStoredProposalSession();
+      return null;
+    }
+    const next = withComputedExpiry(await response.json());
+    saveStoredProposalSession(next);
+    return next;
+  } catch {
+    return session; // network hiccup - keep going, try again on the next check
   }
 };
 

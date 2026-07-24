@@ -2,10 +2,9 @@ import { FormEvent, useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompanyDirectoryPageV8 from "./CompanyDirectoryPageV8";
+import { useProposalSession } from "@/hooks/useProposalSession";
+import { signInToProposalDirectory, clearStoredProposalSession } from "@/lib/companyStatus";
 
-type ProposalSession = { access_token: string; user: { id: string; email?: string } };
-
-const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
@@ -26,42 +25,8 @@ const CRO_METRICS_EMAILS_BY_CONTACT_NAME: Record<string, string> = {
 const buildLinkedInSearchUrl = (companyName: string) =>
   `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(`${companyName} marketing revenue operations leader`)}`;
 
-const readApiJson = async <T,>(response: Response) => {
-  const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
-  if (!response.ok) throw new Error(data?.message || data?.msg || data?.error_description || "Authentication failed.");
-  return data as T;
-};
-
-const getStoredSession = () => {
-  if (typeof window === "undefined") return null;
-  try {
-    const stored = window.localStorage.getItem(SESSION_STORAGE_KEY);
-    return stored ? (JSON.parse(stored) as ProposalSession) : null;
-  } catch {
-    return null;
-  }
-};
-
-const saveStoredSession = (session: ProposalSession) => window.localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
-const clearStoredSession = () => window.localStorage.removeItem(SESSION_STORAGE_KEY);
-
-const signIn = async (email: string, password: string) => {
-  const response = await fetch(`${DB_URL}/auth/v1/token?grant_type=password`, {
-    method: "POST",
-    headers: {
-      apikey: DB_PUBLIC || "",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
-  const session = await readApiJson<ProposalSession>(response);
-  saveStoredSession(session);
-  return session;
-};
-
 const CompanyDirectoryPageV9 = () => {
-  const [session, setSession] = useState<ProposalSession | null>(() => getStoredSession());
+  const [session, setSession] = useProposalSession();
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
@@ -244,7 +209,7 @@ const CompanyDirectoryPageV9 = () => {
     setAuthMessage("");
 
     try {
-      const nextSession = await signIn(authEmail, authPassword);
+      const nextSession = await signInToProposalDirectory(authEmail, authPassword);
       if (nextSession?.access_token) {
         setSession(nextSession);
         setAuthMessage("Signed in.");
@@ -257,7 +222,7 @@ const CompanyDirectoryPageV9 = () => {
   };
 
   const handleSignOut = () => {
-    clearStoredSession();
+    clearStoredProposalSession();
     setSession(null);
     setAuthEmail("");
     setAuthPassword("");

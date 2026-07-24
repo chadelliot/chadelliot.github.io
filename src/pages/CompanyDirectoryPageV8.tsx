@@ -5,8 +5,8 @@ import Footer from "@/components/Footer";
 import { allCompanyLandingPages } from "@/data/allCompanyLandingPages";
 import { proposalOutreachResearch } from "@/data/proposalOutreachResearch";
 import { trackEvent } from "@/lib/analytics";
+import { useProposalSession } from "@/hooks/useProposalSession";
 import {
-  getStoredProposalSession,
   fetchAllCompanyStatuses,
   upsertCompanyStatus,
   getNextBestAction,
@@ -272,15 +272,14 @@ const CompanyDirectoryPageV8 = () => {
   const [draftChannel, setDraftChannel] = useState<DraftChannel>("email");
   const [copyStatus, setCopyStatus] = useState("Copy message");
   const [companyStatuses, setCompanyStatuses] = useState<Record<string, CompanyStatusRecord>>({});
+  const [session] = useProposalSession();
 
   useEffect(() => {
-    const session = getStoredProposalSession();
     if (!session) return;
     fetchAllCompanyStatuses(session).then(setCompanyStatuses);
-  }, []);
+  }, [session]);
 
   const updateCompanyStatus = async (slug: string, status: CompanyStatusValue) => {
-    const session = getStoredProposalSession();
     if (!session) return;
     // Optimistic update so the UI feels instant; Supabase call happens in the background.
     setCompanyStatuses((current) => ({
