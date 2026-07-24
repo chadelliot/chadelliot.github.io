@@ -15,6 +15,10 @@ import {
   findCurrentTeamMember,
   updateContactProgress,
   logContactActivity,
+  getContactTier,
+  buildLinkedInSearchUrl,
+  assignNextBatch,
+  createSelfServeContact,
   STATUS_LABELS,
   getInitials,
   type ProjectContact,
@@ -71,6 +75,13 @@ const ProjectsPage = () => {
   const [dealCreditedTo, setDealCreditedTo] = useState("");
   const [dealDate, setDealDate] = useState("");
   const [dealNotes, setDealNotes] = useState("");
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [newContactCompany, setNewContactCompany] = useState("");
+  const [newContactName, setNewContactName] = useState("");
+  const [newContactEmail, setNewContactEmail] = useState("");
+  const [newContactLinkedIn, setNewContactLinkedIn] = useState("");
+  const [isRequestingBatch, setIsRequestingBatch] = useState(false);
+  const [hasAutoRequestedFirstBatch, setHasAutoRequestedFirstBatch] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -95,6 +106,62 @@ const ProjectsPage = () => {
 
   const currentTeamMember = useMemo(() => (session ? findCurrentTeamMember(session, teamMembers) : null), [session, teamMembers]);
   const isOwner = currentTeamMember?.role === "owner";
+
+  const myAssignedContacts = useMemo(() => {
+    if (!currentTeamMember) return [];
+    return contacts.filter((c) => progress[c.id]?.assigned_to === currentTeamMember.id);
+  }, [contacts, progress, currentTeamMember]);
+
+  const myGoodContacts = useMemo(() => myAssignedContacts.filter((c) => getContactTier(c) !== "research"), [myAssignedContacts]);
+  const myResearchContacts = useMemo(() => myAssignedContacts.filter((c) => getContactTier(c) === "research"), [myAssignedContacts]);
+
+  const canRequestMoreContacts =
+    myGoodContacts.length === 0 || myGoodContacts.every((c) => (progress[c.id]?.status ?? "not_started") !== "not_started");
+
+  const handleRequestMoreContacts = async () => {
+    if (!session || !currentTeamMember || isRequestingBatch) return;
+    setIsRequestingBatch(true);
+    const { assignedGoodIds, assignedResearchIds } = await assignNextBatch(session, currentTeamMember.id, contacts, progress);
+    if (assignedGoodIds.length || assignedResearchIds.length) {
+      const freshProgress = await fetchContactProgress(session);
+      setProgress(freshProgress);
+    }
+    setIsRequestingBatch(false);
+  };
+
+  // First-time team members start with zero assigned contacts - give them
+  // their first batch automatically rather than making them ask for it.
+  useEffect(() => {
+    if (!session || !currentTeamMember || isOwner || hasAutoRequestedFirstBatch || isLoadingData) return;
+    if (myAssignedContacts.length === 0 && contacts.length > 0) {
+      setHasAutoRequestedFirstBatch(true);
+      handleRequestMoreContacts();
+    }
+  }, [session, currentTeamMember, isOwner, isLoadingData, myAssignedContacts.length, contacts.length, hasAutoRequestedFirstBatch]);
+
+  const handleAddContact = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!session || !currentTeamMember || !newContactCompany || !newContactName) return;
+    const created = await createSelfServeContact(session, {
+      company: newContactCompany,
+      contactName: newContactName,
+      email: newContactEmail,
+      linkedinUrl: newContactLinkedIn,
+      assignedTo: currentTeamMember.id,
+    });
+    if (created) {
+      setContacts((current) => [...current, created]);
+      setProgress((current) => ({
+        ...current,
+        [created.id]: { contact_id: created.id, status: "not_started", assigned_to: currentTeamMember.id, updated_at: new Date().toISOString() },
+      }));
+      setNewContactCompany("");
+      setNewContactName("");
+      setNewContactEmail("");
+      setNewContactLinkedIn("");
+      setShowAddContact(false);
+    }
+  };
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -263,6 +330,120 @@ const ProjectsPage = () => {
           </section>
         </main>
         <Footer />
+      </div>
+    );
+  }
+
+  if (!isOwner) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="px-6 pb-20 pt-28 md:px-16 md:pt-32">
+          <div className="mx-auto max-w-4xl">
+            <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
+                <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Your assignments.</h1>
+                {currentTeamMember ? <p className="mt-1 text-sm text-muted-foreground">Signed in as {currentTeamMember.name}</p> : (
+                  <p className="mt-1 text-sm text-[#B45309]">Your account isn't set up as a team member yet — contact Chad.</p>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button type="button" onClick={() => setShowAddContact(true)} className="h-fit rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Add a contact</button>
+                <button type="button" onClick={handleSignOut} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Sign out</button>
+              </div>
+            </div>
+
+            {isLoadingData ? <p className="text-sm text-muted-foreground">Loading your assignments…</p> : null}
+
+            {!isLoadingData && myGoodContacts.length === 0 && myResearchContacts.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{isRequestingBatch ? "Getting your first batch of contacts…" : "No contacts assigned yet."}</p>
+            ) : null}
+
+            <div className="grid gap-3">
+              {myGoodContacts.map((contact) => {
+                const contactProgress = progress[contact.id];
+                const status = contactProgress?.status ?? "not_started";
+                const tier = getContactTier(contact);
+                return (
+                  <article key={contact.id} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm">
+                    <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
+                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          {tier === "email" ? <span title="Email on file">📧</span> : null}
+                          {contact.linkedin_url && contact.linkedin_url.includes("/in/") ? (
+                            <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="font-display text-lg font-extrabold tracking-tight text-foreground hover:text-primary hover:underline">{contact.contact_name}</a>
+                          ) : (
+                            <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.contact_name}</p>
+                          )}
+                        </div>
+                        <p className="text-sm font-semibold text-primary">{contact.title}</p>
+                        <p className="text-sm text-muted-foreground">{contact.company}{contact.email ? ` · ${contact.email}` : ""}</p>
+                      </div>
+                      <select value={status} onChange={(e) => handleStatusChange(contact, e.target.value as ContactStatus)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary">
+                        {(Object.keys(STATUS_LABELS) as ContactStatus[]).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+                      </select>
+                    </div>
+                    {(contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
+                      <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
+                        {contact.linkedin_connect_message ? <button type="button" onClick={() => handleCopy(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
+                        {contact.intro_message ? <button type="button" onClick={() => handleCopy(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
+                        {contact.follow_up_message ? <button type="button" onClick={() => handleCopy(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+
+            {myGoodContacts.length > 0 ? (
+              <div className="mt-4 flex justify-center">
+                <button type="button" onClick={handleRequestMoreContacts} disabled={!canRequestMoreContacts || isRequestingBatch} className="rounded-full border border-primary bg-primary px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground disabled:opacity-40">
+                  {isRequestingBatch ? "Getting more…" : canRequestMoreContacts ? "Send me more contacts" : "Work through your current list first"}
+                </button>
+              </div>
+            ) : null}
+
+            {myResearchContacts.length > 0 ? (
+              <div className="mt-10 border border-[#FDE68A] bg-[#FFFBEB] p-5">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#92400E]">Additional research needed</p>
+                <p className="mb-4 text-sm text-[#92400E]">These need a manual LinkedIn search — click through and confirm you've found the right person.</p>
+                <div className="grid gap-2">
+                  {myResearchContacts.map((contact) => (
+                    <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#FDE68A] bg-white px-3 py-2">
+                      <div>
+                        <span className="font-semibold text-foreground">{contact.contact_name}</span>
+                        <span className="ml-2 text-sm text-muted-foreground">{contact.title} · {contact.company}</span>
+                      </div>
+                      <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </main>
+        <Footer />
+
+        {showAddContact ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40">
+            <div className="h-full w-full max-w-md overflow-y-auto border-l border-border bg-background p-6 shadow-lg">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Add a contact</p>
+              <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">You'll be credited for this one.</h2>
+              <form onSubmit={handleAddContact} className="mt-4 grid gap-3">
+                <label className="grid gap-1.5 text-sm font-semibold text-foreground">Company<input type="text" value={newContactCompany} onChange={(e) => setNewContactCompany(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
+                <label className="grid gap-1.5 text-sm font-semibold text-foreground">Contact name<input type="text" value={newContactName} onChange={(e) => setNewContactName(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
+                <label className="grid gap-1.5 text-sm font-semibold text-foreground">Email (if known)<input type="email" value={newContactEmail} onChange={(e) => setNewContactEmail(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
+                <label className="grid gap-1.5 text-sm font-semibold text-foreground">LinkedIn or social profile URL<input type="url" value={newContactLinkedIn} onChange={(e) => setNewContactLinkedIn(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
+                <div className="mt-3 flex justify-end gap-2">
+                  <button type="button" onClick={() => setShowAddContact(false)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
+                  <button type="submit" className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save contact</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        ) : null}
       </div>
     );
   }

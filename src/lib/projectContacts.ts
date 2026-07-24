@@ -21,6 +21,7 @@ export type ProjectContact = {
   contact_name?: string | null;
   title?: string | null;
   linkedin_url?: string | null;
+  email?: string | null;
   priority?: string | null;
   target_type_raw?: string | null;
   outreach_angle?: string | null;
@@ -234,4 +235,92 @@ export const getInitials = (name?: string | null) => {
     .slice(0, 2)
     .map((p) => p[0]?.toUpperCase() ?? "")
     .join("");
+};
+
+// A contact is only worth handing to a team member if there's a real way to
+// reach them. An email beats a real LinkedIn profile; a bare search link
+// (or nothing at all) means real research is still needed first.
+export type ContactTier = "email" | "linkedin" | "research";
+
+export const hasRealLinkedInProfile = (contact: ProjectContact) => Boolean(contact.linkedin_url?.includes("/in/"));
+
+export const getContactTier = (contact: ProjectContact): ContactTier => {
+  if (contact.email) return "email";
+  if (hasRealLinkedInProfile(contact)) return "linkedin";
+  return "research";
+};
+
+// Builds a ready-to-click LinkedIn people-search URL with the contact's name
+// and company already filled in, so whoever gets this contact doesn't have
+// to build the search themselves - they just click and the person should
+// surface in the results.
+export const buildLinkedInSearchUrl = (contactName?: string | null, company?: string | null) => {
+  const query = [contactName, company].filter(Boolean).join(" ");
+  return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(query)}`;
+};
+
+const TIER_ORDER: Record<ContactTier, number> = { email: 0, linkedin: 1, research: 2 };
+
+// Pulls the next batch for a team member: up to 25 "good" contacts (email
+// or a real LinkedIn profile, best signal first) plus up to 5 "needs
+// research" contacts (no direct way to reach them yet). Only looks at
+// contacts nobody's already assigned, so batches never overlap.
+export const assignNextBatch = async (
+  session: ProposalSession,
+  teamMemberId: string,
+  allContacts: ProjectContact[],
+  allProgress: Record<string, ContactProgress>
+): Promise<{ assignedGoodIds: string[]; assignedResearchIds: string[] }> => {
+  const unassigned = allContacts.filter(
+    (c) => !c.needs_research && !c.do_not_contact && !allProgress[c.id]?.assigned_to
+  );
+
+  const good = unassigned
+    .filter((c) => getContactTier(c) !== "research")
+    .sort((a, b) => TIER_ORDER[getContactTier(a)] - TIER_ORDER[getContactTier(b)])
+    .slice(0, 25);
+
+  const research = unassigned.filter((c) => getContactTier(c) === "research").slice(0, 5);
+
+  const allIds = [...good, ...research].map((c) => c.id);
+  if (allIds.length && DB_URL) {
+    await fetch(`${DB_URL}/rest/v1/contact_progress?contact_id=in.(${allIds.join(",")})`, {
+      method: "PATCH",
+      headers: authHeaders(session),
+      body: JSON.stringify({ assigned_to: teamMemberId }),
+    });
+  }
+
+  return { assignedGoodIds: good.map((c) => c.id), assignedResearchIds: research.map((c) => c.id) };
+};
+
+// Lets a team member add a contact they found themselves. They're
+// automatically credited as the assignee, so they get attribution if it
+// turns into a meeting or closed deal later.
+export const createSelfServeContact = async (
+  session: ProposalSession,
+  input: { company: string; contactName: string; email?: string; linkedinUrl?: string; assignedTo: string }
+): Promise<ProjectContact | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/project_contacts`, {
+    method: "POST",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify({
+      company: input.company,
+      contact_name: input.contactName,
+      email: input.email || null,
+      linkedin_url: input.linkedinUrl || null,
+      needs_research: false,
+      do_not_contact: false,
+      legacy_status_notes: "Added directly by team member",
+    }),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as ProjectContact[];
+  const created = rows[0];
+  if (!created) return null;
+
+  // The DB trigger auto-creates a contact_progress row on insert; assign it now.
+  await updateContactProgress(session, created.id, { assigned_to: input.assignedTo });
+  return created;
 };
