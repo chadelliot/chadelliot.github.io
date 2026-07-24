@@ -63,15 +63,13 @@ const DIRECTORY_METADATA: Record<string, DirectoryMetadata> = {
   e3n: { roleTitle: "Fractional Marketing & Communications Manager", roundAddedDate: "2026-06-02" },
   "rootshell-enterprise-technologies": { roleTitle: "Salesforce Marketing Cloud / Data Cloud Consultant", roundAddedDate: "2026-06-02" },
 
-  "sleep-doctor-gtm-product-marketing": { roleTitle: "GTM / Product Marketing Opportunity", roundAddedDate: "2026-06-02" },
-  "whole-womans-health-fractional-marketing-director": { roleTitle: "Fractional Marketing Director", roundAddedDate: "2026-06-02" },
+
   "shaw-scott-contract-solutions-engineer-consultant": { roleTitle: "Contract Solutions Engineer Consultant", roundAddedDate: "2026-06-02" },
   "strenox-cro-strategist": { roleTitle: "CRO Strategist", roundAddedDate: "2026-06-02" },
   "run-studios-internal-communications-content-strategist": { roleTitle: "Internal Communications Content Strategist", roundAddedDate: "2026-06-02" },
   "xen-ai-fractional-gtm-advisory": { roleTitle: "Fractional GTM Advisory", roundAddedDate: "2026-06-02" },
   "bay-fc-fractional-marketing-pr-operator": { roleTitle: "Fractional Marketing / PR Operator", sourceUrl: "https://www.gofractional.com/job/fractional-marketing-pr-operator-cmpokml4", jobPostedDate: "2026-05-26", roundAddedDate: "2026-06-02" },
   "rippling-senior-lifecycle-marketing-manager-contractor": { roleTitle: "Senior Lifecycle Marketing Manager Contractor", sourceUrl: "https://www.gofractional.com/job/rippling-senior-lifecycle-marketing-manager-contractor-part-time-rippling", roundAddedDate: "2026-06-02" },
-  "classdojo-b2b-content-thought-leadership-strategist": { roleTitle: "B2B Content / Thought Leadership Strategist Contract", sourceUrl: "https://www.gofractional.com/job/ashbyhq-b2b-content-thought-leadership-strategist-contract-classdojo", jobPostedDate: "2026-05-22", roundAddedDate: "2026-06-02" },
 };
 
 const GENERIC_CONTACT_PATTERN = /^(contact|unknown|tbd|n\/a|na|hiring manager|recruiter|marketing contact|leadership contact|people contact|decision maker|senior leader)$/i;

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/inject-commercial-strategy-analytics.mjs",
+    "build": "node scripts/check-duplicate-slugs.mjs; vite build && node scripts/inject-commercial-strategy-analytics.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

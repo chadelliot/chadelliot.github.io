@@ -55,42 +55,6 @@ const makePage = ({ slug, companyName, industry, headline, subheadline, fitSumma
 });
 
 export const fractionalOpportunityWave8CompanyLandingPages: Record<string, CompanyLandingPage> = {
-  "sleep-doctor-gtm-product-marketing": makePage({
-    slug: "sleep-doctor-gtm-product-marketing",
-    companyName: "Sleep Doctor",
-    industry: "Digital health / sleep care / GTM product marketing",
-    headline: "A GTM product-marketing system that connects positioning, lifecycle activation, and measurable growth.",
-    subheadline: "A proposal-style response to Sleep Doctor’s GTM / product marketing opportunity across positioning, launch planning, lifecycle messaging, analytics, and growth operations.",
-    fitSummary: "Sleep Doctor is a strong fit because the work sits at the intersection of healthcare consumer behavior, lifecycle marketing, product positioning, digital acquisition, attribution, and cross-functional GTM execution.",
-    priorities: ["Clarify product positioning and audience needs across sleep-health solutions.", "Connect acquisition, lifecycle, content, and product messaging into a clearer GTM system.", "Create reporting that helps leadership understand what is driving conversion and retention."],
-    title: "GTM Product Marketing Operating System",
-    description: "A fractional GTM and product-marketing engagement focused on positioning, launch planning, lifecycle activation, and growth measurement.",
-    bullets: ["Audit product messaging, audience segments, lifecycle paths, and conversion points.", "Build a launch and campaign rhythm that aligns product, content, growth, and analytics.", "Define reporting that connects GTM activity to acquisition, engagement, and revenue outcomes."],
-    situation: "Sleep Doctor appears to need GTM and product-marketing support for a digital health model where trust, education, conversion, and lifecycle engagement all matter.",
-    opportunity: "The opportunity is to connect product positioning to the marketing system around it so customer needs, campaigns, content, lifecycle messaging, and reporting reinforce one another.",
-    investment: "Fractional or contract opportunity; compensation not listed in source summary",
-    outcomes: ["Sharper product positioning and audience messaging.", "More coordinated GTM launch and lifecycle execution.", "Clearer attribution and performance visibility.", "A practical operating cadence across product, marketing, and analytics."],
-    outreachAngle: "I can help Sleep Doctor connect product positioning, lifecycle marketing, content, paid media, automation, and analytics into a practical GTM operating system.",
-    ctaLabel: "Discuss GTM fit"
-  }),
-  "whole-womans-health-fractional-marketing-director": makePage({
-    slug: "whole-womans-health-fractional-marketing-director",
-    companyName: "Whole Woman’s Health",
-    industry: "Healthcare / reproductive health / fractional marketing leadership",
-    headline: "A marketing operating model for patient access, trust-building, and measurable demand.",
-    subheadline: "A proposal-style response to Whole Woman’s Health’s fractional marketing director opportunity across content, lifecycle communications, paid media, analytics, and patient-facing growth.",
-    fitSummary: "Whole Woman’s Health is a strong adjacent fit because the role requires senior marketing judgment, sensitive audience understanding, patient trust, content strategy, digital acquisition, lifecycle communications, and clear measurement.",
-    priorities: ["Strengthen patient-facing marketing strategy, content, and channel execution.", "Build more consistent lifecycle communications and campaign measurement.", "Support leadership with a practical marketing operating cadence and performance visibility."],
-    title: "Fractional Marketing Leadership System",
-    description: "A fractional marketing leadership engagement focused on patient access, content strategy, lifecycle communications, campaign execution, and reporting.",
-    bullets: ["Assess current marketing channels, audience needs, content gaps, and conversion paths.", "Define a campaign and communications rhythm that balances trust, access, education, and growth.", "Build reporting that clarifies what is driving inquiries, engagement, and patient conversion."],
-    situation: "Whole Woman’s Health needs marketing leadership in a sensitive healthcare category where clarity, empathy, trust, and performance discipline all matter.",
-    opportunity: "The opportunity is to build a marketing system that supports patient access and organizational growth without reducing the work to generic demand generation.",
-    investment: "Fractional marketing director opportunity; compensation not listed in source summary",
-    outcomes: ["Clearer marketing priorities and campaign rhythm.", "Stronger lifecycle and patient communications.", "Improved visibility into channel and content performance.", "A scalable operating model for fractional marketing leadership."],
-    outreachAngle: "I can help Whole Woman’s Health build a marketing operating rhythm that connects content, lifecycle communications, paid media, analytics, and patient access into one measurable system.",
-    ctaLabel: "Discuss marketing leadership"
-  }),
   "shaw-scott-contract-solutions-engineer-consultant": makePage({
     slug: "shaw-scott-contract-solutions-engineer-consultant",
     companyName: "Shaw/Scott",
@@ -198,23 +162,5 @@ export const fractionalOpportunityWave8CompanyLandingPages: Record<string, Compa
     outcomes: ["Sharper lifecycle segmentation and journey strategy.", "More effective automation and testing cadence.", "Clearer reporting tied to funnel and revenue outcomes.", "Better cross-functional alignment across GTM teams."],
     outreachAngle: "I can help Rippling improve lifecycle performance by connecting segmentation, automation, campaign operations, experimentation, RevOps, and analytics into one measurable system.",
     ctaLabel: "Discuss lifecycle fit"
-  }),
-  "classdojo-b2b-content-thought-leadership-strategist": makePage({
-    slug: "classdojo-b2b-content-thought-leadership-strategist",
-    companyName: "ClassDojo",
-    industry: "EdTech / B2B content / thought leadership",
-    headline: "A B2B content engine that turns expertise, audience needs, and growth priorities into thought leadership.",
-    subheadline: "A proposal-style response to ClassDojo’s B2B content and thought leadership strategist contract across content strategy, executive narrative, audience insights, editorial operations, and campaign activation.",
-    fitSummary: "ClassDojo is a strong fit because the role requires content strategy, executive narrative, audience understanding, editorial operations, campaign integration, and the ability to build a repeatable content engine.",
-    priorities: ["Define a B2B thought leadership strategy tied to audience needs and business priorities.", "Build an editorial operating rhythm that improves quality, speed, and reuse across channels.", "Connect content themes to campaigns, lifecycle journeys, and measurable engagement."],
-    title: "B2B Thought Leadership Content Engine",
-    description: "A contract content strategy engagement focused on narrative, editorial operations, SME input, channel activation, and performance learning.",
-    bullets: ["Audit audience needs, existing content, message pillars, and channel opportunities.", "Create a thought leadership framework that turns internal expertise into reusable content assets.", "Build a weekly editorial and review cadence connected to campaign and lifecycle needs."],
-    situation: "ClassDojo needs B2B content and thought leadership support that can translate expertise, product value, market perspective, and audience questions into clear content.",
-    opportunity: "The opportunity is to create a repeatable content engine that supports demand creation, credibility, executive voice, and lifecycle engagement without becoming generic content production.",
-    investment: "Contract opportunity; compensation not listed in source summary",
-    outcomes: ["Clearer thought leadership narrative and content priorities.", "Reusable content pillars across channels.", "Improved editorial workflow and SME input process.", "Stronger connection between content, campaigns, and measurable engagement."],
-    outreachAngle: "I can help ClassDojo build a B2B content engine that connects audience needs, thought leadership, SME input, campaign priorities, and performance learning into a scalable operating rhythm.",
-    ctaLabel: "Discuss content strategy"
   })
 };

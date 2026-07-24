@@ -9,6 +9,7 @@ import { indeedContractWave1CompanyLandingPages } from "./indeedContractWave1Com
 import { fractionalOpportunityWave7CompanyLandingPages } from "./fractionalOpportunityWave7CompanyLandingPages";
 import { fractionalOpportunityWave8CompanyLandingPages } from "./fractionalOpportunityWave8CompanyLandingPages";
 import { fractionalOpportunityWave9CompanyLandingPages } from "./fractionalOpportunityWave9CompanyLandingPages";
+import { jobWorkflowWave10CompanyLandingPages } from "./jobWorkflowWave10CompanyLandingPages";
 import { jobWorkflowWave11CompanyLandingPages } from "./jobWorkflowWave11CompanyLandingPages";
 import { customRoleCompanyLandingPages } from "./customRoleCompanyLandingPages";
 
@@ -211,6 +212,7 @@ export const allCompanyLandingPages = Object.fromEntries(
     ...fractionalOpportunityWave7CompanyLandingPages,
     ...fractionalOpportunityWave8CompanyLandingPages,
     ...fractionalOpportunityWave9CompanyLandingPages,
+    ...jobWorkflowWave10CompanyLandingPages,
     ...jobWorkflowWave11CompanyLandingPages,
     ...customRoleCompanyLandingPages,
   }).map(([slug, page]) => [slug, normalizePage(page)]),
