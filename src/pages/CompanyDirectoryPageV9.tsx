@@ -3,7 +3,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompanyDirectoryPageV8 from "./CompanyDirectoryPageV8";
 
-type AuthMode = "login" | "signup";
 type ProposalSession = { access_token: string; user: { id: string; email?: string } };
 
 const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
@@ -61,23 +60,8 @@ const signIn = async (email: string, password: string) => {
   return session;
 };
 
-const signUp = async (email: string, password: string) => {
-  const response = await fetch(`${DB_URL}/auth/v1/signup`, {
-    method: "POST",
-    headers: {
-      apikey: DB_PUBLIC || "",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
-  const session = await readApiJson<ProposalSession>(response);
-  if (session?.access_token) saveStoredSession(session);
-  return session;
-};
-
 const CompanyDirectoryPageV9 = () => {
   const [session, setSession] = useState<ProposalSession | null>(() => getStoredSession());
-  const [authMode, setAuthMode] = useState<AuthMode>("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
@@ -256,19 +240,14 @@ const CompanyDirectoryPageV9 = () => {
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const submitter = (event.nativeEvent as SubmitEvent).submitter as HTMLButtonElement | null;
-    const requestedAuthMode = (submitter?.dataset.authMode as AuthMode | undefined) ?? authMode;
-    setAuthMode(requestedAuthMode);
     setIsAuthLoading(true);
     setAuthMessage("");
 
     try {
-      const nextSession = requestedAuthMode === "signup" ? await signUp(authEmail, authPassword) : await signIn(authEmail, authPassword);
+      const nextSession = await signIn(authEmail, authPassword);
       if (nextSession?.access_token) {
         setSession(nextSession);
-        setAuthMessage(requestedAuthMode === "signup" ? "Account created. You are signed in." : "Signed in.");
-      } else {
-        setAuthMessage("Account created. Check your email if confirmation is required before access.");
+        setAuthMessage("Signed in.");
       }
     } catch (error) {
       setAuthMessage(error instanceof Error ? error.message : "Authentication failed.");
@@ -308,8 +287,8 @@ const CompanyDirectoryPageV9 = () => {
         <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
           <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Proposal directory access</p>
-            <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">{authMode === "signup" ? "Create your account." : "Sign in to continue."}</h1>
-            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Create your account or sign in to view the private proposal page library and save contacted statuses.</p>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Sign in to continue.</h1>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Sign in to view the private proposal page library and save contacted statuses. Access is by invitation only — contact Chad if you need an account.</p>
             <form onSubmit={handleAuthSubmit} className="mt-6 grid gap-4">
               <label className="grid gap-2 text-sm font-semibold text-foreground">
                 Email
@@ -317,12 +296,9 @@ const CompanyDirectoryPageV9 = () => {
               </label>
               <label className="grid gap-2 text-sm font-semibold text-foreground">
                 Password
-                <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" autoComplete={authMode === "signup" ? "new-password" : "current-password"} />
+                <input type="password" value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm font-normal outline-none focus:border-primary" autoComplete="current-password" />
               </label>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <button type="submit" data-auth-mode="signup" disabled={isAuthLoading} className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] transition-colors disabled:opacity-50 ${authMode === "signup" ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}>Sign up</button>
-                <button type="submit" data-auth-mode="login" disabled={isAuthLoading} className={`rounded-full border px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] transition-colors disabled:opacity-50 ${authMode === "login" ? "border-primary bg-primary text-primary-foreground" : "border-border text-foreground hover:border-primary hover:text-primary"}`}>Sign in</button>
-              </div>
+              <button type="submit" data-auth-mode="login" disabled={isAuthLoading} className="rounded-full border border-primary bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors disabled:opacity-50">Sign in</button>
             </form>
             {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm leading-relaxed text-muted-foreground">{authMessage}</p> : null}
           </section>
