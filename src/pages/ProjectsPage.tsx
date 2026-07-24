@@ -85,6 +85,12 @@ const ProjectsPage = () => {
   const [isRequestingBatch, setIsRequestingBatch] = useState(false);
   const [hasAutoRequestedFirstBatch, setHasAutoRequestedFirstBatch] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
+  const [messageEditor, setMessageEditor] = useState<{
+    contact: ProjectContact;
+    field: "linkedin_connect_message" | "intro_message" | "follow_up_message";
+    label: string;
+    text: string;
+  } | null>(null);
   const [nameInput, setNameInput] = useState("");
 
   useEffect(() => {
@@ -285,13 +291,18 @@ const ProjectsPage = () => {
     if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
   };
 
-  const handleCopy = async (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
-    const text = contact[field];
-    if (!text) return;
-    await navigator.clipboard.writeText(text);
+  const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
+    setMessageEditor({ contact, field, label, text: contact[field] ?? "" });
+  };
+
+  const handleCopyFromEditor = async () => {
+    if (!messageEditor) return;
+    const { contact, field, label } = messageEditor;
+    await navigator.clipboard.writeText(messageEditor.text);
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "message_copied", field);
+    setMessageEditor(null);
   };
 
   const handleSaveMeeting = async () => {
@@ -431,9 +442,9 @@ const ProjectsPage = () => {
                     </div>
                     {(contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
                       <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
-                        {contact.linkedin_connect_message ? <button type="button" onClick={() => handleCopy(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
-                        {contact.intro_message ? <button type="button" onClick={() => handleCopy(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
-                        {contact.follow_up_message ? <button type="button" onClick={() => handleCopy(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+                        {contact.linkedin_connect_message ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
+                        {contact.intro_message ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
+                        {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
                       </div>
                     ) : null}
                   </article>
@@ -511,6 +522,7 @@ const ProjectsPage = () => {
               <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Your contact queue.</h1>
             </div>
             <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setShowAddContact(true)} className="h-fit rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Add a contact</button>
               {isOwner ? (
                 <button type="button" onClick={() => setShowAttribution((v) => !v)} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
                   {showAttribution ? "Hide attribution" : "Meetings & closed deals"}
@@ -725,17 +737,17 @@ const ProjectsPage = () => {
                       <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
                         <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Outreach:</span>
                         {contact.linkedin_connect_message ? (
-                          <button type="button" onClick={() => handleCopy(contact, "linkedin_connect_message", "1. Connection note")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
+                          <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
                             {copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}
                           </button>
                         ) : null}
                         {contact.intro_message ? (
-                          <button type="button" onClick={() => handleCopy(contact, "intro_message", "2. After accepted")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
+                          <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
                             {copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}
                           </button>
                         ) : null}
                         {contact.follow_up_message ? (
-                          <button type="button" onClick={() => handleCopy(contact, "follow_up_message", "3. If no response")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
+                          <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
                             {copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}
                           </button>
                         ) : null}
@@ -772,6 +784,50 @@ const ProjectsPage = () => {
             <div className="mt-5 flex justify-end gap-2">
               <button type="button" onClick={() => setMeetingPrompt(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Skip</button>
               <button type="button" onClick={handleSaveMeeting} disabled={!meetingDate} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground disabled:opacity-50">Save meeting</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {showAddContact ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40">
+          <div className="h-full w-full max-w-md overflow-y-auto border-l border-border bg-background p-6 shadow-lg">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Add a contact</p>
+            <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">You'll be credited for this one.</h2>
+            <form onSubmit={handleAddContact} className="mt-4 grid gap-3">
+              <label className="grid gap-1.5 text-sm font-semibold text-foreground">Company<input type="text" value={newContactCompany} onChange={(e) => setNewContactCompany(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
+              <label className="grid gap-1.5 text-sm font-semibold text-foreground">Contact name<input type="text" value={newContactName} onChange={(e) => setNewContactName(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
+              <label className="grid gap-1.5 text-sm font-semibold text-foreground">Email (if known)<input type="email" value={newContactEmail} onChange={(e) => setNewContactEmail(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
+              <label className="grid gap-1.5 text-sm font-semibold text-foreground">LinkedIn or social profile URL<input type="url" value={newContactLinkedIn} onChange={(e) => setNewContactLinkedIn(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
+              <div className="mt-3 flex justify-end gap-2">
+                <button type="button" onClick={() => setShowAddContact(false)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
+                <button type="submit" className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save contact</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
+
+      {messageEditor ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-lg rounded-2xl border border-border bg-background p-6 shadow-lg">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{messageEditor.label}</p>
+            <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{messageEditor.contact.contact_name} · {messageEditor.contact.company}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Feel free to edit this before copying — it's just a starting point.</p>
+            <textarea
+              value={messageEditor.text}
+              onChange={(e) => setMessageEditor((current) => (current ? { ...current, text: e.target.value } : current))}
+              rows={6}
+              className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+            {messageEditor.field === "linkedin_connect_message" ? (
+              <p className={`mt-1 text-xs ${messageEditor.text.length > 300 ? "font-semibold text-[#B45309]" : "text-muted-foreground"}`}>
+                {messageEditor.text.length}/300 characters {messageEditor.text.length > 300 ? "— over LinkedIn's connection note limit" : ""}
+              </p>
+            ) : null}
+            <div className="mt-4 flex justify-end gap-2">
+              <button type="button" onClick={() => setMessageEditor(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
+              <button type="button" onClick={handleCopyFromEditor} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Copy</button>
             </div>
           </div>
         </div>
