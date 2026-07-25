@@ -540,11 +540,7 @@ const ProjectsPage = () => {
     const meetingBlock = meetingBlocks[contact.id];
     const isBlocked = Boolean(meetingBlock?.is_blocked);
     return (
-      <article
-        key={contact.id}
-        className={`overflow-hidden rounded-lg border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}
-        style={{ borderLeft: `3px solid ${isBlocked ? "#2FA37F" : STATUS_CHART_COLORS[status]}` }}
-      >
+      <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}>
         <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
           <div className="min-w-0">
@@ -603,7 +599,7 @@ const ProjectsPage = () => {
     const isExpanded = Boolean(expandedCompanies[company.id]);
 
     return (
-      <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-shadow hover:shadow-md">
+      <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
         <CompanyInfoCard
           company={company}
           research={getCompanyResearchSummary(companyContacts)}
@@ -625,7 +621,8 @@ const ProjectsPage = () => {
             <button
               type="button"
               onClick={() => toggleCompanyExpanded(company.id)}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+              style={{ backgroundColor: "#2c96731a" }}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
             >
               {isExpanded ? "Hide" : "Show"} {others.length} other contact{others.length === 1 ? "" : "s"} {isExpanded ? "▲" : "▼"}
             </button>

@@ -14,15 +14,6 @@ const STAGE_BADGE_CLASS: Record<Company["company_stage"], string> = {
   closed_lost: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
 };
 
-// Same palette used across the dashboard charts/tiles - keeping the color
-// tied to stage (not decorative) so it reads as meaningful at a glance.
-export const STAGE_ACCENT_COLOR: Record<Company["company_stage"], string> = {
-  new_signal: "#94A3B8",
-  meeting_scheduled: "#2FA37F",
-  closed_won: "#15803D",
-  closed_lost: "#B91C1C",
-};
-
 type CompanyInfoCardProps = {
   company: Company;
   research: CompanyResearchSummary;
@@ -35,18 +26,11 @@ type CompanyInfoCardProps = {
 // before working a person.
 const CompanyInfoCard = ({ company, research, signals, contactCount }: CompanyInfoCardProps) => {
   const topSignal = signals[0];
-  const accentColor = STAGE_ACCENT_COLOR[company.company_stage];
 
   return (
-    <div
-      className="border-b border-[#E2E8F0] px-4 py-3.5"
-      style={{
-        borderTop: `3px solid ${accentColor}`,
-        background: `linear-gradient(180deg, ${accentColor}14 0%, #F8FAFC 100%)`,
-      }}
-    >
+    <div className="border-b border-[#E2E8F0] bg-black px-4 py-3.5">
       <div className="flex flex-wrap items-center gap-2">
-        <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{company.name}</p>
+        <p className="font-display text-lg font-extrabold tracking-tight text-white">{company.name}</p>
         <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${STAGE_BADGE_CLASS[company.company_stage]}`}>
           {COMPANY_STAGE_LABELS[company.company_stage]}
         </span>
@@ -55,11 +39,11 @@ const CompanyInfoCard = ({ company, research, signals, contactCount }: CompanyIn
         {topSignal?.outreach_model ? (
           <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[topSignal.outreach_model]}</span>
         ) : null}
-        <span className="ml-auto text-xs text-muted-foreground">{contactCount} contact{contactCount === 1 ? "" : "s"}</span>
+        <span className="ml-auto text-xs text-white/60">{contactCount} contact{contactCount === 1 ? "" : "s"}</span>
       </div>
 
       {research.industry || research.sector ? (
-        <p className="mt-1.5 text-sm text-muted-foreground">
+        <p className="mt-1.5 text-sm text-white/60">
           {[research.industry, research.sector].filter(Boolean).join(" · ")}
         </p>
       ) : null}

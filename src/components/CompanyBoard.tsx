@@ -10,7 +10,6 @@ import {
   type ProjectContact,
   type TeamMember,
 } from "@/lib/projectContacts";
-import { STAGE_ACCENT_COLOR } from "@/components/CompanyInfoCard";
 
 const STAGE_ORDER: CompanyStage[] = ["new_signal", "meeting_scheduled", "closed_won", "closed_lost"];
 
@@ -94,8 +93,7 @@ const CompanyBoard = ({ companies, contacts, signalsByCompanyId, teamMembers }: 
                     <Link
                       key={company.id}
                       to={`/projects/company/${company.id}`}
-                      className="block rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:border-primary hover:shadow-md"
-                      style={{ borderLeft: `3px solid ${STAGE_ACCENT_COLOR[stage]}` }}
+                      className="block rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:border-primary"
                     >
                       <p className="font-semibold text-foreground">{company.name}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
