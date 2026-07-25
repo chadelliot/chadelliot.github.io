@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -27,6 +28,7 @@ import {
   assignNextCompanyBatch,
   createSelfServeContact,
   STATUS_LABELS,
+  COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
   PRIORITY_ORDER,
@@ -58,6 +60,22 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   follow_up_sent: "border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]",
   meeting_set: "border-primary/30 bg-primary/5 text-primary",
   do_not_contact: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
+};
+
+const STAGE_CHART_COLORS: Record<CompanyStage, string> = {
+  new_signal: "#94A3B8",
+  meeting_scheduled: "#2FA37F",
+  closed_won: "#15803D",
+  closed_lost: "#B91C1C",
+};
+
+const STATUS_CHART_COLORS: Record<ContactStatus, string> = {
+  not_contacted: "#94A3B8",
+  connection_sent: "#6D28D9",
+  introduction_sent: "#1D4ED8",
+  follow_up_sent: "#B45309",
+  meeting_set: "#2FA37F",
+  do_not_contact: "#B91C1C",
 };
 
 const ProjectsPage = () => {
@@ -209,9 +227,24 @@ const ProjectsPage = () => {
       .sort((a, b) => STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name));
   }, [companies, currentTeamMember]);
 
-  const myActiveCompanyCount = useMemo(() => myAssignedCompanies.filter((c) => c.company_stage === "new_signal").length, [myAssignedCompanies]);
+  // A company only has to be "touched," not fully worked, before a rep can
+  // ask for more - once at least one contact there has been reached out to
+  // (any status past not_contacted) or marked do_not_contact, that's
+  // enough. Still-untouched companies (every contact sitting at
+  // not_contacted, stage still new_signal) are what actually blocks a
+  // fresh batch.
+  const isCompanyUntouched = (company: Company): boolean => {
+    if (company.company_stage !== "new_signal") return false;
+    const companyAllContacts = contacts.filter((c) => c.company_id === company.id);
+    if (companyAllContacts.length === 0) return false;
+    return companyAllContacts.every((c) => !c.do_not_contact && (progress[c.id]?.status ?? "not_contacted") === "not_contacted");
+  };
 
-  const canRequestMoreCompanies = myAssignedCompanies.length === 0 || myActiveCompanyCount === 0;
+  const canRequestMoreCompanies = useMemo(
+    () => myAssignedCompanies.length === 0 || myAssignedCompanies.every((c) => !isCompanyUntouched(c)),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [myAssignedCompanies, contacts, progress]
+  );
 
   const handleRequestMoreCompanies = async () => {
     if (!session || !currentTeamMember || isRequestingBatch) return;
@@ -310,17 +343,48 @@ const ProjectsPage = () => {
     return counts;
   }, [contacts, progress, teamMembers]);
 
-  const stats = useMemo(() => {
-    const actionable = contacts.filter((c) => !c.needs_research && !c.do_not_contact);
-    const notContacted = actionable.filter((c) => (progress[c.id]?.status ?? "not_contacted") === "not_contacted").length;
-    const connectionSent = actionable.filter((c) => progress[c.id]?.status === "connection_sent").length;
-    const meetingsSet = actionable.filter((c) => progress[c.id]?.status === "meeting_set").length;
-    const introductionSent = actionable.filter((c) => progress[c.id]?.status === "introduction_sent").length;
-    const followUpSent = actionable.filter((c) => progress[c.id]?.status === "follow_up_sent").length;
-    const needsResearch = contacts.filter((c) => c.needs_research).length;
-    const warmSignal = actionable.filter((c) => signalsByCompany[c.company]?.length).length;
-    return { notContacted, connectionSent, introductionSent, followUpSent, meetingsSet, needsResearch, warmSignal };
-  }, [contacts, progress, signalsByCompany]);
+  // Company-level penetration - how far the whole book has moved through
+  // the funnel, independent of any one contact's status. This is what the
+  // owner dashboard leads with now.
+  const companyStageCounts = useMemo(() => {
+    const counts: Record<CompanyStage, number> = { new_signal: 0, meeting_scheduled: 0, closed_won: 0, closed_lost: 0 };
+    for (const company of companies) counts[company.company_stage] = (counts[company.company_stage] ?? 0) + 1;
+    return counts;
+  }, [companies]);
+
+  const companyStagePieData = useMemo(
+    () =>
+      (Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[])
+        .map((stage) => ({ name: COMPANY_STAGE_LABELS[stage], value: companyStageCounts[stage], color: STAGE_CHART_COLORS[stage] }))
+        .filter((row) => row.value > 0),
+    [companyStageCounts]
+  );
+
+  // Companies by stage, per rep - a penetration leaderboard rather than
+  // just an activity leaderboard.
+  const companiesByRepStage = useMemo(
+    () =>
+      teamMembers.map((member) => {
+        const repCompanies = companies.filter((c) => c.assigned_rep === member.id);
+        const row: Record<string, number | string> = { name: member.name };
+        for (const stage of Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]) {
+          row[stage] = repCompanies.filter((c) => c.company_stage === stage).length;
+        }
+        return row;
+      }),
+    [teamMembers, companies]
+  );
+
+  const contactStatusPieData = useMemo(() => {
+    const counts: Record<ContactStatus, number> = { not_contacted: 0, connection_sent: 0, introduction_sent: 0, follow_up_sent: 0, meeting_set: 0, do_not_contact: 0 };
+    for (const contact of contacts) {
+      const status = progress[contact.id]?.status ?? "not_contacted";
+      counts[status] = (counts[status] ?? 0) + 1;
+    }
+    return (Object.keys(STATUS_LABELS) as ContactStatus[])
+      .map((status) => ({ name: STATUS_LABELS[status], value: counts[status], color: STATUS_CHART_COLORS[status] }))
+      .filter((row) => row.value > 0);
+  }, [contacts, progress]);
 
   const filteredContacts = useMemo(() => {
     let rows = contacts.filter((c) => !c.do_not_contact);
@@ -566,8 +630,8 @@ const ProjectsPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="px-6 pb-20 pt-28 md:px-16 md:pt-32">
-          <div className="mx-auto max-w-4xl">
+        <main className="px-6 pb-20 pt-28 md:px-20 md:pt-32">
+          <div className="w-full">
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
@@ -609,7 +673,7 @@ const ProjectsPage = () => {
               <p className="text-sm text-muted-foreground">{isRequestingBatch ? "Getting your first batch of companies…" : "No companies assigned yet."}</p>
             ) : null}
 
-            <div className="grid gap-6">
+            <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
               {myAssignedCompanies.map((company) => {
                 const companyContacts = contacts.filter((c) => c.company_id === company.id && !c.do_not_contact);
                 const primary = getPrimaryContact(companyContacts);
@@ -750,21 +814,11 @@ const ProjectsPage = () => {
     );
   }
 
-  const statTiles: { key: FilterKey; label: string; value: number }[] = [
-    { key: "warm_signal", label: "Warm signal", value: stats.warmSignal },
-    { key: "not_contacted", label: "Not Contacted", value: stats.notContacted },
-    { key: "connection_sent", label: "Connection Sent", value: stats.connectionSent },
-    { key: "introduction_sent", label: "Introduction Sent", value: stats.introductionSent },
-    { key: "follow_up_sent", label: "Follow-Up Sent", value: stats.followUpSent },
-    { key: "meeting_set", label: "Meetings set", value: stats.meetingsSet },
-    { key: "needs_research", label: "Need research", value: stats.needsResearch },
-  ];
-
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="px-6 pb-20 pt-28 md:px-16 md:pt-32">
-        <div className="mx-auto max-w-6xl">
+      <main className="px-6 pb-20 pt-28 md:px-20 md:pt-32">
+        <div className="w-full">
           <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
@@ -905,24 +959,68 @@ const ProjectsPage = () => {
             </div>
           ) : null}
 
-          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
-            {statTiles.map((tile) => {
-              const isWarm = tile.key === "warm_signal";
-              const isActive = activeFilter === tile.key;
-              const warmClass = isActive ? "border-[#B45309] bg-[#FFFBEB]" : "border-[#FDE68A] bg-[#FFFBEB] hover:border-[#B45309]";
-              const normalClass = isActive ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50";
-              return (
-                <button
-                  key={tile.key}
-                  type="button"
-                  onClick={() => setActiveFilter(activeFilter === tile.key ? "all" : tile.key)}
-                  className={`rounded-2xl border p-4 text-left transition-colors ${isWarm ? warmClass : normalClass}`}
-                >
-                  <p className={`font-mono text-3xl font-bold ${isWarm ? "text-[#B45309]" : "text-foreground"}`}>{tile.value}</p>
-                  <p className={`mt-1 text-xs font-semibold uppercase tracking-[0.1em] ${isWarm ? "text-[#92400E]" : "text-muted-foreground"}`}>{tile.label}</p>
-                </button>
-              );
-            })}
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Company penetration</p>
+          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).map((stage) => (
+              <div key={stage} className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
+                <p className="font-mono text-3xl font-bold text-foreground">{companyStageCounts[stage]}</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mb-8 grid gap-4 lg:grid-cols-3">
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage</p>
+              {companyStagePieData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={companyStagePieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={(entry) => `${entry.name}: ${entry.value}`}>
+                      {companyStagePieData.map((row) => <Cell key={row.name} fill={row.color} />)}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground">No companies yet.</p>
+              )}
+            </div>
+
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 lg:col-span-2">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage, per rep</p>
+              {companiesByRepStage.length > 0 ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={companiesByRepStage}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
+                    <Tooltip />
+                    <Legend formatter={(value) => COMPANY_STAGE_LABELS[value as CompanyStage] ?? value} />
+                    {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).map((stage) => (
+                      <Bar key={stage} dataKey={stage} stackId="stage" fill={STAGE_CHART_COLORS[stage]} />
+                    ))}
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground">No team members yet.</p>
+              )}
+            </div>
+          </div>
+
+          <div className="mb-8 rounded-2xl border border-[#E2E8F0] bg-white p-4">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts by status</p>
+            {contactStatusPieData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={240}>
+                <PieChart>
+                  <Pie data={contactStatusPieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={(entry) => `${entry.name}: ${entry.value}`}>
+                    {contactStatusPieData.map((row) => <Cell key={row.name} fill={row.color} />)}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-muted-foreground">No contacts yet.</p>
+            )}
           </div>
 
           <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-[#E2E8F0] bg-white px-4 py-3">
@@ -933,6 +1031,19 @@ const ProjectsPage = () => {
               placeholder="Search company, name, or title"
               className="h-10 flex-1 rounded-lg border border-[#CBD5E1] bg-white px-3 text-sm outline-none focus:border-primary"
             />
+            <label className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              Status
+              <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value as FilterKey)} className="h-10 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">
+                <option value="all">All</option>
+                <option value="warm_signal">Warm signal</option>
+                <option value="not_contacted">Not Contacted</option>
+                <option value="connection_sent">Connection Sent</option>
+                <option value="introduction_sent">Introduction Sent</option>
+                <option value="follow_up_sent">Follow-Up Sent</option>
+                <option value="meeting_set">Meetings set</option>
+                <option value="needs_research">Need research</option>
+              </select>
+            </label>
             <label className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
               Priority
               <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="h-10 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">

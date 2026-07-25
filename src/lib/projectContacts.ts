@@ -432,6 +432,25 @@ export type CompanyResearchSummary = {
 // import time rather than living on the companies table - so any contact
 // at the company carries it. Pulls it from whichever contact actually has
 // values filled in, since self-serve-added contacts won't.
+// The sourcing data stores "why now" as semicolon-separated fragments
+// ("PE-backed distribution; branch network; pricing/margin leakage.") -
+// readable enough in a spreadsheet cell, but hard to parse at a glance in
+// the UI. This turns it into one comma-and-joined sentence instead.
+export const formatWhyNow = (raw?: string | null): string | null => {
+  if (!raw) return null;
+  const fragments = raw
+    .split(/[;\n]/)
+    .map((f) => f.trim().replace(/\.$/, ""))
+    .filter(Boolean);
+  if (fragments.length === 0) return null;
+  if (fragments.length === 1) return /[.!?]$/.test(fragments[0]) ? fragments[0] : `${fragments[0]}.`;
+
+  const lowered = fragments.map((f, i) => (i === 0 ? f : f.charAt(0).toLowerCase() + f.slice(1)));
+  const last = lowered[lowered.length - 1];
+  const rest = lowered.slice(0, -1);
+  return `${rest.join(", ")}, and ${last}.`;
+};
+
 export const getCompanyResearchSummary = (contacts: ProjectContact[]): CompanyResearchSummary => {
   const withData = contacts.find((c) => c.industry || c.sector || c.value_hypothesis || c.outreach_angle) ?? contacts[0];
   return {
@@ -439,7 +458,7 @@ export const getCompanyResearchSummary = (contacts: ProjectContact[]): CompanyRe
     sector: withData?.sector,
     priority: withData?.priority,
     valueHypothesis: withData?.value_hypothesis,
-    outreachAngle: withData?.outreach_angle,
+    outreachAngle: formatWhyNow(withData?.outreach_angle),
   };
 };
 

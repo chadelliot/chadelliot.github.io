@@ -174,8 +174,8 @@ const CompanyDetailPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="px-6 pb-20 pt-28 md:px-16 md:pt-32">
-        <div className="mx-auto max-w-4xl">
+      <main className="px-6 pb-20 pt-28 md:px-20 md:pt-32">
+        <div className="w-full">
           <Link to="/projects" className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">← Back to RevHub</Link>
 
           {isLoadingData ? <p className="mt-6 text-sm text-muted-foreground">Loading company…</p> : null}
