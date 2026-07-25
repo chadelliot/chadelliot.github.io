@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Send, Linkedin, MapPin, Mail } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 
 const ContactSlideout = () => {
   const { toast } = useToast();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [sending, setSending] = useState(false);
   const [loadTime, setLoadTime] = useState(Date.now());
@@ -98,6 +100,10 @@ const ContactSlideout = () => {
       });
     }, 600);
   };
+
+  // RevHub (/projects) has its own edge-tab slideout ("Add a Contact") in
+  // the same fixed position - don't stack two tabs on top of each other.
+  if (location.pathname.startsWith("/projects")) return null;
 
   return (
     <>

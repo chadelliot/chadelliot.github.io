@@ -1,6 +1,8 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { UserPlus } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -436,6 +438,27 @@ const ProjectsPage = () => {
     });
   }, [contacts, progress, signalsByCompany, activeFilter, priorityFilter, search]);
 
+  // Owner view, grouped by company instead of a flat contact list - same
+  // shape as a rep's "My assignments," but across every company with a
+  // contact matching the current search/status/priority filters (not just
+  // ones assigned to the signed-in owner).
+  const ownerCompanyGroups = useMemo(() => {
+    const byCompanyId: Record<string, ProjectContact[]> = {};
+    for (const contact of filteredContacts) {
+      if (!contact.company_id) continue;
+      (byCompanyId[contact.company_id] ??= []).push(contact);
+    }
+    return companies
+      .filter((c) => byCompanyId[c.id]?.length)
+      .sort((a, b) => {
+        const sa = signalsByCompanyId[a.id]?.length ? 0 : 1;
+        const sb = signalsByCompanyId[b.id]?.length ? 0 : 1;
+        if (sa !== sb) return sa - sb;
+        return STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name);
+      })
+      .map((company) => ({ company, matchingContacts: byCompanyId[company.id] }));
+  }, [companies, filteredContacts, signalsByCompanyId]);
+
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
     setProgress((current) => ({
@@ -554,6 +577,133 @@ const ProjectsPage = () => {
     </div>
   );
 
+  // Shared by both the rep "My assignments" view and the owner view -
+  // company card first, one primary contact, everyone else behind a
+  // dropdown. companyContacts is whatever set of contacts should be
+  // considered "at this company" for the given viewer (a rep's full
+  // roster there, or an owner's filtered/searched subset).
+  const renderCompanyCard = (company: Company, companyContacts: ProjectContact[]) => {
+    const primary = getPrimaryContact(companyContacts);
+    const others = companyContacts.filter((c) => c.id !== primary?.id);
+    const othersGood = others.filter((c) => getContactTier(c) !== "research");
+    const othersResearch = others.filter((c) => getContactTier(c) === "research");
+    const isExpanded = Boolean(expandedCompanies[company.id]);
+
+    return (
+      <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
+        <CompanyInfoCard
+          company={company}
+          research={getCompanyResearchSummary(companyContacts)}
+          signals={signalsByCompanyId[company.id] ?? []}
+          contactCount={companyContacts.length}
+        />
+        <div className="border-b border-[#E2E8F0] px-4 py-2">
+          <Link to={`/projects/company/${company.id}`} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">View full company page →</Link>
+        </div>
+
+        <div className="grid gap-3 p-4">
+          {primary ? (
+            getContactTier(primary) === "research" ? renderAssignedResearchRow(primary) : renderAssignedContactArticle(primary)
+          ) : (
+            <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
+          )}
+
+          {others.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => toggleCompanyExpanded(company.id)}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+            >
+              {isExpanded ? "Hide" : "Show"} {others.length} other contact{others.length === 1 ? "" : "s"} {isExpanded ? "▲" : "▼"}
+            </button>
+          ) : null}
+
+          {isExpanded ? (
+            <>
+              {othersGood.map((contact) => renderAssignedContactArticle(contact))}
+
+              {othersResearch.length > 0 ? (
+                <div className="border border-[#FDE68A] bg-[#FFFBEB] p-4">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#92400E]">Additional research needed</p>
+                  <p className="mb-3 text-sm text-[#92400E]">These need a manual LinkedIn search — click through and confirm you've found the right person.</p>
+                  <div className="grid gap-2">
+                    {othersResearch.map((contact) => renderAssignedResearchRow(contact))}
+                  </div>
+                </div>
+              ) : null}
+            </>
+          ) : null}
+        </div>
+      </div>
+    );
+  };
+
+  // Same slideout treatment as the site's "Contact Chad" panel - a
+  // vertical tab fixed to the right edge that opens into a polished form.
+  // Submitting writes straight to the RevHub queue and auto-assigns the
+  // new contact to whoever's signed in (see handleAddContact).
+  const addContactSlideout = (
+    <Sheet open={showAddContact} onOpenChange={setShowAddContact}>
+      <SheetTrigger asChild>
+        <button
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-[200] hidden md:flex items-center gap-1.5 px-3 py-4 rounded-l-lg border border-r-0 border-primary/40 bg-primary text-primary-foreground font-sans text-[11px] tracking-[0.1em] uppercase font-medium cursor-pointer shadow-lg hover:shadow-xl transition-shadow"
+          style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+        >
+          <UserPlus size={14} />
+          Add a Contact
+        </button>
+      </SheetTrigger>
+
+      <SheetContent side="right" className="w-full sm:w-[440px] p-0 border-l border-border bg-background overflow-y-auto z-[201]">
+        <div className="px-6 md:px-8 py-8">
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-primary/30 bg-primary/[0.06] mb-4">
+              <UserPlus size={13} className="text-primary" />
+              <span className="font-sans text-[10px] tracking-[0.14em] uppercase text-primary font-medium">RevHub outreach</span>
+            </div>
+            <h2 className="font-display text-[28px] font-extrabold text-foreground leading-[1.1] mb-2">
+              You'll Be <em className="text-primary not-italic">Credited</em>
+            </h2>
+            <p className="font-sans text-[13px] text-muted-foreground leading-[1.7]">
+              Found a contact we're missing? Add them here — it saves straight to the queue and gets assigned to you.
+            </p>
+          </div>
+
+          <form onSubmit={handleAddContact} className="space-y-4">
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">
+                Company <span className="text-primary">*</span>
+              </label>
+              <input type="text" value={newContactCompany} onChange={(e) => setNewContactCompany(e.target.value)} required maxLength={150} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="Company name" />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">
+                Contact name <span className="text-primary">*</span>
+              </label>
+              <input type="text" value={newContactName} onChange={(e) => setNewContactName(e.target.value)} required maxLength={150} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="Full name" />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">Email (if known)</label>
+              <input type="email" value={newContactEmail} onChange={(e) => setNewContactEmail(e.target.value)} maxLength={255} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="name@company.com" />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">LinkedIn or social profile URL</label>
+              <input type="url" value={newContactLinkedIn} onChange={(e) => setNewContactLinkedIn(e.target.value)} maxLength={300} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="https://linkedin.com/in/..." />
+            </div>
+
+            <button type="submit" className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-md bg-primary text-primary-foreground font-sans text-[12px] tracking-[0.1em] uppercase font-medium hover:opacity-90 transition-opacity cursor-pointer border-none">
+              Save contact
+              <UserPlus size={14} />
+            </button>
+          </form>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+
   if (!IS_DB_READY) {
     return (
       <div className="min-h-screen bg-background">
@@ -662,7 +812,6 @@ const ProjectsPage = () => {
                 )}
               </div>
               <div className="flex items-center gap-2">
-                <button type="button" onClick={() => setShowAddContact(true)} className="h-fit rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Add a contact</button>
                 <button type="button" onClick={handleSignOut} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Sign out</button>
               </div>
             </div>
@@ -674,62 +823,7 @@ const ProjectsPage = () => {
             ) : null}
 
             <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-              {myAssignedCompanies.map((company) => {
-                const companyContacts = contacts.filter((c) => c.company_id === company.id && !c.do_not_contact);
-                const primary = getPrimaryContact(companyContacts);
-                const others = companyContacts.filter((c) => c.id !== primary?.id);
-                const othersGood = others.filter((c) => getContactTier(c) !== "research");
-                const othersResearch = others.filter((c) => getContactTier(c) === "research");
-                const isExpanded = Boolean(expandedCompanies[company.id]);
-
-                return (
-                  <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
-                    <CompanyInfoCard
-                      company={company}
-                      research={getCompanyResearchSummary(companyContacts)}
-                      signals={signalsByCompanyId[company.id] ?? []}
-                      contactCount={companyContacts.length}
-                    />
-                    <div className="border-b border-[#E2E8F0] px-4 py-2">
-                      <Link to={`/projects/company/${company.id}`} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">View full company page →</Link>
-                    </div>
-
-                    <div className="grid gap-3 p-4">
-                      {primary ? (
-                        getContactTier(primary) === "research" ? renderAssignedResearchRow(primary) : renderAssignedContactArticle(primary)
-                      ) : (
-                        <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
-                      )}
-
-                      {others.length > 0 ? (
-                        <button
-                          type="button"
-                          onClick={() => toggleCompanyExpanded(company.id)}
-                          className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
-                        >
-                          {isExpanded ? "Hide" : "Show"} {others.length} other contact{others.length === 1 ? "" : "s"} {isExpanded ? "▲" : "▼"}
-                        </button>
-                      ) : null}
-
-                      {isExpanded ? (
-                        <>
-                          {othersGood.map((contact) => renderAssignedContactArticle(contact))}
-
-                          {othersResearch.length > 0 ? (
-                            <div className="border border-[#FDE68A] bg-[#FFFBEB] p-4">
-                              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#92400E]">Additional research needed</p>
-                              <p className="mb-3 text-sm text-[#92400E]">These need a manual LinkedIn search — click through and confirm you've found the right person.</p>
-                              <div className="grid gap-2">
-                                {othersResearch.map((contact) => renderAssignedResearchRow(contact))}
-                              </div>
-                            </div>
-                          ) : null}
-                        </>
-                      ) : null}
-                    </div>
-                  </div>
-                );
-              })}
+              {myAssignedCompanies.map((company) => renderCompanyCard(company, contacts.filter((c) => c.company_id === company.id && !c.do_not_contact)))}
             </div>
 
             {myAssignedCompanies.length > 0 ? (
@@ -743,24 +837,7 @@ const ProjectsPage = () => {
         </main>
         <Footer />
 
-        {showAddContact ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40">
-            <div className="h-full w-full max-w-md overflow-y-auto border-l border-border bg-background p-6 shadow-lg">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Add a contact</p>
-              <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">You'll be credited for this one.</h2>
-              <form onSubmit={handleAddContact} className="mt-4 grid gap-3">
-                <label className="grid gap-1.5 text-sm font-semibold text-foreground">Company<input type="text" value={newContactCompany} onChange={(e) => setNewContactCompany(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
-                <label className="grid gap-1.5 text-sm font-semibold text-foreground">Contact name<input type="text" value={newContactName} onChange={(e) => setNewContactName(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
-                <label className="grid gap-1.5 text-sm font-semibold text-foreground">Email (if known)<input type="email" value={newContactEmail} onChange={(e) => setNewContactEmail(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
-                <label className="grid gap-1.5 text-sm font-semibold text-foreground">LinkedIn or social profile URL<input type="url" value={newContactLinkedIn} onChange={(e) => setNewContactLinkedIn(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
-                <div className="mt-3 flex justify-end gap-2">
-                  <button type="button" onClick={() => setShowAddContact(false)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
-                  <button type="submit" className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save contact</button>
-                </div>
-              </form>
-            </div>
-          </div>
-        ) : null}
+        {addContactSlideout}
 
         {meetingPrompt ? (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -825,7 +902,6 @@ const ProjectsPage = () => {
               <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Your contact queue.</h1>
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setShowAddContact(true)} className="h-fit rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Add a contact</button>
               {isOwner ? (
                 <button type="button" onClick={() => setShowAttribution((v) => !v)} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
                   {showAttribution ? "Hide attribution" : "Meetings & closed deals"}
@@ -960,15 +1036,25 @@ const ProjectsPage = () => {
           ) : null}
 
           <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Company penetration</p>
-          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-4">
+          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
             {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).map((stage) => (
               <div key={stage} className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
                 <p className="font-mono text-3xl font-bold text-foreground">{companyStageCounts[stage]}</p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
               </div>
             ))}
+            <button
+              type="button"
+              onClick={() => setShowCharts((v) => !v)}
+              className={`rounded-2xl border p-4 text-left transition-colors ${showCharts ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
+            >
+              <p className={`font-mono text-3xl font-bold ${showCharts ? "text-primary" : "text-foreground"}`}>{showCharts ? "▲" : "▼"}</p>
+              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{showCharts ? "Hide charts" : "Show charts"}</p>
+            </button>
           </div>
 
+          {showCharts ? (
+          <>
           <div className="mb-8 grid gap-4 lg:grid-cols-3">
             <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage</p>
@@ -1022,6 +1108,8 @@ const ProjectsPage = () => {
               <p className="text-sm text-muted-foreground">No contacts yet.</p>
             )}
           </div>
+          </>
+          ) : null}
 
           <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-[#E2E8F0] bg-white px-4 py-3">
             <input
@@ -1061,117 +1149,15 @@ const ProjectsPage = () => {
 
           {isLoadingData ? (
             <p className="text-sm text-muted-foreground">Loading contacts…</p>
-          ) : filteredContacts.length === 0 ? (
+          ) : ownerCompanyGroups.length === 0 ? (
             <p className="text-sm text-muted-foreground">No contacts match the current filters.</p>
           ) : (
-            <div className="grid gap-3">
-              {filteredContacts.slice(0, 50).map((contact) => {
-                const contactProgress = progress[contact.id];
-                const status = contact.needs_research ? null : contactProgress?.status ?? "not_contacted";
-                const companySignals = signalsByCompany[contact.company];
-                const topSignal = companySignals?.[0];
-                return (
-                  <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${topSignal ? "border-[#FDE68A]" : "border-[#E2E8F0]"}`}>
-                    <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">
-                        {contact.needs_research ? "?" : getInitials(contact.contact_name)}
-                      </div>
-                      <div className="min-w-0">
-                        {contact.needs_research ? (
-                          <>
-                            <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.company}</p>
-                            <p className="text-sm font-semibold text-muted-foreground">Contact research needed</p>
-                          </>
-                        ) : (
-                          <>
-                            <div className="flex flex-wrap items-center gap-2">
-                              {contact.linkedin_url ? (
-                                <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="font-display text-lg font-extrabold tracking-tight text-foreground no-underline hover:text-primary hover:underline">{contact.contact_name}</a>
-                              ) : (
-                                <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.contact_name}</p>
-                              )}
-                              {contact.priority ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">{contact.priority}</span> : null}
-                            </div>
-                            <p className="text-sm font-semibold text-primary">{contact.title}</p>
-                            <p className="text-sm text-muted-foreground">{contact.company}</p>
-                            {meetingBlocks[contact.id]?.is_blocked ? (
-                              <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary">
-                                📅 Meeting scheduled with {meetingBlocks[contact.id]?.meeting_contact_name}{meetingBlocks[contact.id]?.meeting_contact_title ? `, ${meetingBlocks[contact.id]?.meeting_contact_title}` : ""}
-                              </p>
-                            ) : null}
-                            {topSignal ? (
-                              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                                <p className="inline-flex items-center gap-1.5 rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[11px] font-semibold text-[#92400E]">
-                                  {companySignals!.length > 1 ? `${companySignals!.length} open roles` : `Hiring${topSignal.role_title ? `: ${topSignal.role_title}` : ""}`}
-                                  {topSignal.posted_date ? ` · posted ${new Date(topSignal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
-                                </p>
-                                {topSignal.outreach_model ? (
-                                  <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>
-                                    {OUTREACH_MODEL_LABELS[topSignal.outreach_model]}
-                                  </span>
-                                ) : null}
-                              </div>
-                            ) : null}
-                          </>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                        {status ? (
-                          <>
-                            <span className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.1em] ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span>
-                            <select
-                              value={status}
-                              onChange={(e) => handleStatusChange(contact, e.target.value as ContactStatus)}
-                              className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary"
-                            >
-                              {(Object.keys(STATUS_LABELS) as ContactStatus[]).map((s) => (
-                                <option key={s} value={s}>{STATUS_LABELS[s]}</option>
-                              ))}
-                            </select>
-                          </>
-                        ) : null}
-                        {teamMembers.length ? (
-                          <select
-                            value={contactProgress?.assigned_to ?? ""}
-                            onChange={(e) => handleAssign(contact, e.target.value)}
-                            className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary"
-                          >
-                            <option value="">Unassigned</option>
-                            {teamMembers.map((member) => (
-                              <option key={member.id} value={member.id}>{member.name}</option>
-                            ))}
-                          </select>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {!contact.needs_research && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
-                      <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
-                        <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Outreach:</span>
-                        {contact.linkedin_connect_message ? (
-                          <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
-                            {copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}
-                          </button>
-                        ) : null}
-                        {contact.intro_message ? (
-                          <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
-                            {copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}
-                          </button>
-                        ) : null}
-                        {contact.follow_up_message ? (
-                          <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
-                            {copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}
-                          </button>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </article>
-                );
-              })}
+            <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+              {ownerCompanyGroups.slice(0, 60).map(({ company, matchingContacts }) => renderCompanyCard(company, matchingContacts))}
             </div>
           )}
-          {filteredContacts.length > 50 ? (
-            <p className="mt-4 text-center text-xs text-muted-foreground">Showing the first 50 of {filteredContacts.length} matching contacts — narrow your search or filters to see more precisely.</p>
+          {ownerCompanyGroups.length > 60 ? (
+            <p className="mt-4 text-center text-xs text-muted-foreground">Showing the first 60 of {ownerCompanyGroups.length} matching companies — narrow your search or filters to see more precisely.</p>
           ) : null}
         </div>
       </main>
