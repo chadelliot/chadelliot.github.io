@@ -49,13 +49,33 @@ export type TeamMember = {
   role: "owner" | "member";
 };
 
+export type OutreachModel = "replace" | "bridge" | "build" | "augment" | "consolidate";
+
+export const OUTREACH_MODEL_LABELS: Record<OutreachModel, string> = {
+  replace: "Replace",
+  bridge: "Bridge",
+  build: "Build",
+  augment: "Augment",
+  consolidate: "Consolidate",
+};
+
+export const OUTREACH_MODEL_BADGE_CLASS: Record<OutreachModel, string> = {
+  replace: "border-[#DDD6FE] bg-[#F5F3FF] text-[#6D28D9]",
+  bridge: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]",
+  build: "border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]",
+  augment: "border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]",
+  consolidate: "border-[#FBCFE8] bg-[#FDF2F8] text-[#BE185D]",
+};
+
 export type CompanySignal = {
+  id: string;
   company: string;
   company_id?: string | null;
   role_title?: string | null;
   posted_date?: string | null;
   source_url?: string | null;
   notes?: string | null;
+  outreach_model?: OutreachModel | null;
 };
 
 export type CompanyStage = "new_signal" | "meeting_scheduled" | "closed_won" | "closed_lost";
@@ -262,6 +282,25 @@ export const fetchCompanySignals = async (session: ProposalSession): Promise<Rec
 export const fetchCompanySignalsList = async (session: ProposalSession): Promise<CompanySignal[]> =>
   fetchAllRows<CompanySignal>(session, "company_signals?select=*&order=posted_date.desc");
 
+// Tags a single hiring signal with which outreach model it calls for
+// (Replace/Bridge/Build/Augment/Consolidate). Owner or assigned-rep call,
+// same trust model as the rest of the company-level controls.
+export const updateSignalOutreachModel = async (
+  session: ProposalSession,
+  signalId: string,
+  outreachModel: OutreachModel | null
+): Promise<CompanySignal | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/company_signals?id=eq.${signalId}`, {
+    method: "PATCH",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify({ outreach_model: outreachModel }),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as CompanySignal[];
+  return rows[0] ?? null;
+};
+
 export const updateContactProgress = async (
   session: ProposalSession,
   contactId: string,
@@ -436,6 +475,84 @@ export const assignNextBatch = async (
   }
 
   return { assignedGoodIds: good.map((c) => c.id), assignedResearchIds: research.map((c) => c.id) };
+};
+
+// Shared ranking used both to sort the contact queue and to rank companies
+// for batch assignment - a warm signal always outranks priority tier, and
+// within the same signal status this decides the tiebreak.
+export const PRIORITY_ORDER: Record<string, number> = { A: 0, "A/B": 1, B: 2, C: 3, D: 4, needs_review: 5, "": 6 };
+
+const chunkIds = (ids: string[], size = 50): string[][] => {
+  const out: string[][] = [];
+  for (let i = 0; i < ids.length; i += size) out.push(ids.slice(i, i + size));
+  return out;
+};
+
+// Company-level batching: a rep now owns whole companies (up to 25 at a
+// time) rather than a scattered list of individual contacts - every
+// contact at an assigned company comes along with it, so nobody has to
+// hunt for who else works there. Companies with a warm hiring signal are
+// handed out first; within the same signal status, the best priority
+// tier among that company's contacts breaks the tie.
+export const assignNextCompanyBatch = async (
+  session: ProposalSession,
+  teamMemberId: string,
+  allCompanies: Company[],
+  allContacts: ProjectContact[],
+  allProgress: Record<string, ContactProgress>,
+  signalsByCompanyId: Record<string, CompanySignal[]>,
+  batchSize = 25
+): Promise<{ assignedCompanyIds: string[] }> => {
+  const unassigned = allCompanies.filter((c) => !c.assigned_rep && c.company_stage === "new_signal");
+
+  const bestPriorityForCompany = (company: Company): number => {
+    let best = 6;
+    for (const contact of allContacts) {
+      if (contact.company_id !== company.id) continue;
+      const p = PRIORITY_ORDER[contact.priority ?? ""] ?? 6;
+      if (p < best) best = p;
+    }
+    return best;
+  };
+
+  const batch = unassigned
+    .sort((a, b) => {
+      const hasSignalA = (signalsByCompanyId[a.id]?.length ?? 0) > 0 ? 0 : 1;
+      const hasSignalB = (signalsByCompanyId[b.id]?.length ?? 0) > 0 ? 0 : 1;
+      if (hasSignalA !== hasSignalB) return hasSignalA - hasSignalB;
+      const pa = bestPriorityForCompany(a);
+      const pb = bestPriorityForCompany(b);
+      if (pa !== pb) return pa - pb;
+      return a.name.localeCompare(b.name);
+    })
+    .slice(0, batchSize);
+
+  const companyIds = batch.map((c) => c.id);
+
+  if (companyIds.length && DB_URL) {
+    await fetch(`${DB_URL}/rest/v1/companies?id=in.(${companyIds.join(",")})`, {
+      method: "PATCH",
+      headers: authHeaders(session),
+      body: JSON.stringify({ assigned_rep: teamMemberId }),
+    });
+
+    // Hand every not-yet-assigned contact at these companies to the same
+    // rep - owning the company means owning everyone in it. Contacts
+    // someone else is already working stay put.
+    const contactIdsToClaim = allContacts
+      .filter((c) => c.company_id && companyIds.includes(c.company_id) && !c.do_not_contact && !allProgress[c.id]?.assigned_to)
+      .map((c) => c.id);
+
+    for (const idChunk of chunkIds(contactIdsToClaim)) {
+      await fetch(`${DB_URL}/rest/v1/contact_progress?contact_id=in.(${idChunk.join(",")})`, {
+        method: "PATCH",
+        headers: authHeaders(session),
+        body: JSON.stringify({ assigned_to: teamMemberId }),
+      });
+    }
+  }
+
+  return { assignedCompanyIds: companyIds };
 };
 
 // Lets a team member add a contact they found themselves. They're

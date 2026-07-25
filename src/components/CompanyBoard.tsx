@@ -1,6 +1,15 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { COMPANY_STAGE_LABELS, type Company, type CompanyStage, type ProjectContact, type TeamMember } from "@/lib/projectContacts";
+import {
+  COMPANY_STAGE_LABELS,
+  OUTREACH_MODEL_LABELS,
+  OUTREACH_MODEL_BADGE_CLASS,
+  type Company,
+  type CompanyStage,
+  type CompanySignal,
+  type ProjectContact,
+  type TeamMember,
+} from "@/lib/projectContacts";
 
 const STAGE_ORDER: CompanyStage[] = ["new_signal", "meeting_scheduled", "closed_won", "closed_lost"];
 
@@ -21,11 +30,11 @@ const STAGE_HEADER_CLASS: Record<CompanyStage, string> = {
 type CompanyBoardProps = {
   companies: Company[];
   contacts: ProjectContact[];
-  signalCountsByCompanyId: Record<string, number>;
+  signalsByCompanyId: Record<string, CompanySignal[]>;
   teamMembers: TeamMember[];
 };
 
-const CompanyBoard = ({ companies, contacts, signalCountsByCompanyId, teamMembers }: CompanyBoardProps) => {
+const CompanyBoard = ({ companies, contacts, signalsByCompanyId, teamMembers }: CompanyBoardProps) => {
   const [search, setSearch] = useState("");
 
   const contactCountsByCompanyId = useMemo(() => {
@@ -78,7 +87,8 @@ const CompanyBoard = ({ companies, contacts, signalCountsByCompanyId, teamMember
                 {stageCompanies.map((company) => {
                   const rep = company.assigned_rep ? repById[company.assigned_rep] : null;
                   const contactCount = contactCountsByCompanyId[company.id] ?? 0;
-                  const signalCount = signalCountsByCompanyId[company.id] ?? 0;
+                  const companySignals = signalsByCompanyId[company.id] ?? [];
+                  const topSignal = companySignals[0];
                   return (
                     <Link
                       key={company.id}
@@ -88,7 +98,10 @@ const CompanyBoard = ({ companies, contacts, signalCountsByCompanyId, teamMember
                       <p className="font-semibold text-foreground">{company.name}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
                         <span>{contactCount} contact{contactCount === 1 ? "" : "s"}</span>
-                        {signalCount > 0 ? <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-1.5 py-0.5 text-[#92400E]">{signalCount} signal{signalCount === 1 ? "" : "s"}</span> : null}
+                        {companySignals.length > 0 ? <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-1.5 py-0.5 text-[#92400E]">{companySignals.length} signal{companySignals.length === 1 ? "" : "s"}</span> : null}
+                        {topSignal?.outreach_model ? (
+                          <span className={`rounded-full border px-1.5 py-0.5 ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[topSignal.outreach_model]}</span>
+                        ) : null}
                         {rep ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-1.5 py-0.5">{rep.name}</span> : <span className="text-muted-foreground/70">Unassigned</span>}
                       </div>
                       {company.company_stage === "closed_lost" && company.closed_lost_reason ? (

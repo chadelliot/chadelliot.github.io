@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -8,7 +9,6 @@ import {
   fetchProjectContacts,
   fetchContactProgress,
   fetchTeamMembers,
-  fetchCompanySignals,
   fetchMeetings,
   fetchClosedDeals,
   fetchCompanies,
@@ -23,9 +23,13 @@ import {
   logContactActivity,
   getContactTier,
   buildLinkedInSearchUrl,
-  assignNextBatch,
+  assignNextCompanyBatch,
   createSelfServeContact,
   STATUS_LABELS,
+  COMPANY_STAGE_LABELS,
+  OUTREACH_MODEL_LABELS,
+  OUTREACH_MODEL_BADGE_CLASS,
+  PRIORITY_ORDER,
   getInitials,
   type ProjectContact,
   type ContactProgress,
@@ -35,6 +39,7 @@ import {
   type Meeting,
   type ClosedDeal,
   type Company,
+  type CompanyStage,
   type ContactMeetingBlock,
 } from "@/lib/projectContacts";
 
@@ -44,8 +49,6 @@ const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
 
 type FilterKey = "all" | "warm_signal" | "not_contacted" | "connection_sent" | "introduction_sent" | "follow_up_sent" | "meeting_set" | "needs_research";
 
-const PRIORITY_ORDER: Record<string, number> = { A: 0, "A/B": 1, B: 2, C: 3, D: 4, needs_review: 5, "": 6 };
-
 const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   not_contacted: "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B]",
   connection_sent: "border-[#DDD6FE] bg-[#F5F3FF] text-[#6D28D9]",
@@ -53,6 +56,13 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   follow_up_sent: "border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]",
   meeting_set: "border-primary/30 bg-primary/5 text-primary",
   do_not_contact: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
+};
+
+const STAGE_BADGE_CLASS: Record<CompanyStage, string> = {
+  new_signal: "border-[#E2E8F0] bg-[#F8FAFC] text-[#334155]",
+  meeting_scheduled: "border-primary/30 bg-primary/5 text-primary",
+  closed_won: "border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]",
+  closed_lost: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
 };
 
 const ProjectsPage = () => {
@@ -104,7 +114,6 @@ const ProjectsPage = () => {
   const [contacts, setContacts] = useState<ProjectContact[]>([]);
   const [progress, setProgress] = useState<Record<string, ContactProgress>>({});
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
-  const [signals, setSignals] = useState<Record<string, CompanySignal>>({});
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -147,17 +156,15 @@ const ProjectsPage = () => {
       fetchProjectContacts(session),
       fetchContactProgress(session),
       fetchTeamMembers(session),
-      fetchCompanySignals(session),
       fetchMeetings(session),
       fetchClosedDeals(session),
       fetchCompanies(session),
       fetchMeetingBlocks(session),
       fetchCompanySignalsList(session),
-    ]).then(([contactRows, progressRows, teamRows, signalRows, meetingRows, dealRows, companyRows, blockRows, signalListRows]) => {
+    ]).then(([contactRows, progressRows, teamRows, meetingRows, dealRows, companyRows, blockRows, signalListRows]) => {
       setContacts(contactRows);
       setProgress(progressRows);
       setTeamMembers(teamRows);
-      setSignals(signalRows);
       setMeetings(meetingRows);
       setClosedDeals(dealRows);
       setCompanies(companyRows);
@@ -170,47 +177,66 @@ const ProjectsPage = () => {
   const currentTeamMember = useMemo(() => (session ? findCurrentTeamMember(session, teamMembers) : null), [session, teamMembers]);
   const isOwner = currentTeamMember?.role === "owner";
 
-  const signalCountsByCompanyId = useMemo(() => {
-    const counts: Record<string, number> = {};
+  // Signals grouped by company_id - a company can carry more than one open
+  // role, and both the assignment ranking and the board cards need to see
+  // the whole cluster, not just one.
+  const signalsByCompanyId = useMemo(() => {
+    const grouped: Record<string, CompanySignal[]> = {};
     for (const signal of signalList) {
       if (!signal.company_id) continue;
-      counts[signal.company_id] = (counts[signal.company_id] ?? 0) + 1;
+      (grouped[signal.company_id] ??= []).push(signal);
     }
-    return counts;
+    return grouped;
   }, [signalList]);
 
-  const myAssignedContacts = useMemo(() => {
+  // Same clustering, keyed by company name instead - the main contact
+  // queue below only has the contact's company name to go on, not every
+  // contact has company_id backfilled on legacy rows.
+  const signalsByCompany = useMemo(() => {
+    const grouped: Record<string, CompanySignal[]> = {};
+    for (const signal of signalList) {
+      (grouped[signal.company] ??= []).push(signal);
+    }
+    return grouped;
+  }, [signalList]);
+
+  // A rep owns whole companies now, not a scattered list of individual
+  // contacts - assigning a company hands them every contact at it. Sorted
+  // so active (new_signal) companies surface above ones that already moved
+  // to a meeting or closed.
+  const STAGE_SORT_ORDER: Record<string, number> = { new_signal: 0, meeting_scheduled: 1, closed_won: 2, closed_lost: 3 };
+  const myAssignedCompanies = useMemo(() => {
     if (!currentTeamMember) return [];
-    return contacts.filter((c) => progress[c.id]?.assigned_to === currentTeamMember.id);
-  }, [contacts, progress, currentTeamMember]);
+    return companies
+      .filter((c) => c.assigned_rep === currentTeamMember.id)
+      .sort((a, b) => STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name));
+  }, [companies, currentTeamMember]);
 
-  const myGoodContacts = useMemo(() => myAssignedContacts.filter((c) => getContactTier(c) !== "research"), [myAssignedContacts]);
-  const myResearchContacts = useMemo(() => myAssignedContacts.filter((c) => getContactTier(c) === "research"), [myAssignedContacts]);
+  const myActiveCompanyCount = useMemo(() => myAssignedCompanies.filter((c) => c.company_stage === "new_signal").length, [myAssignedCompanies]);
 
-  const canRequestMoreContacts =
-    myGoodContacts.length === 0 ||
-    myGoodContacts.every((c) => meetingBlocks[c.id]?.is_blocked || (progress[c.id]?.status ?? "not_contacted") !== "not_contacted");
+  const canRequestMoreCompanies = myAssignedCompanies.length === 0 || myActiveCompanyCount === 0;
 
-  const handleRequestMoreContacts = async () => {
+  const handleRequestMoreCompanies = async () => {
     if (!session || !currentTeamMember || isRequestingBatch) return;
     setIsRequestingBatch(true);
-    const { assignedGoodIds, assignedResearchIds } = await assignNextBatch(session, currentTeamMember.id, contacts, progress, meetingBlocks);
-    if (assignedGoodIds.length || assignedResearchIds.length) {
-      const freshProgress = await fetchContactProgress(session);
+    const { assignedCompanyIds } = await assignNextCompanyBatch(session, currentTeamMember.id, companies, contacts, progress, signalsByCompanyId);
+    if (assignedCompanyIds.length) {
+      const [freshCompanies, freshProgress] = await Promise.all([fetchCompanies(session), fetchContactProgress(session)]);
+      setCompanies(freshCompanies);
       setProgress(freshProgress);
     }
     setIsRequestingBatch(false);
   };
 
-  // First-time team members start with zero assigned contacts - give them
+  // First-time team members start with zero assigned companies - give them
   // their first batch automatically rather than making them ask for it.
   useEffect(() => {
     if (!session || !currentTeamMember || isOwner || hasAutoRequestedFirstBatch || isLoadingData) return;
-    if (myAssignedContacts.length === 0 && contacts.length > 0) {
+    if (myAssignedCompanies.length === 0 && companies.length > 0) {
       setHasAutoRequestedFirstBatch(true);
-      handleRequestMoreContacts();
+      handleRequestMoreCompanies();
     }
-  }, [session, currentTeamMember, isOwner, isLoadingData, myAssignedContacts.length, contacts.length, hasAutoRequestedFirstBatch]);
+  }, [session, currentTeamMember, isOwner, isLoadingData, myAssignedCompanies.length, companies.length, hasAutoRequestedFirstBatch]);
 
   const handleSaveName = async () => {
     if (!session || !currentTeamMember || !nameInput.trim()) return;
@@ -295,14 +321,14 @@ const ProjectsPage = () => {
     const introductionSent = actionable.filter((c) => progress[c.id]?.status === "introduction_sent").length;
     const followUpSent = actionable.filter((c) => progress[c.id]?.status === "follow_up_sent").length;
     const needsResearch = contacts.filter((c) => c.needs_research).length;
-    const warmSignal = actionable.filter((c) => signals[c.company]).length;
+    const warmSignal = actionable.filter((c) => signalsByCompany[c.company]?.length).length;
     return { notContacted, connectionSent, introductionSent, followUpSent, meetingsSet, needsResearch, warmSignal };
-  }, [contacts, progress, signals]);
+  }, [contacts, progress, signalsByCompany]);
 
   const filteredContacts = useMemo(() => {
     let rows = contacts.filter((c) => !c.do_not_contact);
 
-    if (activeFilter === "warm_signal") rows = rows.filter((c) => !c.needs_research && signals[c.company]);
+    if (activeFilter === "warm_signal") rows = rows.filter((c) => !c.needs_research && signalsByCompany[c.company]?.length);
     if (activeFilter === "not_contacted") rows = rows.filter((c) => !c.needs_research && (progress[c.id]?.status ?? "not_contacted") === "not_contacted");
     if (activeFilter === "connection_sent") rows = rows.filter((c) => progress[c.id]?.status === "connection_sent");
     if (activeFilter === "meeting_set") rows = rows.filter((c) => progress[c.id]?.status === "meeting_set");
@@ -328,15 +354,17 @@ const ProjectsPage = () => {
     // none. Within the same signal status, priority tier breaks the tie,
     // and the most recently posted signal sorts first among signal companies.
     return rows.sort((a, b) => {
-      const signalA = signals[a.company];
-      const signalB = signals[b.company];
-      const hasSignalA = signalA ? 0 : 1;
-      const hasSignalB = signalB ? 0 : 1;
+      const signalsA = signalsByCompany[a.company];
+      const signalsB = signalsByCompany[b.company];
+      const hasSignalA = signalsA?.length ? 0 : 1;
+      const hasSignalB = signalsB?.length ? 0 : 1;
       if (hasSignalA !== hasSignalB) return hasSignalA - hasSignalB;
 
-      if (signalA && signalB) {
-        const dateA = signalA.posted_date ?? "";
-        const dateB = signalB.posted_date ?? "";
+      if (signalsA?.length && signalsB?.length) {
+        // signalList is fetched ordered by posted_date desc, so index 0
+        // in each group is already that company's most recent signal.
+        const dateA = signalsA[0].posted_date ?? "";
+        const dateB = signalsB[0].posted_date ?? "";
         if (dateA !== dateB) return dateA > dateB ? -1 : 1;
       }
 
@@ -345,7 +373,7 @@ const ProjectsPage = () => {
       if (pa !== pb) return pa - pb;
       return a.company.localeCompare(b.company);
     });
-  }, [contacts, progress, signals, activeFilter, priorityFilter, search]);
+  }, [contacts, progress, signalsByCompany, activeFilter, priorityFilter, search]);
 
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
@@ -524,78 +552,102 @@ const ProjectsPage = () => {
 
             {isLoadingData ? <p className="text-sm text-muted-foreground">Loading your assignments…</p> : null}
 
-            {!isLoadingData && myGoodContacts.length === 0 && myResearchContacts.length === 0 ? (
-              <p className="text-sm text-muted-foreground">{isRequestingBatch ? "Getting your first batch of contacts…" : "No contacts assigned yet."}</p>
+            {!isLoadingData && myAssignedCompanies.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{isRequestingBatch ? "Getting your first batch of companies…" : "No companies assigned yet."}</p>
             ) : null}
 
-            <div className="grid gap-3">
-              {myGoodContacts.map((contact) => {
-                const contactProgress = progress[contact.id];
-                const status = contactProgress?.status ?? "not_contacted";
-                const tier = getContactTier(contact);
-                const meetingBlock = meetingBlocks[contact.id];
-                const isBlocked = Boolean(meetingBlock?.is_blocked);
+            <div className="grid gap-6">
+              {myAssignedCompanies.map((company) => {
+                const companyContacts = contacts.filter((c) => c.company_id === company.id && !c.do_not_contact);
+                const goodContacts = companyContacts.filter((c) => getContactTier(c) !== "research");
+                const researchContacts = companyContacts.filter((c) => getContactTier(c) === "research");
+                const companySignalCount = signalsByCompanyId[company.id]?.length ?? 0;
+
                 return (
-                  <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}>
-                    <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
-                      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
-                      <div className="min-w-0">
-                        <div className="flex flex-wrap items-center gap-2">
-                          {tier === "email" ? <span title="Email on file">📧</span> : null}
-                          {contact.linkedin_url && contact.linkedin_url.includes("/in/") ? (
-                            <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="font-display text-lg font-extrabold tracking-tight text-foreground hover:text-primary hover:underline">{contact.contact_name}</a>
-                          ) : (
-                            <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.contact_name}</p>
-                          )}
-                        </div>
-                        <p className="text-sm font-semibold text-primary">{contact.title}</p>
-                        <p className="text-sm text-muted-foreground">{contact.company}{contact.email ? ` · ${contact.email}` : ""}</p>
+                  <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <Link to={`/projects/company/${company.id}`} className="font-display text-lg font-extrabold tracking-tight text-foreground hover:text-primary hover:underline">{company.name}</Link>
+                        <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${STAGE_BADGE_CLASS[company.company_stage]}`}>{COMPANY_STAGE_LABELS[company.company_stage]}</span>
+                        {companySignalCount > 0 ? <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#92400E]">{companySignalCount} open role{companySignalCount === 1 ? "" : "s"}</span> : null}
                       </div>
-                      {isBlocked ? (
-                        <span className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">
-                          📅 Meeting scheduled with {meetingBlock?.meeting_contact_name}{meetingBlock?.meeting_contact_title ? `, ${meetingBlock.meeting_contact_title}` : ""}
-                        </span>
-                      ) : (
-                        <select value={status} onChange={(e) => handleStatusChange(contact, e.target.value as ContactStatus)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary">
-                          {(Object.keys(STATUS_LABELS) as ContactStatus[]).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-                        </select>
-                      )}
+                      <span className="text-xs text-muted-foreground">{companyContacts.length} contact{companyContacts.length === 1 ? "" : "s"}</span>
                     </div>
-                    {!isBlocked && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
-                      <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
-                        {contact.linkedin_connect_message ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
-                        {contact.intro_message ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
-                        {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
-                      </div>
-                    ) : null}
-                  </article>
+
+                    <div className="grid gap-3 p-4">
+                      {goodContacts.map((contact) => {
+                        const contactProgress = progress[contact.id];
+                        const status = contactProgress?.status ?? "not_contacted";
+                        const tier = getContactTier(contact);
+                        const meetingBlock = meetingBlocks[contact.id];
+                        const isBlocked = Boolean(meetingBlock?.is_blocked);
+                        return (
+                          <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+                            <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
+                              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
+                              <div className="min-w-0">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {tier === "email" ? <span title="Email on file">📧</span> : null}
+                                  {contact.linkedin_url && contact.linkedin_url.includes("/in/") ? (
+                                    <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="font-display text-lg font-extrabold tracking-tight text-foreground hover:text-primary hover:underline">{contact.contact_name}</a>
+                                  ) : (
+                                    <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.contact_name}</p>
+                                  )}
+                                </div>
+                                <p className="text-sm font-semibold text-primary">{contact.title}</p>
+                                {contact.email ? <p className="text-sm text-muted-foreground">{contact.email}</p> : null}
+                              </div>
+                              {isBlocked ? (
+                                <span className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">
+                                  📅 Meeting scheduled with {meetingBlock?.meeting_contact_name}{meetingBlock?.meeting_contact_title ? `, ${meetingBlock.meeting_contact_title}` : ""}
+                                </span>
+                              ) : (
+                                <select value={status} onChange={(e) => handleStatusChange(contact, e.target.value as ContactStatus)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary">
+                                  {(Object.keys(STATUS_LABELS) as ContactStatus[]).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+                                </select>
+                              )}
+                            </div>
+                            {!isBlocked && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
+                              <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
+                                {contact.linkedin_connect_message ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
+                                {contact.intro_message ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
+                                {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+                              </div>
+                            ) : null}
+                          </article>
+                        );
+                      })}
+
+                      {researchContacts.length > 0 ? (
+                        <div className="border border-[#FDE68A] bg-[#FFFBEB] p-4">
+                          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#92400E]">Additional research needed</p>
+                          <p className="mb-3 text-sm text-[#92400E]">These need a manual LinkedIn search — click through and confirm you've found the right person.</p>
+                          <div className="grid gap-2">
+                            {researchContacts.map((contact) => (
+                              <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#FDE68A] bg-white px-3 py-2">
+                                <div>
+                                  <span className="font-semibold text-foreground">{contact.contact_name}</span>
+                                  <span className="ml-2 text-sm text-muted-foreground">{contact.title}</span>
+                                </div>
+                                <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+
+                      {companyContacts.length === 0 ? <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p> : null}
+                    </div>
+                  </div>
                 );
               })}
             </div>
 
-            {myGoodContacts.length > 0 ? (
-              <div className="mt-4 flex justify-center">
-                <button type="button" onClick={handleRequestMoreContacts} disabled={!canRequestMoreContacts || isRequestingBatch} className="rounded-full border border-primary bg-primary px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground disabled:opacity-40">
-                  {isRequestingBatch ? "Getting more…" : canRequestMoreContacts ? "Send me more contacts" : "Work through your current list first"}
+            {myAssignedCompanies.length > 0 ? (
+              <div className="mt-6 flex justify-center">
+                <button type="button" onClick={handleRequestMoreCompanies} disabled={!canRequestMoreCompanies || isRequestingBatch} className="rounded-full border border-primary bg-primary px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground disabled:opacity-40">
+                  {isRequestingBatch ? "Getting more…" : canRequestMoreCompanies ? "Send me more companies" : "Work through your current list first"}
                 </button>
-              </div>
-            ) : null}
-
-            {myResearchContacts.length > 0 ? (
-              <div className="mt-10 border border-[#FDE68A] bg-[#FFFBEB] p-5">
-                <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#92400E]">Additional research needed</p>
-                <p className="mb-4 text-sm text-[#92400E]">These need a manual LinkedIn search — click through and confirm you've found the right person.</p>
-                <div className="grid gap-2">
-                  {myResearchContacts.map((contact) => (
-                    <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#FDE68A] bg-white px-3 py-2">
-                      <div>
-                        <span className="font-semibold text-foreground">{contact.contact_name}</span>
-                        <span className="ml-2 text-sm text-muted-foreground">{contact.title} · {contact.company}</span>
-                      </div>
-                      <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
-                    </div>
-                  ))}
-                </div>
               </div>
             ) : null}
           </div>
@@ -709,7 +761,7 @@ const ProjectsPage = () => {
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Attribution (owner only)</p>
 
               <div className="mb-6 border-b border-[#E2E8F0] pb-6">
-                <CompanyBoard companies={companies} contacts={contacts} signalCountsByCompanyId={signalCountsByCompanyId} teamMembers={teamMembers} />
+                <CompanyBoard companies={companies} contacts={contacts} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} />
               </div>
 
               <div className="mb-6 border-b border-[#E2E8F0] pb-6">
@@ -880,9 +932,10 @@ const ProjectsPage = () => {
               {filteredContacts.slice(0, 50).map((contact) => {
                 const contactProgress = progress[contact.id];
                 const status = contact.needs_research ? null : contactProgress?.status ?? "not_contacted";
-                const signal = signals[contact.company];
+                const companySignals = signalsByCompany[contact.company];
+                const topSignal = companySignals?.[0];
                 return (
-                  <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${signal ? "border-[#FDE68A]" : "border-[#E2E8F0]"}`}>
+                  <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${topSignal ? "border-[#FDE68A]" : "border-[#E2E8F0]"}`}>
                     <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
                       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">
                         {contact.needs_research ? "?" : getInitials(contact.contact_name)}
@@ -910,10 +963,18 @@ const ProjectsPage = () => {
                                 📅 Meeting scheduled with {meetingBlocks[contact.id]?.meeting_contact_name}{meetingBlocks[contact.id]?.meeting_contact_title ? `, ${meetingBlocks[contact.id]?.meeting_contact_title}` : ""}
                               </p>
                             ) : null}
-                            {signal ? (
-                              <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[11px] font-semibold text-[#92400E]">
-                                Hiring{signal.role_title ? `: ${signal.role_title}` : ""}{signal.posted_date ? ` · posted ${new Date(signal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
-                              </p>
+                            {topSignal ? (
+                              <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                                <p className="inline-flex items-center gap-1.5 rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[11px] font-semibold text-[#92400E]">
+                                  {companySignals!.length > 1 ? `${companySignals!.length} open roles` : `Hiring${topSignal.role_title ? `: ${topSignal.role_title}` : ""}`}
+                                  {topSignal.posted_date ? ` · posted ${new Date(topSignal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
+                                </p>
+                                {topSignal.outreach_model ? (
+                                  <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>
+                                    {OUTREACH_MODEL_LABELS[topSignal.outreach_model]}
+                                  </span>
+                                ) : null}
+                              </div>
                             ) : null}
                           </>
                         )}
