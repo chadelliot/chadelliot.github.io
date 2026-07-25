@@ -39,6 +39,9 @@ import {
   getCompanyResearchSummary,
   formatWhyNow,
   getInitials,
+  fetchOwnerCompanyLeadFields,
+  OWNER_LEAD_TYPE_FILTER_ORDER,
+  OWNER_LEAD_TYPE_BADGE_CLASS,
   type ProjectContact,
   type ContactProgress,
   type ContactStatus,
@@ -49,6 +52,8 @@ import {
   type Company,
   type CompanyStage,
   type ContactMeetingBlock,
+  type OwnerLeadType,
+  type OwnerCompanyLeadFields,
 } from "@/lib/projectContacts";
 
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
@@ -169,6 +174,16 @@ const ProjectsPage = () => {
   const toggleCompanyExpanded = (companyId: string) => setExpandedCompanies((current) => ({ ...current, [companyId]: !current[companyId] }));
   const [showCharts, setShowCharts] = useState(false);
   const [companyStageFilter, setCompanyStageFilter] = useState<CompanyStage | "all">("all");
+  // Owner-only. Not fetched, rendered, or read by anything on the Member
+  // render path below - the data itself never reaches a Member's session
+  // (see fetchOwnerCompanyLeadFields), this is just the UI half of that.
+  const [leadTypeFilter, setLeadTypeFilter] = useState<OwnerLeadType | "all">(
+    () => (sessionStorage.getItem("revhub_lead_type_filter") as OwnerLeadType | "all") || "all"
+  );
+  useEffect(() => {
+    sessionStorage.setItem("revhub_lead_type_filter", leadTypeFilter);
+  }, [leadTypeFilter]);
+  const [ownerCompanyFields, setOwnerCompanyFields] = useState<Record<string, OwnerCompanyLeadFields>>({});
 
   useEffect(() => {
     if (!session) return;
@@ -197,6 +212,16 @@ const ProjectsPage = () => {
 
   const currentTeamMember = useMemo(() => (session ? findCurrentTeamMember(session, teamMembers) : null), [session, teamMembers]);
   const isOwner = currentTeamMember?.role === "owner";
+
+  // Owner-only lead-type data, fetched separately from the member-safe
+  // companies fetch and never merged into `companies` itself - so a
+  // refresh of `companies` elsewhere (after a stage change, a reassignment)
+  // can't accidentally carry stale owner fields, and a Member's companies
+  // array never has this data sitting in it even transiently.
+  useEffect(() => {
+    if (!session || !isOwner) return;
+    fetchOwnerCompanyLeadFields(session).then(setOwnerCompanyFields);
+  }, [session, isOwner, companies.length]);
 
   // Signals grouped by company_id - a company can carry more than one open
   // role, and both the assignment ranking and the board cards need to see
@@ -459,6 +484,7 @@ const ProjectsPage = () => {
     return companies
       .filter((c) => byCompanyId[c.id]?.length)
       .filter((c) => companyStageFilter === "all" || c.company_stage === companyStageFilter)
+      .filter((c) => leadTypeFilter === "all" || ownerCompanyFields[c.id]?.canonical_lead_type === leadTypeFilter)
       .sort((a, b) => {
         const sa = signalsByCompanyId[a.id]?.length ? 0 : 1;
         const sb = signalsByCompanyId[b.id]?.length ? 0 : 1;
@@ -466,7 +492,7 @@ const ProjectsPage = () => {
         return STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name);
       })
       .map((company) => ({ company, matchingContacts: byCompanyId[company.id] }));
-  }, [companies, filteredContacts, signalsByCompanyId, companyStageFilter]);
+  }, [companies, filteredContacts, signalsByCompanyId, companyStageFilter, leadTypeFilter, ownerCompanyFields]);
 
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
@@ -606,6 +632,8 @@ const ProjectsPage = () => {
           signals={signalsByCompanyId[company.id] ?? []}
           contactCount={companyContacts.length}
           engagedCount={companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length}
+          ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
+          ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
         />
         <div className="border-b border-[#E2E8F0] px-4 py-2">
           <Link to={`/projects/company/${company.id}`} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">View full company page →</Link>
@@ -1181,8 +1209,30 @@ const ProjectsPage = () => {
                 <option value="C">C</option>
               </select>
             </label>
-            {activeFilter !== "all" ? (
-              <button type="button" onClick={() => setActiveFilter("all")} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Clear filter</button>
+            {/* Owner-only: the data behind this never reaches a Member's
+                session in the first place (see fetchOwnerCompanyLeadFields),
+                so there's no separate "hide for members" check needed here -
+                this whole search/filter bar only renders on the owner
+                return branch above. */}
+            <label className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+              Lead type
+              <select
+                value={leadTypeFilter}
+                onChange={(e) => setLeadTypeFilter(e.target.value as OwnerLeadType | "all")}
+                className="h-10 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary"
+              >
+                <option value="all">All Lead Types</option>
+                {OWNER_LEAD_TYPE_FILTER_ORDER.map((type) => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </label>
+            {activeFilter !== "all" || priorityFilter !== "all" || leadTypeFilter !== "all" ? (
+              <button
+                type="button"
+                onClick={() => { setActiveFilter("all"); setPriorityFilter("all"); setLeadTypeFilter("all"); }}
+                className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
+              >
+                Clear filters
+              </button>
             ) : null}
           </div>
 

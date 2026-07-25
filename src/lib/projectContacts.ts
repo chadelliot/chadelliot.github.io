@@ -67,6 +67,90 @@ export const OUTREACH_MODEL_BADGE_CLASS: Record<OutreachModel, string> = {
   consolidate: "border-[#FBCFE8] bg-[#FDF2F8] text-[#BE185D]",
 };
 
+// Owner-only fields (Phase 1 lead-origin/opportunity-type classification).
+// These are never present in the member-safe fetch - they only arrive via
+// the owner-only RPC fetches below, which the database refuses to return
+// data from unless the caller is an owner. See
+// supabase/migrations/leadtype_phase1_foundation.sql.
+export type LeadOrigin = "Active Hiring Signal" | "Direct Flexible-Work Opportunity";
+
+export type OpportunityType =
+  | "Fractional Opportunity"
+  | "Contract Opportunity"
+  | "Contract-to-Hire"
+  | "Interim Opportunity"
+  | "Temporary Assignment"
+  | "Consulting Project"
+  | "Full-Time Hiring Signal";
+
+// The owner-facing filter/badge value: every OpportunityType, plus the
+// "no active signal" fallback for companies sourced only from the Contacts
+// tab.
+export type OwnerLeadType = OpportunityType | "Cold Outreach";
+
+// Dropdown order specified by the product spec - deliberately NOT the same
+// order as the canonical-type buying-intent hierarchy used in
+// recompute_company_lead_type() in the SQL migration.
+export const OWNER_LEAD_TYPE_FILTER_ORDER: OwnerLeadType[] = [
+  "Cold Outreach",
+  "Fractional Opportunity",
+  "Contract Opportunity",
+  "Contract-to-Hire",
+  "Interim Opportunity",
+  "Temporary Assignment",
+  "Consulting Project",
+  "Full-Time Hiring Signal",
+];
+
+export const OWNER_LEAD_TYPE_BADGE_CLASS: Record<OwnerLeadType, string> = {
+  "Cold Outreach": "border-[#E2E8F0] bg-[#F8FAFC] text-[#334155]",
+  "Fractional Opportunity": "border-[#DDD6FE] bg-[#F5F3FF] text-[#6D28D9]",
+  "Contract Opportunity": "border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]",
+  "Contract-to-Hire": "border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]",
+  "Interim Opportunity": "border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]",
+  "Temporary Assignment": "border-[#FED7AA] bg-[#FFF7ED] text-[#C2410C]",
+  "Consulting Project": "border-[#FBCFE8] bg-[#FDF2F8] text-[#BE185D]",
+  "Full-Time Hiring Signal": "border-[#CBD5E1] bg-[#F1F5F9] text-[#475569]",
+};
+
+// Same category-to-hue mapping as OWNER_LEAD_TYPE_BADGE_CLASS, as a single
+// accent hex - used for the dot indicator on the company card header, which
+// has a black background the light pill classes above aren't legible on.
+export const OWNER_LEAD_TYPE_DOT_COLOR: Record<OwnerLeadType, string> = {
+  "Cold Outreach": "#94A3B8",
+  "Fractional Opportunity": "#A78BFA",
+  "Contract Opportunity": "#60A5FA",
+  "Contract-to-Hire": "#4ADE80",
+  "Interim Opportunity": "#FBBF24",
+  "Temporary Assignment": "#FB923C",
+  "Consulting Project": "#F472B6",
+  "Full-Time Hiring Signal": "#CBD5E1",
+};
+
+// Owner-only fields fetched separately from the shared signal fetch (see
+// fetchOwnerSignalFields). Merge onto a CompanySignal by id when rendering
+// an Owner view.
+export type OwnerSignalFields = {
+  id: string;
+  lead_origin?: LeadOrigin | null;
+  opportunity_type?: OpportunityType | null;
+  engagement_details?: string | null;
+  raw_lead_origin?: string | null;
+  raw_opportunity_type?: string | null;
+};
+
+// Owner-only fields fetched separately from the shared company fetch (see
+// fetchOwnerCompanyLeadFields). Merge onto a Company by id when rendering
+// an Owner view.
+export type OwnerCompanyLeadFields = {
+  id: string;
+  canonical_lead_type?: OwnerLeadType | null;
+  all_signal_types?: OpportunityType[] | null;
+  primary_signal_id?: string | null;
+  signal_count?: number;
+  lead_type_needs_review?: boolean;
+};
+
 export type CompanySignal = {
   id: string;
   company: string;
@@ -76,6 +160,12 @@ export type CompanySignal = {
   source_url?: string | null;
   notes?: string | null;
   outreach_model?: OutreachModel | null;
+  // Owner-only - absent unless merged in via mergeOwnerSignalFields().
+  lead_origin?: LeadOrigin | null;
+  opportunity_type?: OpportunityType | null;
+  engagement_details?: string | null;
+  raw_lead_origin?: string | null;
+  raw_opportunity_type?: string | null;
 };
 
 export type CompanyStage = "new_signal" | "meeting_scheduled" | "closed_won" | "closed_lost";
@@ -89,6 +179,12 @@ export type Company = {
   meeting_contact_id?: string | null;
   meeting_date?: string | null;
   closed_lost_reason?: string | null;
+  // Owner-only - absent unless merged in via mergeOwnerCompanyLeadFields().
+  canonical_lead_type?: OwnerLeadType | null;
+  all_signal_types?: OpportunityType[] | null;
+  primary_signal_id?: string | null;
+  signal_count?: number;
+  lead_type_needs_review?: boolean;
 };
 
 export type ContactMeetingBlock = {
@@ -117,6 +213,11 @@ export type Meeting = {
   confirmed: boolean;
   notes?: string | null;
   created_at: string;
+  // Owner-only, captured once at meeting-creation time and never
+  // recomputed later - see the attribution rules in the Phase 1 migration.
+  // Not present on the member-safe fetch.
+  meeting_lead_type_snapshot?: OwnerLeadType | null;
+  meeting_lead_origin_snapshot?: LeadOrigin | "Cold Outreach" | null;
 };
 
 export type ClosedDeal = {
@@ -127,6 +228,9 @@ export type ClosedDeal = {
   contract_signed_date?: string | null;
   notes?: string | null;
   created_at: string;
+  // Owner-only, same snapshot rules as Meeting above.
+  closed_won_lead_type_snapshot?: OwnerLeadType | null;
+  closed_won_lead_origin_snapshot?: LeadOrigin | "Cold Outreach" | null;
 };
 
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
@@ -167,8 +271,38 @@ export { getStoredProposalSession };
 export const fetchProjectContacts = async (session: ProposalSession): Promise<ProjectContact[]> =>
   fetchAllRows<ProjectContact>(session, "project_contacts?select=*&order=company.asc");
 
+// Explicit column list, not select=* - the Phase 1 migration revokes
+// SELECT on the owner-only lead-type columns for everyone at the table
+// level, so a select=* here would fail for Owners and Members alike. Owner
+// views merge in fetchOwnerCompanyLeadFields() separately.
+const COMPANY_SAFE_COLUMNS = "id,name,normalized_name,assigned_rep,company_stage,meeting_contact_id,meeting_date,closed_lost_reason";
+
 export const fetchCompanies = async (session: ProposalSession): Promise<Company[]> =>
-  fetchAllRows<Company>(session, "companies?select=*&order=name.asc");
+  fetchAllRows<Company>(session, `companies?select=${COMPANY_SAFE_COLUMNS}&order=name.asc`);
+
+// Owner-only. Returns nothing (empty array) if the caller isn't an owner -
+// enforced by the database via is_owner() inside the RPC, not by this
+// function trusting the caller's claimed role.
+export const fetchOwnerCompanyLeadFields = async (session: ProposalSession): Promise<Record<string, OwnerCompanyLeadFields>> => {
+  if (!DB_URL) return {};
+  const response = await fetch(`${DB_URL}/rest/v1/rpc/get_owner_company_lead_fields`, {
+    method: "POST",
+    headers: authHeaders(session),
+    body: JSON.stringify({}),
+  });
+  if (!response.ok) return {};
+  const rows = (await response.json()) as OwnerCompanyLeadFields[];
+  return Object.fromEntries(rows.map((row) => [row.id, row]));
+};
+
+// Merges owner-only lead-type fields onto the member-safe Company rows.
+// Call only from an Owner code path - a Member calling this is harmless
+// (the RPC returns nothing for them) but there's no reason to call it.
+export const mergeOwnerCompanyLeadFields = (companies: Company[], ownerFields: Record<string, OwnerCompanyLeadFields>): Company[] =>
+  companies.map((c) => {
+    const extra = ownerFields[c.id];
+    return extra ? { ...c, ...extra } : c;
+  });
 
 export const fetchMeetingBlocks = async (session: ProposalSession): Promise<Record<string, ContactMeetingBlock>> => {
   const rows = await fetchAllRows<ContactMeetingBlock>(session, "contact_meeting_block?select=*");
@@ -266,9 +400,13 @@ export const updateTeamMemberRole = async (
   return rows[0] ?? null;
 };
 
+// Explicit column list, not select=* - see COMPANY_SAFE_COLUMNS above for
+// why. Owner views merge in fetchOwnerSignalFields() separately.
+const COMPANY_SIGNAL_SAFE_COLUMNS = "id,company,company_id,role_title,posted_date,source_url,notes,outreach_model";
+
 export const fetchCompanySignals = async (session: ProposalSession): Promise<Record<string, CompanySignal>> => {
   if (!DB_URL) return {};
-  const response = await fetch(`${DB_URL}/rest/v1/company_signals?select=*`, {
+  const response = await fetch(`${DB_URL}/rest/v1/company_signals?select=${COMPANY_SIGNAL_SAFE_COLUMNS}`, {
     headers: authHeaders(session),
   });
   if (!response.ok) return {};
@@ -280,7 +418,27 @@ export const fetchCompanySignals = async (session: ProposalSession): Promise<Rec
 // the warm-signal badge), this keeps every row - a company detail page
 // should show all of a company's hiring signals, not just one.
 export const fetchCompanySignalsList = async (session: ProposalSession): Promise<CompanySignal[]> =>
-  fetchAllRows<CompanySignal>(session, "company_signals?select=*&order=posted_date.desc");
+  fetchAllRows<CompanySignal>(session, `company_signals?select=${COMPANY_SIGNAL_SAFE_COLUMNS}&order=posted_date.desc`);
+
+// Owner-only. Returns nothing if the caller isn't an owner - enforced by
+// the database, not the client.
+export const fetchOwnerSignalFields = async (session: ProposalSession): Promise<Record<string, OwnerSignalFields>> => {
+  if (!DB_URL) return {};
+  const response = await fetch(`${DB_URL}/rest/v1/rpc/get_owner_signal_fields`, {
+    method: "POST",
+    headers: authHeaders(session),
+    body: JSON.stringify({}),
+  });
+  if (!response.ok) return {};
+  const rows = (await response.json()) as OwnerSignalFields[];
+  return Object.fromEntries(rows.map((row) => [row.id, row]));
+};
+
+export const mergeOwnerSignalFields = (signals: CompanySignal[], ownerFields: Record<string, OwnerSignalFields>): CompanySignal[] =>
+  signals.map((s) => {
+    const extra = ownerFields[s.id];
+    return extra ? { ...s, ...extra } : s;
+  });
 
 // Tags a single hiring signal with which outreach model it calls for
 // (Replace/Bridge/Build/Augment/Consolidate). Owner or assigned-rep call,
@@ -333,9 +491,11 @@ export const logContactActivity = async (
   });
 };
 
+const MEETING_SAFE_COLUMNS = "id,contact_id,company_id,set_by,meeting_date,confirmed,notes,created_at";
+
 export const fetchMeetings = async (session: ProposalSession): Promise<Meeting[]> => {
   if (!DB_URL) return [];
-  const response = await fetch(`${DB_URL}/rest/v1/meetings?select=*&order=meeting_date.desc`, {
+  const response = await fetch(`${DB_URL}/rest/v1/meetings?select=${MEETING_SAFE_COLUMNS}&order=meeting_date.desc`, {
     headers: authHeaders(session),
   });
   if (!response.ok) return [];
@@ -360,9 +520,11 @@ export const createMeeting = async (
   return rows[0] ?? null;
 };
 
+const CLOSED_DEAL_SAFE_COLUMNS = "id,company,company_id,credited_to,contract_signed_date,notes,created_at";
+
 export const fetchClosedDeals = async (session: ProposalSession): Promise<ClosedDeal[]> => {
   if (!DB_URL) return [];
-  const response = await fetch(`${DB_URL}/rest/v1/closed_deals?select=*&order=contract_signed_date.desc`, {
+  const response = await fetch(`${DB_URL}/rest/v1/closed_deals?select=${CLOSED_DEAL_SAFE_COLUMNS}&order=contract_signed_date.desc`, {
     headers: authHeaders(session),
   });
   if (!response.ok) return [];

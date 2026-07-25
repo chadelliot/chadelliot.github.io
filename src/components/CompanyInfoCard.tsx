@@ -2,9 +2,11 @@ import {
   COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
+  OWNER_LEAD_TYPE_DOT_COLOR,
   type Company,
   type CompanyResearchSummary,
   type CompanySignal,
+  type OwnerLeadType,
 } from "@/lib/projectContacts";
 
 const STAGE_BADGE_CLASS: Record<Company["company_stage"], string> = {
@@ -23,12 +25,18 @@ type CompanyInfoCardProps = {
   // do-not-contact) - lets the header show real engagement, not just a
   // headcount.
   engagedCount?: number;
+  // Owner-only. Undefined for Members - the caller only passes this on the
+  // owner render path, and the underlying data never reaches a Member's
+  // session in the first place (see fetchOwnerCompanyLeadFields), so this
+  // is a belt-and-suspenders check, not the actual security boundary.
+  ownerLeadType?: OwnerLeadType | null;
+  ownerSignalCount?: number;
 };
 
 // The company-level facts pulled from ChatGPT's account research - shown
 // first, before any individual contact, so a rep orients on the company
 // before working a person.
-const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCount = 0 }: CompanyInfoCardProps) => {
+const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCount = 0, ownerLeadType, ownerSignalCount }: CompanyInfoCardProps) => {
   const topSignal = signals[0];
 
   return (
@@ -39,6 +47,13 @@ const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCoun
           {COMPANY_STAGE_LABELS[company.company_stage]}
         </span>
         {research.priority ? <span className="rounded-full border border-[#E2E8F0] bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">Priority {research.priority}</span> : null}
+        {ownerLeadType ? (
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-white">
+            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: OWNER_LEAD_TYPE_DOT_COLOR[ownerLeadType] }} />
+            {ownerLeadType}
+            {ownerSignalCount && ownerSignalCount > 1 ? ` · ${ownerSignalCount} active signals` : ""}
+          </span>
+        ) : null}
         {signals.length > 0 ? <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#92400E]">{signals.length} open role{signals.length === 1 ? "" : "s"}</span> : null}
         {topSignal?.outreach_model ? (
           <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[topSignal.outreach_model]}</span>

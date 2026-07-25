@@ -26,6 +26,9 @@ import {
   STATUS_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
+  OWNER_LEAD_TYPE_DOT_COLOR,
+  fetchOwnerCompanyLeadFields,
+  fetchOwnerSignalFields,
   type ProjectContact,
   type ContactProgress,
   type ContactStatus,
@@ -36,6 +39,8 @@ import {
   type Company,
   type CompanyStage,
   type OutreachModel,
+  type OwnerCompanyLeadFields,
+  type OwnerSignalFields,
 } from "@/lib/projectContacts";
 
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
@@ -71,6 +76,13 @@ const CompanyDetailPage = () => {
   const [dealDate, setDealDate] = useState("");
   const [dealNotes, setDealNotes] = useState("");
 
+  // Owner-only. Fetched separately from the member-safe companies/signals
+  // fetches above - see the note in ProjectsPage.tsx next to the same
+  // pattern.
+  const [ownerCompanyFields, setOwnerCompanyFields] = useState<Record<string, OwnerCompanyLeadFields>>({});
+  const [ownerSignalFields, setOwnerSignalFields] = useState<Record<string, OwnerSignalFields>>({});
+  const [showOpportunityIntelligence, setShowOpportunityIntelligence] = useState(false);
+
   useEffect(() => {
     if (!session) return;
     setIsLoadingData(true);
@@ -96,6 +108,14 @@ const CompanyDetailPage = () => {
 
   const currentTeamMember = useMemo(() => (session ? findCurrentTeamMember(session, teamMembers) : null), [session, teamMembers]);
   const isOwner = currentTeamMember?.role === "owner";
+
+  useEffect(() => {
+    if (!session || !isOwner) return;
+    Promise.all([fetchOwnerCompanyLeadFields(session), fetchOwnerSignalFields(session)]).then(([companyFields, signalFields]) => {
+      setOwnerCompanyFields(companyFields);
+      setOwnerSignalFields(signalFields);
+    });
+  }, [session, isOwner, companies.length, signals.length]);
 
   const company = useMemo(() => companies.find((c) => c.id === id) ?? null, [companies, id]);
   const canManage = company ? canManageCompany(company, currentTeamMember, isOwner) : false;
@@ -248,8 +268,68 @@ const CompanyDetailPage = () => {
                   signals={companySignals}
                   contactCount={companyContacts.length}
                   engagedCount={companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length}
+                  ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
+                  ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
                 />
               </div>
+
+              {isOwner ? (
+                <div className="mb-6 rounded-lg border border-[#E2E8F0] bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setShowOpportunityIntelligence((v) => !v)}
+                    className="flex w-full items-center justify-between px-4 py-3 text-left"
+                  >
+                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Opportunity intelligence (owner only)</span>
+                    <span className="text-xs font-semibold text-muted-foreground">{showOpportunityIntelligence ? "Hide ▲" : "Show ▼"}</span>
+                  </button>
+                  {showOpportunityIntelligence ? (
+                    <div className="border-t border-[#E2E8F0] px-4 py-4">
+                      {(() => {
+                        const ownerFields = ownerCompanyFields[company.id];
+                        const canonicalType = ownerFields?.canonical_lead_type;
+                        const primarySignal = ownerFields?.primary_signal_id ? companySignals.find((s) => s.id === ownerFields.primary_signal_id) : null;
+                        const primarySignalOwnerFields = primarySignal ? ownerSignalFields[primarySignal.id] : null;
+                        const leadOrigin = canonicalType === "Cold Outreach" ? "Cold Outreach" : primarySignalOwnerFields?.lead_origin;
+                        const otherTypes = (ownerFields?.all_signal_types ?? []).filter((t) => t !== canonicalType);
+                        return (
+                          <div className="grid gap-4 md:grid-cols-2">
+                            <div>
+                              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Canonical lead type</p>
+                              <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                {canonicalType ? <span className="h-2 w-2 rounded-full" style={{ backgroundColor: OWNER_LEAD_TYPE_DOT_COLOR[canonicalType] }} /> : null}
+                                {canonicalType ?? "Not yet classified"}
+                              </p>
+                              {ownerFields?.lead_type_needs_review ? (
+                                <p className="mt-1 text-xs text-[#B45309]">One or more signals here have no opportunity_type set - flagged for review.</p>
+                              ) : null}
+                            </div>
+                            <div>
+                              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Lead origin</p>
+                              <p className="text-sm font-semibold text-foreground">{leadOrigin ?? "—"}</p>
+                            </div>
+                            {primarySignalOwnerFields?.engagement_details ? (
+                              <div>
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Engagement details</p>
+                                <p className="text-sm text-foreground">{primarySignalOwnerFields.engagement_details}</p>
+                              </div>
+                            ) : null}
+                            <div>
+                              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Related signals</p>
+                              <p className="text-sm text-foreground">{ownerFields?.signal_count ?? 0} total</p>
+                              {otherTypes.length > 0 ? (
+                                <ul className="mt-1 list-inside list-disc text-sm text-muted-foreground">
+                                  {otherTypes.map((t) => <li key={t}>{t}</li>)}
+                                </ul>
+                              ) : null}
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
 
               {company.company_stage === "closed_lost" && company.closed_lost_reason ? (
                 <div className="mb-6 rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
