@@ -165,6 +165,7 @@ const ProjectsPage = () => {
   const [nameInput, setNameInput] = useState("");
   const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({});
   const toggleCompanyExpanded = (companyId: string) => setExpandedCompanies((current) => ({ ...current, [companyId]: !current[companyId] }));
+  const [showCharts, setShowCharts] = useState(false);
 
   useEffect(() => {
     if (!session) return;
