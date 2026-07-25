@@ -7,6 +7,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompanyBoard from "@/components/CompanyBoard";
 import CompanyInfoCard from "@/components/CompanyInfoCard";
+import ProjectsSidebar, { type ProjectsSection } from "@/components/ProjectsSidebar";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import { signInToProposalDirectory, clearStoredProposalSession, hydrateSessionFromUrlFragment, setOwnPassword } from "@/lib/companyStatus";
 import {
@@ -150,7 +151,7 @@ const ProjectsPage = () => {
   const [meetingPrompt, setMeetingPrompt] = useState<ProjectContact | null>(null);
   const [meetingDate, setMeetingDate] = useState("");
   const [meetingNotes, setMeetingNotes] = useState("");
-  const [showAttribution, setShowAttribution] = useState(false);
+  const [activeSection, setActiveSection] = useState<ProjectsSection>("assignments");
   const [dealCompany, setDealCompany] = useState("");
   const [dealCreditedTo, setDealCreditedTo] = useState("");
   const [dealDate, setDealDate] = useState("");
@@ -819,7 +820,15 @@ const ProjectsPage = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
-        <main className="px-6 pb-20 pt-28 md:px-20 md:pt-32">
+        <div className="md:flex">
+          <ProjectsSidebar
+            isOwner={false}
+            activeSection="assignments"
+            onSectionChange={() => {}}
+            memberName={currentTeamMember?.name}
+            onSignOut={handleSignOut}
+          />
+          <main className="min-w-0 flex-1 px-6 pb-20 pt-28 md:px-10 md:pt-10">
           <div className="w-full">
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -850,9 +859,6 @@ const ProjectsPage = () => {
                   <p className="mt-1 text-sm text-[#B45309]">Your account isn't set up as a team member yet — contact Chad.</p>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <button type="button" onClick={handleSignOut} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Sign out</button>
-              </div>
             </div>
 
             {isLoadingData ? <p className="text-sm text-muted-foreground">Loading your assignments…</p> : null}
@@ -873,7 +879,8 @@ const ProjectsPage = () => {
               </div>
             ) : null}
           </div>
-        </main>
+          </main>
+        </div>
         <Footer />
 
         {addContactSlideout}
@@ -946,31 +953,31 @@ const ProjectsPage = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
-      <main className="px-6 pb-20 pt-28 md:px-20 md:pt-32">
-        <div className="w-full">
-          <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
-            <div>
+      <div className="md:flex">
+        <ProjectsSidebar
+          isOwner={isOwner}
+          activeSection={activeSection}
+          onSectionChange={setActiveSection}
+          memberName={currentTeamMember?.name}
+          onSignOut={handleSignOut}
+        />
+        <main className="min-w-0 flex-1 px-6 pb-20 pt-28 md:px-10 md:pt-10">
+          <div className="w-full">
+            <div className="mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
-              <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Your contact queue.</h1>
+              <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
+                {activeSection === "board" ? "Company board." : activeSection === "team" ? "Team & attribution." : "Your contact queue."}
+              </h1>
             </div>
-            <div className="flex items-center gap-2">
-              {isOwner ? (
-                <button type="button" onClick={() => setShowAttribution((v) => !v)} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">
-                  {showAttribution ? "Hide attribution" : "Meetings & closed deals"}
-                </button>
-              ) : null}
-              <button type="button" onClick={handleSignOut} className="h-fit rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] transition-colors hover:border-primary hover:text-primary">Sign out</button>
-            </div>
-          </div>
 
-          {isOwner && showAttribution ? (
+          {activeSection === "board" ? (
             <div className="mb-8 border border-[#E2E8F0] bg-white p-5">
-              <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Attribution (owner only)</p>
+              <CompanyBoard companies={companies} contacts={contacts} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} />
+            </div>
+          ) : null}
 
-              <div className="mb-6 border-b border-[#E2E8F0] pb-6">
-                <CompanyBoard companies={companies} contacts={contacts} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} />
-              </div>
-
+          {activeSection === "team" ? (
+            <div className="mb-8 border border-[#E2E8F0] bg-white p-5">
               <div className="mb-6 border-b border-[#E2E8F0] pb-6">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Team members</p>
                 <div className="grid gap-2">
@@ -1087,6 +1094,8 @@ const ProjectsPage = () => {
             </div>
           ) : null}
 
+          {activeSection === "assignments" ? (
+          <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Company penetration</p>
             {companyStageFilter !== "all" ? (
@@ -1248,8 +1257,11 @@ const ProjectsPage = () => {
           {ownerCompanyGroups.length > 60 ? (
             <p className="mt-4 text-center text-xs text-muted-foreground">Showing the first 60 of {ownerCompanyGroups.length} matching companies — narrow your search or filters to see more precisely.</p>
           ) : null}
-        </div>
-      </main>
+          </>
+          ) : null}
+          </div>
+        </main>
+      </div>
       <Footer />
 
       {meetingPrompt ? (
