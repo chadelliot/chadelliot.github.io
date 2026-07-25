@@ -56,6 +56,36 @@ export type CompanySignal = {
   notes?: string | null;
 };
 
+export type CompanyStage = "new_signal" | "meeting_scheduled" | "closed_won" | "closed_lost";
+
+export type Company = {
+  id: string;
+  name: string;
+  normalized_name: string;
+  assigned_rep?: string | null;
+  company_stage: CompanyStage;
+  meeting_contact_id?: string | null;
+  meeting_date?: string | null;
+  closed_lost_reason?: string | null;
+};
+
+export type ContactMeetingBlock = {
+  contact_id: string;
+  company_id: string;
+  company_stage: CompanyStage;
+  meeting_contact_id?: string | null;
+  is_blocked: boolean;
+  meeting_contact_name?: string | null;
+  meeting_contact_title?: string | null;
+};
+
+export const COMPANY_STAGE_LABELS: Record<CompanyStage, string> = {
+  new_signal: "New Signal",
+  meeting_scheduled: "Meeting Scheduled",
+  closed_won: "Closed Won",
+  closed_lost: "Closed Lost",
+};
+
 export type Meeting = {
   id: string;
   contact_id: string;
@@ -112,6 +142,32 @@ export { getStoredProposalSession };
 
 export const fetchProjectContacts = async (session: ProposalSession): Promise<ProjectContact[]> =>
   fetchAllRows<ProjectContact>(session, "project_contacts?select=*&order=company.asc");
+
+export const fetchCompanies = async (session: ProposalSession): Promise<Company[]> =>
+  fetchAllRows<Company>(session, "companies?select=*&order=name.asc");
+
+export const fetchMeetingBlocks = async (session: ProposalSession): Promise<Record<string, ContactMeetingBlock>> => {
+  const rows = await fetchAllRows<ContactMeetingBlock>(session, "contact_meeting_block?select=*");
+  return Object.fromEntries(rows.map((row) => [row.contact_id, row]));
+};
+
+// Owner-only in the UI (not yet enforced at the database level - matches
+// the trust model of the rest of the company-level controls for now).
+export const updateCompanyStage = async (
+  session: ProposalSession,
+  companyId: string,
+  updates: { company_stage: CompanyStage; closed_lost_reason?: string | null; meeting_contact_id?: string | null }
+): Promise<Company | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/companies?id=eq.${companyId}`, {
+    method: "PATCH",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify(updates),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as Company[];
+  return rows[0] ?? null;
+};
 
 export const fetchContactProgress = async (session: ProposalSession): Promise<Record<string, ContactProgress>> => {
   const rows = await fetchAllRows<ContactProgress>(session, "contact_progress?select=*");
@@ -313,10 +369,15 @@ export const assignNextBatch = async (
   session: ProposalSession,
   teamMemberId: string,
   allContacts: ProjectContact[],
-  allProgress: Record<string, ContactProgress>
+  allProgress: Record<string, ContactProgress>,
+  meetingBlocks: Record<string, ContactMeetingBlock> = {}
 ): Promise<{ assignedGoodIds: string[]; assignedResearchIds: string[] }> => {
   const unassigned = allContacts.filter(
-    (c) => !c.needs_research && !c.do_not_contact && !allProgress[c.id]?.assigned_to
+    (c) =>
+      !c.needs_research &&
+      !c.do_not_contact &&
+      !allProgress[c.id]?.assigned_to &&
+      !meetingBlocks[c.id]?.is_blocked
   );
 
   const good = unassigned

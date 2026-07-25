@@ -10,6 +10,9 @@ import {
   fetchCompanySignals,
   fetchMeetings,
   fetchClosedDeals,
+  fetchCompanies,
+  fetchMeetingBlocks,
+  updateCompanyStage,
   createMeeting,
   createClosedDeal,
   findCurrentTeamMember,
@@ -30,6 +33,11 @@ import {
   type CompanySignal,
   type Meeting,
   type ClosedDeal,
+  type Company,
+  type CompanyStage,
+  type ContactMeetingBlock,
+  COMPANY_STAGE_LABELS,
+
 } from "@/lib/projectContacts";
 
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
@@ -101,6 +109,9 @@ const ProjectsPage = () => {
   const [signals, setSignals] = useState<Record<string, CompanySignal>>({});
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [meetingBlocks, setMeetingBlocks] = useState<Record<string, ContactMeetingBlock>>({});
+  const [companySearch, setCompanySearch] = useState("");
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
@@ -141,13 +152,17 @@ const ProjectsPage = () => {
       fetchCompanySignals(session),
       fetchMeetings(session),
       fetchClosedDeals(session),
-    ]).then(([contactRows, progressRows, teamRows, signalRows, meetingRows, dealRows]) => {
+      fetchCompanies(session),
+      fetchMeetingBlocks(session),
+    ]).then(([contactRows, progressRows, teamRows, signalRows, meetingRows, dealRows, companyRows, blockRows]) => {
       setContacts(contactRows);
       setProgress(progressRows);
       setTeamMembers(teamRows);
       setSignals(signalRows);
       setMeetings(meetingRows);
       setClosedDeals(dealRows);
+      setCompanies(companyRows);
+      setMeetingBlocks(blockRows);
       setIsLoadingData(false);
     });
   }, [session]);
@@ -164,12 +179,13 @@ const ProjectsPage = () => {
   const myResearchContacts = useMemo(() => myAssignedContacts.filter((c) => getContactTier(c) === "research"), [myAssignedContacts]);
 
   const canRequestMoreContacts =
-    myGoodContacts.length === 0 || myGoodContacts.every((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted");
+    myGoodContacts.length === 0 ||
+    myGoodContacts.every((c) => meetingBlocks[c.id]?.is_blocked || (progress[c.id]?.status ?? "not_contacted") !== "not_contacted");
 
   const handleRequestMoreContacts = async () => {
     if (!session || !currentTeamMember || isRequestingBatch) return;
     setIsRequestingBatch(true);
-    const { assignedGoodIds, assignedResearchIds } = await assignNextBatch(session, currentTeamMember.id, contacts, progress);
+    const { assignedGoodIds, assignedResearchIds } = await assignNextBatch(session, currentTeamMember.id, contacts, progress, meetingBlocks);
     if (assignedGoodIds.length || assignedResearchIds.length) {
       const freshProgress = await fetchContactProgress(session);
       setProgress(freshProgress);
@@ -204,6 +220,19 @@ const ProjectsPage = () => {
     }
     const updated = await updateTeamMemberRole(session, memberId, role);
     if (updated) setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+  };
+
+  const handleSetCompanyStage = async (companyId: string, stage: CompanyStage, closedLostReason?: string) => {
+    if (!session) return;
+    const updates: { company_stage: CompanyStage; closed_lost_reason?: string | null; meeting_contact_id?: string | null } = { company_stage: stage };
+    if (stage === "closed_lost") updates.closed_lost_reason = closedLostReason || null;
+    if (stage === "new_signal") updates.meeting_contact_id = null; // reopening clears the old meeting record
+    const updated = await updateCompanyStage(session, companyId, updates);
+    if (updated) {
+      setCompanies((current) => current.map((c) => (c.id === updated.id ? updated : c)));
+      const freshBlocks = await fetchMeetingBlocks(session);
+      setMeetingBlocks(freshBlocks);
+    }
   };
 
   const handleAddContact = async (event: FormEvent<HTMLFormElement>) => {
@@ -335,6 +364,9 @@ const ProjectsPage = () => {
       setMeetingPrompt(contact);
       setMeetingDate("");
       setMeetingNotes("");
+      const [freshCompanies, freshBlocks] = await Promise.all([fetchCompanies(session), fetchMeetingBlocks(session)]);
+      setCompanies(freshCompanies);
+      setMeetingBlocks(freshBlocks);
     }
   };
 
@@ -505,8 +537,10 @@ const ProjectsPage = () => {
                 const contactProgress = progress[contact.id];
                 const status = contactProgress?.status ?? "not_contacted";
                 const tier = getContactTier(contact);
+                const meetingBlock = meetingBlocks[contact.id];
+                const isBlocked = Boolean(meetingBlock?.is_blocked);
                 return (
-                  <article key={contact.id} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm">
+                  <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}>
                     <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
                       <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
                       <div className="min-w-0">
@@ -521,11 +555,17 @@ const ProjectsPage = () => {
                         <p className="text-sm font-semibold text-primary">{contact.title}</p>
                         <p className="text-sm text-muted-foreground">{contact.company}{contact.email ? ` · ${contact.email}` : ""}</p>
                       </div>
-                      <select value={status} onChange={(e) => handleStatusChange(contact, e.target.value as ContactStatus)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary">
-                        {(Object.keys(STATUS_LABELS) as ContactStatus[]).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-                      </select>
+                      {isBlocked ? (
+                        <span className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">
+                          📅 Meeting scheduled with {meetingBlock?.meeting_contact_name}{meetingBlock?.meeting_contact_title ? `, ${meetingBlock.meeting_contact_title}` : ""}
+                        </span>
+                      ) : (
+                        <select value={status} onChange={(e) => handleStatusChange(contact, e.target.value as ContactStatus)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary">
+                          {(Object.keys(STATUS_LABELS) as ContactStatus[]).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+                        </select>
+                      )}
                     </div>
-                    {(contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
+                    {!isBlocked && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
                       <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
                         {contact.linkedin_connect_message ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
                         {contact.intro_message ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
@@ -671,6 +711,63 @@ const ProjectsPage = () => {
           {isOwner && showAttribution ? (
             <div className="mb-8 border border-[#E2E8F0] bg-white p-5">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Attribution (owner only)</p>
+
+              <div className="mb-6 border-b border-[#E2E8F0] pb-6">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Company controls</p>
+                <input
+                  type="text"
+                  value={companySearch}
+                  onChange={(e) => setCompanySearch(e.target.value)}
+                  placeholder="Search a company by name…"
+                  className="mb-3 h-10 w-full rounded-lg border border-[#CBD5E1] bg-white px-3 text-sm outline-none focus:border-primary"
+                />
+                <div className="grid gap-2">
+                  {companySearch.trim().length > 1 &&
+                    companies
+                      .filter((c) => c.name.toLowerCase().includes(companySearch.trim().toLowerCase()))
+                      .slice(0, 8)
+                      .map((company) => (
+                        <div key={company.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#E2E8F0] px-3 py-2">
+                          <div>
+                            <span className="font-semibold text-foreground">{company.name}</span>
+                            <span className="ml-2 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                              {COMPANY_STAGE_LABELS[company.company_stage]}
+                            </span>
+                            {company.company_stage === "closed_lost" && company.closed_lost_reason ? (
+                              <span className="ml-2 text-xs text-muted-foreground">— {company.closed_lost_reason}</span>
+                            ) : null}
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2">
+                            {company.company_stage === "meeting_scheduled" ? (
+                              <button type="button" onClick={() => handleSetCompanyStage(company.id, "new_signal")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">
+                                Reopen outreach
+                              </button>
+                            ) : null}
+                            {company.company_stage !== "closed_won" ? (
+                              <button type="button" onClick={() => handleSetCompanyStage(company.id, "closed_won")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">
+                                Mark Closed Won
+                              </button>
+                            ) : null}
+                            {company.company_stage !== "closed_lost" ? (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const reason = window.prompt("Optional: why was this closed lost?") ?? "";
+                                  handleSetCompanyStage(company.id, "closed_lost", reason);
+                                }}
+                                className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                              >
+                                Mark Closed Lost
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      ))}
+                  {companySearch.trim().length > 1 && companies.filter((c) => c.name.toLowerCase().includes(companySearch.trim().toLowerCase())).length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No companies match that search.</p>
+                  ) : null}
+                </div>
+              </div>
 
               <div className="mb-6 border-b border-[#E2E8F0] pb-6">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Team members</p>
@@ -865,6 +962,11 @@ const ProjectsPage = () => {
                             </div>
                             <p className="text-sm font-semibold text-primary">{contact.title}</p>
                             <p className="text-sm text-muted-foreground">{contact.company}</p>
+                            {meetingBlocks[contact.id]?.is_blocked ? (
+                              <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/5 px-2.5 py-1 text-[11px] font-semibold text-primary">
+                                📅 Meeting scheduled with {meetingBlocks[contact.id]?.meeting_contact_name}{meetingBlocks[contact.id]?.meeting_contact_title ? `, ${meetingBlocks[contact.id]?.meeting_contact_title}` : ""}
+                              </p>
+                            ) : null}
                             {signal ? (
                               <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[11px] font-semibold text-[#92400E]">
                                 Hiring{signal.role_title ? `: ${signal.role_title}` : ""}{signal.posted_date ? ` · posted ${new Date(signal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
