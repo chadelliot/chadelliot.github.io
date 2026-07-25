@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import CompanyInfoCard from "@/components/CompanyInfoCard";
+import ProjectsSidebar from "@/components/ProjectsSidebar";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import {
   fetchProjectContacts,
@@ -27,6 +28,7 @@ import {
   OWNER_LEAD_TYPE_DOT_COLOR,
   fetchOwnerCompanyLeadFields,
   fetchOwnerSignalFields,
+  formatWhyNow,
   type ProjectContact,
   type ContactProgress,
   type ContactStatus,
@@ -40,6 +42,7 @@ import {
   type OwnerCompanyLeadFields,
   type OwnerSignalFields,
 } from "@/lib/projectContacts";
+import { clearStoredProposalSession } from "@/lib/companyStatus";
 
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
@@ -57,7 +60,8 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
 
 const CompanyDetailPage = () => {
   const { id } = useParams<{ id: string }>();
-  const [session] = useProposalSession();
+  const navigate = useNavigate();
+  const [session, setSession] = useProposalSession();
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [contacts, setContacts] = useState<ProjectContact[]>([]);
@@ -186,9 +190,21 @@ const CompanyDetailPage = () => {
 
   if (!session) return <Navigate to="/projects" replace />;
 
+  const handleSignOut = () => {
+    clearStoredProposalSession();
+    setSession(null);
+  };
+
   return (
     <div className="min-h-screen bg-[#F6F5F2]">
-      <main className="px-6 pb-20 pt-8 md:px-10 md:pt-10">
+      <ProjectsSidebar
+        isOwner={isOwner}
+        activeSection="assignments"
+        onSectionChange={() => navigate("/projects")}
+        memberName={currentTeamMember?.name}
+        onSignOut={handleSignOut}
+      />
+      <main className="px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
         <div className="mx-auto w-full max-w-3xl">
           <Link to="/projects" className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">← Back to RevHub</Link>
 
@@ -278,6 +294,17 @@ const CompanyDetailPage = () => {
                   </button>
                   {showOpportunityIntelligence ? (
                     <div className="border-t border-[#E2E8F0] px-4 py-4">
+                      {companyResearch.valueHypothesis || companyResearch.outreachAngle ? (
+                        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
+                          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Why this fits RevHub</p>
+                          {companyResearch.valueHypothesis ? (
+                            <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{companyResearch.valueHypothesis}</p>
+                          ) : null}
+                          {companyResearch.outreachAngle ? (
+                            <p className="mt-1 text-sm text-foreground"><span className="font-semibold text-primary">Why now: </span>{companyResearch.outreachAngle}</p>
+                          ) : null}
+                        </div>
+                      ) : null}
                       {(() => {
                         const ownerFields = ownerCompanyFields[company.id];
                         const canonicalType = ownerFields?.canonical_lead_type;

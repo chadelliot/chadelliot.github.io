@@ -111,8 +111,12 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
 
   return (
     <>
-      {/* Desktop rail */}
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 bg-[#14151A] md:block">
+      {/* Desktop rail - fixed, not sticky, so it's truly locked in place
+          regardless of how tall the content column gets or what any
+          ancestor's overflow/stacking context is doing. The content area
+          carries a matching md:ml-56 offset (see ProjectsPage.tsx) since a
+          fixed element is taken out of normal flow. */}
+      <aside className="fixed inset-y-0 left-0 hidden h-screen w-56 shrink-0 bg-[#14151A] md:block">
         <NavList />
       </aside>
 

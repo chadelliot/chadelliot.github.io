@@ -550,6 +550,7 @@ const ProjectsPage = () => {
 
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
+    const previousStatus = progress[contact.id]?.status ?? "not_contacted";
     setProgress((current) => ({
       ...current,
       [contact.id]: { contact_id: contact.id, status, updated_at: new Date().toISOString(), assigned_to: current[contact.id]?.assigned_to ?? null },
@@ -561,6 +562,13 @@ const ProjectsPage = () => {
       setMeetingPrompt(contact);
       setMeetingDate("");
       setMeetingNotes("");
+    }
+    // Setting a contact to meeting_set (or reverting one away from it) can
+    // flip the company's stage server-side via the handle_meeting_set DB
+    // trigger (see supabase/migrations/revert_meeting_status.sql) - refetch
+    // both directions so the stage stat tiles and meeting blocks never go
+    // stale after a revert.
+    if (status === "meeting_set" || previousStatus === "meeting_set") {
       const [freshCompanies, freshBlocks] = await Promise.all([fetchCompanies(session), fetchMeetingBlocks(session)]);
       setCompanies(freshCompanies);
       setMeetingBlocks(freshBlocks);
@@ -865,7 +873,7 @@ const ProjectsPage = () => {
   if (!isOwner) {
     return (
       <div className="min-h-screen bg-[#F6F5F2]">
-        <div className="md:flex">
+        <div>
           <ProjectsSidebar
             isOwner={false}
             activeSection="assignments"
@@ -873,7 +881,7 @@ const ProjectsPage = () => {
             memberName={currentTeamMember?.name}
             onSignOut={handleSignOut}
           />
-          <main className="min-w-0 flex-1 px-6 pb-20 pt-8 md:px-10 md:pt-10">
+          <main className="min-w-0 px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
           <div className="w-full">
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -997,7 +1005,7 @@ const ProjectsPage = () => {
 
   return (
     <div className="min-h-screen bg-[#F6F5F2]">
-      <div className="md:flex">
+      <div>
         <ProjectsSidebar
           isOwner={isOwner}
           activeSection={activeSection}
@@ -1005,7 +1013,7 @@ const ProjectsPage = () => {
           memberName={currentTeamMember?.name}
           onSignOut={handleSignOut}
         />
-        <main className="min-w-0 flex-1 px-6 pb-20 pt-8 md:px-10 md:pt-10">
+        <main className="min-w-0 px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
           <div className="w-full">
             <div className="mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>

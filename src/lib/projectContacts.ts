@@ -644,8 +644,18 @@ export const formatMessageForDisplay = (raw?: string | null): string => {
   if (!raw) return "";
   let text = raw.trim();
 
+  // The sheet sometimes uses em dashes ("Hey Sarah — noticed you're
+  // hiring...") but Chad doesn't want them in outreach copy regardless of
+  // what the source data has. An em dash surrounded by spaces is standing
+  // in for a comma-like pause, so it becomes ", "; one butted against
+  // words (word—word) reads as a break and becomes " - " instead. En
+  // dashes get the same treatment for consistency.
+  text = text.replace(/\s+[—–]\s+/g, ", ");
+  text = text.replace(/([a-zA-Z0-9])[—–]([a-zA-Z0-9])/g, "$1 - $2");
+  text = text.replace(/[—–]/g, "-");
+
   // Give the greeting its own line: "Hi Sarah," / "Hello -" / "Hey there,"
-  text = text.replace(/^((?:Hi|Hello|Hey)\b[^,.\-–—\n]{0,60}[,.\-–—])\s+/i, "$1\n\n");
+  text = text.replace(/^((?:Hi|Hello|Hey)\b[^,.\-\n]{0,60}[,.\-])\s+/i, "$1\n\n");
 
   // Give the sign-off its own paragraph, keeping a trailing name intact:
   // "...call next week? Best, Chad" -> "...call next week?\n\nBest, Chad"
