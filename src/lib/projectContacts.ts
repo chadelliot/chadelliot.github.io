@@ -127,6 +127,27 @@ export const OWNER_LEAD_TYPE_DOT_COLOR: Record<OwnerLeadType, string> = {
   "Full-Time Hiring Signal": "#CBD5E1",
 };
 
+// Two-stop gradients for the company-card avatar chip, same hue family as
+// the dot/badge colors above so a company's lead type reads consistently
+// everywhere on an Owner's screen. There's no logo or contact-photo source
+// today (no company website/domain field exists in the schema, and a
+// LinkedIn photo isn't something this app can fetch client-side), so the
+// avatar chip is initials-on-gradient - meaningful color standing in for a
+// photo rather than decoration. Members don't have lead-type data at all,
+// so their cards always use DEFAULT_AVATAR_GRADIENT.
+export const OWNER_LEAD_TYPE_AVATAR_GRADIENT: Record<OwnerLeadType, [string, string]> = {
+  "Cold Outreach": ["#94A3B8", "#64748B"],
+  "Fractional Opportunity": ["#A78BFA", "#7C3AED"],
+  "Contract Opportunity": ["#60A5FA", "#2563EB"],
+  "Contract-to-Hire": ["#4ADE80", "#15803D"],
+  "Interim Opportunity": ["#FBBF24", "#B45309"],
+  "Temporary Assignment": ["#FB923C", "#C2410C"],
+  "Consulting Project": ["#F472B6", "#BE185D"],
+  "Full-Time Hiring Signal": ["#94A3B8", "#475569"],
+};
+
+export const DEFAULT_AVATAR_GRADIENT: [string, string] = ["#5DCAA5", "#0F6E56"];
+
 // Owner-only fields fetched separately from the shared signal fetch (see
 // fetchOwnerSignalFields). Merge onto a CompanySignal by id when rendering
 // an Owner view.

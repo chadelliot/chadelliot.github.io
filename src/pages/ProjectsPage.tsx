@@ -1,6 +1,6 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UserPlus } from "lucide-react";
+import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3 } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -77,6 +77,23 @@ const STAGE_CHART_COLORS: Record<CompanyStage, string> = {
   closed_lost: "#B91C1C",
 };
 
+// Light background tint for the icon chip on each KPI tile - same hue as
+// STAGE_CHART_COLORS, just at low opacity so the icon color still does the
+// work of carrying meaning.
+const STAGE_TINT_BG: Record<CompanyStage, string> = {
+  new_signal: "#94A3B822",
+  meeting_scheduled: "#2FA37F22",
+  closed_won: "#15803D22",
+  closed_lost: "#B91C1C22",
+};
+
+const STAGE_ICON: Record<CompanyStage, typeof Zap> = {
+  new_signal: Zap,
+  meeting_scheduled: CalendarClock,
+  closed_won: Trophy,
+  closed_lost: XCircle,
+};
+
 const STATUS_CHART_COLORS: Record<ContactStatus, string> = {
   not_contacted: "#94A3B8",
   connection_sent: "#6D28D9",
@@ -84,6 +101,40 @@ const STATUS_CHART_COLORS: Record<ContactStatus, string> = {
   follow_up_sent: "#B45309",
   meeting_set: "#2FA37F",
   do_not_contact: "#B91C1C",
+};
+
+// Reveals company cards 6 at a time, loading more automatically as the
+// sentinel div at the bottom of the list scrolls into view - "scroll to
+// see more" rather than a click-to-load button. Resets to the first 6
+// whenever the underlying count changes (a filter change, a fresh batch of
+// assignments), which is the right default even though it also means a
+// data refresh with an unchanged filter set will reset scroll position -
+// an acceptable tradeoff for the simplicity here.
+const INFINITE_SCROLL_BATCH = 6;
+const useInfiniteReveal = (totalCount: number) => {
+  const [visibleCount, setVisibleCount] = useState(INFINITE_SCROLL_BATCH);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    setVisibleCount(INFINITE_SCROLL_BATCH);
+  }, [totalCount]);
+
+  useEffect(() => {
+    const node = sentinelRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setVisibleCount((v) => Math.min(v + INFINITE_SCROLL_BATCH, totalCount));
+        }
+      },
+      { rootMargin: "600px" }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [totalCount]);
+
+  return { visibleCount, sentinelRef };
 };
 
 const ProjectsPage = () => {
@@ -256,6 +307,8 @@ const ProjectsPage = () => {
       .filter((c) => c.assigned_rep === currentTeamMember.id)
       .sort((a, b) => STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name));
   }, [companies, currentTeamMember]);
+
+  const { visibleCount: memberVisibleCount, sentinelRef: memberSentinelRef } = useInfiniteReveal(myAssignedCompanies.length);
 
   // A company only has to be "touched," not fully worked, before a rep can
   // ask for more - once at least one contact there has been reached out to
@@ -493,6 +546,8 @@ const ProjectsPage = () => {
       .map((company) => ({ company, matchingContacts: byCompanyId[company.id] }));
   }, [companies, filteredContacts, signalsByCompanyId, companyStageFilter, leadTypeFilter, ownerCompanyFields]);
 
+  const { visibleCount: ownerVisibleCount, sentinelRef: ownerSentinelRef } = useInfiniteReveal(ownerCompanyGroups.length);
+
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
     setProgress((current) => ({
@@ -565,9 +620,14 @@ const ProjectsPage = () => {
     const meetingBlock = meetingBlocks[contact.id];
     const isBlocked = Boolean(meetingBlock?.is_blocked);
     return (
-      <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+      <article key={contact.id} className={`overflow-hidden border-t bg-white ${isBlocked ? "border-primary/40" : "border-[#EEEDE7]"}`}>
         <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
+          <div
+            className="flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold text-white"
+            style={{ background: `linear-gradient(135deg, ${STATUS_CHART_COLORS[status]}, ${STATUS_CHART_COLORS[status]}CC)` }}
+          >
+            {getInitials(contact.contact_name)}
+          </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
               {tier === "email" ? <span title="Email on file">📧</span> : null}
@@ -591,7 +651,7 @@ const ProjectsPage = () => {
           )}
         </div>
         {!isBlocked && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
-          <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
+          <div className="flex flex-wrap items-center gap-2 border-t border-[#EEEDE7] bg-[#FAFAF8] px-4 py-3 md:px-5">
             {contact.linkedin_connect_message ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
             {contact.intro_message ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
             {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
@@ -624,7 +684,7 @@ const ProjectsPage = () => {
     const isExpanded = Boolean(expandedCompanies[company.id]);
 
     return (
-      <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
+      <div key={company.id} className="overflow-hidden rounded-2xl border border-[#EEEDE7] bg-white shadow-sm transition-shadow hover:shadow-md">
         <CompanyInfoCard
           company={company}
           research={getCompanyResearchSummary(companyContacts)}
@@ -634,7 +694,7 @@ const ProjectsPage = () => {
           ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
           ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
         />
-        <div className="border-b border-[#E2E8F0] px-4 py-2">
+        <div className="border-b border-[#EEEDE7] bg-[#FAFAF8] px-4 py-2">
           <Link to={`/projects/company/${company.id}`} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">View full company page →</Link>
         </div>
 
@@ -650,7 +710,7 @@ const ProjectsPage = () => {
               type="button"
               onClick={() => toggleCompanyExpanded(company.id)}
               style={{ backgroundColor: "#2c96731a" }}
-              className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-[#EEEDE7] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
             >
               {isExpanded ? "Hide" : "Show"} {others.length} other contact{others.length === 1 ? "" : "s"} {isExpanded ? "▲" : "▼"}
             </button>
@@ -804,7 +864,7 @@ const ProjectsPage = () => {
 
   if (!isOwner) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-[#F6F5F2]">
         <div className="md:flex">
           <ProjectsSidebar
             isOwner={false}
@@ -853,8 +913,9 @@ const ProjectsPage = () => {
             ) : null}
 
             <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-              {myAssignedCompanies.map((company) => renderCompanyCard(company, contacts.filter((c) => c.company_id === company.id && !c.do_not_contact)))}
+              {myAssignedCompanies.slice(0, memberVisibleCount).map((company) => renderCompanyCard(company, contacts.filter((c) => c.company_id === company.id && !c.do_not_contact)))}
             </div>
+            {memberVisibleCount < myAssignedCompanies.length ? <div ref={memberSentinelRef} className="h-1" /> : null}
 
             {myAssignedCompanies.length > 0 ? (
               <div className="mt-6 flex justify-center">
@@ -935,7 +996,7 @@ const ProjectsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#F6F5F2]">
       <div className="md:flex">
         <ProjectsSidebar
           isOwner={isOwner}
@@ -954,13 +1015,13 @@ const ProjectsPage = () => {
             </div>
 
           {activeSection === "board" ? (
-            <div className="mb-8 border border-[#E2E8F0] bg-white p-5">
+            <div className="mb-8 rounded-2xl border border-[#EEEDE7] bg-white p-5 shadow-sm">
               <CompanyBoard companies={companies} contacts={contacts} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} />
             </div>
           ) : null}
 
           {activeSection === "team" ? (
-            <div className="mb-8 border border-[#E2E8F0] bg-white p-5">
+            <div className="mb-8 rounded-2xl border border-[#EEEDE7] bg-white p-5 shadow-sm">
               <div className="mb-6 border-b border-[#E2E8F0] pb-6">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Team members</p>
                 <div className="grid gap-2">
@@ -1088,34 +1149,39 @@ const ProjectsPage = () => {
           <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
             {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).map((stage) => {
               const isActive = companyStageFilter === stage;
+              const Icon = STAGE_ICON[stage];
               return (
                 <button
                   key={stage}
                   type="button"
                   onClick={() => setCompanyStageFilter(isActive ? "all" : stage)}
-                  style={{ borderTop: `3px solid ${STAGE_CHART_COLORS[stage]}` }}
-                  className={`rounded-2xl border shadow-sm p-4 text-left transition-all hover:shadow-md ${isActive ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
+                  className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${isActive ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
                 >
-                  <p className={`font-mono text-3xl font-bold ${isActive ? "text-primary" : "text-foreground"}`}>{companyStageCounts[stage]}</p>
-                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
+                  <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG[stage] }}>
+                    <Icon size={16} style={{ color: STAGE_CHART_COLORS[stage] }} />
+                  </div>
+                  <p className={`text-2xl font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>{companyStageCounts[stage]}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
                 </button>
               );
             })}
             <button
               type="button"
               onClick={() => setShowCharts((v) => !v)}
-              style={{ borderTop: "3px solid #2FA37F" }}
-              className={`rounded-2xl border shadow-sm p-4 text-left transition-all hover:shadow-md ${showCharts ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
+              className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${showCharts ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
             >
-              <p className={`font-mono text-3xl font-bold ${showCharts ? "text-primary" : "text-foreground"}`}>{showCharts ? "▲" : "▼"}</p>
-              <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{showCharts ? "Hide charts" : "Show charts"}</p>
+              <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+                <BarChart3 size={16} className="text-primary" />
+              </div>
+              <p className={`text-2xl font-semibold ${showCharts ? "text-primary" : "text-foreground"}`}>{showCharts ? "▲" : "▼"}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{showCharts ? "Hide charts" : "Show charts"}</p>
             </button>
           </div>
 
           {showCharts ? (
           <>
           <div className="mb-8 grid gap-4 lg:grid-cols-4">
-            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage</p>
               {companyStagePieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -1131,7 +1197,7 @@ const ProjectsPage = () => {
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm lg:col-span-2">
+            <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm lg:col-span-2">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage, per rep</p>
               {companiesByRepStage.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -1151,7 +1217,7 @@ const ProjectsPage = () => {
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+            <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts by status</p>
               {contactStatusPieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -1170,7 +1236,7 @@ const ProjectsPage = () => {
           </>
           ) : null}
 
-          <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 shadow-sm">
+          <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[#EEEDE7] bg-white px-4 py-3 shadow-sm">
             <input
               type="text"
               value={search}
@@ -1234,11 +1300,14 @@ const ProjectsPage = () => {
             <p className="text-sm text-muted-foreground">No contacts match the current filters.</p>
           ) : (
             <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-              {ownerCompanyGroups.slice(0, 60).map(({ company, matchingContacts }) => renderCompanyCard(company, matchingContacts))}
+              {ownerCompanyGroups.slice(0, ownerVisibleCount).map(({ company, matchingContacts }) => renderCompanyCard(company, matchingContacts))}
             </div>
           )}
-          {ownerCompanyGroups.length > 60 ? (
-            <p className="mt-4 text-center text-xs text-muted-foreground">Showing the first 60 of {ownerCompanyGroups.length} matching companies — narrow your search or filters to see more precisely.</p>
+          {ownerVisibleCount < ownerCompanyGroups.length ? <div ref={ownerSentinelRef} className="h-1" /> : null}
+          {ownerCompanyGroups.length > 0 ? (
+            <p className="mt-4 text-center text-xs text-muted-foreground">
+              Showing {Math.min(ownerVisibleCount, ownerCompanyGroups.length)} of {ownerCompanyGroups.length} companies{ownerVisibleCount < ownerCompanyGroups.length ? " — scroll for more" : ""}
+            </p>
           ) : null}
           </>
           ) : null}

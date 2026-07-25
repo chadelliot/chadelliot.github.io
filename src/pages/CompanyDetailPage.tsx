@@ -1,7 +1,5 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import CompanyInfoCard from "@/components/CompanyInfoCard";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import {
@@ -178,14 +176,10 @@ const CompanyDetailPage = () => {
 
   if (!IS_DB_READY) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
-          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
-            <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground">Login is not configured.</h1>
-          </section>
-        </main>
-        <Footer />
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F5F2] px-6 py-16">
+        <section className="mx-auto w-full max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground">Login is not configured.</h1>
+        </section>
       </div>
     );
   }
@@ -193,10 +187,9 @@ const CompanyDetailPage = () => {
   if (!session) return <Navigate to="/projects" replace />;
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navbar />
-      <main className="px-6 pb-20 pt-28 md:px-20 md:pt-32">
-        <div className="w-full">
+    <div className="min-h-screen bg-[#F6F5F2]">
+      <main className="px-6 pb-20 pt-8 md:px-10 md:pt-10">
+        <div className="mx-auto w-full max-w-3xl">
           <Link to="/projects" className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">← Back to RevHub</Link>
 
           {isLoadingData ? <p className="mt-6 text-sm text-muted-foreground">Loading company…</p> : null}
@@ -261,7 +254,7 @@ const CompanyDetailPage = () => {
                 ) : null}
               </div>
 
-              <div className="mb-6 overflow-hidden rounded-xl border border-[#E2E8F0]">
+              <div className="mb-6 overflow-hidden rounded-2xl border border-[#EEEDE7] bg-white shadow-sm">
                 <CompanyInfoCard
                   company={company}
                   research={companyResearch}
@@ -508,7 +501,6 @@ const CompanyDetailPage = () => {
           ) : null}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

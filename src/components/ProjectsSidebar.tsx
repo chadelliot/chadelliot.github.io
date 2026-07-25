@@ -33,35 +33,41 @@ type ProjectsSidebarProps = {
 // board and Team below a divider, matching the trust boundary already
 // enforced by the data layer (see fetchOwnerCompanyLeadFields and friends
 // in projectContacts.ts) rather than inventing a second one here.
+//
+// Dark rail is a deliberate contrast choice against the warm off-white
+// content canvas (see ProjectsPage.tsx) - a common pattern in the
+// dashboard references this was modeled on, and it makes the nav read as
+// a fixed piece of chrome rather than another content surface competing
+// for attention.
 const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, onSignOut }: ProjectsSidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const NavList = ({ onNavigate }: { onNavigate?: () => void }) => (
     <div className="flex h-full flex-col">
       <div className="px-3 pb-6 pt-1">
-        <p className="font-display text-lg font-extrabold tracking-tight text-foreground">RevHub</p>
-        <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Outreach</p>
+        <p className="font-display text-lg font-semibold tracking-tight text-white">RevHub</p>
+        <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Outreach</p>
       </div>
 
       {/* Navbar's site-wide nav is gone from /projects (it's a standalone
           tool now, not a marketing page) - this is the one way back to
           aboutchad.com so nobody gets stranded. */}
       <div className="px-2 pb-4">
-        <Link to="/" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground no-underline hover:bg-[#F8FAFC] hover:text-primary">
+        <Link to="/" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-white/50 no-underline hover:bg-white/5 hover:text-white">
           <ArrowLeft size={14} />
           aboutchad.com
         </Link>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-2">
-        <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Workflow</p>
+        <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">Workflow</p>
         {(isOwner ? OWNER_SHARED_ITEMS : MEMBER_ITEMS).map(({ key, label, icon: Icon }) => (
           <button
             key={key}
             type="button"
             onClick={() => { onSectionChange(key); onNavigate?.(); }}
-            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-semibold transition-colors ${
-              activeSection === key ? "bg-primary/10 text-primary" : "text-[#334155] hover:bg-[#F8FAFC]"
+            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
+              activeSection === key ? "bg-primary/20 text-[#5DCAA5]" : "text-white/70 hover:bg-white/5 hover:text-white"
             }`}
           >
             <Icon size={16} />
@@ -71,14 +77,14 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
 
         {isOwner ? (
           <>
-            <p className="px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Owner only</p>
+            <p className="px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">Owner only</p>
             {OWNER_ONLY_ITEMS.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => { onSectionChange(key); onNavigate?.(); }}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-semibold transition-colors ${
-                  activeSection === key ? "bg-primary/10 text-primary" : "text-[#334155] hover:bg-[#F8FAFC]"
+                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
+                  activeSection === key ? "bg-primary/20 text-[#5DCAA5]" : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >
                 <Icon size={16} />
@@ -89,12 +95,12 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
         ) : null}
       </nav>
 
-      <div className="mt-auto border-t border-[#E2E8F0] px-3 py-4">
-        {memberName ? <p className="mb-2 truncate text-xs text-muted-foreground">Signed in as {memberName}</p> : null}
+      <div className="mt-auto border-t border-white/10 px-3 py-4">
+        {memberName ? <p className="mb-2 truncate text-xs text-white/40">Signed in as {memberName}</p> : null}
         <button
           type="button"
           onClick={onSignOut}
-          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-semibold text-[#334155] hover:bg-[#F8FAFC]"
+          className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white"
         >
           <LogOut size={16} />
           Sign out
@@ -106,22 +112,22 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
   return (
     <>
       {/* Desktop rail */}
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 border-r border-[#E2E8F0] bg-white md:block">
+      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 bg-[#14151A] md:block">
         <NavList />
       </aside>
 
-      {/* Mobile drawer */}
-      <div className="mb-4 flex items-center justify-between md:hidden">
-        <p className="font-display text-lg font-extrabold tracking-tight text-foreground">RevHub</p>
+      {/* Mobile top bar + drawer */}
+      <div className="mb-4 flex items-center justify-between bg-[#14151A] px-4 py-3 md:hidden">
+        <p className="font-display text-base font-semibold tracking-tight text-white">RevHub</p>
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger asChild>
-            <button type="button" className="rounded-lg border border-[#E2E8F0] p-2 text-[#334155]" aria-label="Open menu">
+            <button type="button" className="rounded-lg border border-white/15 p-2 text-white" aria-label="Open menu">
               <Menu size={18} />
             </button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-72 p-0">
+          <SheetContent side="left" className="w-72 border-none bg-[#14151A] p-0">
             <div className="flex items-center justify-end px-3 pt-3">
-              <button type="button" onClick={() => setMobileOpen(false)} className="rounded-lg p-1.5 text-muted-foreground" aria-label="Close menu">
+              <button type="button" onClick={() => setMobileOpen(false)} className="rounded-lg p-1.5 text-white/50 hover:text-white" aria-label="Close menu">
                 <X size={18} />
               </button>
             </div>

@@ -14,7 +14,7 @@ import {
 const STAGE_ORDER: CompanyStage[] = ["new_signal", "meeting_scheduled", "closed_won", "closed_lost"];
 
 const STAGE_COLUMN_CLASS: Record<CompanyStage, string> = {
-  new_signal: "border-[#E2E8F0] bg-[#F8FAFC]",
+  new_signal: "border-[#EEEDE7] bg-[#FAFAF8]",
   meeting_scheduled: "border-primary/30 bg-primary/5",
   closed_won: "border-[#BBF7D0] bg-[#F0FDF4]",
   closed_lost: "border-[#FECACA] bg-[#FEF2F2]",
@@ -79,7 +79,7 @@ const CompanyBoard = ({ companies, contacts, signalsByCompanyId, teamMembers }: 
         {STAGE_ORDER.map((stage) => {
           const stageCompanies = companiesByStage[stage];
           return (
-            <div key={stage} className={`rounded-xl border p-3 ${STAGE_COLUMN_CLASS[stage]}`}>
+            <div key={stage} className={`rounded-2xl border p-3 ${STAGE_COLUMN_CLASS[stage]}`}>
               <p className={`mb-3 text-[11px] font-bold uppercase tracking-[0.08em] ${STAGE_HEADER_CLASS[stage]}`}>
                 {COMPANY_STAGE_LABELS[stage]} <span className="font-mono text-muted-foreground">({stageCompanies.length})</span>
               </p>
@@ -93,7 +93,7 @@ const CompanyBoard = ({ companies, contacts, signalsByCompanyId, teamMembers }: 
                     <Link
                       key={company.id}
                       to={`/projects/company/${company.id}`}
-                      className="block rounded-lg border border-[#E2E8F0] bg-white px-3 py-2.5 text-sm shadow-sm transition-colors hover:border-primary"
+                      className="block rounded-xl border border-[#EEEDE7] bg-white px-3 py-2.5 text-sm shadow-sm transition-shadow hover:shadow-md"
                     >
                       <p className="font-semibold text-foreground">{company.name}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
