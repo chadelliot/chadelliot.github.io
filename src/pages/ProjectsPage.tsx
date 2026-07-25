@@ -36,17 +36,16 @@ const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.rep
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
 
-type FilterKey = "all" | "warm_signal" | "not_started" | "meeting_set" | "responded" | "needs_research";
+type FilterKey = "all" | "warm_signal" | "not_contacted" | "connection_sent" | "introduction_sent" | "follow_up_sent" | "meeting_set" | "needs_research";
 
 const PRIORITY_ORDER: Record<string, number> = { A: 0, "A/B": 1, B: 2, C: 3, D: 4, needs_review: 5, "": 6 };
 
 const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
-  not_started: "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B]",
-  connected: "border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]",
-  messaged: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]",
-  responded: "border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]",
+  not_contacted: "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B]",
+  connection_sent: "border-[#DDD6FE] bg-[#F5F3FF] text-[#6D28D9]",
+  introduction_sent: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]",
+  follow_up_sent: "border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]",
   meeting_set: "border-primary/30 bg-primary/5 text-primary",
-  closed: "border-[#E2E8F0] bg-[#F1F5F9] text-[#334155]",
   do_not_contact: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
 };
 
@@ -165,7 +164,7 @@ const ProjectsPage = () => {
   const myResearchContacts = useMemo(() => myAssignedContacts.filter((c) => getContactTier(c) === "research"), [myAssignedContacts]);
 
   const canRequestMoreContacts =
-    myGoodContacts.length === 0 || myGoodContacts.every((c) => (progress[c.id]?.status ?? "not_started") !== "not_started");
+    myGoodContacts.length === 0 || myGoodContacts.every((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted");
 
   const handleRequestMoreContacts = async () => {
     if (!session || !currentTeamMember || isRequestingBatch) return;
@@ -221,7 +220,7 @@ const ProjectsPage = () => {
       setContacts((current) => [...current, created]);
       setProgress((current) => ({
         ...current,
-        [created.id]: { contact_id: created.id, status: "not_started", assigned_to: currentTeamMember.id, updated_at: new Date().toISOString() },
+        [created.id]: { contact_id: created.id, status: "not_contacted", assigned_to: currentTeamMember.id, updated_at: new Date().toISOString() },
       }));
       setNewContactCompany("");
       setNewContactName("");
@@ -253,7 +252,7 @@ const ProjectsPage = () => {
   const statusCountsByMember = useMemo(() => {
     const counts: Record<string, Record<ContactStatus, number>> = {};
     for (const member of teamMembers) {
-      counts[member.id] = { not_started: 0, connected: 0, messaged: 0, responded: 0, meeting_set: 0, closed: 0, do_not_contact: 0 };
+      counts[member.id] = { not_contacted: 0, connection_sent: 0, introduction_sent: 0, follow_up_sent: 0, meeting_set: 0, do_not_contact: 0 };
     }
     for (const contact of contacts) {
       const p = progress[contact.id];
@@ -265,21 +264,25 @@ const ProjectsPage = () => {
 
   const stats = useMemo(() => {
     const actionable = contacts.filter((c) => !c.needs_research && !c.do_not_contact);
-    const notStarted = actionable.filter((c) => (progress[c.id]?.status ?? "not_started") === "not_started").length;
+    const notContacted = actionable.filter((c) => (progress[c.id]?.status ?? "not_contacted") === "not_contacted").length;
+    const connectionSent = actionable.filter((c) => progress[c.id]?.status === "connection_sent").length;
     const meetingsSet = actionable.filter((c) => progress[c.id]?.status === "meeting_set").length;
-    const responded = actionable.filter((c) => progress[c.id]?.status === "responded").length;
+    const introductionSent = actionable.filter((c) => progress[c.id]?.status === "introduction_sent").length;
+    const followUpSent = actionable.filter((c) => progress[c.id]?.status === "follow_up_sent").length;
     const needsResearch = contacts.filter((c) => c.needs_research).length;
     const warmSignal = actionable.filter((c) => signals[c.company]).length;
-    return { notStarted, meetingsSet, responded, needsResearch, warmSignal };
+    return { notContacted, connectionSent, introductionSent, followUpSent, meetingsSet, needsResearch, warmSignal };
   }, [contacts, progress, signals]);
 
   const filteredContacts = useMemo(() => {
     let rows = contacts.filter((c) => !c.do_not_contact);
 
     if (activeFilter === "warm_signal") rows = rows.filter((c) => !c.needs_research && signals[c.company]);
-    if (activeFilter === "not_started") rows = rows.filter((c) => !c.needs_research && (progress[c.id]?.status ?? "not_started") === "not_started");
+    if (activeFilter === "not_contacted") rows = rows.filter((c) => !c.needs_research && (progress[c.id]?.status ?? "not_contacted") === "not_contacted");
+    if (activeFilter === "connection_sent") rows = rows.filter((c) => progress[c.id]?.status === "connection_sent");
     if (activeFilter === "meeting_set") rows = rows.filter((c) => progress[c.id]?.status === "meeting_set");
-    if (activeFilter === "responded") rows = rows.filter((c) => progress[c.id]?.status === "responded");
+    if (activeFilter === "introduction_sent") rows = rows.filter((c) => progress[c.id]?.status === "introduction_sent");
+    if (activeFilter === "follow_up_sent") rows = rows.filter((c) => progress[c.id]?.status === "follow_up_sent");
     if (activeFilter === "needs_research") rows = rows.filter((c) => c.needs_research);
     else if (activeFilter !== "all") rows = rows.filter((c) => !c.needs_research);
 
@@ -338,7 +341,7 @@ const ProjectsPage = () => {
   const handleAssign = async (contact: ProjectContact, assignedTo: string) => {
     if (!session) return;
     const value = assignedTo || null;
-    setProgress((current) => ({ ...current, [contact.id]: { ...current[contact.id], contact_id: contact.id, status: current[contact.id]?.status ?? "not_started", updated_at: new Date().toISOString(), assigned_to: value } }));
+    setProgress((current) => ({ ...current, [contact.id]: { ...current[contact.id], contact_id: contact.id, status: current[contact.id]?.status ?? "not_contacted", updated_at: new Date().toISOString(), assigned_to: value } }));
     const saved = await updateContactProgress(session, contact.id, { assigned_to: value }, currentTeamMember?.id);
     if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
   };
@@ -500,7 +503,7 @@ const ProjectsPage = () => {
             <div className="grid gap-3">
               {myGoodContacts.map((contact) => {
                 const contactProgress = progress[contact.id];
-                const status = contactProgress?.status ?? "not_started";
+                const status = contactProgress?.status ?? "not_contacted";
                 const tier = getContactTier(contact);
                 return (
                   <article key={contact.id} className="overflow-hidden border border-[#E2E8F0] bg-white shadow-sm">
@@ -636,8 +639,10 @@ const ProjectsPage = () => {
 
   const statTiles: { key: FilterKey; label: string; value: number }[] = [
     { key: "warm_signal", label: "Warm signal", value: stats.warmSignal },
-    { key: "not_started", label: "Not started", value: stats.notStarted },
-    { key: "responded", label: "Responded", value: stats.responded },
+    { key: "not_contacted", label: "Not Contacted", value: stats.notContacted },
+    { key: "connection_sent", label: "Connection Sent", value: stats.connectionSent },
+    { key: "introduction_sent", label: "Introduction Sent", value: stats.introductionSent },
+    { key: "follow_up_sent", label: "Follow-Up Sent", value: stats.followUpSent },
     { key: "meeting_set", label: "Meetings set", value: stats.meetingsSet },
     { key: "needs_research", label: "Need research", value: stats.needsResearch },
   ];
@@ -695,12 +700,12 @@ const ProjectsPage = () => {
                       <thead>
                         <tr className="border-b border-[#E2E8F0] text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
                           <th className="py-2 pr-3">Team member</th>
-                          <th className="px-2 py-2">Not started</th>
-                          <th className="px-2 py-2">Connected</th>
-                          <th className="px-2 py-2">Messaged</th>
-                          <th className="px-2 py-2">Responded</th>
-                          <th className="px-2 py-2">Meeting set</th>
-                          <th className="px-2 py-2">Closed</th>
+                          <th className="px-2 py-2">Not Contacted</th>
+                          <th className="px-2 py-2">Connection Sent</th>
+                          <th className="px-2 py-2">Introduction Sent</th>
+                          <th className="px-2 py-2">Follow-Up Sent</th>
+                          <th className="px-2 py-2">Meeting Set</th>
+                          <th className="px-2 py-2">Do Not Contact</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -709,12 +714,12 @@ const ProjectsPage = () => {
                           return (
                             <tr key={member.id} className="border-b border-[#E2E8F0]">
                               <td className="py-2 pr-3 font-semibold text-foreground">{member.name}</td>
-                              <td className="px-2 py-2">{c?.not_started ?? 0}</td>
-                              <td className="px-2 py-2">{c?.connected ?? 0}</td>
-                              <td className="px-2 py-2">{c?.messaged ?? 0}</td>
-                              <td className="px-2 py-2">{c?.responded ?? 0}</td>
+                              <td className="px-2 py-2">{c?.not_contacted ?? 0}</td>
+                              <td className="px-2 py-2">{c?.connection_sent ?? 0}</td>
+                              <td className="px-2 py-2">{c?.introduction_sent ?? 0}</td>
+                              <td className="px-2 py-2">{c?.follow_up_sent ?? 0}</td>
                               <td className="px-2 py-2">{c?.meeting_set ?? 0}</td>
-                              <td className="px-2 py-2">{c?.closed ?? 0}</td>
+                              <td className="px-2 py-2">{c?.do_not_contact ?? 0}</td>
                             </tr>
                           );
                         })}
@@ -834,7 +839,7 @@ const ProjectsPage = () => {
             <div className="grid gap-3">
               {filteredContacts.slice(0, 50).map((contact) => {
                 const contactProgress = progress[contact.id];
-                const status = contact.needs_research ? null : contactProgress?.status ?? "not_started";
+                const status = contact.needs_research ? null : contactProgress?.status ?? "not_contacted";
                 const signal = signals[contact.company];
                 return (
                   <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${signal ? "border-[#FDE68A]" : "border-[#E2E8F0]"}`}>

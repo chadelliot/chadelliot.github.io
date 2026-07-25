@@ -5,12 +5,11 @@
 import { getStoredProposalSession, type ProposalSession } from "./companyStatus";
 
 export type ContactStatus =
-  | "not_started"
-  | "connected"
-  | "messaged"
-  | "responded"
+  | "not_contacted"
+  | "connection_sent"
+  | "introduction_sent"
+  | "follow_up_sent"
   | "meeting_set"
-  | "closed"
   | "do_not_contact";
 
 export type ProjectContact = {
@@ -265,13 +264,12 @@ export const findCurrentTeamMember = (session: ProposalSession, teamMembers: Tea
 };
 
 export const STATUS_LABELS: Record<ContactStatus, string> = {
-  not_started: "Not started",
-  connected: "Connected",
-  messaged: "Messaged",
-  responded: "Responded",
-  meeting_set: "Meeting set",
-  closed: "Closed",
-  do_not_contact: "Do not contact",
+  not_contacted: "Not Contacted",
+  connection_sent: "Connection Sent",
+  introduction_sent: "Introduction Sent",
+  follow_up_sent: "Follow-Up Sent",
+  meeting_set: "Meeting Set",
+  do_not_contact: "Do Not Contact",
 };
 
 export const getInitials = (name?: string | null) => {
