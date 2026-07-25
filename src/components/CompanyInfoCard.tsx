@@ -19,12 +19,16 @@ type CompanyInfoCardProps = {
   research: CompanyResearchSummary;
   signals: CompanySignal[];
   contactCount: number;
+  // Contacts with any status update beyond "not contacted" (including
+  // do-not-contact) - lets the header show real engagement, not just a
+  // headcount.
+  engagedCount?: number;
 };
 
 // The company-level facts pulled from ChatGPT's account research - shown
 // first, before any individual contact, so a rep orients on the company
 // before working a person.
-const CompanyInfoCard = ({ company, research, signals, contactCount }: CompanyInfoCardProps) => {
+const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCount = 0 }: CompanyInfoCardProps) => {
   const topSignal = signals[0];
 
   return (
@@ -39,7 +43,9 @@ const CompanyInfoCard = ({ company, research, signals, contactCount }: CompanyIn
         {topSignal?.outreach_model ? (
           <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[topSignal.outreach_model]}</span>
         ) : null}
-        <span className="ml-auto text-xs text-white/60">{contactCount} contact{contactCount === 1 ? "" : "s"}</span>
+        <span className="ml-auto text-xs text-white/60">
+          {engagedCount > 0 ? `${engagedCount} of ${contactCount} contacts engaged` : `${contactCount} contact${contactCount === 1 ? "" : "s"}`}
+        </span>
       </div>
 
       {research.industry || research.sector ? (

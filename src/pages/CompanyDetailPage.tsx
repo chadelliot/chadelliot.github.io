@@ -242,7 +242,13 @@ const CompanyDetailPage = () => {
               </div>
 
               <div className="mb-6 overflow-hidden rounded-xl border border-[#E2E8F0]">
-                <CompanyInfoCard company={company} research={companyResearch} signals={companySignals} contactCount={companyContacts.length} />
+                <CompanyInfoCard
+                  company={company}
+                  research={companyResearch}
+                  signals={companySignals}
+                  contactCount={companyContacts.length}
+                  engagedCount={companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length}
+                />
               </div>
 
               {company.company_stage === "closed_lost" && company.closed_lost_reason ? (

@@ -605,6 +605,7 @@ const ProjectsPage = () => {
           research={getCompanyResearchSummary(companyContacts)}
           signals={signalsByCompanyId[company.id] ?? []}
           contactCount={companyContacts.length}
+          engagedCount={companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length}
         />
         <div className="border-b border-[#E2E8F0] px-4 py-2">
           <Link to={`/projects/company/${company.id}`} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">View full company page →</Link>
@@ -1093,8 +1094,8 @@ const ProjectsPage = () => {
 
           {showCharts ? (
           <>
-          <div className="mb-8 grid gap-4 lg:grid-cols-3">
-            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm" style={{ borderTop: "3px solid #2FA37F" }}>
+          <div className="mb-8 grid gap-4 lg:grid-cols-4">
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage</p>
               {companyStagePieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -1110,7 +1111,7 @@ const ProjectsPage = () => {
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm lg:col-span-2" style={{ borderTop: "3px solid #1D4ED8" }}>
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm lg:col-span-2">
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage, per rep</p>
               {companiesByRepStage.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -1129,22 +1130,22 @@ const ProjectsPage = () => {
                 <p className="text-sm text-muted-foreground">No team members yet.</p>
               )}
             </div>
-          </div>
 
-          <div className="mb-8 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm" style={{ borderTop: "3px solid #B45309" }}>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts by status</p>
-            {contactStatusPieData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <PieChart>
-                  <Pie data={contactStatusPieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label={(entry) => `${entry.name}: ${entry.value}`}>
-                    {contactStatusPieData.map((row) => <Cell key={row.name} fill={row.color} />)}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-sm text-muted-foreground">No contacts yet.</p>
-            )}
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts by status</p>
+              {contactStatusPieData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={220}>
+                  <PieChart>
+                    <Pie data={contactStatusPieData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} label={(entry) => `${entry.name}: ${entry.value}`}>
+                      {contactStatusPieData.map((row) => <Cell key={row.name} fill={row.color} />)}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-muted-foreground">No contacts yet.</p>
+              )}
+            </div>
           </div>
           </>
           ) : null}
