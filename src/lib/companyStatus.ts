@@ -100,6 +100,60 @@ export const refreshProposalSessionIfNeeded = async (session: ProposalSession): 
   }
 };
 
+// Clicking "Accept invitation" (or a password-reset email) redirects back
+// here with the session tokens in the URL fragment (#access_token=...&type=
+// invite). This reads them, turns them into a real session, and clears them
+// from the address bar. It also reports back whether this was an invite/
+// recovery link specifically, since those cases still need a password set
+// before the account is actually usable through the normal sign-in form.
+export const hydrateSessionFromUrlFragment = async (): Promise<{ session: ProposalSession; needsPassword: boolean } | null> => {
+  if (typeof window === "undefined") return null;
+  const hash = window.location.hash;
+  if (!hash || !hash.includes("access_token")) return null;
+
+  const params = new URLSearchParams(hash.replace(/^#/, ""));
+  const access_token = params.get("access_token");
+  const refresh_token = params.get("refresh_token") ?? undefined;
+  const type = params.get("type"); // "invite" | "recovery" | "signup" | ...
+  if (!access_token) return null;
+
+  // Clear the tokens out of the visible URL right away so they're not
+  // sitting in the address bar or browser history.
+  window.history.replaceState(null, "", window.location.pathname + window.location.search);
+
+  try {
+    const userResponse = await fetch(`${DB_URL}/auth/v1/user`, {
+      headers: { apikey: DB_PUBLIC || "", Authorization: `Bearer ${access_token}` },
+    });
+    if (!userResponse.ok) return null;
+    const user = (await userResponse.json()) as { id: string; email?: string };
+
+    const session: ProposalSession = {
+      access_token,
+      refresh_token,
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
+      user: { id: user.id, email: user.email },
+    };
+    saveStoredProposalSession(session);
+    return { session, needsPassword: type === "invite" || type === "recovery" };
+  } catch {
+    return null;
+  }
+};
+
+export const setOwnPassword = async (session: ProposalSession, password: string): Promise<boolean> => {
+  const response = await fetch(`${DB_URL}/auth/v1/user`, {
+    method: "PUT",
+    headers: {
+      apikey: DB_PUBLIC || "",
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ password }),
+  });
+  return response.ok;
+};
+
 const authHeaders = (session: ProposalSession) => ({
   apikey: DB_PUBLIC || "",
   Authorization: `Bearer ${session.access_token}`,

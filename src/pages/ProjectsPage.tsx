@@ -2,7 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useProposalSession } from "@/hooks/useProposalSession";
-import { signInToProposalDirectory, clearStoredProposalSession } from "@/lib/companyStatus";
+import { signInToProposalDirectory, clearStoredProposalSession, hydrateSessionFromUrlFragment, setOwnPassword } from "@/lib/companyStatus";
 import {
   fetchProjectContacts,
   fetchContactProgress,
@@ -52,6 +52,45 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
 
 const ProjectsPage = () => {
   const [session, setSession] = useProposalSession();
+  const [mustSetPassword, setMustSetPassword] = useState(false);
+  const [newPasswordInput, setNewPasswordInput] = useState("");
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+  const [passwordSetMessage, setPasswordSetMessage] = useState("");
+  const [isSettingPassword, setIsSettingPassword] = useState(false);
+
+  useEffect(() => {
+    hydrateSessionFromUrlFragment().then((result) => {
+      if (!result) return;
+      setSession(result.session);
+      if (result.needsPassword) setMustSetPassword(true);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleSetPassword = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!session) return;
+    if (newPasswordInput.length < 6) {
+      setPasswordSetMessage("Password must be at least 6 characters.");
+      return;
+    }
+    if (newPasswordInput !== newPasswordConfirm) {
+      setPasswordSetMessage("Passwords don't match.");
+      return;
+    }
+    setIsSettingPassword(true);
+    const ok = await setOwnPassword(session, newPasswordInput);
+    setIsSettingPassword(false);
+    if (ok) {
+      setMustSetPassword(false);
+      setNewPasswordInput("");
+      setNewPasswordConfirm("");
+      setPasswordSetMessage("");
+    } else {
+      setPasswordSetMessage("Something went wrong setting your password. Try again.");
+    }
+  };
+
   const [authEmail, setAuthEmail] = useState("");
   const [authPassword, setAuthPassword] = useState("");
   const [authMessage, setAuthMessage] = useState("");
@@ -361,6 +400,36 @@ const ProjectsPage = () => {
               <button type="submit" disabled={isAuthLoading} className="rounded-full border border-primary bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors disabled:opacity-50">Sign in</button>
             </form>
             {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm text-muted-foreground">{authMessage}</p> : null}
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (mustSetPassword) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
+          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Welcome to RevHub outreach</p>
+            <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Set your password.</h1>
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">One last step — choose a password so you can sign back in normally next time.</p>
+            <form onSubmit={handleSetPassword} className="mt-6 grid gap-4">
+              <label className="grid gap-2 text-sm font-semibold text-foreground">
+                New password
+                <input type="password" value={newPasswordInput} onChange={(e) => setNewPasswordInput(e.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" autoComplete="new-password" />
+              </label>
+              <label className="grid gap-2 text-sm font-semibold text-foreground">
+                Confirm password
+                <input type="password" value={newPasswordConfirm} onChange={(e) => setNewPasswordConfirm(e.target.value)} required minLength={6} className="rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none focus:border-primary" autoComplete="new-password" />
+              </label>
+              <button type="submit" disabled={isSettingPassword} className="rounded-full border border-primary bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors disabled:opacity-50">
+                {isSettingPassword ? "Saving…" : "Save password"}
+              </button>
+            </form>
+            {passwordSetMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm text-muted-foreground">{passwordSetMessage}</p> : null}
           </section>
         </main>
         <Footer />
