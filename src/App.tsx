@@ -10,6 +10,7 @@ import SkillsPage from "./pages/SkillsPage";
 import ContactPage from "./pages/ContactPage";
 import CompanyDirectoryPageV9 from "./pages/CompanyDirectoryPageV9";
 import ProjectsPage from "./pages/ProjectsPage";
+import CompanyDetailPage from "./pages/CompanyDetailPage";
 import CompanyLandingPage from "./pages/CompanyLandingPage";
 import ExecutiveDashboardPage from "./pages/ExecutiveDashboardPage";
 import CommercialStrategyPage from "./pages/CommercialStrategyPage";
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/contact" element={<ContactPage />} />
           <Route path="/company" element={<CompanyDirectoryPageV9 />} />
           <Route path="/projects" element={<ProjectsPage />} />
+          <Route path="/projects/company/:id" element={<CompanyDetailPage />} />
           <Route path="/company/:slug" element={<CompanyLandingPage />} />
           <Route path="/executive-dashboard" element={<ExecutiveDashboardPage />} />
           <Route path="/commercial-strategy" element={<CommercialStrategyPage />} />

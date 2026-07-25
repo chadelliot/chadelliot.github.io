@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CompanyBoard from "@/components/CompanyBoard";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import { signInToProposalDirectory, clearStoredProposalSession, hydrateSessionFromUrlFragment, setOwnPassword } from "@/lib/companyStatus";
 import {
@@ -12,7 +13,7 @@ import {
   fetchClosedDeals,
   fetchCompanies,
   fetchMeetingBlocks,
-  updateCompanyStage,
+  fetchCompanySignalsList,
   createMeeting,
   createClosedDeal,
   findCurrentTeamMember,
@@ -34,10 +35,7 @@ import {
   type Meeting,
   type ClosedDeal,
   type Company,
-  type CompanyStage,
   type ContactMeetingBlock,
-  COMPANY_STAGE_LABELS,
-
 } from "@/lib/projectContacts";
 
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
@@ -111,7 +109,7 @@ const ProjectsPage = () => {
   const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [meetingBlocks, setMeetingBlocks] = useState<Record<string, ContactMeetingBlock>>({});
-  const [companySearch, setCompanySearch] = useState("");
+  const [signalList, setSignalList] = useState<CompanySignal[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
   const [activeFilter, setActiveFilter] = useState<FilterKey>("all");
@@ -154,7 +152,8 @@ const ProjectsPage = () => {
       fetchClosedDeals(session),
       fetchCompanies(session),
       fetchMeetingBlocks(session),
-    ]).then(([contactRows, progressRows, teamRows, signalRows, meetingRows, dealRows, companyRows, blockRows]) => {
+      fetchCompanySignalsList(session),
+    ]).then(([contactRows, progressRows, teamRows, signalRows, meetingRows, dealRows, companyRows, blockRows, signalListRows]) => {
       setContacts(contactRows);
       setProgress(progressRows);
       setTeamMembers(teamRows);
@@ -163,12 +162,22 @@ const ProjectsPage = () => {
       setClosedDeals(dealRows);
       setCompanies(companyRows);
       setMeetingBlocks(blockRows);
+      setSignalList(signalListRows);
       setIsLoadingData(false);
     });
   }, [session]);
 
   const currentTeamMember = useMemo(() => (session ? findCurrentTeamMember(session, teamMembers) : null), [session, teamMembers]);
   const isOwner = currentTeamMember?.role === "owner";
+
+  const signalCountsByCompanyId = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const signal of signalList) {
+      if (!signal.company_id) continue;
+      counts[signal.company_id] = (counts[signal.company_id] ?? 0) + 1;
+    }
+    return counts;
+  }, [signalList]);
 
   const myAssignedContacts = useMemo(() => {
     if (!currentTeamMember) return [];
@@ -220,19 +229,6 @@ const ProjectsPage = () => {
     }
     const updated = await updateTeamMemberRole(session, memberId, role);
     if (updated) setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
-  };
-
-  const handleSetCompanyStage = async (companyId: string, stage: CompanyStage, closedLostReason?: string) => {
-    if (!session) return;
-    const updates: { company_stage: CompanyStage; closed_lost_reason?: string | null; meeting_contact_id?: string | null } = { company_stage: stage };
-    if (stage === "closed_lost") updates.closed_lost_reason = closedLostReason || null;
-    if (stage === "new_signal") updates.meeting_contact_id = null; // reopening clears the old meeting record
-    const updated = await updateCompanyStage(session, companyId, updates);
-    if (updated) {
-      setCompanies((current) => current.map((c) => (c.id === updated.id ? updated : c)));
-      const freshBlocks = await fetchMeetingBlocks(session);
-      setMeetingBlocks(freshBlocks);
-    }
   };
 
   const handleAddContact = async (event: FormEvent<HTMLFormElement>) => {
@@ -713,60 +709,7 @@ const ProjectsPage = () => {
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Attribution (owner only)</p>
 
               <div className="mb-6 border-b border-[#E2E8F0] pb-6">
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Company controls</p>
-                <input
-                  type="text"
-                  value={companySearch}
-                  onChange={(e) => setCompanySearch(e.target.value)}
-                  placeholder="Search a company by name…"
-                  className="mb-3 h-10 w-full rounded-lg border border-[#CBD5E1] bg-white px-3 text-sm outline-none focus:border-primary"
-                />
-                <div className="grid gap-2">
-                  {companySearch.trim().length > 1 &&
-                    companies
-                      .filter((c) => c.name.toLowerCase().includes(companySearch.trim().toLowerCase()))
-                      .slice(0, 8)
-                      .map((company) => (
-                        <div key={company.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#E2E8F0] px-3 py-2">
-                          <div>
-                            <span className="font-semibold text-foreground">{company.name}</span>
-                            <span className="ml-2 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
-                              {COMPANY_STAGE_LABELS[company.company_stage]}
-                            </span>
-                            {company.company_stage === "closed_lost" && company.closed_lost_reason ? (
-                              <span className="ml-2 text-xs text-muted-foreground">— {company.closed_lost_reason}</span>
-                            ) : null}
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2">
-                            {company.company_stage === "meeting_scheduled" ? (
-                              <button type="button" onClick={() => handleSetCompanyStage(company.id, "new_signal")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">
-                                Reopen outreach
-                              </button>
-                            ) : null}
-                            {company.company_stage !== "closed_won" ? (
-                              <button type="button" onClick={() => handleSetCompanyStage(company.id, "closed_won")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">
-                                Mark Closed Won
-                              </button>
-                            ) : null}
-                            {company.company_stage !== "closed_lost" ? (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const reason = window.prompt("Optional: why was this closed lost?") ?? "";
-                                  handleSetCompanyStage(company.id, "closed_lost", reason);
-                                }}
-                                className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
-                              >
-                                Mark Closed Lost
-                              </button>
-                            ) : null}
-                          </div>
-                        </div>
-                      ))}
-                  {companySearch.trim().length > 1 && companies.filter((c) => c.name.toLowerCase().includes(companySearch.trim().toLowerCase())).length === 0 ? (
-                    <p className="text-sm text-muted-foreground">No companies match that search.</p>
-                  ) : null}
-                </div>
+                <CompanyBoard companies={companies} contacts={contacts} signalCountsByCompanyId={signalCountsByCompanyId} teamMembers={teamMembers} />
               </div>
 
               <div className="mb-6 border-b border-[#E2E8F0] pb-6">

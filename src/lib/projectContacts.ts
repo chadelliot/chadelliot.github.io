@@ -15,6 +15,7 @@ export type ContactStatus =
 export type ProjectContact = {
   id: string;
   company: string;
+  company_id?: string | null;
   industry?: string | null;
   sector?: string | null;
   contact_name?: string | null;
@@ -50,6 +51,7 @@ export type TeamMember = {
 
 export type CompanySignal = {
   company: string;
+  company_id?: string | null;
   role_title?: string | null;
   posted_date?: string | null;
   source_url?: string | null;
@@ -89,6 +91,7 @@ export const COMPANY_STAGE_LABELS: Record<CompanyStage, string> = {
 export type Meeting = {
   id: string;
   contact_id: string;
+  company_id?: string | null;
   set_by?: string | null;
   meeting_date?: string | null;
   confirmed: boolean;
@@ -99,6 +102,7 @@ export type Meeting = {
 export type ClosedDeal = {
   id: string;
   company: string;
+  company_id?: string | null;
   credited_to?: string | null;
   contract_signed_date?: string | null;
   notes?: string | null;
@@ -169,6 +173,34 @@ export const updateCompanyStage = async (
   return rows[0] ?? null;
 };
 
+// Owners can reassign any company; a rep can't hand it off to themselves -
+// that's still an owner call, same trust model as updateCompanyStage.
+export const updateCompanyAssignedRep = async (
+  session: ProposalSession,
+  companyId: string,
+  assignedRep: string | null
+): Promise<Company | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/companies?id=eq.${companyId}`, {
+    method: "PATCH",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify({ assigned_rep: assignedRep }),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as Company[];
+  return rows[0] ?? null;
+};
+
+// Company-level edit rights (stage changes, closed deal logging): owners,
+// or the rep that company is currently assigned to. Matches the same
+// UI-level trust model as the rest of the company controls - not enforced
+// at the database level yet.
+export const canManageCompany = (company: Company, currentTeamMember: TeamMember | null, isOwner: boolean): boolean => {
+  if (isOwner) return true;
+  if (!currentTeamMember) return false;
+  return company.assigned_rep === currentTeamMember.id;
+};
+
 export const fetchContactProgress = async (session: ProposalSession): Promise<Record<string, ContactProgress>> => {
   const rows = await fetchAllRows<ContactProgress>(session, "contact_progress?select=*");
   return Object.fromEntries(rows.map((row) => [row.contact_id, row]));
@@ -223,6 +255,12 @@ export const fetchCompanySignals = async (session: ProposalSession): Promise<Rec
   const rows = (await response.json()) as CompanySignal[];
   return Object.fromEntries(rows.map((row) => [row.company, row]));
 };
+
+// Unlike fetchCompanySignals (which keeps only one signal per company for
+// the warm-signal badge), this keeps every row - a company detail page
+// should show all of a company's hiring signals, not just one.
+export const fetchCompanySignalsList = async (session: ProposalSession): Promise<CompanySignal[]> =>
+  fetchAllRows<CompanySignal>(session, "company_signals?select=*&order=posted_date.desc");
 
 export const updateContactProgress = async (
   session: ProposalSession,
@@ -297,13 +335,14 @@ export const createClosedDeal = async (
   company: string,
   creditedTo: string | null,
   contractSignedDate: string,
-  notes: string
+  notes: string,
+  companyId?: string | null
 ): Promise<ClosedDeal | null> => {
   if (!DB_URL) return null;
   const response = await fetch(`${DB_URL}/rest/v1/closed_deals`, {
     method: "POST",
     headers: { ...authHeaders(session), Prefer: "return=representation" },
-    body: JSON.stringify({ company, credited_to: creditedTo, contract_signed_date: contractSignedDate, notes }),
+    body: JSON.stringify({ company, credited_to: creditedTo, contract_signed_date: contractSignedDate, notes, company_id: companyId ?? null }),
   });
   if (!response.ok) return null;
   const rows = (await response.json()) as ClosedDeal[];
