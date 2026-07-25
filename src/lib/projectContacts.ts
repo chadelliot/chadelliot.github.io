@@ -172,13 +172,14 @@ export const fetchCompanySignals = async (session: ProposalSession): Promise<Rec
 export const updateContactProgress = async (
   session: ProposalSession,
   contactId: string,
-  updates: Partial<Pick<ContactProgress, "status" | "assigned_to">>
+  updates: Partial<Pick<ContactProgress, "status" | "assigned_to">>,
+  updatedByTeamMemberId?: string | null
 ): Promise<ContactProgress | null> => {
   if (!DB_URL) return null;
   const response = await fetch(`${DB_URL}/rest/v1/contact_progress?contact_id=eq.${contactId}`, {
     method: "PATCH",
     headers: { ...authHeaders(session), Prefer: "return=representation" },
-    body: JSON.stringify({ ...updates, updated_by: session.user.id }),
+    body: JSON.stringify({ ...updates, updated_by: updatedByTeamMemberId ?? null }),
   });
   if (!response.ok) return null;
   const rows = (await response.json()) as ContactProgress[];
@@ -189,13 +190,14 @@ export const logContactActivity = async (
   session: ProposalSession,
   contactId: string,
   eventType: string,
-  eventDetail?: string
+  eventDetail?: string,
+  actorTeamMemberId?: string | null
 ): Promise<void> => {
   if (!DB_URL) return;
   await fetch(`${DB_URL}/rest/v1/contact_activity`, {
     method: "POST",
     headers: authHeaders(session),
-    body: JSON.stringify({ contact_id: contactId, event_type: eventType, event_detail: eventDetail, actor: session.user.id }),
+    body: JSON.stringify({ contact_id: contactId, event_type: eventType, event_detail: eventDetail, actor: actorTeamMemberId ?? null }),
   });
 };
 

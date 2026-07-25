@@ -250,6 +250,19 @@ const ProjectsPage = () => {
     setSession(null);
   };
 
+  const statusCountsByMember = useMemo(() => {
+    const counts: Record<string, Record<ContactStatus, number>> = {};
+    for (const member of teamMembers) {
+      counts[member.id] = { not_started: 0, connected: 0, messaged: 0, responded: 0, meeting_set: 0, closed: 0, do_not_contact: 0 };
+    }
+    for (const contact of contacts) {
+      const p = progress[contact.id];
+      if (!p?.assigned_to || !counts[p.assigned_to]) continue;
+      counts[p.assigned_to][p.status] = (counts[p.assigned_to][p.status] ?? 0) + 1;
+    }
+    return counts;
+  }, [contacts, progress, teamMembers]);
+
   const stats = useMemo(() => {
     const actionable = contacts.filter((c) => !c.needs_research && !c.do_not_contact);
     const notStarted = actionable.filter((c) => (progress[c.id]?.status ?? "not_started") === "not_started").length;
@@ -312,9 +325,9 @@ const ProjectsPage = () => {
       ...current,
       [contact.id]: { contact_id: contact.id, status, updated_at: new Date().toISOString(), assigned_to: current[contact.id]?.assigned_to ?? null },
     }));
-    const saved = await updateContactProgress(session, contact.id, { status });
+    const saved = await updateContactProgress(session, contact.id, { status }, currentTeamMember?.id);
     if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
-    logContactActivity(session, contact.id, "status_changed", status);
+    logContactActivity(session, contact.id, "status_changed", status, currentTeamMember?.id);
     if (status === "meeting_set") {
       setMeetingPrompt(contact);
       setMeetingDate("");
@@ -326,7 +339,7 @@ const ProjectsPage = () => {
     if (!session) return;
     const value = assignedTo || null;
     setProgress((current) => ({ ...current, [contact.id]: { ...current[contact.id], contact_id: contact.id, status: current[contact.id]?.status ?? "not_started", updated_at: new Date().toISOString(), assigned_to: value } }));
-    const saved = await updateContactProgress(session, contact.id, { assigned_to: value });
+    const saved = await updateContactProgress(session, contact.id, { assigned_to: value }, currentTeamMember?.id);
     if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
   };
 
@@ -340,7 +353,7 @@ const ProjectsPage = () => {
     await navigator.clipboard.writeText(messageEditor.text);
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
-    if (session) logContactActivity(session, contact.id, "message_copied", field);
+    if (session) logContactActivity(session, contact.id, "message_copied", field, currentTeamMember?.id);
     setMessageEditor(null);
   };
 
@@ -675,6 +688,40 @@ const ProjectsPage = () => {
                   ))}
                   {teamMembers.length === 0 ? <p className="text-sm text-muted-foreground">No team members yet.</p> : null}
                 </div>
+
+                {teamMembers.length > 0 ? (
+                  <div className="mt-4 overflow-x-auto">
+                    <table className="w-full min-w-[640px] border-collapse text-sm">
+                      <thead>
+                        <tr className="border-b border-[#E2E8F0] text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+                          <th className="py-2 pr-3">Team member</th>
+                          <th className="px-2 py-2">Not started</th>
+                          <th className="px-2 py-2">Connected</th>
+                          <th className="px-2 py-2">Messaged</th>
+                          <th className="px-2 py-2">Responded</th>
+                          <th className="px-2 py-2">Meeting set</th>
+                          <th className="px-2 py-2">Closed</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {teamMembers.map((member) => {
+                          const c = statusCountsByMember[member.id];
+                          return (
+                            <tr key={member.id} className="border-b border-[#E2E8F0]">
+                              <td className="py-2 pr-3 font-semibold text-foreground">{member.name}</td>
+                              <td className="px-2 py-2">{c?.not_started ?? 0}</td>
+                              <td className="px-2 py-2">{c?.connected ?? 0}</td>
+                              <td className="px-2 py-2">{c?.messaged ?? 0}</td>
+                              <td className="px-2 py-2">{c?.responded ?? 0}</td>
+                              <td className="px-2 py-2">{c?.meeting_set ?? 0}</td>
+                              <td className="px-2 py-2">{c?.closed ?? 0}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : null}
               </div>
 
               <form onSubmit={handleSaveClosedDeal} className="mb-6 grid gap-3 border-b border-[#E2E8F0] pb-6 md:grid-cols-[1fr_1fr_1fr_2fr_auto] md:items-end">
