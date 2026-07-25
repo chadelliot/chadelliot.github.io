@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import CompanyInfoCard from "@/components/CompanyInfoCard";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import {
   fetchProjectContacts,
@@ -18,8 +19,11 @@ import {
   findCurrentTeamMember,
   canManageCompany,
   getInitials,
+  getPrimaryContact,
+  getCompanyResearchSummary,
+  getContactTier,
+  buildLinkedInSearchUrl,
   STATUS_LABELS,
-  COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
   type ProjectContact,
@@ -47,13 +51,6 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   do_not_contact: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
 };
 
-const STAGE_BADGE_CLASS: Record<CompanyStage, string> = {
-  new_signal: "border-[#E2E8F0] bg-[#F8FAFC] text-[#334155]",
-  meeting_scheduled: "border-primary/30 bg-primary/5 text-primary",
-  closed_won: "border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]",
-  closed_lost: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
-};
-
 const CompanyDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [session] = useProposalSession();
@@ -67,6 +64,7 @@ const CompanyDetailPage = () => {
   const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
+  const [showAllContacts, setShowAllContacts] = useState(false);
   const [showLogDeal, setShowLogDeal] = useState(false);
   const [dealCreditedTo, setDealCreditedTo] = useState("");
   const [dealDate, setDealDate] = useState("");
@@ -119,6 +117,9 @@ const CompanyDetailPage = () => {
     () => (id ? closedDeals.find((d) => d.company_id === id || d.company === company?.name) ?? null : null),
     [closedDeals, id, company]
   );
+  const primaryContact = useMemo(() => getPrimaryContact(companyContacts), [companyContacts]);
+  const otherContacts = useMemo(() => companyContacts.filter((c) => c.id !== primaryContact?.id), [companyContacts, primaryContact]);
+  const companyResearch = useMemo(() => getCompanyResearchSummary(companyContacts), [companyContacts]);
 
   const handleSetStage = async (stage: CompanyStage, closedLostReason?: string) => {
     if (!session || !company) return;
@@ -188,14 +189,12 @@ const CompanyDetailPage = () => {
 
           {company ? (
             <>
-              <div className="mb-8 mt-4 flex flex-wrap items-start justify-between gap-4">
+              <div className="mb-4 mt-4 flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach · Company</p>
                   <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{company.name}</h1>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className={`rounded-full border px-3 py-1 text-[11px] font-bold uppercase tracking-[0.08em] ${STAGE_BADGE_CLASS[company.company_stage]}`}>
-                      {COMPANY_STAGE_LABELS[company.company_stage]}
-                    </span>
+                    <span className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Assigned to:</span>
                     {canManage ? (
                       <select
                         value={company.assigned_rep ?? ""}
@@ -239,6 +238,10 @@ const CompanyDetailPage = () => {
                     ) : null}
                   </div>
                 ) : null}
+              </div>
+
+              <div className="mb-6 overflow-hidden rounded-xl border border-[#E2E8F0]">
+                <CompanyInfoCard company={company} research={companyResearch} signals={companySignals} contactCount={companyContacts.length} />
               </div>
 
               {company.company_stage === "closed_lost" && company.closed_lost_reason ? (
@@ -336,30 +339,81 @@ const CompanyDetailPage = () => {
               <div>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts ({companyContacts.length})</p>
                 <div className="grid gap-2">
-                  {companyContacts.map((contact) => {
-                    const contactProgress = progress[contact.id];
-                    const status = contact.needs_research ? null : contactProgress?.status ?? "not_contacted";
-                    const isMeetingContact = company.meeting_contact_id === contact.id;
-                    return (
-                      <div key={contact.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
-                        <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-display text-xs font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
-                          <div>
-                            <p className="text-sm font-semibold text-foreground">
-                              {contact.contact_name}
-                              {isMeetingContact ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">📅 Meeting contact</span> : null}
-                            </p>
-                            <p className="text-xs text-muted-foreground">{contact.title}{contact.email ? ` · ${contact.email}` : ""}</p>
-                          </div>
+                  {primaryContact ? (
+                    getContactTier(primaryContact) === "research" ? (
+                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
+                        <div>
+                          <span className="text-sm font-semibold text-foreground">{primaryContact.contact_name}</span>
+                          <span className="ml-2 text-xs text-muted-foreground">{primaryContact.title}</span>
+                          <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">Needs research</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          {status ? <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span> : <span className="text-xs text-muted-foreground">Needs research</span>}
-                          <span className="text-xs text-muted-foreground">{teamMembers.find((m) => m.id === contactProgress?.assigned_to)?.name ?? "Unassigned"}</span>
-                        </div>
+                        <a href={buildLinkedInSearchUrl(primaryContact.contact_name, primaryContact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
                       </div>
-                    );
-                  })}
-                  {companyContacts.length === 0 ? <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p> : null}
+                    ) : (
+                      (() => {
+                        const contactProgress = progress[primaryContact.id];
+                        const status = contactProgress?.status ?? "not_contacted";
+                        const isMeetingContact = company.meeting_contact_id === primaryContact.id;
+                        return (
+                          <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-display text-xs font-extrabold text-primary">{getInitials(primaryContact.contact_name)}</div>
+                              <div>
+                                <p className="text-sm font-semibold text-foreground">
+                                  {primaryContact.contact_name}
+                                  <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">Primary contact</span>
+                                  {isMeetingContact ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">📅 Meeting contact</span> : null}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{primaryContact.title}{primaryContact.email ? ` · ${primaryContact.email}` : ""}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span>
+                              <span className="text-xs text-muted-foreground">{teamMembers.find((m) => m.id === contactProgress?.assigned_to)?.name ?? "Unassigned"}</span>
+                            </div>
+                          </div>
+                        );
+                      })()
+                    )
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
+                  )}
+
+                  {otherContacts.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setShowAllContacts((v) => !v)}
+                      className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                    >
+                      {showAllContacts ? "Hide" : "Show"} {otherContacts.length} other contact{otherContacts.length === 1 ? "" : "s"} {showAllContacts ? "▲" : "▼"}
+                    </button>
+                  ) : null}
+
+                  {showAllContacts
+                    ? otherContacts.map((contact) => {
+                        const contactProgress = progress[contact.id];
+                        const status = contact.needs_research ? null : contactProgress?.status ?? "not_contacted";
+                        const isMeetingContact = company.meeting_contact_id === contact.id;
+                        return (
+                          <div key={contact.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+                            <div className="flex items-center gap-3">
+                              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-display text-xs font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
+                              <div>
+                                <p className="text-sm font-semibold text-foreground">
+                                  {contact.contact_name}
+                                  {isMeetingContact ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">📅 Meeting contact</span> : null}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{contact.title}{contact.email ? ` · ${contact.email}` : ""}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {status ? <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span> : <span className="text-xs text-muted-foreground">Needs research</span>}
+                              <span className="text-xs text-muted-foreground">{teamMembers.find((m) => m.id === contactProgress?.assigned_to)?.name ?? "Unassigned"}</span>
+                            </div>
+                          </div>
+                        );
+                      })
+                    : null}
                 </div>
               </div>
             </>

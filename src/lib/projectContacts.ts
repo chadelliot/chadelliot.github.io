@@ -388,6 +388,61 @@ export const createClosedDeal = async (
   return rows[0] ?? null;
 };
 
+// Ranks which "Target #" a contact was designated during ChatGPT's account
+// research (Target 1 is the primary recommended contact, 2 and 3 are
+// backups) - lower is more primary. Contacts without a parseable target
+// number (e.g. self-serve additions) sort last on this axis alone.
+const targetRank = (contact: ProjectContact): number => {
+  const match = contact.target_type_raw?.match(/([123])/);
+  return match ? Number(match[1]) : 99;
+};
+
+// Picks the one contact at a company that should surface by default,
+// everyone else stays behind a "show more" toggle. ChatGPT's Target 1/2/3
+// designation (target_type_raw) is the primary signal; ties or contacts
+// without that field fall back to reachability tier and priority, same
+// ranking already used for batch assignment.
+export const getPrimaryContact = (contacts: ProjectContact[]): ProjectContact | null => {
+  const candidates = contacts.filter((c) => !c.do_not_contact);
+  if (candidates.length === 0) return null;
+  return [...candidates].sort((a, b) => {
+    const ra = targetRank(a);
+    const rb = targetRank(b);
+    if (ra !== rb) return ra - rb;
+    const ta = TIER_ORDER[getContactTier(a)];
+    const tb = TIER_ORDER[getContactTier(b)];
+    if (ta !== tb) return ta - tb;
+    const pa = PRIORITY_ORDER[a.priority ?? ""] ?? 6;
+    const pb = PRIORITY_ORDER[b.priority ?? ""] ?? 6;
+    if (pa !== pb) return pa - pb;
+    return (a.contact_name ?? "").localeCompare(b.contact_name ?? "");
+  })[0];
+};
+
+export type CompanyResearchSummary = {
+  industry?: string | null;
+  sector?: string | null;
+  priority?: string | null;
+  valueHypothesis?: string | null;
+  outreachAngle?: string | null;
+};
+
+// The company-level research ChatGPT produced (industry, sector, why RevHub
+// fits, the buying trigger) was denormalized onto every contact row at
+// import time rather than living on the companies table - so any contact
+// at the company carries it. Pulls it from whichever contact actually has
+// values filled in, since self-serve-added contacts won't.
+export const getCompanyResearchSummary = (contacts: ProjectContact[]): CompanyResearchSummary => {
+  const withData = contacts.find((c) => c.industry || c.sector || c.value_hypothesis || c.outreach_angle) ?? contacts[0];
+  return {
+    industry: withData?.industry,
+    sector: withData?.sector,
+    priority: withData?.priority,
+    valueHypothesis: withData?.value_hypothesis,
+    outreachAngle: withData?.outreach_angle,
+  };
+};
+
 // Matches the signed-in session to a team_members row by email, since that's
 // what the person actually logs in with - avoids needing team_members.id to
 // be manually set to match their Supabase Auth user ID.

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CompanyBoard from "@/components/CompanyBoard";
+import CompanyInfoCard from "@/components/CompanyInfoCard";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import { signInToProposalDirectory, clearStoredProposalSession, hydrateSessionFromUrlFragment, setOwnPassword } from "@/lib/companyStatus";
 import {
@@ -26,10 +27,11 @@ import {
   assignNextCompanyBatch,
   createSelfServeContact,
   STATUS_LABELS,
-  COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
   PRIORITY_ORDER,
+  getPrimaryContact,
+  getCompanyResearchSummary,
   getInitials,
   type ProjectContact,
   type ContactProgress,
@@ -56,13 +58,6 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   follow_up_sent: "border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]",
   meeting_set: "border-primary/30 bg-primary/5 text-primary",
   do_not_contact: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
-};
-
-const STAGE_BADGE_CLASS: Record<CompanyStage, string> = {
-  new_signal: "border-[#E2E8F0] bg-[#F8FAFC] text-[#334155]",
-  meeting_scheduled: "border-primary/30 bg-primary/5 text-primary",
-  closed_won: "border-[#BBF7D0] bg-[#F0FDF4] text-[#15803D]",
-  closed_lost: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
 };
 
 const ProjectsPage = () => {
@@ -148,6 +143,8 @@ const ProjectsPage = () => {
     text: string;
   } | null>(null);
   const [nameInput, setNameInput] = useState("");
+  const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({});
+  const toggleCompanyExpanded = (companyId: string) => setExpandedCompanies((current) => ({ ...current, [companyId]: !current[companyId] }));
 
   useEffect(() => {
     if (!session) return;
@@ -437,6 +434,62 @@ const ProjectsPage = () => {
     }
   };
 
+  // Shared row renderers for the "My assignments" company groups - a full
+  // article for a reachable contact, a lighter search-needed row for one
+  // still needing manual research.
+  const renderAssignedContactArticle = (contact: ProjectContact) => {
+    const contactProgress = progress[contact.id];
+    const status = contactProgress?.status ?? "not_contacted";
+    const tier = getContactTier(contact);
+    const meetingBlock = meetingBlocks[contact.id];
+    const isBlocked = Boolean(meetingBlock?.is_blocked);
+    return (
+      <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+        <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              {tier === "email" ? <span title="Email on file">📧</span> : null}
+              {contact.linkedin_url && contact.linkedin_url.includes("/in/") ? (
+                <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="font-display text-lg font-extrabold tracking-tight text-foreground hover:text-primary hover:underline">{contact.contact_name}</a>
+              ) : (
+                <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.contact_name}</p>
+              )}
+            </div>
+            <p className="text-sm font-semibold text-primary">{contact.title}</p>
+            {contact.email ? <p className="text-sm text-muted-foreground">{contact.email}</p> : null}
+          </div>
+          {isBlocked ? (
+            <span className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">
+              📅 Meeting scheduled with {meetingBlock?.meeting_contact_name}{meetingBlock?.meeting_contact_title ? `, ${meetingBlock.meeting_contact_title}` : ""}
+            </span>
+          ) : (
+            <select value={status} onChange={(e) => handleStatusChange(contact, e.target.value as ContactStatus)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary">
+              {(Object.keys(STATUS_LABELS) as ContactStatus[]).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
+            </select>
+          )}
+        </div>
+        {!isBlocked && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
+          <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
+            {contact.linkedin_connect_message ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
+            {contact.intro_message ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
+            {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+          </div>
+        ) : null}
+      </article>
+    );
+  };
+
+  const renderAssignedResearchRow = (contact: ProjectContact) => (
+    <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#FDE68A] bg-white px-3 py-2">
+      <div>
+        <span className="font-semibold text-foreground">{contact.contact_name}</span>
+        <span className="ml-2 text-sm text-muted-foreground">{contact.title}</span>
+      </div>
+      <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
+    </div>
+  );
+
   if (!IS_DB_READY) {
     return (
       <div className="min-h-screen bg-background">
@@ -559,84 +612,56 @@ const ProjectsPage = () => {
             <div className="grid gap-6">
               {myAssignedCompanies.map((company) => {
                 const companyContacts = contacts.filter((c) => c.company_id === company.id && !c.do_not_contact);
-                const goodContacts = companyContacts.filter((c) => getContactTier(c) !== "research");
-                const researchContacts = companyContacts.filter((c) => getContactTier(c) === "research");
-                const companySignalCount = signalsByCompanyId[company.id]?.length ?? 0;
+                const primary = getPrimaryContact(companyContacts);
+                const others = companyContacts.filter((c) => c.id !== primary?.id);
+                const othersGood = others.filter((c) => getContactTier(c) !== "research");
+                const othersResearch = others.filter((c) => getContactTier(c) === "research");
+                const isExpanded = Boolean(expandedCompanies[company.id]);
 
                 return (
                   <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Link to={`/projects/company/${company.id}`} className="font-display text-lg font-extrabold tracking-tight text-foreground hover:text-primary hover:underline">{company.name}</Link>
-                        <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${STAGE_BADGE_CLASS[company.company_stage]}`}>{COMPANY_STAGE_LABELS[company.company_stage]}</span>
-                        {companySignalCount > 0 ? <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] text-[#92400E]">{companySignalCount} open role{companySignalCount === 1 ? "" : "s"}</span> : null}
-                      </div>
-                      <span className="text-xs text-muted-foreground">{companyContacts.length} contact{companyContacts.length === 1 ? "" : "s"}</span>
+                    <CompanyInfoCard
+                      company={company}
+                      research={getCompanyResearchSummary(companyContacts)}
+                      signals={signalsByCompanyId[company.id] ?? []}
+                      contactCount={companyContacts.length}
+                    />
+                    <div className="border-b border-[#E2E8F0] px-4 py-2">
+                      <Link to={`/projects/company/${company.id}`} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">View full company page →</Link>
                     </div>
 
                     <div className="grid gap-3 p-4">
-                      {goodContacts.map((contact) => {
-                        const contactProgress = progress[contact.id];
-                        const status = contactProgress?.status ?? "not_contacted";
-                        const tier = getContactTier(contact);
-                        const meetingBlock = meetingBlocks[contact.id];
-                        const isBlocked = Boolean(meetingBlock?.is_blocked);
-                        return (
-                          <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}>
-                            <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
-                              <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
-                              <div className="min-w-0">
-                                <div className="flex flex-wrap items-center gap-2">
-                                  {tier === "email" ? <span title="Email on file">📧</span> : null}
-                                  {contact.linkedin_url && contact.linkedin_url.includes("/in/") ? (
-                                    <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="font-display text-lg font-extrabold tracking-tight text-foreground hover:text-primary hover:underline">{contact.contact_name}</a>
-                                  ) : (
-                                    <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{contact.contact_name}</p>
-                                  )}
-                                </div>
-                                <p className="text-sm font-semibold text-primary">{contact.title}</p>
-                                {contact.email ? <p className="text-sm text-muted-foreground">{contact.email}</p> : null}
-                              </div>
-                              {isBlocked ? (
-                                <span className="rounded-full border border-primary/30 bg-primary/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">
-                                  📅 Meeting scheduled with {meetingBlock?.meeting_contact_name}{meetingBlock?.meeting_contact_title ? `, ${meetingBlock.meeting_contact_title}` : ""}
-                                </span>
-                              ) : (
-                                <select value={status} onChange={(e) => handleStatusChange(contact, e.target.value as ContactStatus)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary">
-                                  {(Object.keys(STATUS_LABELS) as ContactStatus[]).map((s) => <option key={s} value={s}>{STATUS_LABELS[s]}</option>)}
-                                </select>
-                              )}
-                            </div>
-                            {!isBlocked && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
-                              <div className="flex flex-wrap items-center gap-2 border-t border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3 md:px-5">
-                                {contact.linkedin_connect_message ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
-                                {contact.intro_message ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
-                                {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
-                              </div>
-                            ) : null}
-                          </article>
-                        );
-                      })}
+                      {primary ? (
+                        getContactTier(primary) === "research" ? renderAssignedResearchRow(primary) : renderAssignedContactArticle(primary)
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
+                      )}
 
-                      {researchContacts.length > 0 ? (
-                        <div className="border border-[#FDE68A] bg-[#FFFBEB] p-4">
-                          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#92400E]">Additional research needed</p>
-                          <p className="mb-3 text-sm text-[#92400E]">These need a manual LinkedIn search — click through and confirm you've found the right person.</p>
-                          <div className="grid gap-2">
-                            {researchContacts.map((contact) => (
-                              <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#FDE68A] bg-white px-3 py-2">
-                                <div>
-                                  <span className="font-semibold text-foreground">{contact.contact_name}</span>
-                                  <span className="ml-2 text-sm text-muted-foreground">{contact.title}</span>
-                                </div>
-                                <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                      {others.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => toggleCompanyExpanded(company.id)}
+                          className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                        >
+                          {isExpanded ? "Hide" : "Show"} {others.length} other contact{others.length === 1 ? "" : "s"} {isExpanded ? "▲" : "▼"}
+                        </button>
                       ) : null}
 
-                      {companyContacts.length === 0 ? <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p> : null}
+                      {isExpanded ? (
+                        <>
+                          {othersGood.map((contact) => renderAssignedContactArticle(contact))}
+
+                          {othersResearch.length > 0 ? (
+                            <div className="border border-[#FDE68A] bg-[#FFFBEB] p-4">
+                              <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#92400E]">Additional research needed</p>
+                              <p className="mb-3 text-sm text-[#92400E]">These need a manual LinkedIn search — click through and confirm you've found the right person.</p>
+                              <div className="grid gap-2">
+                                {othersResearch.map((contact) => renderAssignedResearchRow(contact))}
+                              </div>
+                            </div>
+                          ) : null}
+                        </>
+                      ) : null}
                     </div>
                   </div>
                 );
