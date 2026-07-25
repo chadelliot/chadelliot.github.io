@@ -3,8 +3,6 @@ import { Link } from "react-router-dom";
 import { UserPlus } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import CompanyBoard from "@/components/CompanyBoard";
 import CompanyInfoCard from "@/components/CompanyInfoCard";
 import ProjectsSidebar, { type ProjectsSection } from "@/components/ProjectsSidebar";
@@ -746,25 +744,19 @@ const ProjectsPage = () => {
 
   if (!IS_DB_READY) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
-          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
-            <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground">Login is not configured.</h1>
-          </section>
-        </main>
-        <Footer />
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 py-16">
+        <section className="mx-auto w-full max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground">Login is not configured.</h1>
+        </section>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
-          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 py-16">
+        <section className="mx-auto w-full max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
+          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
             <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Sign in to continue.</h1>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">Access is by invitation only — contact Chad if you need an account.</p>
             <form onSubmit={handleAuthSubmit} className="mt-6 grid gap-4">
@@ -779,19 +771,15 @@ const ProjectsPage = () => {
               <button type="submit" disabled={isAuthLoading} className="rounded-full border border-primary bg-primary px-5 py-3 text-sm font-semibold uppercase tracking-[0.08em] text-primary-foreground transition-colors disabled:opacity-50">Sign in</button>
             </form>
             {authMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm text-muted-foreground">{authMessage}</p> : null}
-          </section>
-        </main>
-        <Footer />
+        </section>
       </div>
     );
   }
 
   if (mustSetPassword) {
     return (
-      <div className="min-h-screen bg-background">
-        <Navbar />
-        <main className="px-6 pb-20 pt-32 md:px-20 md:pt-40">
-          <section className="mx-auto max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
+      <div className="flex min-h-screen items-center justify-center bg-background px-6 py-16">
+        <section className="mx-auto w-full max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.22em] text-primary">Welcome to RevHub outreach</p>
             <h1 className="font-display text-4xl font-extrabold tracking-tight text-foreground">Set your password.</h1>
             <p className="mt-4 text-sm leading-relaxed text-muted-foreground">One last step — choose a password so you can sign back in normally next time.</p>
@@ -809,9 +797,7 @@ const ProjectsPage = () => {
               </button>
             </form>
             {passwordSetMessage ? <p className="mt-4 rounded-2xl border border-border p-4 text-sm text-muted-foreground">{passwordSetMessage}</p> : null}
-          </section>
-        </main>
-        <Footer />
+        </section>
       </div>
     );
   }
@@ -819,7 +805,6 @@ const ProjectsPage = () => {
   if (!isOwner) {
     return (
       <div className="min-h-screen bg-background">
-        <Navbar />
         <div className="md:flex">
           <ProjectsSidebar
             isOwner={false}
@@ -828,7 +813,7 @@ const ProjectsPage = () => {
             memberName={currentTeamMember?.name}
             onSignOut={handleSignOut}
           />
-          <main className="min-w-0 flex-1 px-6 pb-20 pt-28 md:px-10 md:pt-10">
+          <main className="min-w-0 flex-1 px-6 pb-20 pt-8 md:px-10 md:pt-10">
           <div className="w-full">
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
@@ -881,7 +866,6 @@ const ProjectsPage = () => {
           </div>
           </main>
         </div>
-        <Footer />
 
         {addContactSlideout}
 
@@ -952,7 +936,6 @@ const ProjectsPage = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
       <div className="md:flex">
         <ProjectsSidebar
           isOwner={isOwner}
@@ -961,7 +944,7 @@ const ProjectsPage = () => {
           memberName={currentTeamMember?.name}
           onSignOut={handleSignOut}
         />
-        <main className="min-w-0 flex-1 px-6 pb-20 pt-28 md:px-10 md:pt-10">
+        <main className="min-w-0 flex-1 px-6 pb-20 pt-8 md:px-10 md:pt-10">
           <div className="w-full">
             <div className="mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
@@ -1262,7 +1245,6 @@ const ProjectsPage = () => {
           </div>
         </main>
       </div>
-      <Footer />
 
       {meetingPrompt ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">

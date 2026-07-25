@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { LayoutGrid, KanbanSquare, Users, LogOut, Menu, X } from "lucide-react";
+import { Link } from "react-router-dom";
+import { LayoutGrid, KanbanSquare, Users, LogOut, Menu, X, ArrowLeft } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 export type ProjectsSection = "assignments" | "board" | "team";
@@ -40,6 +41,16 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
       <div className="px-3 pb-6 pt-1">
         <p className="font-display text-lg font-extrabold tracking-tight text-foreground">RevHub</p>
         <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Outreach</p>
+      </div>
+
+      {/* Navbar's site-wide nav is gone from /projects (it's a standalone
+          tool now, not a marketing page) - this is the one way back to
+          aboutchad.com so nobody gets stranded. */}
+      <div className="px-2 pb-4">
+        <Link to="/" className="flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold text-muted-foreground no-underline hover:bg-[#F8FAFC] hover:text-primary">
+          <ArrowLeft size={14} />
+          aboutchad.com
+        </Link>
       </div>
 
       <nav className="flex flex-1 flex-col gap-1 px-2">
