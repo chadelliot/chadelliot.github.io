@@ -451,6 +451,29 @@ export const formatWhyNow = (raw?: string | null): string | null => {
   return `${rest.join(", ")}, and ${last}.`;
 };
 
+// Presentational only - the outreach copy from the sheet often arrives as
+// one flat block of text. This gives the greeting and sign-off their own
+// lines so it reads like an actual message, without touching a single
+// word of the content itself. The stored message in the database is
+// never changed - this only affects what's shown in (and copied from)
+// the editor.
+export const formatMessageForDisplay = (raw?: string | null): string => {
+  if (!raw) return "";
+  let text = raw.trim();
+
+  // Give the greeting its own line: "Hi Sarah," / "Hello -" / "Hey there,"
+  text = text.replace(/^((?:Hi|Hello|Hey)\b[^,.\-–—\n]{0,60}[,.\-–—])\s+/i, "$1\n\n");
+
+  // Give the sign-off its own paragraph, keeping a trailing name intact:
+  // "...call next week? Best, Chad" -> "...call next week?\n\nBest, Chad"
+  text = text.replace(
+    /\s+((?:Best regards|Best wishes|Best|Regards|Warm regards|Sincerely|Thanks again|Thank you|Thanks|Cheers|Talk soon|Looking forward(?: to (?:it|hearing from you|connecting))?)[,.]?\s*[\w' -]{0,40})$/i,
+    "\n\n$1"
+  );
+
+  return text;
+};
+
 export const getCompanyResearchSummary = (contacts: ProjectContact[]): CompanyResearchSummary => {
   const withData = contacts.find((c) => c.industry || c.sector || c.value_hypothesis || c.outreach_angle) ?? contacts[0];
   return {

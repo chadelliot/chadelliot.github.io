@@ -33,9 +33,11 @@ import {
   COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
+  formatMessageForDisplay,
   PRIORITY_ORDER,
   getPrimaryContact,
   getCompanyResearchSummary,
+  formatWhyNow,
   getInitials,
   type ProjectContact,
   type ContactProgress,
@@ -166,6 +168,7 @@ const ProjectsPage = () => {
   const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({});
   const toggleCompanyExpanded = (companyId: string) => setExpandedCompanies((current) => ({ ...current, [companyId]: !current[companyId] }));
   const [showCharts, setShowCharts] = useState(false);
+  const [companyStageFilter, setCompanyStageFilter] = useState<CompanyStage | "all">("all");
 
   useEffect(() => {
     if (!session) return;
@@ -398,8 +401,12 @@ const ProjectsPage = () => {
     if (activeFilter === "meeting_set") rows = rows.filter((c) => progress[c.id]?.status === "meeting_set");
     if (activeFilter === "introduction_sent") rows = rows.filter((c) => progress[c.id]?.status === "introduction_sent");
     if (activeFilter === "follow_up_sent") rows = rows.filter((c) => progress[c.id]?.status === "follow_up_sent");
+    // Needs-research contacts (and the companies whose only visible contact
+    // is one of them) stay out of the default view - they clutter the
+    // queue with people nobody can act on yet. They only surface when
+    // that's specifically what's being filtered for.
     if (activeFilter === "needs_research") rows = rows.filter((c) => c.needs_research);
-    else if (activeFilter !== "all") rows = rows.filter((c) => !c.needs_research);
+    else rows = rows.filter((c) => !c.needs_research);
 
     if (priorityFilter !== "all") rows = rows.filter((c) => (c.priority || "") === priorityFilter);
 
@@ -451,6 +458,7 @@ const ProjectsPage = () => {
     }
     return companies
       .filter((c) => byCompanyId[c.id]?.length)
+      .filter((c) => companyStageFilter === "all" || c.company_stage === companyStageFilter)
       .sort((a, b) => {
         const sa = signalsByCompanyId[a.id]?.length ? 0 : 1;
         const sb = signalsByCompanyId[b.id]?.length ? 0 : 1;
@@ -458,7 +466,7 @@ const ProjectsPage = () => {
         return STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name);
       })
       .map((company) => ({ company, matchingContacts: byCompanyId[company.id] }));
-  }, [companies, filteredContacts, signalsByCompanyId]);
+  }, [companies, filteredContacts, signalsByCompanyId, companyStageFilter]);
 
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
@@ -488,7 +496,7 @@ const ProjectsPage = () => {
   };
 
   const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
-    setMessageEditor({ contact, field, label, text: contact[field] ?? "" });
+    setMessageEditor({ contact, field, label, text: formatMessageForDisplay(contact[field]) });
   };
 
   const handleCopyFromEditor = async () => {
@@ -866,15 +874,28 @@ const ProjectsPage = () => {
 
         {messageEditor ? (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-lg rounded-2xl border border-border bg-background p-6 shadow-lg">
+            <div className="w-full max-w-2xl rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{messageEditor.label}</p>
               <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{messageEditor.contact.contact_name} · {messageEditor.contact.company}</h2>
               <p className="mt-2 text-sm text-muted-foreground">Feel free to edit this before copying — it's just a starting point.</p>
+
+              {messageEditor.contact.value_hypothesis || messageEditor.contact.outreach_angle ? (
+                <div className="mt-4 rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
+                  <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Context for this message</p>
+                  {messageEditor.contact.value_hypothesis ? (
+                    <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{messageEditor.contact.value_hypothesis}</p>
+                  ) : null}
+                  {messageEditor.contact.outreach_angle ? (
+                    <p className="mt-1 text-sm text-foreground"><span className="font-semibold text-primary">Why now: </span>{formatWhyNow(messageEditor.contact.outreach_angle)}</p>
+                  ) : null}
+                </div>
+              ) : null}
+
               <textarea
                 value={messageEditor.text}
                 onChange={(e) => setMessageEditor((current) => (current ? { ...current, text: e.target.value } : current))}
-                rows={6}
-                className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                rows={12}
+                className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary"
               />
               {messageEditor.field === "linkedin_connect_message" ? (
                 <p className={`mt-1 text-xs ${messageEditor.text.length > 300 ? "font-semibold text-[#B45309]" : "text-muted-foreground"}`}>
@@ -1036,14 +1057,27 @@ const ProjectsPage = () => {
             </div>
           ) : null}
 
-          <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Company penetration</p>
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Company penetration</p>
+            {companyStageFilter !== "all" ? (
+              <button type="button" onClick={() => setCompanyStageFilter("all")} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Clear stage filter</button>
+            ) : null}
+          </div>
           <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
-            {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).map((stage) => (
-              <div key={stage} className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
-                <p className="font-mono text-3xl font-bold text-foreground">{companyStageCounts[stage]}</p>
-                <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
-              </div>
-            ))}
+            {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).map((stage) => {
+              const isActive = companyStageFilter === stage;
+              return (
+                <button
+                  key={stage}
+                  type="button"
+                  onClick={() => setCompanyStageFilter(isActive ? "all" : stage)}
+                  className={`rounded-2xl border p-4 text-left transition-colors ${isActive ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
+                >
+                  <p className={`font-mono text-3xl font-bold ${isActive ? "text-primary" : "text-foreground"}`}>{companyStageCounts[stage]}</p>
+                  <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
+                </button>
+              );
+            })}
             <button
               type="button"
               onClick={() => setShowCharts((v) => !v)}

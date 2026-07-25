@@ -47,20 +47,6 @@ const CompanyInfoCard = ({ company, research, signals, contactCount }: CompanyIn
           {[research.industry, research.sector].filter(Boolean).join(" · ")}
         </p>
       ) : null}
-
-      {research.valueHypothesis ? (
-        <p className="mt-2 text-sm text-foreground">
-          <span className="font-semibold text-primary">Why it fits: </span>
-          {research.valueHypothesis}
-        </p>
-      ) : null}
-
-      {research.outreachAngle ? (
-        <p className="mt-1 text-sm text-foreground">
-          <span className="font-semibold text-primary">Why now: </span>
-          {research.outreachAngle}
-        </p>
-      ) : null}
     </div>
   );
 };
