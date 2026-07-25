@@ -51,6 +51,17 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   do_not_contact: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
 };
 
+// Mirrors STATUS_CHART_COLORS in ProjectsPage.tsx - same palette so a
+// contact's status reads the same color everywhere in RevHub.
+const STATUS_ACCENT_COLOR: Record<ContactStatus, string> = {
+  not_contacted: "#94A3B8",
+  connection_sent: "#6D28D9",
+  introduction_sent: "#1D4ED8",
+  follow_up_sent: "#B45309",
+  meeting_set: "#2FA37F",
+  do_not_contact: "#B91C1C",
+};
+
 const CompanyDetailPage = () => {
   const { id } = useParams<{ id: string }>();
   const [session] = useProposalSession();
@@ -240,7 +251,7 @@ const CompanyDetailPage = () => {
                 ) : null}
               </div>
 
-              <div className="mb-6 overflow-hidden rounded-xl border border-[#E2E8F0]">
+              <div className="mb-6 overflow-hidden rounded-xl border border-[#E2E8F0] shadow-sm">
                 <CompanyInfoCard company={company} research={companyResearch} signals={companySignals} contactCount={companyContacts.length} />
               </div>
 
@@ -355,7 +366,10 @@ const CompanyDetailPage = () => {
                         const status = contactProgress?.status ?? "not_contacted";
                         const isMeetingContact = company.meeting_contact_id === primaryContact.id;
                         return (
-                          <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+                          <div
+                            className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 shadow-sm ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}
+                            style={{ borderLeft: `3px solid ${isMeetingContact ? "#2FA37F" : STATUS_ACCENT_COLOR[status]}` }}
+                          >
                             <div className="flex items-center gap-3">
                               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-display text-xs font-extrabold text-primary">{getInitials(primaryContact.contact_name)}</div>
                               <div>
@@ -395,7 +409,11 @@ const CompanyDetailPage = () => {
                         const status = contact.needs_research ? null : contactProgress?.status ?? "not_contacted";
                         const isMeetingContact = company.meeting_contact_id === contact.id;
                         return (
-                          <div key={contact.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+                          <div
+                            key={contact.id}
+                            className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 shadow-sm ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}
+                            style={{ borderLeft: `3px solid ${isMeetingContact ? "#2FA37F" : status ? STATUS_ACCENT_COLOR[status] : "#FDE68A"}` }}
+                          >
                             <div className="flex items-center gap-3">
                               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-display text-xs font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
                               <div>

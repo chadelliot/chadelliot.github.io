@@ -540,7 +540,11 @@ const ProjectsPage = () => {
     const meetingBlock = meetingBlocks[contact.id];
     const isBlocked = Boolean(meetingBlock?.is_blocked);
     return (
-      <article key={contact.id} className={`overflow-hidden border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+      <article
+        key={contact.id}
+        className={`overflow-hidden rounded-lg border bg-white shadow-sm ${isBlocked ? "border-primary/40" : "border-[#E2E8F0]"}`}
+        style={{ borderLeft: `3px solid ${isBlocked ? "#2FA37F" : STATUS_CHART_COLORS[status]}` }}
+      >
         <div className="grid gap-4 p-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center md:p-5">
           <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 font-display text-sm font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
           <div className="min-w-0">
@@ -599,7 +603,7 @@ const ProjectsPage = () => {
     const isExpanded = Boolean(expandedCompanies[company.id]);
 
     return (
-      <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white">
+      <div key={company.id} className="overflow-hidden rounded-xl border border-[#E2E8F0] bg-white shadow-sm transition-shadow hover:shadow-md">
         <CompanyInfoCard
           company={company}
           research={getCompanyResearchSummary(companyContacts)}
@@ -1071,7 +1075,8 @@ const ProjectsPage = () => {
                   key={stage}
                   type="button"
                   onClick={() => setCompanyStageFilter(isActive ? "all" : stage)}
-                  className={`rounded-2xl border p-4 text-left transition-colors ${isActive ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
+                  style={{ borderTop: `3px solid ${STAGE_CHART_COLORS[stage]}` }}
+                  className={`rounded-2xl border shadow-sm p-4 text-left transition-all hover:shadow-md ${isActive ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
                 >
                   <p className={`font-mono text-3xl font-bold ${isActive ? "text-primary" : "text-foreground"}`}>{companyStageCounts[stage]}</p>
                   <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
@@ -1081,7 +1086,8 @@ const ProjectsPage = () => {
             <button
               type="button"
               onClick={() => setShowCharts((v) => !v)}
-              className={`rounded-2xl border p-4 text-left transition-colors ${showCharts ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
+              style={{ borderTop: "3px solid #2FA37F" }}
+              className={`rounded-2xl border shadow-sm p-4 text-left transition-all hover:shadow-md ${showCharts ? "border-primary bg-primary/5" : "border-[#E2E8F0] bg-white hover:border-primary/50"}`}
             >
               <p className={`font-mono text-3xl font-bold ${showCharts ? "text-primary" : "text-foreground"}`}>{showCharts ? "▲" : "▼"}</p>
               <p className="mt-1 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">{showCharts ? "Hide charts" : "Show charts"}</p>
@@ -1091,7 +1097,7 @@ const ProjectsPage = () => {
           {showCharts ? (
           <>
           <div className="mb-8 grid gap-4 lg:grid-cols-3">
-            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4">
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm" style={{ borderTop: "3px solid #2FA37F" }}>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage</p>
               {companyStagePieData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -1107,7 +1113,7 @@ const ProjectsPage = () => {
               )}
             </div>
 
-            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 lg:col-span-2">
+            <div className="rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm lg:col-span-2" style={{ borderTop: "3px solid #1D4ED8" }}>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Companies by stage, per rep</p>
               {companiesByRepStage.length > 0 ? (
                 <ResponsiveContainer width="100%" height={220}>
@@ -1128,7 +1134,7 @@ const ProjectsPage = () => {
             </div>
           </div>
 
-          <div className="mb-8 rounded-2xl border border-[#E2E8F0] bg-white p-4">
+          <div className="mb-8 rounded-2xl border border-[#E2E8F0] bg-white p-4 shadow-sm" style={{ borderTop: "3px solid #B45309" }}>
             <p className="mb-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts by status</p>
             {contactStatusPieData.length > 0 ? (
               <ResponsiveContainer width="100%" height={240}>
@@ -1146,7 +1152,7 @@ const ProjectsPage = () => {
           </>
           ) : null}
 
-          <div className="mb-6 flex flex-wrap items-center gap-3 border-b border-[#E2E8F0] bg-white px-4 py-3">
+          <div className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-[#E2E8F0] bg-white px-4 py-3 shadow-sm">
             <input
               type="text"
               value={search}

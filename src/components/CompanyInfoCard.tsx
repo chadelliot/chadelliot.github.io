@@ -14,6 +14,15 @@ const STAGE_BADGE_CLASS: Record<Company["company_stage"], string> = {
   closed_lost: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
 };
 
+// Same palette used across the dashboard charts/tiles - keeping the color
+// tied to stage (not decorative) so it reads as meaningful at a glance.
+export const STAGE_ACCENT_COLOR: Record<Company["company_stage"], string> = {
+  new_signal: "#94A3B8",
+  meeting_scheduled: "#2FA37F",
+  closed_won: "#15803D",
+  closed_lost: "#B91C1C",
+};
+
 type CompanyInfoCardProps = {
   company: Company;
   research: CompanyResearchSummary;
@@ -26,9 +35,16 @@ type CompanyInfoCardProps = {
 // before working a person.
 const CompanyInfoCard = ({ company, research, signals, contactCount }: CompanyInfoCardProps) => {
   const topSignal = signals[0];
+  const accentColor = STAGE_ACCENT_COLOR[company.company_stage];
 
   return (
-    <div className="border-b border-[#E2E8F0] bg-[#F8FAFC] px-4 py-3.5">
+    <div
+      className="border-b border-[#E2E8F0] px-4 py-3.5"
+      style={{
+        borderTop: `3px solid ${accentColor}`,
+        background: `linear-gradient(180deg, ${accentColor}14 0%, #F8FAFC 100%)`,
+      }}
+    >
       <div className="flex flex-wrap items-center gap-2">
         <p className="font-display text-lg font-extrabold tracking-tight text-foreground">{company.name}</p>
         <span className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.08em] ${STAGE_BADGE_CLASS[company.company_stage]}`}>
