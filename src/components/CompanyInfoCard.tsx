@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Building2, Zap, Mail } from "lucide-react";
 import {
   COMPANY_STAGE_LABELS,
@@ -7,6 +8,7 @@ import {
   OWNER_LEAD_TYPE_AVATAR_GRADIENT,
   DEFAULT_AVATAR_GRADIENT,
   getInitials,
+  getClearbitLogoUrl,
   type Company,
   type CompanyResearchSummary,
   type CompanySignal,
@@ -41,6 +43,11 @@ type CompanyInfoCardProps = {
   // contacted yet" and wasn't actually telling anyone anything useful at a
   // glance.
   emailContactCount?: number;
+  // Derived from a contact's email domain (see getCompanyDomain) - not
+  // guaranteed to exist or to resolve to an actual Clearbit logo, so this is
+  // always a progressive enhancement over the initials chip, never a
+  // replacement that could leave the avatar blank.
+  logoDomain?: string | null;
 };
 
 // The company-level facts pulled from ChatGPT's account research - shown
@@ -49,9 +56,15 @@ type CompanyInfoCardProps = {
 // today, so the avatar chip is initials-on-gradient rather than a photo -
 // the gradient itself carries meaning (lead type) for Owners instead of
 // being purely decorative.
-const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCount = 0, ownerLeadType, ownerSignalCount, emailContactCount = 0 }: CompanyInfoCardProps) => {
+const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCount = 0, ownerLeadType, ownerSignalCount, emailContactCount = 0, logoDomain }: CompanyInfoCardProps) => {
   const topSignal = signals[0];
   const [gradientFrom, gradientTo] = ownerLeadType ? OWNER_LEAD_TYPE_AVATAR_GRADIENT[ownerLeadType] : DEFAULT_AVATAR_GRADIENT;
+  // Clearbit doesn't have a logo for every domain (small/private companies
+  // especially), and there's no way to know in advance - so this tries the
+  // image and silently falls back to the initials-on-gradient chip the
+  // instant it 404s, rather than showing a broken-image icon.
+  const [logoFailed, setLogoFailed] = useState(false);
+  const showLogo = Boolean(logoDomain) && !logoFailed;
   // "New Signal" just meant "hasn't been contacted yet," which every card
   // in this default view already is - not useful information next to the
   // name. A mail icon + count of contacts with a known email is a more
@@ -63,12 +76,21 @@ const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCoun
   return (
     <div className="border-b border-[#EEEDE7] bg-white px-4 py-4">
       <div className="flex items-start gap-3">
-        <div
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-white"
-          style={{ background: `linear-gradient(135deg, ${gradientFrom}, ${gradientTo})` }}
-        >
-          {getInitials(company.name)}
-        </div>
+        {showLogo ? (
+          <img
+            src={getClearbitLogoUrl(logoDomain as string)}
+            alt=""
+            onError={() => setLogoFailed(true)}
+            className="h-11 w-11 shrink-0 rounded-xl border border-[#EEEDE7] bg-white object-contain p-1.5"
+          />
+        ) : (
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-sm font-semibold text-white"
+            style={{ background: `linear-gradient(135deg, ${gradientFrom}, ${gradientTo})` }}
+          >
+            {getInitials(company.name)}
+          </div>
+        )}
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">

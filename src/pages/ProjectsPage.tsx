@@ -1371,6 +1371,12 @@ const ProjectsPage = () => {
             </div>
           ) : null}
 
+          {!EMAIL_SEQUENCE_STAGES.some((stage) => contact[stage.field]) ? (
+            <div className="mt-4 rounded-lg border border-dashed border-[#CBD5E1] bg-[#FAFAF8] p-4 text-sm text-muted-foreground">
+              No draft email content is on file for this contact yet (no intro or follow-up messages were generated for them). Add them manually via the message editor, or flag this contact for a research/drafting pass.
+            </div>
+          ) : null}
+
           <div className="mt-4 grid gap-3">
             {EMAIL_SEQUENCE_STAGES.map((stage) => {
               const rawText = contact[stage.field];

@@ -36,6 +36,7 @@ import {
   EMAIL_SEQUENCE_STAGES,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
+  OUTREACH_MODEL_DESCRIPTIONS,
   OWNER_LEAD_TYPE_DOT_COLOR,
   fetchOwnerCompanyLeadFields,
   fetchOwnerSignalFields,
@@ -113,6 +114,7 @@ const CompanyDetailPage = () => {
     text: string;
   } | null>(null);
   const [isDraftingAILine, setIsDraftingAILine] = useState(false);
+  const [showOutreachModelHelp, setShowOutreachModelHelp] = useState(false);
 
   // Owner-only. Fetched separately from the member-safe companies/signals
   // fetches above - see the note in ProjectsPage.tsx next to the same
@@ -388,7 +390,7 @@ const CompanyDetailPage = () => {
         onAddContact={() => navigate("/projects")}
       />
       <main className="px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
-        <div className="mx-auto w-full max-w-3xl">
+        <div className="mx-auto w-full max-w-7xl">
           <Link to="/projects" className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">← Back to RevHub</Link>
 
           {isLoadingData ? <p className="mt-6 text-sm text-muted-foreground">Loading company…</p> : null}
@@ -453,229 +455,268 @@ const CompanyDetailPage = () => {
                 ) : null}
               </div>
 
-              <div className="mb-6 overflow-hidden rounded-2xl border border-[#EEEDE7] bg-white shadow-sm">
-                <CompanyInfoCard
-                  company={company}
-                  research={companyResearch}
-                  signals={companySignals}
-                  contactCount={companyContacts.length}
-                  engagedCount={companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length}
-                  ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
-                  ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
-                  emailContactCount={companyContacts.filter((c) => c.email).length}
-                  logoDomain={getCompanyDomain(companyContacts)}
-                />
-              </div>
-
-              {isOwner ? (
-                <div className="mb-6 rounded-lg border border-[#E2E8F0] bg-white">
-                  <button
-                    type="button"
-                    onClick={() => setShowOpportunityIntelligence((v) => !v)}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left"
-                  >
-                    <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Opportunity intelligence (owner only)</span>
-                    <span className="text-xs font-semibold text-muted-foreground">{showOpportunityIntelligence ? "Hide ▲" : "Show ▼"}</span>
-                  </button>
-                  {showOpportunityIntelligence ? (
-                    <div className="border-t border-[#E2E8F0] px-4 py-4">
-                      {companyResearch.valueHypothesis || companyResearch.outreachAngle ? (
-                        <div className="mb-4 rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
-                          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Why this fits RevHub</p>
-                          {companyResearch.valueHypothesis ? (
-                            <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{companyResearch.valueHypothesis}</p>
-                          ) : null}
-                          {companyResearch.outreachAngle ? (
-                            <p className="mt-1 text-sm text-foreground"><span className="font-semibold text-primary">Why now: </span>{companyResearch.outreachAngle}</p>
-                          ) : null}
-                        </div>
-                      ) : null}
-                      {(() => {
-                        const ownerFields = ownerCompanyFields[company.id];
-                        const canonicalType = ownerFields?.canonical_lead_type;
-                        const primarySignal = ownerFields?.primary_signal_id ? companySignals.find((s) => s.id === ownerFields.primary_signal_id) : null;
-                        const primarySignalOwnerFields = primarySignal ? ownerSignalFields[primarySignal.id] : null;
-                        const leadOrigin = canonicalType === "Cold Outreach" ? "Cold Outreach" : primarySignalOwnerFields?.lead_origin;
-                        const otherTypes = (ownerFields?.all_signal_types ?? []).filter((t) => t !== canonicalType);
-                        return (
-                          <div className="grid gap-4 md:grid-cols-2">
-                            <div>
-                              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Canonical lead type</p>
-                              <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                                {canonicalType ? <span className="h-2 w-2 rounded-full" style={{ backgroundColor: OWNER_LEAD_TYPE_DOT_COLOR[canonicalType] }} /> : null}
-                                {canonicalType ?? "Not yet classified"}
-                              </p>
-                              {ownerFields?.lead_type_needs_review ? (
-                                <p className="mt-1 text-xs text-[#B45309]">One or more signals here have no opportunity_type set - flagged for review.</p>
-                              ) : null}
-                            </div>
-                            <div>
-                              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Lead origin</p>
-                              <p className="text-sm font-semibold text-foreground">{leadOrigin ?? "—"}</p>
-                            </div>
-                            {primarySignalOwnerFields?.engagement_details ? (
-                              <div>
-                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Engagement details</p>
-                                <p className="text-sm text-foreground">{primarySignalOwnerFields.engagement_details}</p>
-                              </div>
-                            ) : null}
-                            <div>
-                              <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Related signals</p>
-                              <p className="text-sm text-foreground">{ownerFields?.signal_count ?? 0} total</p>
-                              {otherTypes.length > 0 ? (
-                                <ul className="mt-1 list-inside list-disc text-sm text-muted-foreground">
-                                  {otherTypes.map((t) => <li key={t}>{t}</li>)}
-                                </ul>
-                              ) : null}
-                            </div>
-                          </div>
-                        );
-                      })()}
+              {/* Two-column layout: left/main is what drives the funnel forward
+                  (current status, then contacts to actually work), right/side
+                  is supporting intel (company snapshot, signals, owner-only
+                  classification) - read once, act on the left, reference on
+                  the right as needed. Stacks to a single column on mobile,
+                  main content first. */}
+              <div className="grid gap-6 lg:grid-cols-[1fr_380px] lg:items-start">
+                <div className="grid gap-6">
+                  {company.company_stage === "closed_lost" && company.closed_lost_reason ? (
+                    <div className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
+                      <span className="font-semibold">Closed lost:</span> {company.closed_lost_reason}
                     </div>
                   ) : null}
-                </div>
-              ) : null}
 
-              {company.company_stage === "closed_lost" && company.closed_lost_reason ? (
-                <div className="mb-6 rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-4 py-3 text-sm text-[#B91C1C]">
-                  <span className="font-semibold">Closed lost:</span> {company.closed_lost_reason}
-                </div>
-              ) : null}
-
-              {companyMeeting ? (
-                <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-primary">Meeting scheduled</p>
-                  <p className="mt-1 text-sm text-foreground">
-                    {meetingContact?.contact_name ?? "Unknown contact"}{meetingContact?.title ? `, ${meetingContact.title}` : ""}
-                    {companyMeeting.meeting_date ? ` · ${companyMeeting.meeting_date}` : ""}
-                    {meetingSetter ? ` · set by ${meetingSetter.name}` : ""}
-                  </p>
-                  {companyMeeting.notes ? <p className="mt-1 text-sm text-muted-foreground">{companyMeeting.notes}</p> : null}
-                </div>
-              ) : null}
-
-              {company.company_stage === "closed_won" ? (
-                <div className="mb-6 rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#15803D]">Closed deal</p>
-                  {companyClosedDeal ? (
-                    <p className="mt-1 text-sm text-foreground">
-                      Signed {companyClosedDeal.contract_signed_date} · credited to {teamMembers.find((t) => t.id === companyClosedDeal.credited_to)?.name ?? "unassigned"}
-                      {companyClosedDeal.notes ? ` — ${companyClosedDeal.notes}` : ""}
-                    </p>
-                  ) : (
-                    <div className="mt-2">
-                      <p className="text-sm text-muted-foreground">No closed deal logged yet for this company.</p>
-                      {canManage ? (
-                        showLogDeal ? (
-                          <form onSubmit={handleSaveClosedDeal} className="mt-3 grid gap-2 md:grid-cols-[1fr_1fr_2fr_auto] md:items-end">
-                            <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
-                              Credit to
-                              <select value={dealCreditedTo} onChange={(e) => setDealCreditedTo(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary">
-                                <option value="">Unassigned</option>
-                                {teamMembers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-                              </select>
-                            </label>
-                            <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
-                              Contract signed
-                              <input type="date" value={dealDate} onChange={(e) => setDealDate(e.target.value)} required className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
-                            </label>
-                            <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
-                              Notes
-                              <input type="text" value={dealNotes} onChange={(e) => setDealNotes(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
-                            </label>
-                            <button type="submit" className="h-9 rounded-md bg-primary px-4 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save</button>
-                          </form>
-                        ) : (
-                          <button type="button" onClick={() => setShowLogDeal(true)} className="mt-2 rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">
-                            Log closed deal
-                          </button>
-                        )
-                      ) : null}
+                  {companyMeeting ? (
+                    <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-primary">Meeting scheduled</p>
+                      <p className="mt-1 text-sm text-foreground">
+                        {meetingContact?.contact_name ?? "Unknown contact"}{meetingContact?.title ? `, ${meetingContact.title}` : ""}
+                        {companyMeeting.meeting_date ? ` · ${companyMeeting.meeting_date}` : ""}
+                        {meetingSetter ? ` · set by ${meetingSetter.name}` : ""}
+                      </p>
+                      {companyMeeting.notes ? <p className="mt-1 text-sm text-muted-foreground">{companyMeeting.notes}</p> : null}
                     </div>
-                  )}
-                </div>
-              ) : null}
+                  ) : null}
 
-              {companySignals.length > 0 ? (
-                <div className="mb-8">
-                  <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Hiring signals ({companySignals.length})</p>
-                  <div className="grid gap-2">
-                    {companySignals.map((signal) => (
-                      <div key={signal.id} className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-sm">
-                        <div className="flex flex-wrap items-center justify-between gap-2">
-                          <div>
-                            <span className="font-semibold text-[#92400E]">{signal.role_title ?? "Open role"}</span>
-                            {signal.posted_date ? <span className="ml-2 text-xs text-[#92400E]">posted {new Date(signal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> : null}
-                            {signal.source_url ? <a href={signal.source_url} target="_blank" rel="noreferrer" className="ml-2 text-xs font-semibold text-primary hover:underline">View posting</a> : null}
-                          </div>
+                  {company.company_stage === "closed_won" ? (
+                    <div className="rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#15803D]">Closed deal</p>
+                      {companyClosedDeal ? (
+                        <p className="mt-1 text-sm text-foreground">
+                          Signed {companyClosedDeal.contract_signed_date} · credited to {teamMembers.find((t) => t.id === companyClosedDeal.credited_to)?.name ?? "unassigned"}
+                          {companyClosedDeal.notes ? ` — ${companyClosedDeal.notes}` : ""}
+                        </p>
+                      ) : (
+                        <div className="mt-2">
+                          <p className="text-sm text-muted-foreground">No closed deal logged yet for this company.</p>
                           {canManage ? (
-                            <select
-                              value={signal.outreach_model ?? ""}
-                              onChange={(e) => handleSetOutreachModel(signal.id, e.target.value as OutreachModel | "")}
-                              className="h-8 rounded-md border border-[#FDE68A] bg-white px-2 text-xs font-semibold text-[#92400E] outline-none focus:border-primary"
-                            >
-                              <option value="">No model set</option>
-                              {(Object.keys(OUTREACH_MODEL_LABELS) as OutreachModel[]).map((m) => <option key={m} value={m}>{OUTREACH_MODEL_LABELS[m]}</option>)}
-                            </select>
-                          ) : signal.outreach_model ? (
-                            <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${OUTREACH_MODEL_BADGE_CLASS[signal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[signal.outreach_model]}</span>
+                            showLogDeal ? (
+                              <form onSubmit={handleSaveClosedDeal} className="mt-3 grid gap-2 md:grid-cols-[1fr_1fr_2fr_auto] md:items-end">
+                                <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
+                                  Credit to
+                                  <select value={dealCreditedTo} onChange={(e) => setDealCreditedTo(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary">
+                                    <option value="">Unassigned</option>
+                                    {teamMembers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                  </select>
+                                </label>
+                                <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
+                                  Contract signed
+                                  <input type="date" value={dealDate} onChange={(e) => setDealDate(e.target.value)} required className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
+                                </label>
+                                <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
+                                  Notes
+                                  <input type="text" value={dealNotes} onChange={(e) => setDealNotes(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
+                                </label>
+                                <button type="submit" className="h-9 rounded-md bg-primary px-4 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save</button>
+                              </form>
+                            ) : (
+                              <button type="button" onClick={() => setShowLogDeal(true)} className="mt-2 rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">
+                                Log closed deal
+                              </button>
+                            )
                           ) : null}
                         </div>
-                        {signal.notes ? <p className="mt-1 text-xs text-[#92400E]">{signal.notes}</p> : null}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
-
-              <div>
-                <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts ({companyContacts.length})</p>
-                <p className="mb-3 text-xs text-muted-foreground">Click the mail icon to work an email sequence, or a message-stage button to open, edit, and copy a LinkedIn message.</p>
-                <div className="grid gap-2">
-                  {primaryContact ? (
-                    getContactTier(primaryContact) === "research" ? (
-                      <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
-                        <div>
-                          <span className="text-sm font-semibold text-foreground">{primaryContact.contact_name}</span>
-                          <span className="ml-2 text-xs text-muted-foreground">{primaryContact.title}</span>
-                          <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">Needs research</span>
-                        </div>
-                        <a href={buildLinkedInSearchUrl(primaryContact.contact_name, primaryContact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
-                      </div>
-                    ) : (
-                      renderOutreachContact(primaryContact, true)
-                    )
-                  ) : (
-                    <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
-                  )}
-
-                  {otherContacts.length > 0 ? (
-                    <button
-                      type="button"
-                      onClick={() => setShowAllContacts((v) => !v)}
-                      style={{ backgroundColor: "#2c96731a" }}
-                      className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
-                    >
-                      {showAllContacts ? "Hide" : "Show"} {otherContacts.length} other contact{otherContacts.length === 1 ? "" : "s"} {showAllContacts ? "▲" : "▼"}
-                    </button>
+                      )}
+                    </div>
                   ) : null}
 
-                  {showAllContacts
-                    ? otherContacts.map((contact) =>
-                        contact.needs_research ? (
-                          <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
+                  <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm md:p-5">
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts ({companyContacts.length})</p>
+                    <p className="mb-3 text-xs text-muted-foreground">Click the mail icon to work an email sequence, or a message-stage button to open, edit, and copy a LinkedIn message.</p>
+                    <div className="grid gap-2">
+                      {primaryContact ? (
+                        getContactTier(primaryContact) === "research" ? (
+                          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
                             <div>
-                              <span className="text-sm font-semibold text-foreground">{contact.contact_name}</span>
-                              <span className="ml-2 text-xs text-muted-foreground">{contact.title}</span>
+                              <span className="text-sm font-semibold text-foreground">{primaryContact.contact_name}</span>
+                              <span className="ml-2 text-xs text-muted-foreground">{primaryContact.title}</span>
                               <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">Needs research</span>
                             </div>
-                            <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
+                            <a href={buildLinkedInSearchUrl(primaryContact.contact_name, primaryContact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
                           </div>
                         ) : (
-                          renderOutreachContact(contact, false)
+                          renderOutreachContact(primaryContact, true)
                         )
-                      )
-                    : null}
+                      ) : (
+                        <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
+                      )}
+
+                      {otherContacts.length > 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllContacts((v) => !v)}
+                          style={{ backgroundColor: "#2c96731a" }}
+                          className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                        >
+                          {showAllContacts ? "Hide" : "Show"} {otherContacts.length} other contact{otherContacts.length === 1 ? "" : "s"} {showAllContacts ? "▲" : "▼"}
+                        </button>
+                      ) : null}
+
+                      {showAllContacts
+                        ? otherContacts.map((contact) =>
+                            contact.needs_research ? (
+                              <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
+                                <div>
+                                  <span className="text-sm font-semibold text-foreground">{contact.contact_name}</span>
+                                  <span className="ml-2 text-xs text-muted-foreground">{contact.title}</span>
+                                  <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">Needs research</span>
+                                </div>
+                                <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
+                              </div>
+                            ) : (
+                              renderOutreachContact(contact, false)
+                            )
+                          )
+                        : null}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-6">
+                  <div className="overflow-hidden rounded-2xl border border-[#EEEDE7] bg-white shadow-sm">
+                    <CompanyInfoCard
+                      company={company}
+                      research={companyResearch}
+                      signals={companySignals}
+                      contactCount={companyContacts.length}
+                      engagedCount={companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length}
+                      ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
+                      ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
+                      emailContactCount={companyContacts.filter((c) => c.email).length}
+                      logoDomain={getCompanyDomain(companyContacts)}
+                    />
+                  </div>
+
+                  {companySignals.length > 0 ? (
+                    <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm md:p-5">
+                      <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Hiring signals ({companySignals.length})</p>
+                        <button
+                          type="button"
+                          onClick={() => setShowOutreachModelHelp((v) => !v)}
+                          className="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary hover:underline"
+                        >
+                          {showOutreachModelHelp ? "Hide" : "What do these models mean?"}
+                        </button>
+                      </div>
+                      {showOutreachModelHelp ? (
+                        <div className="mb-3 grid gap-2 rounded-lg border border-[#E2E8F0] bg-[#FAFAF8] p-3">
+                          {(Object.keys(OUTREACH_MODEL_LABELS) as OutreachModel[]).map((m) => (
+                            <p key={m} className="text-xs text-foreground">
+                              <span className={`mr-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${OUTREACH_MODEL_BADGE_CLASS[m]}`}>{OUTREACH_MODEL_LABELS[m]}</span>
+                              {OUTREACH_MODEL_DESCRIPTIONS[m]}
+                            </p>
+                          ))}
+                        </div>
+                      ) : null}
+                      <div className="grid gap-2">
+                        {companySignals.map((signal) => (
+                          <div key={signal.id} className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-sm">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div>
+                                <span className="font-semibold text-[#92400E]">{signal.role_title ?? "Open role"}</span>
+                                {signal.posted_date ? <span className="ml-2 text-xs text-[#92400E]">posted {new Date(signal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> : null}
+                                {signal.source_url ? <a href={signal.source_url} target="_blank" rel="noreferrer" className="ml-2 text-xs font-semibold text-primary hover:underline">View posting</a> : null}
+                              </div>
+                              {canManage ? (
+                                <select
+                                  value={signal.outreach_model ?? ""}
+                                  onChange={(e) => handleSetOutreachModel(signal.id, e.target.value as OutreachModel | "")}
+                                  className="h-8 rounded-md border border-[#FDE68A] bg-white px-2 text-xs font-semibold text-[#92400E] outline-none focus:border-primary"
+                                >
+                                  <option value="">No model set</option>
+                                  {(Object.keys(OUTREACH_MODEL_LABELS) as OutreachModel[]).map((m) => <option key={m} value={m}>{OUTREACH_MODEL_LABELS[m]}</option>)}
+                                </select>
+                              ) : signal.outreach_model ? (
+                                <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${OUTREACH_MODEL_BADGE_CLASS[signal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[signal.outreach_model]}</span>
+                              ) : null}
+                            </div>
+                            {signal.notes ? <p className="mt-1 text-xs text-[#92400E]">{signal.notes}</p> : null}
+                            {signal.outreach_model ? (
+                              <p className="mt-1.5 text-xs text-[#92400E]">
+                                <span className="font-semibold">{OUTREACH_MODEL_LABELS[signal.outreach_model]}: </span>
+                                {OUTREACH_MODEL_DESCRIPTIONS[signal.outreach_model]}
+                              </p>
+                            ) : canManage ? (
+                              <p className="mt-1.5 text-xs text-[#92400E]/70">Pick a model above for messaging guidance on this signal.</p>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {isOwner ? (
+                    <div className="rounded-lg border border-[#E2E8F0] bg-white">
+                      <button
+                        type="button"
+                        onClick={() => setShowOpportunityIntelligence((v) => !v)}
+                        className="flex w-full items-center justify-between px-4 py-3 text-left"
+                      >
+                        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Opportunity intelligence (owner only)</span>
+                        <span className="text-xs font-semibold text-muted-foreground">{showOpportunityIntelligence ? "Hide ▲" : "Show ▼"}</span>
+                      </button>
+                      {showOpportunityIntelligence ? (
+                        <div className="border-t border-[#E2E8F0] px-4 py-4">
+                          {companyResearch.valueHypothesis || companyResearch.outreachAngle ? (
+                            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
+                              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Why this fits RevHub</p>
+                              {companyResearch.valueHypothesis ? (
+                                <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{companyResearch.valueHypothesis}</p>
+                              ) : null}
+                              {companyResearch.outreachAngle ? (
+                                <p className="mt-1 text-sm text-foreground"><span className="font-semibold text-primary">Why now: </span>{companyResearch.outreachAngle}</p>
+                              ) : null}
+                            </div>
+                          ) : null}
+                          {(() => {
+                            const ownerFields = ownerCompanyFields[company.id];
+                            const canonicalType = ownerFields?.canonical_lead_type;
+                            const primarySignal = ownerFields?.primary_signal_id ? companySignals.find((s) => s.id === ownerFields.primary_signal_id) : null;
+                            const primarySignalOwnerFields = primarySignal ? ownerSignalFields[primarySignal.id] : null;
+                            const leadOrigin = canonicalType === "Cold Outreach" ? "Cold Outreach" : primarySignalOwnerFields?.lead_origin;
+                            const otherTypes = (ownerFields?.all_signal_types ?? []).filter((t) => t !== canonicalType);
+                            return (
+                              <div className="grid gap-4">
+                                <div>
+                                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Canonical lead type</p>
+                                  <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                    {canonicalType ? <span className="h-2 w-2 rounded-full" style={{ backgroundColor: OWNER_LEAD_TYPE_DOT_COLOR[canonicalType] }} /> : null}
+                                    {canonicalType ?? "Not yet classified"}
+                                  </p>
+                                  {ownerFields?.lead_type_needs_review ? (
+                                    <p className="mt-1 text-xs text-[#B45309]">One or more signals here have no opportunity_type set - flagged for review.</p>
+                                  ) : null}
+                                </div>
+                                <div>
+                                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Lead origin</p>
+                                  <p className="text-sm font-semibold text-foreground">{leadOrigin ?? "—"}</p>
+                                </div>
+                                {primarySignalOwnerFields?.engagement_details ? (
+                                  <div>
+                                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Engagement details</p>
+                                    <p className="text-sm text-foreground">{primarySignalOwnerFields.engagement_details}</p>
+                                  </div>
+                                ) : null}
+                                <div>
+                                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Related signals</p>
+                                  <p className="text-sm text-foreground">{ownerFields?.signal_count ?? 0} total</p>
+                                  {otherTypes.length > 0 ? (
+                                    <ul className="mt-1 list-inside list-disc text-sm text-muted-foreground">
+                                      {otherTypes.map((t) => <li key={t}>{t}</li>)}
+                                    </ul>
+                                  ) : null}
+                                </div>
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
             </>
@@ -733,6 +774,12 @@ const CompanyDetailPage = () => {
                   >
                     {copyFeedback[`${contact.id}-email_subject`] ?? "Copy subject"}
                   </button>
+                </div>
+              ) : null}
+
+              {!EMAIL_SEQUENCE_STAGES.some((stage) => contact[stage.field]) ? (
+                <div className="mt-4 rounded-lg border border-dashed border-[#CBD5E1] bg-[#FAFAF8] p-4 text-sm text-muted-foreground">
+                  No draft email content is on file for this contact yet (no intro or follow-up messages were generated for them). Add them manually via the message editor, or flag this contact for a research/drafting pass.
                 </div>
               ) : null}
 

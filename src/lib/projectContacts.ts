@@ -99,6 +99,20 @@ export const OUTREACH_MODEL_BADGE_CLASS: Record<OutreachModel, string> = {
   consolidate: "border-[#FBCFE8] bg-[#FDF2F8] text-[#BE185D]",
 };
 
+// What each model means and what a rep should actually do with it - shown
+// next to the dropdown/badge wherever outreach_model appears (see
+// OutreachModelHelp in CompanyDetailPage.tsx) since the label alone
+// ("Augment"?) doesn't explain itself. See
+// backfill_outreach_model_heuristic.sql for the keyword logic that presets
+// this per signal.
+export const OUTREACH_MODEL_DESCRIPTIONS: Record<OutreachModel, string> = {
+  replace: "Someone in this role left or is leaving. Pitch continuity: fractional support that covers the gap immediately, or as an ongoing alternative to re-hiring full-time.",
+  bridge: "They need interim coverage while a permanent search runs, or during a leave of absence. Pitch speed: ready-now support that doesn't wait on a full hiring process.",
+  build: "This is a net-new function or first hire in this area. Pitch expertise-on-tap: senior-level experience without the cost and time of building an in-house team from scratch.",
+  augment: "An existing team just needs more capacity. Pitch flexible bandwidth: extra hands on what's already stretched, without adding full-time headcount.",
+  consolidate: "They're merging roles or cutting costs. Pitch efficiency: one experienced fractional hire covering what would otherwise take multiple full-time salaries.",
+};
+
 // Owner-only fields (Phase 1 lead-origin/opportunity-type classification).
 // These are never present in the member-safe fetch - they only arrive via
 // the owner-only RPC fetches below, which the database refuses to return

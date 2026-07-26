@@ -4,7 +4,10 @@ import {
   COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
+  OUTREACH_MODEL_DESCRIPTIONS,
   getCompanyResearchSummary,
+  getCompanyDomain,
+  getClearbitLogoUrl,
   PRIORITY_ORDER,
   type Company,
   type CompanyStage,
@@ -13,6 +16,16 @@ import {
   type ContactProgress,
   type TeamMember,
 } from "@/lib/projectContacts";
+
+// Small logo chip for a board card - tries Clearbit, falls back to nothing
+// (no initials chip here; the company name text is already the primary
+// label on these compact cards, so a failed logo just means no image
+// rather than swapping to another element).
+const CompanyLogo = ({ domain }: { domain: string | null }) => {
+  const [failed, setFailed] = useState(false);
+  if (!domain || failed) return null;
+  return <img src={getClearbitLogoUrl(domain)} alt="" onError={() => setFailed(true)} className="h-5 w-5 shrink-0 rounded border border-[#EEEDE7] bg-white object-contain p-0.5" />;
+};
 
 const STAGE_ORDER: CompanyStage[] = ["new_signal", "meeting_scheduled", "closed_won", "closed_lost"];
 
@@ -209,7 +222,10 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
                       className="block rounded-xl border border-[#EEEDE7] bg-white px-3 py-2.5 text-sm shadow-sm transition-shadow hover:shadow-md"
                     >
                       <div className="flex items-start justify-between gap-2">
-                        <p className="font-semibold text-foreground">{company.name}</p>
+                        <span className="flex min-w-0 items-center gap-1.5">
+                          <CompanyLogo domain={getCompanyDomain(contactsByCompanyId[company.id] ?? [])} />
+                          <p className="truncate font-semibold text-foreground">{company.name}</p>
+                        </span>
                         {insight?.stalled ? (
                           <span className="shrink-0 rounded-full bg-[#FEF2F2] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.06em] text-[#B91C1C]">Stalled</span>
                         ) : null}
@@ -219,7 +235,7 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
                         {insight?.priority ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-1.5 py-0.5">Priority {insight.priority}</span> : null}
                         {companySignals.length > 0 ? <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-1.5 py-0.5 text-[#92400E]">{companySignals.length} signal{companySignals.length === 1 ? "" : "s"}</span> : null}
                         {topSignal?.outreach_model ? (
-                          <span className={`rounded-full border px-1.5 py-0.5 ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[topSignal.outreach_model]}</span>
+                          <span title={OUTREACH_MODEL_DESCRIPTIONS[topSignal.outreach_model]} className={`cursor-help rounded-full border px-1.5 py-0.5 ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[topSignal.outreach_model]}</span>
                         ) : null}
                         {rep ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-1.5 py-0.5">{rep.name}</span> : <span className="text-muted-foreground/70">Unassigned</span>}
                       </div>
