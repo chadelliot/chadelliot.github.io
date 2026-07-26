@@ -15,6 +15,8 @@ import {
   updateCompanyAssignedRep,
   updateSignalOutreachModel,
   createClosedDeal,
+  deleteMeetingForContact,
+  deleteClosedDealsForCompany,
   findCurrentTeamMember,
   canManageCompany,
   getInitials,
@@ -151,12 +153,26 @@ const CompanyDetailPage = () => {
     // Reopening (back to new_signal) clears out both closed-state fields,
     // regardless of which closed state it's reverting from, so the company
     // comes back clean rather than carrying a stale reason or meeting link.
+    const priorMeetingContactId = company.meeting_contact_id;
     if (stage === "new_signal") {
       updates.meeting_contact_id = null;
       updates.closed_lost_reason = null;
     }
     const updated = await updateCompanyStage(session, company.id, updates);
     if (updated) setCompanies((current) => current.map((c) => (c.id === updated.id ? updated : c)));
+    // "Reopen outreach" is meant to wipe the slate clean everywhere, not just
+    // on this page - the Team page's meetings/closed-deals lists and its
+    // per-rep tally columns all read straight from these tables, so a stale
+    // row there would keep showing a date, note, or count for something
+    // that's no longer true.
+    if (stage === "new_signal" && updated) {
+      if (priorMeetingContactId) {
+        await deleteMeetingForContact(session, priorMeetingContactId);
+        setMeetings((current) => current.filter((m) => m.contact_id !== priorMeetingContactId));
+      }
+      await deleteClosedDealsForCompany(session, company.id, company.name);
+      setClosedDeals((current) => current.filter((d) => d.company_id !== company.id && d.company !== company.name));
+    }
   };
 
   const handleSetOutreachModel = async (signalId: string, model: OutreachModel | "") => {

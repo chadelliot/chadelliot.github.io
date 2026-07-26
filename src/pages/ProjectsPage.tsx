@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail } from "lucide-react";
+import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -355,8 +355,6 @@ const ProjectsPage = () => {
       .sort((a, b) => STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name));
   }, [companies, currentTeamMember]);
 
-  const { visibleCount: memberVisibleCount, sentinelRef: memberSentinelRef } = useInfiniteReveal(myAssignedCompanies.length);
-
   // A company only has to be "touched," not fully worked, before a rep can
   // ask for more - once at least one contact there has been reached out to
   // (any status past not_contacted) or marked do_not_contact, that's
@@ -632,6 +630,50 @@ const ProjectsPage = () => {
       return a.company.localeCompare(b.company);
     });
   }, [contacts, progress, signalsByCompany, activeFilter, priorityFilter, search]);
+
+  // Member-scoped version of the same search/status/priority filters the
+  // owner view uses (filteredContacts, above, is already computed across
+  // every contact) - restricted here to only the companies this rep is
+  // assigned, so a Member gets the same filtering power without ever
+  // touching Lead Type (that control - and the data behind it - stays
+  // owner-only, rendered only in the owner branch further down).
+  const myFilteredCompanyGroups = useMemo(() => {
+    const myCompanyIds = new Set(myAssignedCompanies.map((c) => c.id));
+    const byCompanyId: Record<string, ProjectContact[]> = {};
+    for (const contact of filteredContacts) {
+      if (!contact.company_id || !myCompanyIds.has(contact.company_id)) continue;
+      (byCompanyId[contact.company_id] ??= []).push(contact);
+    }
+    return myAssignedCompanies
+      .filter((c) => byCompanyId[c.id]?.length)
+      .map((company) => ({ company, matchingContacts: byCompanyId[company.id] }));
+  }, [myAssignedCompanies, filteredContacts]);
+
+  const { visibleCount: memberVisibleCount, sentinelRef: memberSentinelRef } = useInfiniteReveal(myFilteredCompanyGroups.length);
+
+  // Top-of-page KPI row for a Member's own book - company-level "total
+  // opportunities" plus the three funnel stages (unfiltered by the
+  // search/status/priority bar, same as the owner's stage tiles, so these
+  // always reflect the rep's whole book at a glance) alongside contact-level
+  // engagement, which the company-stage counts alone don't surface.
+  const myCompanyStageCounts = useMemo(() => {
+    const counts: Record<CompanyStage, number> = { new_signal: 0, meeting_scheduled: 0, closed_won: 0, closed_lost: 0 };
+    for (const company of myAssignedCompanies) counts[company.company_stage] = (counts[company.company_stage] ?? 0) + 1;
+    return counts;
+  }, [myAssignedCompanies]);
+
+  const myContactEngagement = useMemo(() => {
+    const myCompanyIds = new Set(myAssignedCompanies.map((c) => c.id));
+    let engaged = 0;
+    let notEngaged = 0;
+    for (const contact of contacts) {
+      if (!contact.company_id || !myCompanyIds.has(contact.company_id) || contact.do_not_contact) continue;
+      const status = progress[contact.id]?.status ?? "not_contacted";
+      if (status === "not_contacted") notEngaged += 1;
+      else engaged += 1;
+    }
+    return { engaged, notEngaged };
+  }, [myAssignedCompanies, contacts, progress]);
 
   // Owner view, grouped by company instead of a flat contact list - same
   // shape as a rep's "My assignments," but across every company with a
@@ -1234,16 +1276,113 @@ const ProjectsPage = () => {
               </div>
             </div>
 
+            {/* Same six numbers regardless of the search/status/priority
+                filters below - this is "how is my whole book doing," not
+                "how many rows match my current filter." */}
+            <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+                <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.new_signal }}>
+                  <Zap size={16} style={{ color: STAGE_CHART_COLORS.new_signal }} />
+                </div>
+                <p className="text-2xl font-semibold text-foreground">{myAssignedCompanies.length}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Total opportunities</p>
+              </div>
+              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+                <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#94A3B822]">
+                  <UserMinus size={16} className="text-[#64748B]" />
+                </div>
+                <p className="text-2xl font-semibold text-foreground">{myContactEngagement.notEngaged}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Contacts not engaged</p>
+              </div>
+              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+                <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#2FA37F22]">
+                  <UserCheck size={16} className="text-primary" />
+                </div>
+                <p className="text-2xl font-semibold text-foreground">{myContactEngagement.engaged}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Contacts engaged</p>
+              </div>
+              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+                <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.meeting_scheduled }}>
+                  <CalendarClock size={16} style={{ color: STAGE_CHART_COLORS.meeting_scheduled }} />
+                </div>
+                <p className="text-2xl font-semibold text-foreground">{myCompanyStageCounts.meeting_scheduled}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Meetings scheduled</p>
+              </div>
+              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+                <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.closed_won }}>
+                  <Trophy size={16} style={{ color: STAGE_CHART_COLORS.closed_won }} />
+                </div>
+                <p className="text-2xl font-semibold text-foreground">{myCompanyStageCounts.closed_won}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Closed won</p>
+              </div>
+              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+                <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.closed_lost }}>
+                  <XCircle size={16} style={{ color: STAGE_CHART_COLORS.closed_lost }} />
+                </div>
+                <p className="text-2xl font-semibold text-foreground">{myCompanyStageCounts.closed_lost}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Closed lost</p>
+              </div>
+            </div>
+
+            {/* Same search/status/priority controls the owner gets - Lead
+                Type deliberately isn't here (owner-only data, see
+                fetchOwnerCompanyLeadFields). */}
+            <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-[#EEEDE7] bg-white px-4 py-3 shadow-sm">
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search company, name, or title"
+                className="h-10 flex-1 rounded-lg border border-[#CBD5E1] bg-white px-3 text-sm outline-none focus:border-primary"
+              />
+              <label className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                Status
+                <select value={activeFilter} onChange={(e) => setActiveFilter(e.target.value as FilterKey)} className="h-10 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">
+                  <option value="all">All</option>
+                  <option value="warm_signal">Warm signal</option>
+                  <option value="not_contacted">Not Contacted</option>
+                  <option value="connection_sent">Connection Sent</option>
+                  <option value="introduction_sent">Introduction Sent</option>
+                  <option value="follow_up_sent">Follow-Up Sent</option>
+                  <option value="meeting_set">Meetings set</option>
+                  <option value="needs_research">Need research</option>
+                </select>
+              </label>
+              <label className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+                Priority
+                <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="h-10 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">
+                  <option value="all">All</option>
+                  <option value="A">A</option>
+                  <option value="A/B">A/B</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                </select>
+              </label>
+              {activeFilter !== "all" || priorityFilter !== "all" ? (
+                <button
+                  type="button"
+                  onClick={() => { setActiveFilter("all"); setPriorityFilter("all"); }}
+                  className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
+                >
+                  Clear filters
+                </button>
+              ) : null}
+            </div>
+
             {isLoadingData ? <p className="text-sm text-muted-foreground">Loading your assignments…</p> : null}
 
             {!isLoadingData && myAssignedCompanies.length === 0 ? (
               <p className="text-sm text-muted-foreground">{isRequestingBatch ? "Getting your first batch of companies…" : "No companies assigned yet."}</p>
             ) : null}
 
+            {!isLoadingData && myAssignedCompanies.length > 0 && myFilteredCompanyGroups.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No contacts match the current filters.</p>
+            ) : null}
+
             <div className="grid gap-6 lg:grid-cols-2 lg:items-start">
-              {myAssignedCompanies.slice(0, memberVisibleCount).map((company) => renderCompanyCard(company, contacts.filter((c) => c.company_id === company.id && !c.do_not_contact)))}
+              {myFilteredCompanyGroups.slice(0, memberVisibleCount).map(({ company, matchingContacts }) => renderCompanyCard(company, matchingContacts))}
             </div>
-            {memberVisibleCount < myAssignedCompanies.length ? <div ref={memberSentinelRef} className="h-1" /> : null}
+            {memberVisibleCount < myFilteredCompanyGroups.length ? <div ref={memberSentinelRef} className="h-1" /> : null}
 
             {myAssignedCompanies.length > 0 ? (
               <div className="mt-6 flex justify-center">
@@ -1351,7 +1490,7 @@ const ProjectsPage = () => {
 
           {activeSection === "board" ? (
             <div className="mb-8 rounded-2xl border border-[#EEEDE7] bg-white p-5 shadow-sm">
-              <CompanyBoard companies={companies} contacts={contacts} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} />
+              <CompanyBoard companies={companies} contacts={contacts} progress={progress} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} />
             </div>
           ) : null}
 

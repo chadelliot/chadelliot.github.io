@@ -235,7 +235,7 @@ export type ContactMeetingBlock = {
 };
 
 export const COMPANY_STAGE_LABELS: Record<CompanyStage, string> = {
-  new_signal: "New Signal",
+  new_signal: "New Opportunity",
   meeting_scheduled: "Meeting Scheduled",
   closed_won: "Closed Won",
   closed_lost: "Closed Lost",
@@ -606,6 +606,33 @@ export const createClosedDeal = async (
   if (!response.ok) return null;
   const rows = (await response.json()) as ClosedDeal[];
   return rows[0] ?? null;
+};
+
+// Reopening a company (back to New Opportunity) is meant to wipe the slate
+// clean, not just hide the meeting/closed-deal on the company page - the
+// Team page's "Meetings set" / "Closed deals" lists and its per-rep tally
+// columns all read straight from these two tables, so a stale row there
+// would keep showing dates, notes, and counts for something that's no
+// longer true. Deleting outright (rather than some "reverted" flag) matches
+// how Chad described the expectation: gone from every place it showed up.
+export const deleteMeetingForContact = async (session: ProposalSession, contactId: string): Promise<void> => {
+  if (!DB_URL) return;
+  await fetch(`${DB_URL}/rest/v1/meetings?contact_id=eq.${encodeURIComponent(contactId)}`, {
+    method: "DELETE",
+    headers: authHeaders(session),
+  });
+};
+
+// Closed-deal rows are matched by company_id where present, but older rows
+// (and possibly some from before company_id was tracked) only have the
+// plain company name string - so both are covered here rather than risking
+// a leftover row surviving whichever backfill state a given deal is in.
+export const deleteClosedDealsForCompany = async (session: ProposalSession, companyId: string, companyName: string): Promise<void> => {
+  if (!DB_URL) return;
+  await fetch(`${DB_URL}/rest/v1/closed_deals?or=(company_id.eq.${encodeURIComponent(companyId)},company.eq.${encodeURIComponent(companyName)})`, {
+    method: "DELETE",
+    headers: authHeaders(session),
+  });
 };
 
 // Ranks which "Target #" a contact was designated during ChatGPT's account
