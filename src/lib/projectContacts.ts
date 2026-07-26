@@ -63,6 +63,22 @@ export type TeamMember = {
   email: string;
   role: "owner" | "member";
   title?: string | null;
+  linkedin_url?: string | null;
+  photo_url?: string | null;
+  resume_url?: string | null;
+  // The short sentence appended to outreach as signature-line
+  // personalization - see EMAIL_SEQUENCE_STAGES / matchCredibilityLine
+  // below for how this actually gets used.
+  credibility_line?: string | null;
+  // Free-text, comma-separated industries/keywords a rep associates with
+  // their own background (e.g. "supply chain, logistics, manufacturing") -
+  // used for context-aware matching against a contact's industry/sector.
+  // Deliberately a plain string rather than a structured array - reps fill
+  // this in themselves, and a comma-separated field is the lowest-friction
+  // input for that.
+  background_tags?: string | null;
+  google_calendar_connected?: boolean;
+  google_calendar_email?: string | null;
 };
 
 export type OutreachModel = "replace" | "bridge" | "build" | "augment" | "consolidate";
@@ -397,9 +413,18 @@ export const fetchContactProgress = async (session: ProposalSession): Promise<Re
   return Object.fromEntries(rows.map((row) => [row.contact_id, row]));
 };
 
+// Explicit column list rather than select=* - the google_refresh_token
+// column is intentionally excluded from authenticated/anon's grant (see
+// add_google_calendar_fields.sql) so it never reaches the browser. PostgREST
+// throws a permission error for the *entire* select=* query if any column on
+// the row isn't grantable to the requesting role, so select=* would fail
+// outright here rather than just omitting that one column.
+const TEAM_MEMBER_COLUMNS =
+  "id,name,email,role,title,linkedin_url,photo_url,resume_url,credibility_line,background_tags,google_calendar_connected,google_calendar_email";
+
 export const fetchTeamMembers = async (session: ProposalSession): Promise<TeamMember[]> => {
   if (!DB_URL) return [];
-  const response = await fetch(`${DB_URL}/rest/v1/team_members?select=*&order=name.asc`, {
+  const response = await fetch(`${DB_URL}/rest/v1/team_members?select=${TEAM_MEMBER_COLUMNS}&order=name.asc`, {
     headers: authHeaders(session),
   });
   if (!response.ok) return [];
@@ -408,7 +433,7 @@ export const fetchTeamMembers = async (session: ProposalSession): Promise<TeamMe
 
 export const updateTeamMemberName = async (session: ProposalSession, teamMemberId: string, name: string): Promise<TeamMember | null> => {
   if (!DB_URL) return null;
-  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}`, {
+  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}&select=${TEAM_MEMBER_COLUMNS}`, {
     method: "PATCH",
     headers: { ...authHeaders(session), Prefer: "return=representation" },
     body: JSON.stringify({ name }),
@@ -426,10 +451,18 @@ export const updateTeamMemberName = async (session: ProposalSession, teamMemberI
 export const updateTeamMemberProfile = async (
   session: ProposalSession,
   teamMemberId: string,
-  updates: { name?: string; title?: string | null }
+  updates: {
+    name?: string;
+    title?: string | null;
+    linkedin_url?: string | null;
+    photo_url?: string | null;
+    resume_url?: string | null;
+    credibility_line?: string | null;
+    background_tags?: string | null;
+  }
 ): Promise<TeamMember | null> => {
   if (!DB_URL) return null;
-  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}`, {
+  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}&select=${TEAM_MEMBER_COLUMNS}`, {
     method: "PATCH",
     headers: { ...authHeaders(session), Prefer: "return=representation" },
     body: JSON.stringify(updates),
@@ -437,6 +470,51 @@ export const updateTeamMemberProfile = async (
   if (!response.ok) return null;
   const rows = (await response.json()) as TeamMember[];
   return rows[0] ?? null;
+};
+
+// Uploads a photo or resume to the matching Supabase Storage bucket (see
+// add_rep_profile_enrichment.sql for the buckets + RLS policies), under a
+// path scoped to this rep's own team_member id so the storage policies can
+// verify ownership. Returns the URL to save onto the team_members row -
+// public for avatars (bucket is public), or the storage path itself for
+// resumes (bucket is private; fetchResumeSignedUrl below turns that into a
+// short-lived signed link when someone actually wants to view it).
+export const uploadTeamMemberFile = async (
+  session: ProposalSession,
+  teamMemberId: string,
+  bucket: "avatars" | "resumes",
+  file: File
+): Promise<string | null> => {
+  if (!DB_URL) return null;
+  const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
+  const path = `${teamMemberId}/${bucket === "avatars" ? "photo" : "resume"}.${ext}`;
+  const response = await fetch(`${DB_URL}/storage/v1/object/${bucket}/${path}`, {
+    method: "POST",
+    headers: {
+      apikey: DB_PUBLIC || "",
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": file.type || "application/octet-stream",
+      "x-upsert": "true",
+    },
+    body: file,
+  });
+  if (!response.ok) return null;
+  if (bucket === "avatars") return `${DB_URL}/storage/v1/object/public/${bucket}/${path}`;
+  return path;
+};
+
+// Resumes live in a private bucket (they're personal documents), so viewing
+// one needs a short-lived signed URL rather than a permanent public link.
+export const fetchResumeSignedUrl = async (session: ProposalSession, resumePath: string): Promise<string | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/storage/v1/object/sign/resumes/${resumePath}`, {
+    method: "POST",
+    headers: { ...authHeaders(session) },
+    body: JSON.stringify({ expiresIn: 300 }),
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as { signedURL?: string };
+  return data.signedURL ? `${DB_URL}/storage/v1${data.signedURL}` : null;
 };
 
 // Only actually works if the signed-in user is an owner - enforced by a
@@ -448,7 +526,7 @@ export const updateTeamMemberRole = async (
   role: "owner" | "member"
 ): Promise<TeamMember | null> => {
   if (!DB_URL) return null;
-  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}`, {
+  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}&select=${TEAM_MEMBER_COLUMNS}`, {
     method: "PATCH",
     headers: { ...authHeaders(session), Prefer: "return=representation" },
     body: JSON.stringify({ role }),
@@ -731,6 +809,42 @@ export const formatMessageForDisplay = (raw?: string | null): string => {
   return text;
 };
 
+// Context-aware matching, kept intentionally simple: a rep lists their own
+// background as a handful of comma-separated tags ("supply chain,
+// logistics, manufacturing") rather than filling in a separate line per
+// industry - lower friction for the rep, at the cost of only being able to
+// decide *whether* their one credibility line is relevant to a given
+// contact, not picking between several. If the rep hasn't listed any tags
+// at all, there's nothing to judge relevance against, so the line is
+// treated as always-relevant (better to show a possibly-generic line than
+// silently never use it).
+export const getPersonalizationLine = (rep: TeamMember | null | undefined, contact: ProjectContact): string | null => {
+  if (!rep?.credibility_line?.trim()) return null;
+  const tags = (rep.background_tags ?? "")
+    .split(",")
+    .map((t) => t.trim().toLowerCase())
+    .filter(Boolean);
+  if (tags.length === 0) return rep.credibility_line;
+  const haystack = `${contact.industry ?? ""} ${contact.sector ?? ""}`.toLowerCase().trim();
+  if (!haystack) return rep.credibility_line;
+  const isRelevant = tags.some((tag) => haystack.includes(tag) || tag.includes(haystack));
+  return isRelevant ? rep.credibility_line : null;
+};
+
+// Wraps formatMessageForDisplay with the rep's personalization line, slotted
+// in as its own paragraph just before the sign-off (formatMessageForDisplay
+// always gives the sign-off its own "\n\n"-separated paragraph, so the last
+// blank-line boundary in the formatted text is reliably that seam) rather
+// than tacked onto the very end, which would read strangely after "Best,
+// Chad." Falls back to appending at the end if no sign-off was detected.
+export const personalizeMessage = (raw: string | null | undefined, personalizationLine?: string | null): string => {
+  const formatted = formatMessageForDisplay(raw);
+  if (!personalizationLine || !formatted) return formatted;
+  const lastBreak = formatted.lastIndexOf("\n\n");
+  if (lastBreak === -1) return `${formatted}\n\n${personalizationLine}`;
+  return `${formatted.slice(0, lastBreak)}\n\n${personalizationLine}${formatted.slice(lastBreak)}`;
+};
+
 export const getCompanyResearchSummary = (contacts: ProjectContact[]): CompanyResearchSummary => {
   const withData = contacts.find((c) => c.industry || c.sector || c.value_hypothesis || c.outreach_angle) ?? contacts[0];
   return {
@@ -784,6 +898,157 @@ export const STATUS_ORDER: Record<ContactStatus, number> = {
   follow_up_sent: 3,
   meeting_set: 4,
   do_not_contact: 5,
+};
+
+// Generic mail providers that show up constantly in this data (personal
+// emails on self-serve-added contacts, or people using a personal address
+// for work) - never the company's own domain, so a logo lookup against one
+// of these would return the provider's own logo instead of the company's.
+const GENERIC_EMAIL_DOMAINS = new Set([
+  "gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "aol.com", "icloud.com", "live.com", "msn.com", "proton.me", "protonmail.com",
+]);
+
+// No domain/website field exists on companies (see the comment above
+// getCompanyResearchSummary) - but any contact's real email address already
+// tells us the company's domain for free, which is all the Clearbit Logo
+// API needs. Prefers a non-assumed email when one exists, since an assumed
+// address is itself just a guess at the domain pattern - though in
+// practice the domain portion is the same either way.
+export const getCompanyDomain = (contacts: ProjectContact[]): string | null => {
+  const withRealEmail = contacts.find((c) => c.email && !c.email_assumption_notice) ?? contacts.find((c) => c.email);
+  const domain = withRealEmail?.email?.split("@")[1]?.toLowerCase().trim();
+  if (!domain || GENERIC_EMAIL_DOMAINS.has(domain)) return null;
+  return domain;
+};
+
+export const getClearbitLogoUrl = (domain: string): string => `https://logo.clearbit.com/${domain}`;
+
+// Calls the rep-profile-ai Supabase Edge Function (see
+// supabase/functions/rep-profile-ai/index.ts) - the only place in this app
+// that talks to an LLM, and deliberately kept server-side since the API key
+// it needs can't safely live in this static frontend's bundle. Both
+// functions return null on any failure (network, missing key, bad
+// response) rather than throwing, so callers can fall back to the
+// non-AI behavior without a try/catch at every call site.
+const callRepProfileAI = async (session: ProposalSession, body: Record<string, unknown>): Promise<Record<string, unknown> | null> => {
+  if (!DB_URL) return null;
+  try {
+    const response = await fetch(`${DB_URL}/functions/v1/rep-profile-ai`, {
+      method: "POST",
+      headers: { ...authHeaders(session) },
+      body: JSON.stringify(body),
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+};
+
+// AI-drafted version of getPersonalizationLine - instead of deciding
+// whether to reuse the rep's one saved sentence, this asks an LLM to write
+// a new sentence tailored to this specific contact's role/industry. Always
+// returned for review (never auto-inserted/auto-sent) - the caller shows it
+// to the rep in the message editor the same way the static line is shown.
+export const draftAIPersonalizationLine = async (
+  session: ProposalSession,
+  rep: TeamMember | null | undefined,
+  contact: ProjectContact
+): Promise<string | null> => {
+  if (!rep?.credibility_line?.trim()) return null;
+  const result = await callRepProfileAI(session, {
+    action: "personalize",
+    repBackground: rep.credibility_line,
+    repTags: rep.background_tags ?? "",
+    contact: { title: contact.title, industry: contact.industry, sector: contact.sector },
+  });
+  const line = result?.line;
+  return typeof line === "string" && line.trim() ? line.trim() : null;
+};
+
+// Builds the Google authorization URL entirely client-side - the client ID
+// isn't a secret (it's meant to be public; only the client SECRET needs to
+// stay server-side, which is why the token exchange itself happens in the
+// google-calendar Edge Function, not here). Requires VITE_GOOGLE_CLIENT_ID
+// to be set at build time - see the Google Calendar setup instructions
+// handed off alongside supabase/functions/google-calendar/index.ts.
+export const buildGoogleAuthUrl = (teamMemberId: string): string | null => {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+  if (!clientId || !DB_URL) return null;
+  const redirectUri = `${DB_URL}/functions/v1/google-calendar`;
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: "code",
+    // calendar.events (not just freebusy) so the same connection can also
+    // create the booked event, not merely read availability.
+    scope: "https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/userinfo.email",
+    access_type: "offline",
+    // Forces Google to re-issue a refresh token every time - without this,
+    // reconnecting after a disconnect can silently fail to return one (see
+    // the comment in the Edge Function's oauth_callback handler).
+    prompt: "consent",
+    state: teamMemberId,
+  });
+  return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+};
+
+export const disconnectGoogleCalendar = async (session: ProposalSession, teamMemberId: string): Promise<boolean> => {
+  if (!DB_URL) return false;
+  const response = await fetch(`${DB_URL}/functions/v1/google-calendar`, {
+    method: "POST",
+    headers: { ...authHeaders(session) },
+    body: JSON.stringify({ action: "disconnect", repId: teamMemberId }),
+  });
+  if (!response.ok) return false;
+  const data = (await response.json()) as { success?: boolean };
+  return Boolean(data.success);
+};
+
+// These two intentionally do NOT require a RevHub session - the person
+// booking a slot is a cold-outreach contact with no RevHub account at all.
+// The Edge Function itself is what's allowed to read/write the rep's
+// Google refresh token (via the service role key), completely independent
+// of whether the caller is signed in here.
+export const fetchAvailableSlots = async (repId: string): Promise<{ repName?: string; slots: string[]; error?: string }> => {
+  if (!DB_URL) return { slots: [], error: "Not configured." };
+  const response = await fetch(`${DB_URL}/functions/v1/google-calendar`, {
+    method: "POST",
+    headers: { apikey: DB_PUBLIC || "", "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "get_available_slots", repId }),
+  });
+  const data = (await response.json()) as { repName?: string; slots?: string[]; error?: string };
+  return { repName: data.repName, slots: data.slots ?? [], error: data.error };
+};
+
+export const bookSlot = async (
+  repId: string,
+  startIso: string,
+  contactName: string,
+  contactEmail: string,
+  notes?: string
+): Promise<{ success: boolean; eventLink?: string; error?: string }> => {
+  if (!DB_URL) return { success: false, error: "Not configured." };
+  const response = await fetch(`${DB_URL}/functions/v1/google-calendar`, {
+    method: "POST",
+    headers: { apikey: DB_PUBLIC || "", "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "book_slot", repId, startIso, contactName, contactEmail, notes }),
+  });
+  const data = (await response.json()) as { success?: boolean; eventLink?: string; error?: string };
+  return { success: Boolean(data.success), eventLink: data.eventLink, error: data.error };
+};
+
+export type ParsedResumeFields = { credibility_line?: string; background_tags?: string; notable_wins?: string[] };
+
+// Only PDFs are supported today - see the comment in the Edge Function for
+// why (Claude's document support is PDF/image-based, not .doc/.docx).
+export const parseResumeWithAI = async (session: ProposalSession, file: File): Promise<ParsedResumeFields | null> => {
+  if (file.type !== "application/pdf") return null;
+  const buffer = await file.arrayBuffer();
+  const base64 = btoa(Array.from(new Uint8Array(buffer), (b) => String.fromCharCode(b)).join(""));
+  const result = await callRepProfileAI(session, { action: "parse_resume", resumeBase64: base64, mimeType: "application/pdf" });
+  if (!result || "error" in result) return null;
+  return result as ParsedResumeFields;
 };
 
 export const getInitials = (name?: string | null) => {
