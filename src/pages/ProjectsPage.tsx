@@ -21,6 +21,7 @@ import {
   createClosedDeal,
   findCurrentTeamMember,
   updateTeamMemberName,
+  updateTeamMemberProfile,
   updateTeamMemberRole,
   updateContactProgress,
   logContactActivity,
@@ -29,6 +30,7 @@ import {
   assignNextCompanyBatch,
   createSelfServeContact,
   STATUS_LABELS,
+  STATUS_ORDER,
   COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
@@ -210,6 +212,14 @@ const ProjectsPage = () => {
   const [newContactName, setNewContactName] = useState("");
   const [newContactEmail, setNewContactEmail] = useState("");
   const [newContactLinkedIn, setNewContactLinkedIn] = useState("");
+  const [newContactTitle, setNewContactTitle] = useState("");
+  const [newContactIndustry, setNewContactIndustry] = useState("");
+  const [newContactPriority, setNewContactPriority] = useState("");
+  const [newContactValueHypothesis, setNewContactValueHypothesis] = useState("");
+  const [newContactOutreachAngle, setNewContactOutreachAngle] = useState("");
+  const [profileTitleInput, setProfileTitleInput] = useState("");
+  const [profileNameInput, setProfileNameInput] = useState("");
+  const [profileSaveMessage, setProfileSaveMessage] = useState("");
   const [isRequestingBatch, setIsRequestingBatch] = useState(false);
   const [hasAutoRequestedFirstBatch, setHasAutoRequestedFirstBatch] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -262,6 +272,12 @@ const ProjectsPage = () => {
 
   const currentTeamMember = useMemo(() => (session ? findCurrentTeamMember(session, teamMembers) : null), [session, teamMembers]);
   const isOwner = currentTeamMember?.role === "owner";
+
+  useEffect(() => {
+    if (!currentTeamMember) return;
+    setProfileNameInput(currentTeamMember.name);
+    setProfileTitleInput(currentTeamMember.title ?? "");
+  }, [currentTeamMember]);
 
   // Owner-only lead-type data, fetched separately from the member-safe
   // companies fetch and never merged into `companies` itself - so a
@@ -373,26 +389,89 @@ const ProjectsPage = () => {
   const handleAddContact = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!session || !currentTeamMember || !newContactCompany || !newContactName) return;
-    const created = await createSelfServeContact(session, {
-      company: newContactCompany,
-      contactName: newContactName,
-      email: newContactEmail,
-      linkedinUrl: newContactLinkedIn,
-      assignedTo: currentTeamMember.id,
-    });
+    const created = await createSelfServeContact(
+      session,
+      {
+        company: newContactCompany,
+        contactName: newContactName,
+        email: newContactEmail,
+        linkedinUrl: newContactLinkedIn,
+        assignedTo: currentTeamMember.id,
+        title: newContactTitle,
+        industry: newContactIndustry,
+        priority: newContactPriority,
+        valueHypothesis: newContactValueHypothesis,
+        outreachAngle: newContactOutreachAngle,
+      },
+      companies
+    );
     if (created) {
       setContacts((current) => [...current, created]);
       setProgress((current) => ({
         ...current,
         [created.id]: { contact_id: created.id, status: "not_contacted", assigned_to: currentTeamMember.id, updated_at: new Date().toISOString() },
       }));
+      // The contact may have just created a brand-new company row (see
+      // findOrCreateCompanyId) - refetch so it shows up as a card right
+      // away instead of only appearing after the next full page load.
+      if (created.company_id && !companies.some((c) => c.id === created.company_id)) {
+        setCompanies(await fetchCompanies(session));
+      }
       setNewContactCompany("");
       setNewContactName("");
       setNewContactEmail("");
       setNewContactLinkedIn("");
+      setNewContactTitle("");
+      setNewContactIndustry("");
+      setNewContactPriority("");
+      setNewContactValueHypothesis("");
+      setNewContactOutreachAngle("");
       setShowAddContact(false);
     }
   };
+
+  const handleSaveProfile = async () => {
+    if (!session || !currentTeamMember) return;
+    const updated = await updateTeamMemberProfile(session, currentTeamMember.id, {
+      name: profileNameInput.trim() || currentTeamMember.name,
+      title: profileTitleInput.trim() || null,
+    });
+    if (updated) {
+      setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+      setProfileSaveMessage("Saved.");
+      setTimeout(() => setProfileSaveMessage(""), 2000);
+    }
+  };
+
+  // Shared between the Member and Owner render branches - editing your own
+  // name/title. Email is shown read-only: it's how findCurrentTeamMember
+  // matches this row to the signed-in session, so it isn't safe to edit
+  // from here (see the comment on updateTeamMemberProfile).
+  const renderProfileSection = () => (
+    <div className="max-w-md rounded-2xl border border-[#EEEDE7] bg-white p-6 shadow-sm">
+      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Your profile</p>
+      <h2 className="mb-5 font-display text-xl font-extrabold tracking-tight text-foreground">Update your info</h2>
+      <div className="grid gap-4">
+        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+          Name
+          <input type="text" value={profileNameInput} onChange={(e) => setProfileNameInput(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+        </label>
+        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+          Title
+          <input type="text" value={profileTitleInput} onChange={(e) => setProfileTitleInput(e.target.value)} placeholder="e.g. Account Executive" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+        </label>
+        <label className="grid gap-1.5 text-sm font-semibold text-muted-foreground">
+          Email
+          <input type="email" value={currentTeamMember?.email ?? ""} disabled className="rounded-lg border border-border bg-[#F1F0EC] px-3 py-2 text-sm text-muted-foreground outline-none" />
+          <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">This is your sign-in email and can't be changed here.</span>
+        </label>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={handleSaveProfile} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save</button>
+          {profileSaveMessage ? <span className="text-xs font-semibold text-primary">{profileSaveMessage}</span> : null}
+        </div>
+      </div>
+    </div>
+  );
 
   const handleAuthSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -658,13 +737,28 @@ const ProjectsPage = () => {
             </select>
           )}
         </div>
-        {!isBlocked && (contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message) ? (
-          <div className="flex flex-wrap items-center gap-2 border-t border-[#EEEDE7] bg-[#FAFAF8] px-4 py-3 md:px-5">
-            {contact.linkedin_connect_message ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
-            {contact.intro_message ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
-            {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
-          </div>
-        ) : null}
+        {(() => {
+          // Once a contact has moved past a stage, the button for that
+          // stage's message stops being useful - you already sent it.
+          // Purely derived from the current status (not a separate
+          // dismissed flag), so reverting status earlier than the
+          // threshold brings the button straight back.
+          const statusRank = STATUS_ORDER[status];
+          const showConnectionNote = statusRank < STATUS_ORDER.connection_sent;
+          const showAfterAccepted = statusRank < STATUS_ORDER.follow_up_sent;
+          const hasAnyButton =
+            (contact.linkedin_connect_message && showConnectionNote) ||
+            (contact.intro_message && showAfterAccepted) ||
+            contact.follow_up_message;
+          if (isBlocked || !hasAnyButton) return null;
+          return (
+            <div className="flex flex-wrap items-center gap-2 border-t border-[#EEEDE7] bg-[#FAFAF8] px-4 py-3 md:px-5">
+              {contact.linkedin_connect_message && showConnectionNote ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
+              {contact.intro_message && showAfterAccepted ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
+              {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+            </div>
+          );
+        })()}
       </article>
     );
   };
@@ -800,6 +894,38 @@ const ProjectsPage = () => {
               <input type="url" value={newContactLinkedIn} onChange={(e) => setNewContactLinkedIn(e.target.value)} maxLength={300} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="https://linkedin.com/in/..." />
             </div>
 
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">Job title</label>
+              <input type="text" value={newContactTitle} onChange={(e) => setNewContactTitle(e.target.value)} maxLength={150} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="e.g. VP Revenue Operations" />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">Industry</label>
+              <input type="text" value={newContactIndustry} onChange={(e) => setNewContactIndustry(e.target.value)} maxLength={150} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="e.g. B2B Distribution" />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">Priority tier</label>
+              <select value={newContactPriority} onChange={(e) => setNewContactPriority(e.target.value)} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors">
+                <option value="">Not sure</option>
+                <option value="A">A</option>
+                <option value="A/B">A/B</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">Why it fits</label>
+              <textarea value={newContactValueHypothesis} onChange={(e) => setNewContactValueHypothesis(e.target.value)} rows={2} maxLength={600} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="Why RevHub is a fit for this company/role" />
+            </div>
+
+            <div>
+              <label className="font-sans text-[10px] tracking-[0.12em] uppercase text-muted-foreground mb-1.5 block">Why now</label>
+              <textarea value={newContactOutreachAngle} onChange={(e) => setNewContactOutreachAngle(e.target.value)} rows={2} maxLength={600} className="w-full px-3.5 py-2.5 rounded-md border border-border bg-card text-foreground font-sans text-[13px] outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-colors" placeholder="The buying trigger - why reach out right now" />
+            </div>
+
             <button type="submit" className="w-full inline-flex items-center justify-center gap-2.5 px-6 py-3 rounded-md bg-primary text-primary-foreground font-sans text-[12px] tracking-[0.1em] uppercase font-medium hover:opacity-90 transition-opacity cursor-pointer border-none">
               Save contact
               <UserPlus size={14} />
@@ -876,13 +1002,24 @@ const ProjectsPage = () => {
         <div>
           <ProjectsSidebar
             isOwner={false}
-            activeSection="assignments"
-            onSectionChange={() => {}}
+            activeSection={activeSection}
+            onSectionChange={setActiveSection}
             memberName={currentTeamMember?.name}
             onSignOut={handleSignOut}
+            onAddContact={() => setShowAddContact(true)}
           />
           <main className="min-w-0 px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
           <div className="w-full">
+            {activeSection === "profile" ? (
+              <>
+                <div className="mb-8">
+                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
+                  <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Your profile.</h1>
+                </div>
+                {renderProfileSection()}
+              </>
+            ) : (
+            <>
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
@@ -932,6 +1069,8 @@ const ProjectsPage = () => {
                 </button>
               </div>
             ) : null}
+            </>
+            )}
           </div>
           </main>
         </div>
@@ -1012,15 +1151,18 @@ const ProjectsPage = () => {
           onSectionChange={setActiveSection}
           memberName={currentTeamMember?.name}
           onSignOut={handleSignOut}
+          onAddContact={() => setShowAddContact(true)}
         />
         <main className="min-w-0 px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
           <div className="w-full">
             <div className="mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
               <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
-                {activeSection === "board" ? "Company board." : activeSection === "team" ? "Team & attribution." : "Your contact queue."}
+                {activeSection === "board" ? "Company board." : activeSection === "team" ? "Team & attribution." : activeSection === "profile" ? "Your profile." : "Your contact queue."}
               </h1>
             </div>
+
+          {activeSection === "profile" ? renderProfileSection() : null}
 
           {activeSection === "board" ? (
             <div className="mb-8 rounded-2xl border border-[#EEEDE7] bg-white p-5 shadow-sm">
@@ -1347,24 +1489,7 @@ const ProjectsPage = () => {
         </div>
       ) : null}
 
-      {showAddContact ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/40">
-          <div className="h-full w-full max-w-md overflow-y-auto border-l border-border bg-background p-6 shadow-lg">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Add a contact</p>
-            <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">You'll be credited for this one.</h2>
-            <form onSubmit={handleAddContact} className="mt-4 grid gap-3">
-              <label className="grid gap-1.5 text-sm font-semibold text-foreground">Company<input type="text" value={newContactCompany} onChange={(e) => setNewContactCompany(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
-              <label className="grid gap-1.5 text-sm font-semibold text-foreground">Contact name<input type="text" value={newContactName} onChange={(e) => setNewContactName(e.target.value)} required className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
-              <label className="grid gap-1.5 text-sm font-semibold text-foreground">Email (if known)<input type="email" value={newContactEmail} onChange={(e) => setNewContactEmail(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
-              <label className="grid gap-1.5 text-sm font-semibold text-foreground">LinkedIn or social profile URL<input type="url" value={newContactLinkedIn} onChange={(e) => setNewContactLinkedIn(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" /></label>
-              <div className="mt-3 flex justify-end gap-2">
-                <button type="button" onClick={() => setShowAddContact(false)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
-                <button type="submit" className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save contact</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
+      {addContactSlideout}
 
       {messageEditor ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
