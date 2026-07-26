@@ -148,7 +148,13 @@ const CompanyDetailPage = () => {
     if (!session || !company) return;
     const updates: { company_stage: CompanyStage; closed_lost_reason?: string | null; meeting_contact_id?: string | null } = { company_stage: stage };
     if (stage === "closed_lost") updates.closed_lost_reason = closedLostReason || null;
-    if (stage === "new_signal") updates.meeting_contact_id = null;
+    // Reopening (back to new_signal) clears out both closed-state fields,
+    // regardless of which closed state it's reverting from, so the company
+    // comes back clean rather than carrying a stale reason or meeting link.
+    if (stage === "new_signal") {
+      updates.meeting_contact_id = null;
+      updates.closed_lost_reason = null;
+    }
     const updated = await updateCompanyStage(session, company.id, updates);
     if (updated) setCompanies((current) => current.map((c) => (c.id === updated.id ? updated : c)));
   };
@@ -203,6 +209,7 @@ const CompanyDetailPage = () => {
         onSectionChange={() => navigate("/projects")}
         memberName={currentTeamMember?.name}
         onSignOut={handleSignOut}
+        onAddContact={() => navigate("/projects")}
       />
       <main className="px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
         <div className="mx-auto w-full max-w-3xl">
@@ -244,7 +251,7 @@ const CompanyDetailPage = () => {
 
                 {canManage ? (
                   <div className="flex flex-wrap items-center gap-2">
-                    {company.company_stage === "meeting_scheduled" ? (
+                    {company.company_stage !== "new_signal" ? (
                       <button type="button" onClick={() => handleSetStage("new_signal")} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary">
                         Reopen outreach
                       </button>

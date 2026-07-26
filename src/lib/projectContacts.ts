@@ -47,6 +47,7 @@ export type TeamMember = {
   name: string;
   email: string;
   role: "owner" | "member";
+  title?: string | null;
 };
 
 export type OutreachModel = "replace" | "bridge" | "build" | "augment" | "consolidate";
@@ -402,6 +403,27 @@ export const updateTeamMemberName = async (session: ProposalSession, teamMemberI
   return rows[0] ?? null;
 };
 
+// Self-service profile edit (name + title only). Email is deliberately not
+// editable here - it's how findCurrentTeamMember matches this row to the
+// signed-in Supabase Auth session, so changing it here without also
+// changing the login credential would silently disconnect someone from
+// their own account on next sign-in.
+export const updateTeamMemberProfile = async (
+  session: ProposalSession,
+  teamMemberId: string,
+  updates: { name?: string; title?: string | null }
+): Promise<TeamMember | null> => {
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}`, {
+    method: "PATCH",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify(updates),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as TeamMember[];
+  return rows[0] ?? null;
+};
+
 // Only actually works if the signed-in user is an owner - enforced by a
 // database trigger, not just this function, so this can't be bypassed by
 // calling the API directly.
@@ -696,6 +718,22 @@ export const STATUS_LABELS: Record<ContactStatus, string> = {
   do_not_contact: "Do Not Contact",
 };
 
+// How far along the outreach pipeline each status is - used to decide
+// whether a message-template button ("Connection note", "After accepted")
+// still makes sense to show. do_not_contact is treated as past everything,
+// since outreach has stopped for that contact regardless of how far they'd
+// gotten. Purely derived from the current status, so reverting a contact
+// to an earlier status automatically brings the relevant buttons back -
+// there's no separate "has this been dismissed" flag to get out of sync.
+export const STATUS_ORDER: Record<ContactStatus, number> = {
+  not_contacted: 0,
+  connection_sent: 1,
+  introduction_sent: 2,
+  follow_up_sent: 3,
+  meeting_set: 4,
+  do_not_contact: 5,
+};
+
 export const getInitials = (name?: string | null) => {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
@@ -772,95 +810,107 @@ export const assignNextBatch = async (
 // within the same signal status this decides the tiebreak.
 export const PRIORITY_ORDER: Record<string, number> = { A: 0, "A/B": 1, B: 2, C: 3, D: 4, needs_review: 5, "": 6 };
 
-const chunkIds = (ids: string[], size = 50): string[][] => {
-  const out: string[][] = [];
-  for (let i = 0; i < ids.length; i += size) out.push(ids.slice(i, i + size));
-  return out;
-};
-
 // Company-level batching: a rep now owns whole companies (up to 25 at a
 // time) rather than a scattered list of individual contacts - every
 // contact at an assigned company comes along with it, so nobody has to
-// hunt for who else works there. Companies with a warm hiring signal are
-// handed out first; within the same signal status, the best priority
-// tier among that company's contacts breaks the tie.
+// hunt for who else works there.
+//
+// The actual ranking (has a signal, best priority tier, and - as of the
+// evenly-distribute-by-category request - round-robin across lead type so
+// one category can't monopolize a rep's batch) runs entirely inside the
+// assign_next_company_batch() Postgres function, not here. That's not
+// optional: canonical_lead_type is owner-only data, REVOKEd at the column
+// level from every Member (see leadtype_phase1_foundation.sql) so a
+// Member's own session is never allowed to read it over REST. Balancing
+// by category server-side, inside a SECURITY DEFINER function that never
+// returns the category itself, is the only way to get "spread evenly by
+// category" without breaking that boundary. See
+// supabase/migrations/assign_next_company_batch.sql.
 export const assignNextCompanyBatch = async (
   session: ProposalSession,
   teamMemberId: string,
-  allCompanies: Company[],
-  allContacts: ProjectContact[],
-  allProgress: Record<string, ContactProgress>,
-  signalsByCompanyId: Record<string, CompanySignal[]>,
+  _allCompanies: Company[],
+  _allContacts: ProjectContact[],
+  _allProgress: Record<string, ContactProgress>,
+  _signalsByCompanyId: Record<string, CompanySignal[]>,
   batchSize = 25
 ): Promise<{ assignedCompanyIds: string[] }> => {
-  const unassigned = allCompanies.filter((c) => !c.assigned_rep && c.company_stage === "new_signal");
-
-  const bestPriorityForCompany = (company: Company): number => {
-    let best = 6;
-    for (const contact of allContacts) {
-      if (contact.company_id !== company.id) continue;
-      const p = PRIORITY_ORDER[contact.priority ?? ""] ?? 6;
-      if (p < best) best = p;
-    }
-    return best;
-  };
-
-  const batch = unassigned
-    .sort((a, b) => {
-      const hasSignalA = (signalsByCompanyId[a.id]?.length ?? 0) > 0 ? 0 : 1;
-      const hasSignalB = (signalsByCompanyId[b.id]?.length ?? 0) > 0 ? 0 : 1;
-      if (hasSignalA !== hasSignalB) return hasSignalA - hasSignalB;
-      const pa = bestPriorityForCompany(a);
-      const pb = bestPriorityForCompany(b);
-      if (pa !== pb) return pa - pb;
-      return a.name.localeCompare(b.name);
-    })
-    .slice(0, batchSize);
-
-  const companyIds = batch.map((c) => c.id);
-
-  if (companyIds.length && DB_URL) {
-    await fetch(`${DB_URL}/rest/v1/companies?id=in.(${companyIds.join(",")})`, {
-      method: "PATCH",
-      headers: authHeaders(session),
-      body: JSON.stringify({ assigned_rep: teamMemberId }),
-    });
-
-    // Hand every not-yet-assigned contact at these companies to the same
-    // rep - owning the company means owning everyone in it. Contacts
-    // someone else is already working stay put.
-    const contactIdsToClaim = allContacts
-      .filter((c) => c.company_id && companyIds.includes(c.company_id) && !c.do_not_contact && !allProgress[c.id]?.assigned_to)
-      .map((c) => c.id);
-
-    for (const idChunk of chunkIds(contactIdsToClaim)) {
-      await fetch(`${DB_URL}/rest/v1/contact_progress?contact_id=in.(${idChunk.join(",")})`, {
-        method: "PATCH",
-        headers: authHeaders(session),
-        body: JSON.stringify({ assigned_to: teamMemberId }),
-      });
-    }
-  }
+  if (!DB_URL) return { assignedCompanyIds: [] };
+  const response = await fetch(`${DB_URL}/rest/v1/rpc/assign_next_company_batch`, {
+    method: "POST",
+    headers: authHeaders(session),
+    body: JSON.stringify({ p_rep_id: teamMemberId, p_batch_size: batchSize }),
+  });
+  if (!response.ok) return { assignedCompanyIds: [] };
+  const rows = (await response.json()) as { company_id: string }[];
+  const companyIds = rows.map((r) => r.company_id);
 
   return { assignedCompanyIds: companyIds };
 };
 
+// Looks up a company by name (case/whitespace-insensitive, matching the
+// same convention as normalized_name elsewhere) against an already-fetched
+// companies list, creating one if it doesn't exist yet. Without this, a
+// self-serve-added contact would carry only a company name string and no
+// company_id - exactly the bug that left 49 imported contacts invisible in
+// the app on 2026-07-25 (see backfill_orphaned_marketing_companies.sql).
+const findOrCreateCompanyId = async (
+  session: ProposalSession,
+  companyName: string,
+  companies: Company[]
+): Promise<string | null> => {
+  const trimmed = companyName.trim();
+  if (!trimmed) return null;
+  const existing = companies.find((c) => c.name.trim().toLowerCase() === trimmed.toLowerCase());
+  if (existing) return existing.id;
+  if (!DB_URL) return null;
+  const response = await fetch(`${DB_URL}/rest/v1/companies`, {
+    method: "POST",
+    headers: { ...authHeaders(session), Prefer: "return=representation" },
+    body: JSON.stringify({ name: trimmed, normalized_name: trimmed.toLowerCase() }),
+  });
+  if (!response.ok) return null;
+  const rows = (await response.json()) as Company[];
+  return rows[0]?.id ?? null;
+};
+
 // Lets a team member add a contact they found themselves. They're
 // automatically credited as the assignee, so they get attribution if it
-// turns into a meeting or closed deal later.
+// turns into a meeting or closed deal later. `companies` should be the
+// caller's already-fetched company list, used to resolve/create the
+// company_id link so this contact is never orphaned from its company card.
 export const createSelfServeContact = async (
   session: ProposalSession,
-  input: { company: string; contactName: string; email?: string; linkedinUrl?: string; assignedTo: string }
+  input: {
+    company: string;
+    contactName: string;
+    email?: string;
+    linkedinUrl?: string;
+    assignedTo: string;
+    title?: string;
+    industry?: string;
+    priority?: string;
+    valueHypothesis?: string;
+    outreachAngle?: string;
+  },
+  companies: Company[]
 ): Promise<ProjectContact | null> => {
   if (!DB_URL) return null;
+  const companyId = await findOrCreateCompanyId(session, input.company, companies);
   const response = await fetch(`${DB_URL}/rest/v1/project_contacts`, {
     method: "POST",
     headers: { ...authHeaders(session), Prefer: "return=representation" },
     body: JSON.stringify({
       company: input.company,
+      company_id: companyId,
       contact_name: input.contactName,
       email: input.email || null,
       linkedin_url: input.linkedinUrl || null,
+      title: input.title || null,
+      industry: input.industry || null,
+      priority: input.priority || null,
+      value_hypothesis: input.valueHypothesis || null,
+      outreach_angle: input.outreachAngle || null,
       needs_research: false,
       do_not_contact: false,
       legacy_status_notes: "Added directly by team member",
