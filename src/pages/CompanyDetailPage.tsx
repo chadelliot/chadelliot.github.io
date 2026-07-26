@@ -286,6 +286,7 @@ const CompanyDetailPage = () => {
                   engagedCount={companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length}
                   ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
                   ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
+                  emailContactCount={companyContacts.filter((c) => c.email).length}
                 />
               </div>
 

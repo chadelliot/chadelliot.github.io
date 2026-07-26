@@ -1,4 +1,4 @@
-import { Building2, Zap } from "lucide-react";
+import { Building2, Zap, Mail } from "lucide-react";
 import {
   COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
@@ -35,6 +35,12 @@ type CompanyInfoCardProps = {
   // is a belt-and-suspenders check, not the actual security boundary.
   ownerLeadType?: OwnerLeadType | null;
   ownerSignalCount?: number;
+  // How many of this company's contacts have a known email address - shown
+  // as a mail icon + count next to the company name instead of the old
+  // unconditional "New Signal" pill, which just meant "hasn't been
+  // contacted yet" and wasn't actually telling anyone anything useful at a
+  // glance.
+  emailContactCount?: number;
 };
 
 // The company-level facts pulled from ChatGPT's account research - shown
@@ -43,27 +49,16 @@ type CompanyInfoCardProps = {
 // today, so the avatar chip is initials-on-gradient rather than a photo -
 // the gradient itself carries meaning (lead type) for Owners instead of
 // being purely decorative.
-// A signal only counts as "new" if we actually know when it posted and
-// that date is recent - an unlabeled or stale posting shouldn't wear the
-// same badge as a role that went up yesterday.
-const RECENT_SIGNAL_WINDOW_DAYS = 7;
-const hasRecentSignal = (signals: CompanySignal[]): boolean =>
-  signals.some((s) => {
-    if (!s.posted_date) return false;
-    const posted = new Date(s.posted_date);
-    if (Number.isNaN(posted.getTime())) return false;
-    const daysSince = (Date.now() - posted.getTime()) / (1000 * 60 * 60 * 24);
-    return daysSince >= 0 && daysSince <= RECENT_SIGNAL_WINDOW_DAYS;
-  });
-
-const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCount = 0, ownerLeadType, ownerSignalCount }: CompanyInfoCardProps) => {
+const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCount = 0, ownerLeadType, ownerSignalCount, emailContactCount = 0 }: CompanyInfoCardProps) => {
   const topSignal = signals[0];
   const [gradientFrom, gradientTo] = ownerLeadType ? OWNER_LEAD_TYPE_AVATAR_GRADIENT[ownerLeadType] : DEFAULT_AVATAR_GRADIENT;
-  // "New Signal" is the company_stage pill (not contacted yet) - only show
-  // it when there's a genuinely fresh, dated posting behind it. Every
-  // other stage (Meeting Scheduled, Closed Won, Closed Lost) isn't about
-  // signal freshness, so it always renders as before.
-  const showStagePill = company.company_stage !== "new_signal" || hasRecentSignal(signals);
+  // "New Signal" just meant "hasn't been contacted yet," which every card
+  // in this default view already is - not useful information next to the
+  // name. A mail icon + count of contacts with a known email is a more
+  // actionable at-a-glance signal, so it takes that slot instead. The
+  // other stages (Meeting Scheduled, Closed Won, Closed Lost) are real
+  // milestones worth flagging, so they still render as before.
+  const showStagePill = company.company_stage !== "new_signal";
 
   return (
     <div className="border-b border-[#EEEDE7] bg-white px-4 py-4">
@@ -81,6 +76,11 @@ const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCoun
             {showStagePill ? (
               <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] ${STAGE_PILL_CLASS[company.company_stage]}`}>
                 {COMPANY_STAGE_LABELS[company.company_stage]}
+              </span>
+            ) : emailContactCount > 0 ? (
+              <span title={`${emailContactCount} contact${emailContactCount === 1 ? "" : "s"} with an email on file`} className="inline-flex items-center gap-1 rounded-full bg-[#EFF6FF] px-2 py-0.5 text-[10px] font-semibold text-[#1D4ED8]">
+                <Mail size={10} />
+                {emailContactCount}
               </span>
             ) : null}
           </div>

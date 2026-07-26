@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3 } from "lucide-react";
+import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -137,6 +137,35 @@ const useInfiniteReveal = (totalCount: number) => {
   }, [totalCount]);
 
   return { visibleCount, sentinelRef };
+};
+
+// A small self-contained popover (owns its own open/close state) rather
+// than a single shared "which company's popup is open" flag on the page -
+// there can be dozens of these rendered in one card grid, and this keeps
+// each one independent without threading an id through render props.
+const CompanyWhyPopover = ({ valueHypothesis, outreachAngle }: { valueHypothesis?: string | null; outreachAngle?: string | null }) => {
+  const [open, setOpen] = useState(false);
+  if (!valueHypothesis && !outreachAngle) return null;
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        onBlur={() => window.setTimeout(() => setOpen(false), 150)}
+        aria-label="Why we're targeting this company"
+        className="flex h-6 w-6 items-center justify-center rounded-full text-primary hover:bg-primary/10"
+      >
+        <Info size={15} />
+      </button>
+      {open ? (
+        <div className="absolute right-0 top-8 z-20 w-72 rounded-lg border border-[#EEEDE7] bg-white p-3 text-left shadow-lg">
+          <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary">Why we're reaching out</p>
+          {valueHypothesis ? <p className="text-xs leading-relaxed text-foreground"><span className="font-semibold">Why it fits: </span>{valueHypothesis}</p> : null}
+          {outreachAngle ? <p className="mt-1.5 text-xs leading-relaxed text-foreground"><span className="font-semibold">Why now: </span>{outreachAngle}</p> : null}
+        </div>
+      ) : null}
+    </div>
+  );
 };
 
 const ProjectsPage = () => {
@@ -784,20 +813,23 @@ const ProjectsPage = () => {
     const othersGood = others.filter((c) => getContactTier(c) !== "research");
     const othersResearch = others.filter((c) => getContactTier(c) === "research");
     const isExpanded = Boolean(expandedCompanies[company.id]);
+    const research = getCompanyResearchSummary(companyContacts);
 
     return (
       <div key={company.id} className="overflow-hidden rounded-2xl border border-[#EEEDE7] bg-white shadow-sm transition-shadow hover:shadow-md">
         <CompanyInfoCard
           company={company}
-          research={getCompanyResearchSummary(companyContacts)}
+          research={research}
           signals={signalsByCompanyId[company.id] ?? []}
           contactCount={companyContacts.length}
           engagedCount={companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length}
           ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
           ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
+          emailContactCount={companyContacts.filter((c) => c.email).length}
         />
-        <div className="border-b border-[#EEEDE7] bg-[#FAFAF8] px-4 py-2">
+        <div className="flex items-center justify-between border-b border-[#EEEDE7] bg-[#FAFAF8] px-4 py-2">
           <Link to={`/projects/company/${company.id}`} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">View full company page →</Link>
+          <CompanyWhyPopover valueHypothesis={research.valueHypothesis} outreachAngle={research.outreachAngle} />
         </div>
 
         <div className="grid gap-3 p-4">
