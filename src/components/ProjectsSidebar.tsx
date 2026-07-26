@@ -3,7 +3,7 @@ import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
 import { LayoutGrid, KanbanSquare, Users, LogOut, Menu, X, ArrowLeft, UserCircle, UserPlus } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import revhubLogo from "@/assets/revhub-logo-white.svg";
+import revhubLogo from "@/assets/RH-Logo-Light.png";
 
 export type ProjectsSection = "assignments" | "board" | "team" | "profile";
 
@@ -59,7 +59,7 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
 
   const NavList = ({ onNavigate }: { onNavigate?: () => void }) => (
     <div className="flex h-full flex-col">
-      <div className="px-3 pb-6 pt-1">
+      <div className="px-3 pb-6 pt-7">
         <img src={revhubLogo} alt="RevHub" className="h-6 w-auto" />
         <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Outreach</p>
       </div>
