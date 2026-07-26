@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
+import { Mail } from "lucide-react";
 import CompanyInfoCard from "@/components/CompanyInfoCard";
 import ProjectsSidebar from "@/components/ProjectsSidebar";
 import { useProposalSession } from "@/hooks/useProposalSession";
@@ -14,6 +15,8 @@ import {
   updateCompanyStage,
   updateCompanyAssignedRep,
   updateSignalOutreachModel,
+  updateContactProgress,
+  logContactActivity,
   createClosedDeal,
   deleteMeetingForContact,
   deleteClosedDealsForCompany,
@@ -22,9 +25,15 @@ import {
   getInitials,
   getPrimaryContact,
   getCompanyResearchSummary,
+  getCompanyDomain,
   getContactTier,
   buildLinkedInSearchUrl,
+  getPersonalizationLine,
+  personalizeMessage,
+  draftAIPersonalizationLine,
   STATUS_LABELS,
+  STATUS_ORDER,
+  EMAIL_SEQUENCE_STAGES,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
   OWNER_LEAD_TYPE_DOT_COLOR,
@@ -45,6 +54,15 @@ import {
   type OwnerSignalFields,
 } from "@/lib/projectContacts";
 import { clearStoredProposalSession } from "@/lib/companyStatus";
+
+const STATUS_CHART_COLORS: Record<ContactStatus, string> = {
+  not_contacted: "#94A3B8",
+  connection_sent: "#6D28D9",
+  introduction_sent: "#1D4ED8",
+  follow_up_sent: "#B45309",
+  meeting_set: "#2FA37F",
+  do_not_contact: "#B91C1C",
+};
 
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
@@ -79,6 +97,22 @@ const CompanyDetailPage = () => {
   const [dealCreditedTo, setDealCreditedTo] = useState("");
   const [dealDate, setDealDate] = useState("");
   const [dealNotes, setDealNotes] = useState("");
+
+  // Outreach directly from the company page - same email popup / message
+  // editor pattern as ProjectsPage's "My assignments" cards (see
+  // renderAssignedContactArticle / emailPopupModal there), duplicated here
+  // rather than shared since those live as closures over ProjectsPage's own
+  // state. Chad asked for contacts on this page to be actionable rather than
+  // just a read-only roster.
+  const [copyFeedback, setCopyFeedback] = useState<Record<string, string>>({});
+  const [emailPopupContact, setEmailPopupContact] = useState<ProjectContact | null>(null);
+  const [messageEditor, setMessageEditor] = useState<{
+    contact: ProjectContact;
+    field: "linkedin_connect_message" | "intro_message" | "follow_up_message";
+    label: string;
+    text: string;
+  } | null>(null);
+  const [isDraftingAILine, setIsDraftingAILine] = useState(false);
 
   // Owner-only. Fetched separately from the member-safe companies/signals
   // fetches above - see the note in ProjectsPage.tsx next to the same
@@ -181,6 +215,61 @@ const CompanyDetailPage = () => {
     if (updated) setSignals((current) => current.map((s) => (s.id === updated.id ? updated : s)));
   };
 
+  const handleSetEmailPosition = async (contact: ProjectContact, position: number) => {
+    if (!session) return;
+    setProgress((current) => ({
+      ...current,
+      [contact.id]: { ...current[contact.id], contact_id: contact.id, status: current[contact.id]?.status ?? "not_contacted", updated_at: new Date().toISOString(), email_sequence_position: position },
+    }));
+    const saved = await updateContactProgress(session, contact.id, { email_sequence_position: position }, currentTeamMember?.id);
+    if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
+    logContactActivity(session, contact.id, "email_sequence_changed", String(position), currentTeamMember?.id);
+  };
+
+  const handleCopyEmailField = async (contact: ProjectContact, field: string, text: string, label: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
+    setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
+    if (session) logContactActivity(session, contact.id, "email_message_copied", field, currentTeamMember?.id);
+  };
+
+  const handleSendEmail = (contact: ProjectContact, field: string, text: string) => {
+    const subject = contact.email_subject ?? "";
+    const mailto = `mailto:${encodeURIComponent(contact.email ?? "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+    window.location.href = mailto;
+    if (session) logContactActivity(session, contact.id, "email_send_clicked", field, currentTeamMember?.id);
+  };
+
+  const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
+    const personalization = field === "intro_message" ? getPersonalizationLine(currentTeamMember, contact) : null;
+    setMessageEditor({ contact, field, label, text: personalizeMessage(contact[field], personalization) });
+  };
+
+  const handleCopyFromEditor = async () => {
+    if (!messageEditor) return;
+    const { contact, field, label } = messageEditor;
+    await navigator.clipboard.writeText(messageEditor.text);
+    setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
+    setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
+    if (session) logContactActivity(session, contact.id, "message_copied", field, currentTeamMember?.id);
+    setMessageEditor(null);
+  };
+
+  const handleDraftAILineForEditor = async () => {
+    if (!session || !messageEditor) return;
+    setIsDraftingAILine(true);
+    const line = await draftAIPersonalizationLine(session, currentTeamMember, messageEditor.contact);
+    if (line) {
+      setMessageEditor((current) => {
+        if (!current) return current;
+        const lastBreak = current.text.lastIndexOf("\n\n");
+        const text = lastBreak === -1 ? `${current.text}\n\n${line}` : `${current.text.slice(0, lastBreak)}\n\n${line}${current.text.slice(lastBreak)}`;
+        return { ...current, text };
+      });
+    }
+    setIsDraftingAILine(false);
+  };
+
   const handleReassignRep = async (repId: string) => {
     if (!session || !company) return;
     const updated = await updateCompanyAssignedRep(session, company.id, repId || null);
@@ -198,6 +287,77 @@ const CompanyDetailPage = () => {
       setDealNotes("");
       setShowLogDeal(false);
     }
+  };
+
+  // Contact row with working outreach controls - mail icon (+ 3-dot email
+  // sequence progress) opens the email popup, message-stage buttons open the
+  // message editor. Mirrors ProjectsPage's renderAssignedContactArticle so a
+  // rep never has to leave a company's page to actually reach out. `company`
+  // is guaranteed non-null wherever this is called (inside the `company ?`
+  // branch below).
+  const renderOutreachContact = (contact: ProjectContact, isPrimary: boolean) => {
+    const contactProgress = progress[contact.id];
+    const status = contactProgress?.status ?? "not_contacted";
+    const isMeetingContact = company?.meeting_contact_id === contact.id;
+    const emailPosition = contactProgress?.email_sequence_position ?? 0;
+    const statusRank = STATUS_ORDER[status];
+    const showConnectionNote = statusRank < STATUS_ORDER.connection_sent;
+    const showAfterAccepted = statusRank < STATUS_ORDER.follow_up_sent;
+    const hasAnyButton =
+      (contact.linkedin_connect_message && showConnectionNote) ||
+      (contact.intro_message && showAfterAccepted) ||
+      contact.follow_up_message;
+
+    return (
+      <div key={contact.id} className={`overflow-hidden rounded-lg border bg-white ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5">
+          <div className="flex items-center gap-3">
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white"
+              style={{ background: `linear-gradient(135deg, ${STATUS_CHART_COLORS[status]}, ${STATUS_CHART_COLORS[status]}CC)` }}
+            >
+              {getInitials(contact.contact_name)}
+            </div>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                {contact.email ? (
+                  <button
+                    type="button"
+                    onClick={() => setEmailPopupContact(contact)}
+                    title="Email outreach"
+                    className="flex items-center gap-1 rounded-full border border-[#CBD5E1] bg-white px-1.5 py-0.5 text-[#1D4ED8] hover:border-primary hover:text-primary"
+                  >
+                    <Mail size={12} />
+                    <span className="flex items-center gap-0.5">
+                      {[1, 2, 3].map((dot) => (
+                        <span key={dot} className={`h-1.5 w-1.5 rounded-full ${emailPosition >= dot ? "bg-current" : "bg-[#E2E8F0]"}`} />
+                      ))}
+                    </span>
+                  </button>
+                ) : null}
+                <p className="text-sm font-semibold text-foreground">
+                  {contact.contact_name}
+                  {isPrimary ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">Primary contact</span> : null}
+                  {isMeetingContact ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">📅 Meeting contact</span> : null}
+                </p>
+              </div>
+              <p className="text-xs text-muted-foreground">{contact.title}{contact.email ? ` · ${contact.email}` : ""}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span>
+            <span className="text-xs text-muted-foreground">{teamMembers.find((m) => m.id === contactProgress?.assigned_to)?.name ?? "Unassigned"}</span>
+          </div>
+        </div>
+        {hasAnyButton ? (
+          <div className="flex flex-wrap items-center gap-2 border-t border-[#EEEDE7] bg-[#FAFAF8] px-3 py-2">
+            {contact.linkedin_connect_message && showConnectionNote ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
+            {contact.intro_message && showAfterAccepted ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
+            {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+          </div>
+        ) : null}
+      </div>
+    );
   };
 
   if (!IS_DB_READY) {
@@ -303,6 +463,7 @@ const CompanyDetailPage = () => {
                   ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
                   ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
                   emailContactCount={companyContacts.filter((c) => c.email).length}
+                  logoDomain={getCompanyDomain(companyContacts)}
                 />
               </div>
 
@@ -469,6 +630,7 @@ const CompanyDetailPage = () => {
 
               <div>
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts ({companyContacts.length})</p>
+                <p className="mb-3 text-xs text-muted-foreground">Click the mail icon to work an email sequence, or a message-stage button to open, edit, and copy a LinkedIn message.</p>
                 <div className="grid gap-2">
                   {primaryContact ? (
                     getContactTier(primaryContact) === "research" ? (
@@ -481,30 +643,7 @@ const CompanyDetailPage = () => {
                         <a href={buildLinkedInSearchUrl(primaryContact.contact_name, primaryContact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
                       </div>
                     ) : (
-                      (() => {
-                        const contactProgress = progress[primaryContact.id];
-                        const status = contactProgress?.status ?? "not_contacted";
-                        const isMeetingContact = company.meeting_contact_id === primaryContact.id;
-                        return (
-                          <div className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-display text-xs font-extrabold text-primary">{getInitials(primaryContact.contact_name)}</div>
-                              <div>
-                                <p className="text-sm font-semibold text-foreground">
-                                  {primaryContact.contact_name}
-                                  <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">Primary contact</span>
-                                  {isMeetingContact ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">📅 Meeting contact</span> : null}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{primaryContact.title}{primaryContact.email ? ` · ${primaryContact.email}` : ""}</p>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span>
-                              <span className="text-xs text-muted-foreground">{teamMembers.find((m) => m.id === contactProgress?.assigned_to)?.name ?? "Unassigned"}</span>
-                            </div>
-                          </div>
-                        );
-                      })()
+                      renderOutreachContact(primaryContact, true)
                     )
                   ) : (
                     <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
@@ -522,29 +661,20 @@ const CompanyDetailPage = () => {
                   ) : null}
 
                   {showAllContacts
-                    ? otherContacts.map((contact) => {
-                        const contactProgress = progress[contact.id];
-                        const status = contact.needs_research ? null : contactProgress?.status ?? "not_contacted";
-                        const isMeetingContact = company.meeting_contact_id === contact.id;
-                        return (
-                          <div key={contact.id} className={`flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-white px-3 py-2.5 ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 font-display text-xs font-extrabold text-primary">{getInitials(contact.contact_name)}</div>
-                              <div>
-                                <p className="text-sm font-semibold text-foreground">
-                                  {contact.contact_name}
-                                  {isMeetingContact ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">📅 Meeting contact</span> : null}
-                                </p>
-                                <p className="text-xs text-muted-foreground">{contact.title}{contact.email ? ` · ${contact.email}` : ""}</p>
-                              </div>
+                    ? otherContacts.map((contact) =>
+                        contact.needs_research ? (
+                          <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
+                            <div>
+                              <span className="text-sm font-semibold text-foreground">{contact.contact_name}</span>
+                              <span className="ml-2 text-xs text-muted-foreground">{contact.title}</span>
+                              <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">Needs research</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              {status ? <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span> : <span className="text-xs text-muted-foreground">Needs research</span>}
-                              <span className="text-xs text-muted-foreground">{teamMembers.find((m) => m.id === contactProgress?.assigned_to)?.name ?? "Unassigned"}</span>
-                            </div>
+                            <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
                           </div>
-                        );
-                      })
+                        ) : (
+                          renderOutreachContact(contact, false)
+                        )
+                      )
                     : null}
                 </div>
               </div>
@@ -552,6 +682,166 @@ const CompanyDetailPage = () => {
           ) : null}
         </div>
       </main>
+
+      {emailPopupContact ? (() => {
+        const contact = emailPopupContact;
+        const contactProgress = progress[contact.id];
+        const emailPosition = contactProgress?.email_sequence_position ?? 0;
+        return (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+            <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Email outreach</p>
+                  <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{contact.contact_name} · {contact.company}</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">{contact.email}</p>
+                </div>
+                <div className="flex shrink-0 items-center gap-1 pt-1">
+                  {[1, 2, 3].map((dot) => (
+                    <span key={dot} className={`h-2 w-2 rounded-full ${emailPosition >= dot ? "bg-primary" : "bg-[#E2E8F0]"}`} />
+                  ))}
+                </div>
+              </div>
+
+              {contact.email_assumption_notice ? (
+                <div className="mt-4 rounded-lg border border-[#FBBF24]/40 bg-[#FFFBEB] p-3 text-xs text-[#92400E]">
+                  <span className="font-semibold">Assumed email: </span>
+                  {contact.email_assumption_notice}
+                </div>
+              ) : null}
+
+              {currentTeamMember?.google_calendar_connected ? (
+                <button
+                  type="button"
+                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`)}
+                  className="mt-4 rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                >
+                  📅 Copy scheduling link
+                </button>
+              ) : null}
+
+              {contact.email_subject ? (
+                <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] px-3 py-2.5">
+                  <div className="min-w-0">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Subject line</p>
+                    <p className="truncate text-sm font-semibold text-foreground">{contact.email_subject}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopyEmailField(contact, "email_subject", contact.email_subject ?? "", "Copy subject")}
+                    className="shrink-0 rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                  >
+                    {copyFeedback[`${contact.id}-email_subject`] ?? "Copy subject"}
+                  </button>
+                </div>
+              ) : null}
+
+              <div className="mt-4 grid gap-3">
+                {EMAIL_SEQUENCE_STAGES.map((stage) => {
+                  const rawText = contact[stage.field];
+                  if (!rawText) return null;
+                  const personalization = stage.position === 1 ? getPersonalizationLine(currentTeamMember, contact) : null;
+                  const text = personalizeMessage(rawText, personalization);
+                  const isSent = emailPosition >= stage.position;
+                  return (
+                    <div key={stage.position} className={`rounded-lg border p-3.5 ${isSent ? "border-[#EEEDE7] bg-[#FAFAF8]" : "border-[#EEEDE7] bg-white"}`}>
+                      <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-primary">{stage.position}. {stage.label}</p>
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleSendEmail(contact, stage.field, text)}
+                            className="rounded-md border border-primary bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-foreground hover:opacity-90"
+                          >
+                            Send
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleCopyEmailField(contact, stage.field, text, "Copy")}
+                            className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                          >
+                            {copyFeedback[`${contact.id}-${stage.field}`] ?? "Copy"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSetEmailPosition(contact, isSent ? stage.position - 1 : stage.position)}
+                            className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                          >
+                            {isSent ? "Undo (mark not sent)" : "Mark as sent"}
+                          </button>
+                        </div>
+                      </div>
+                      {isSent ? <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">✓ Marked sent</p> : null}
+                      <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{text}</p>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="mt-5 flex justify-end">
+                <button type="button" onClick={() => setEmailPopupContact(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Close</button>
+              </div>
+            </div>
+          </div>
+        );
+      })() : null}
+
+      {messageEditor ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{messageEditor.label}</p>
+            <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{messageEditor.contact.contact_name} · {messageEditor.contact.company}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">Feel free to edit this before copying — it's just a starting point.</p>
+
+            {messageEditor.contact.value_hypothesis || messageEditor.contact.outreach_angle ? (
+              <div className="mt-4 rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
+                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Context for this message</p>
+                {messageEditor.contact.value_hypothesis ? (
+                  <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{messageEditor.contact.value_hypothesis}</p>
+                ) : null}
+                {messageEditor.contact.outreach_angle ? (
+                  <p className="mt-1 text-sm text-foreground"><span className="font-semibold text-primary">Why now: </span>{formatWhyNow(messageEditor.contact.outreach_angle)}</p>
+                ) : null}
+              </div>
+            ) : null}
+
+            <textarea
+              value={messageEditor.text}
+              onChange={(e) => setMessageEditor((current) => (current ? { ...current, text: e.target.value } : current))}
+              rows={12}
+              className="mt-4 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm leading-relaxed outline-none focus:border-primary"
+            />
+            {messageEditor.field === "linkedin_connect_message" ? (
+              <p className={`mt-1 text-xs ${messageEditor.text.length > 300 ? "font-semibold text-[#B45309]" : "text-muted-foreground"}`}>
+                {messageEditor.text.length}/300 characters {messageEditor.text.length > 300 ? "— over LinkedIn's connection note limit" : ""}
+              </p>
+            ) : null}
+            <div className="mt-4 flex flex-wrap justify-end gap-2">
+              {messageEditor.field === "intro_message" && currentTeamMember?.credibility_line ? (
+                <button
+                  type="button"
+                  onClick={handleDraftAILineForEditor}
+                  disabled={isDraftingAILine}
+                  className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary disabled:opacity-50"
+                >
+                  {isDraftingAILine ? "Drafting…" : "✨ AI-personalize"}
+                </button>
+              ) : null}
+              {currentTeamMember?.google_calendar_connected ? (
+                <button
+                  type="button"
+                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`)}
+                  className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                >
+                  📅 Copy scheduling link
+                </button>
+              ) : null}
+              <button type="button" onClick={() => setMessageEditor(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
+              <button type="button" onClick={handleCopyFromEditor} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Copy</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };

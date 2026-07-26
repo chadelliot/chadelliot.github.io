@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -35,7 +35,15 @@ import {
   COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
-  formatMessageForDisplay,
+  getPersonalizationLine,
+  draftAIPersonalizationLine,
+  parseResumeWithAI,
+  buildGoogleAuthUrl,
+  disconnectGoogleCalendar,
+  getCompanyDomain,
+  personalizeMessage,
+  uploadTeamMemberFile,
+  fetchResumeSignedUrl,
   PRIORITY_ORDER,
   getPrimaryContact,
   getCompanyResearchSummary,
@@ -62,7 +70,7 @@ const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.rep
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
 
-type FilterKey = "all" | "warm_signal" | "not_contacted" | "connection_sent" | "introduction_sent" | "follow_up_sent" | "meeting_set" | "needs_research";
+type FilterKey = "all" | "warm_signal" | "not_contacted" | "engaged" | "connection_sent" | "introduction_sent" | "follow_up_sent" | "meeting_set" | "needs_research";
 
 const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   not_contacted: "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B]",
@@ -249,7 +257,17 @@ const ProjectsPage = () => {
   const [newContactOutreachAngle, setNewContactOutreachAngle] = useState("");
   const [profileTitleInput, setProfileTitleInput] = useState("");
   const [profileNameInput, setProfileNameInput] = useState("");
+  const [profileLinkedInInput, setProfileLinkedInInput] = useState("");
+  const [profileCredibilityInput, setProfileCredibilityInput] = useState("");
+  const [profileBackgroundTagsInput, setProfileBackgroundTagsInput] = useState("");
   const [profileSaveMessage, setProfileSaveMessage] = useState("");
+  const [isDraftingAILine, setIsDraftingAILine] = useState(false);
+  const [calendarStatusMessage, setCalendarStatusMessage] = useState("");
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [isUploadingResume, setIsUploadingResume] = useState(false);
+  const [resumeFileForAI, setResumeFileForAI] = useState<File | null>(null);
+  const [isParsingResumeAI, setIsParsingResumeAI] = useState(false);
+  const [resumeAIMessage, setResumeAIMessage] = useState("");
   const [isRequestingBatch, setIsRequestingBatch] = useState(false);
   const [hasAutoRequestedFirstBatch, setHasAutoRequestedFirstBatch] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
@@ -308,7 +326,28 @@ const ProjectsPage = () => {
     if (!currentTeamMember) return;
     setProfileNameInput(currentTeamMember.name);
     setProfileTitleInput(currentTeamMember.title ?? "");
+    setProfileLinkedInInput(currentTeamMember.linkedin_url ?? "");
+    setProfileCredibilityInput(currentTeamMember.credibility_line ?? "");
+    setProfileBackgroundTagsInput(currentTeamMember.background_tags ?? "");
   }, [currentTeamMember]);
+
+  // Google redirects back here after the OAuth consent screen (see the
+  // google-calendar Edge Function's oauth_callback handler) with a
+  // ?calendar= query param rather than anything requiring a fetch - this
+  // just surfaces that as a message and cleans the URL so refreshing the
+  // page doesn't re-show it.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const calendarResult = params.get("calendar");
+    if (calendarResult === "connected") {
+      setCalendarStatusMessage("Google Calendar connected.");
+      setActiveSection("profile");
+    } else if (calendarResult === "error") {
+      setCalendarStatusMessage("Couldn't connect Google Calendar - try again.");
+      setActiveSection("profile");
+    }
+    if (calendarResult) window.history.replaceState({}, "", window.location.pathname);
+  }, []);
 
   // Owner-only lead-type data, fetched separately from the member-safe
   // companies fetch and never merged into `companies` itself - so a
@@ -464,6 +503,9 @@ const ProjectsPage = () => {
     const updated = await updateTeamMemberProfile(session, currentTeamMember.id, {
       name: profileNameInput.trim() || currentTeamMember.name,
       title: profileTitleInput.trim() || null,
+      linkedin_url: profileLinkedInInput.trim() || null,
+      credibility_line: profileCredibilityInput.trim() || null,
+      background_tags: profileBackgroundTagsInput.trim() || null,
     });
     if (updated) {
       setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
@@ -472,15 +514,100 @@ const ProjectsPage = () => {
     }
   };
 
+  const handleUploadPhoto = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !session || !currentTeamMember) return;
+    setIsUploadingPhoto(true);
+    const photoUrl = await uploadTeamMemberFile(session, currentTeamMember.id, "avatars", file);
+    if (photoUrl) {
+      const updated = await updateTeamMemberProfile(session, currentTeamMember.id, { photo_url: photoUrl });
+      if (updated) setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+    }
+    setIsUploadingPhoto(false);
+  };
+
+  const handleUploadResume = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file || !session || !currentTeamMember) return;
+    setIsUploadingResume(true);
+    const resumePath = await uploadTeamMemberFile(session, currentTeamMember.id, "resumes", file);
+    if (resumePath) {
+      const updated = await updateTeamMemberProfile(session, currentTeamMember.id, { resume_url: resumePath });
+      if (updated) setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+      // Kept in memory (not re-downloaded from storage) so "Parse with AI"
+      // below can read it immediately without an extra round trip.
+      setResumeFileForAI(file);
+    }
+    setIsUploadingResume(false);
+  };
+
+  // Fills the Signature line / Background tags inputs from the resume for
+  // the rep to review - never saved automatically. The rep still has to
+  // read it over and click Save themselves, same as if they'd typed it in.
+  const handleParseResumeAI = async () => {
+    if (!session || !resumeFileForAI) return;
+    setIsParsingResumeAI(true);
+    setResumeAIMessage("");
+    const parsed = await parseResumeWithAI(session, resumeFileForAI);
+    if (parsed) {
+      if (parsed.credibility_line) setProfileCredibilityInput(parsed.credibility_line);
+      if (parsed.background_tags) setProfileBackgroundTagsInput(parsed.background_tags);
+      setResumeAIMessage("Filled in below - review, then click Save.");
+    } else {
+      setResumeAIMessage("Couldn't read that resume (PDF only for now) - fill the fields in by hand instead.");
+    }
+    setIsParsingResumeAI(false);
+  };
+
+  const handleDisconnectCalendar = async () => {
+    if (!session || !currentTeamMember) return;
+    const success = await disconnectGoogleCalendar(session, currentTeamMember.id);
+    if (success) {
+      setTeamMembers((current) => current.map((m) => (m.id === currentTeamMember.id ? { ...m, google_calendar_connected: false, google_calendar_email: null } : m)));
+      setCalendarStatusMessage("Google Calendar disconnected.");
+    }
+  };
+
+  // Resumes live in a private bucket, so "viewing" one means asking for a
+  // fresh short-lived signed link each time rather than storing a permanent
+  // URL anywhere in the UI.
+  const handleViewResume = async () => {
+    if (!session || !currentTeamMember?.resume_url) return;
+    const url = await fetchResumeSignedUrl(session, currentTeamMember.resume_url);
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   // Shared between the Member and Owner render branches - editing your own
-  // name/title. Email is shown read-only: it's how findCurrentTeamMember
+  // profile. Email is shown read-only: it's how findCurrentTeamMember
   // matches this row to the signed-in session, so it isn't safe to edit
   // from here (see the comment on updateTeamMemberProfile).
+  //
+  // Resume upload is deliberately just storage + a link for a human (you)
+  // to read, not an auto-fill - actually parsing a resume into structured
+  // background fields needs an LLM call, which can't safely run in this
+  // static frontend (no place to hold an API key). See
+  // supabase/functions/rep-profile-ai for the Edge Function that adds that
+  // once you've got a key ready to wire in.
   const renderProfileSection = () => (
     <div className="max-w-md rounded-2xl border border-[#EEEDE7] bg-white p-6 shadow-sm">
       <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Your profile</p>
       <h2 className="mb-5 font-display text-xl font-extrabold tracking-tight text-foreground">Update your info</h2>
       <div className="grid gap-4">
+        <div className="flex items-center gap-3">
+          {currentTeamMember?.photo_url ? (
+            <img src={currentTeamMember.photo_url} alt={currentTeamMember.name} className="h-14 w-14 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F1F0EC] text-sm font-semibold text-muted-foreground">
+              {getInitials(currentTeamMember?.name ?? "")}
+            </div>
+          )}
+          <label className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">
+            <span className="cursor-pointer">{isUploadingPhoto ? "Uploading…" : "Upload photo"}</span>
+            <input type="file" accept="image/*" onChange={handleUploadPhoto} disabled={isUploadingPhoto} className="hidden" />
+          </label>
+        </div>
         <label className="grid gap-1.5 text-sm font-semibold text-foreground">
           Name
           <input type="text" value={profileNameInput} onChange={(e) => setProfileNameInput(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
@@ -494,6 +621,91 @@ const ProjectsPage = () => {
           <input type="email" value={currentTeamMember?.email ?? ""} disabled className="rounded-lg border border-border bg-[#F1F0EC] px-3 py-2 text-sm text-muted-foreground outline-none" />
           <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">This is your sign-in email and can't be changed here.</span>
         </label>
+        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+          LinkedIn profile URL
+          <input type="url" value={profileLinkedInInput} onChange={(e) => setProfileLinkedInInput(e.target.value)} placeholder="https://linkedin.com/in/you" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+        </label>
+        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+          Signature line
+          <textarea
+            value={profileCredibilityInput}
+            onChange={(e) => setProfileCredibilityInput(e.target.value)}
+            rows={2}
+            placeholder="e.g. I spent 6 years in supply chain ops before this, so I've seen this exact hiring crunch firsthand."
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+          <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+            One sentence about your own background - gets woven into your intro messages to add credibility.
+          </span>
+        </label>
+        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+          Background tags
+          <input
+            type="text"
+            value={profileBackgroundTagsInput}
+            onChange={(e) => setProfileBackgroundTagsInput(e.target.value)}
+            placeholder="e.g. supply chain, logistics, manufacturing"
+            className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+          <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+            Comma-separated industries/keywords from your background. Your signature line only gets added when a contact's industry matches one of these - leave blank to always include it.
+          </span>
+        </label>
+        <div className="grid gap-1.5 text-sm font-semibold text-foreground">
+          Resume
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">
+              <span className="cursor-pointer">{isUploadingResume ? "Uploading…" : currentTeamMember?.resume_url ? "Replace resume" : "Upload resume"}</span>
+              <input type="file" accept=".pdf,.doc,.docx" onChange={handleUploadResume} disabled={isUploadingResume} className="hidden" />
+            </label>
+            {currentTeamMember?.resume_url ? (
+              <button type="button" onClick={handleViewResume} className="text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:text-primary hover:underline">View current</button>
+            ) : null}
+            {resumeFileForAI ? (
+              <button type="button" onClick={handleParseResumeAI} disabled={isParsingResumeAI} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline disabled:opacity-50">
+                {isParsingResumeAI ? "Reading resume…" : "Fill in signature line + tags from this resume"}
+              </button>
+            ) : null}
+          </div>
+          {resumeAIMessage ? <span className="text-xs font-semibold text-primary">{resumeAIMessage}</span> : null}
+          <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+            PDF or Word. Stored privately - only you and Owners can view it. PDF resumes can be auto-read (button appears after upload) to suggest your signature line and background tags below - review before saving.
+          </span>
+        </div>
+        <div className="grid gap-1.5 text-sm font-semibold text-foreground">
+          Google Calendar
+          {currentTeamMember?.google_calendar_connected ? (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-full bg-[#EAF3DE] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#3B6D11]">
+                Connected{currentTeamMember.google_calendar_email ? ` · ${currentTeamMember.google_calendar_email}` : ""}
+              </span>
+              <button type="button" onClick={handleDisconnectCalendar} className="text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:text-primary hover:underline">Disconnect</button>
+            </div>
+          ) : (
+            <div>
+              {buildGoogleAuthUrl(currentTeamMember?.id ?? "") ? (
+                <a
+                  href={buildGoogleAuthUrl(currentTeamMember?.id ?? "") ?? "#"}
+                  className="inline-block rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                >
+                  Connect Google Calendar
+                </a>
+              ) : (
+                <p className="text-xs text-muted-foreground">Google Calendar isn't set up yet - ask Chad.</p>
+              )}
+            </div>
+          )}
+          {currentTeamMember?.google_calendar_connected ? (
+            <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+              Your scheduling link: <span className="font-semibold text-foreground">{window.location.origin}/schedule/{currentTeamMember.id}</span> - drop it into an outreach message so contacts can book real open time on your calendar.
+            </span>
+          ) : (
+            <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+              Connect once, then contacts can grab time directly off your real availability instead of a manual back-and-forth.
+            </span>
+          )}
+          {calendarStatusMessage ? <span className="text-xs font-semibold text-primary">{calendarStatusMessage}</span> : null}
+        </div>
         <div className="flex items-center gap-3">
           <button type="button" onClick={handleSaveProfile} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save</button>
           {profileSaveMessage ? <span className="text-xs font-semibold text-primary">{profileSaveMessage}</span> : null}
@@ -582,6 +794,10 @@ const ProjectsPage = () => {
 
     if (activeFilter === "warm_signal") rows = rows.filter((c) => !c.needs_research && signalsByCompany[c.company]?.length);
     if (activeFilter === "not_contacted") rows = rows.filter((c) => !c.needs_research && (progress[c.id]?.status ?? "not_contacted") === "not_contacted");
+    // "Engaged" is any status past the starting line - matches how
+    // myContactEngagement/engagedCount elsewhere define "engaged" (anything
+    // other than not_contacted), not a specific status value.
+    if (activeFilter === "engaged") rows = rows.filter((c) => !c.needs_research && (progress[c.id]?.status ?? "not_contacted") !== "not_contacted");
     if (activeFilter === "connection_sent") rows = rows.filter((c) => progress[c.id]?.status === "connection_sent");
     if (activeFilter === "meeting_set") rows = rows.filter((c) => progress[c.id]?.status === "meeting_set");
     if (activeFilter === "introduction_sent") rows = rows.filter((c) => progress[c.id]?.status === "introduction_sent");
@@ -638,16 +854,20 @@ const ProjectsPage = () => {
   // touching Lead Type (that control - and the data behind it - stays
   // owner-only, rendered only in the owner branch further down).
   const myFilteredCompanyGroups = useMemo(() => {
-    const myCompanyIds = new Set(myAssignedCompanies.map((c) => c.id));
+    // companyStageFilter mirrors the owner view's clickable stage tiles
+    // (see ownerCompanyGroups) - lets the "Meetings scheduled"/"Closed
+    // won"/"Closed lost" KPI tiles below double as filters too.
+    const stageScoped = myAssignedCompanies.filter((c) => companyStageFilter === "all" || c.company_stage === companyStageFilter);
+    const myCompanyIds = new Set(stageScoped.map((c) => c.id));
     const byCompanyId: Record<string, ProjectContact[]> = {};
     for (const contact of filteredContacts) {
       if (!contact.company_id || !myCompanyIds.has(contact.company_id)) continue;
       (byCompanyId[contact.company_id] ??= []).push(contact);
     }
-    return myAssignedCompanies
+    return stageScoped
       .filter((c) => byCompanyId[c.id]?.length)
       .map((company) => ({ company, matchingContacts: byCompanyId[company.id] }));
-  }, [myAssignedCompanies, filteredContacts]);
+  }, [myAssignedCompanies, filteredContacts, companyStageFilter]);
 
   const { visibleCount: memberVisibleCount, sentinelRef: memberSentinelRef } = useInfiniteReveal(myFilteredCompanyGroups.length);
 
@@ -773,7 +993,13 @@ const ProjectsPage = () => {
   };
 
   const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
-    setMessageEditor({ contact, field, label, text: formatMessageForDisplay(contact[field]) });
+    // Signature-line personalization only applies to the intro message -
+    // the connection note is too short (300-char LinkedIn cap, already
+    // enforced below) to spare a sentence on the rep's own background, and
+    // the follow-up is a reminder nudge, not the place to (re-)introduce
+    // credibility.
+    const personalization = field === "intro_message" ? getPersonalizationLine(currentTeamMember, contact) : null;
+    setMessageEditor({ contact, field, label, text: personalizeMessage(contact[field], personalization) });
   };
 
   const handleCopyFromEditor = async () => {
@@ -784,6 +1010,27 @@ const ProjectsPage = () => {
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "message_copied", field, currentTeamMember?.id);
     setMessageEditor(null);
+  };
+
+  // Replaces whatever personalization sentence is currently in the editor
+  // (the static credibility_line match, or nothing) with a freshly
+  // AI-drafted one tailored to this contact - inserted the same way
+  // personalizeMessage does (its own paragraph, just before the sign-off),
+  // and left fully editable afterward since this is a draft to review, not
+  // something that goes out unreviewed.
+  const handleDraftAILineForEditor = async () => {
+    if (!session || !messageEditor) return;
+    setIsDraftingAILine(true);
+    const line = await draftAIPersonalizationLine(session, currentTeamMember, messageEditor.contact);
+    if (line) {
+      setMessageEditor((current) => {
+        if (!current) return current;
+        const lastBreak = current.text.lastIndexOf("\n\n");
+        const text = lastBreak === -1 ? `${current.text}\n\n${line}` : `${current.text.slice(0, lastBreak)}\n\n${line}${current.text.slice(lastBreak)}`;
+        return { ...current, text };
+      });
+    }
+    setIsDraftingAILine(false);
   };
 
   const handleSaveMeeting = async () => {
@@ -923,6 +1170,7 @@ const ProjectsPage = () => {
           ownerLeadType={isOwner ? ownerCompanyFields[company.id]?.canonical_lead_type : undefined}
           ownerSignalCount={isOwner ? ownerCompanyFields[company.id]?.signal_count : undefined}
           emailContactCount={companyContacts.filter((c) => c.email).length}
+          logoDomain={getCompanyDomain(companyContacts)}
         />
         <div className="flex items-center justify-between border-b border-[#EEEDE7] bg-[#FAFAF8] px-4 py-2">
           <Link to={`/projects/company/${company.id}`} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">View full company page →</Link>
@@ -1097,6 +1345,16 @@ const ProjectsPage = () => {
             </div>
           ) : null}
 
+          {currentTeamMember?.google_calendar_connected ? (
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`)}
+              className="mt-4 rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+            >
+              📅 Copy scheduling link
+            </button>
+          ) : null}
+
           {contact.email_subject ? (
             <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] px-3 py-2.5">
               <div className="min-w-0">
@@ -1115,8 +1373,15 @@ const ProjectsPage = () => {
 
           <div className="mt-4 grid gap-3">
             {EMAIL_SEQUENCE_STAGES.map((stage) => {
-              const text = contact[stage.field];
-              if (!text) return null;
+              const rawText = contact[stage.field];
+              if (!rawText) return null;
+              // Same reasoning as the LinkedIn intro message - the opening
+              // email is where a rep's own credibility line actually earns
+              // its place; the follow-ups already reference back to it, so
+              // repeating it there would feel redundant rather than
+              // personal.
+              const personalization = stage.position === 1 ? getPersonalizationLine(currentTeamMember, contact) : null;
+              const text = personalizeMessage(rawText, personalization);
               const isSent = emailPosition >= stage.position;
               return (
                 <div key={stage.position} className={`rounded-lg border p-3.5 ${isSent ? "border-[#EEEDE7] bg-[#FAFAF8]" : "border-[#EEEDE7] bg-white"}`}>
@@ -1125,14 +1390,14 @@ const ProjectsPage = () => {
                     <div className="flex flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => handleSendEmail(contact, stage.field, formatMessageForDisplay(text))}
+                        onClick={() => handleSendEmail(contact, stage.field, text)}
                         className="rounded-md border border-primary bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-foreground hover:opacity-90"
                       >
                         Send
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleCopyEmailField(contact, stage.field, formatMessageForDisplay(text), "Copy")}
+                        onClick={() => handleCopyEmailField(contact, stage.field, text, "Copy")}
                         className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
                       >
                         {copyFeedback[`${contact.id}-${stage.field}`] ?? "Copy"}
@@ -1147,7 +1412,7 @@ const ProjectsPage = () => {
                     </div>
                   </div>
                   {isSent ? <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">✓ Marked sent</p> : null}
-                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{formatMessageForDisplay(text)}</p>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{text}</p>
                 </div>
               );
             })}
@@ -1278,51 +1543,85 @@ const ProjectsPage = () => {
 
             {/* Same six numbers regardless of the search/status/priority
                 filters below - this is "how is my whole book doing," not
-                "how many rows match my current filter." */}
-            <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+                "how many rows match my current filter." Each tile is also a
+                filter shortcut: the four stage tiles set companyStageFilter,
+                the two contact tiles set activeFilter (status), and clicking
+                an already-active tile clears it back to "all." */}
+            <div className="mb-2 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+              <button
+                type="button"
+                onClick={() => setCompanyStageFilter("all")}
+                className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${companyStageFilter === "all" ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+              >
                 <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.new_signal }}>
                   <Zap size={16} style={{ color: STAGE_CHART_COLORS.new_signal }} />
                 </div>
-                <p className="text-2xl font-semibold text-foreground">{myAssignedCompanies.length}</p>
+                <p className={`text-2xl font-semibold ${companyStageFilter === "all" ? "text-primary" : "text-foreground"}`}>{myAssignedCompanies.length}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Total opportunities</p>
-              </div>
-              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveFilter(activeFilter === "not_contacted" ? "all" : "not_contacted")}
+                className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${activeFilter === "not_contacted" ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+              >
                 <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#94A3B822]">
                   <UserMinus size={16} className="text-[#64748B]" />
                 </div>
-                <p className="text-2xl font-semibold text-foreground">{myContactEngagement.notEngaged}</p>
+                <p className={`text-2xl font-semibold ${activeFilter === "not_contacted" ? "text-primary" : "text-foreground"}`}>{myContactEngagement.notEngaged}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Contacts not engaged</p>
-              </div>
-              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveFilter(activeFilter === "engaged" ? "all" : "engaged")}
+                className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${activeFilter === "engaged" ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+              >
                 <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#2FA37F22]">
                   <UserCheck size={16} className="text-primary" />
                 </div>
-                <p className="text-2xl font-semibold text-foreground">{myContactEngagement.engaged}</p>
+                <p className={`text-2xl font-semibold ${activeFilter === "engaged" ? "text-primary" : "text-foreground"}`}>{myContactEngagement.engaged}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Contacts engaged</p>
-              </div>
-              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+              </button>
+              <button
+                type="button"
+                onClick={() => setCompanyStageFilter(companyStageFilter === "meeting_scheduled" ? "all" : "meeting_scheduled")}
+                className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${companyStageFilter === "meeting_scheduled" ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+              >
                 <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.meeting_scheduled }}>
                   <CalendarClock size={16} style={{ color: STAGE_CHART_COLORS.meeting_scheduled }} />
                 </div>
-                <p className="text-2xl font-semibold text-foreground">{myCompanyStageCounts.meeting_scheduled}</p>
+                <p className={`text-2xl font-semibold ${companyStageFilter === "meeting_scheduled" ? "text-primary" : "text-foreground"}`}>{myCompanyStageCounts.meeting_scheduled}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Meetings scheduled</p>
-              </div>
-              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+              </button>
+              <button
+                type="button"
+                onClick={() => setCompanyStageFilter(companyStageFilter === "closed_won" ? "all" : "closed_won")}
+                className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${companyStageFilter === "closed_won" ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+              >
                 <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.closed_won }}>
                   <Trophy size={16} style={{ color: STAGE_CHART_COLORS.closed_won }} />
                 </div>
-                <p className="text-2xl font-semibold text-foreground">{myCompanyStageCounts.closed_won}</p>
+                <p className={`text-2xl font-semibold ${companyStageFilter === "closed_won" ? "text-primary" : "text-foreground"}`}>{myCompanyStageCounts.closed_won}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Closed won</p>
-              </div>
-              <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm">
+              </button>
+              <button
+                type="button"
+                onClick={() => setCompanyStageFilter(companyStageFilter === "closed_lost" ? "all" : "closed_lost")}
+                className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${companyStageFilter === "closed_lost" ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+              >
                 <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.closed_lost }}>
                   <XCircle size={16} style={{ color: STAGE_CHART_COLORS.closed_lost }} />
                 </div>
-                <p className="text-2xl font-semibold text-foreground">{myCompanyStageCounts.closed_lost}</p>
+                <p className={`text-2xl font-semibold ${companyStageFilter === "closed_lost" ? "text-primary" : "text-foreground"}`}>{myCompanyStageCounts.closed_lost}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Closed lost</p>
-              </div>
+              </button>
             </div>
+            {companyStageFilter !== "all" ? (
+              <div className="mb-8 flex justify-end">
+                <button type="button" onClick={() => setCompanyStageFilter("all")} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Clear stage filter</button>
+              </div>
+            ) : (
+              <div className="mb-6" />
+            )}
 
             {/* Same search/status/priority controls the owner gets - Lead
                 Type deliberately isn't here (owner-only data, see
@@ -1341,6 +1640,7 @@ const ProjectsPage = () => {
                   <option value="all">All</option>
                   <option value="warm_signal">Warm signal</option>
                   <option value="not_contacted">Not Contacted</option>
+                  <option value="engaged">Engaged</option>
                   <option value="connection_sent">Connection Sent</option>
                   <option value="introduction_sent">Introduction Sent</option>
                   <option value="follow_up_sent">Follow-Up Sent</option>
@@ -1358,10 +1658,10 @@ const ProjectsPage = () => {
                   <option value="C">C</option>
                 </select>
               </label>
-              {activeFilter !== "all" || priorityFilter !== "all" ? (
+              {activeFilter !== "all" || priorityFilter !== "all" || companyStageFilter !== "all" ? (
                 <button
                   type="button"
-                  onClick={() => { setActiveFilter("all"); setPriorityFilter("all"); }}
+                  onClick={() => { setActiveFilter("all"); setPriorityFilter("all"); setCompanyStageFilter("all"); }}
                   className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
                 >
                   Clear filters
@@ -1455,7 +1755,26 @@ const ProjectsPage = () => {
                   {messageEditor.text.length}/300 characters {messageEditor.text.length > 300 ? "— over LinkedIn's connection note limit" : ""}
                 </p>
               ) : null}
-              <div className="mt-4 flex justify-end gap-2">
+              <div className="mt-4 flex flex-wrap justify-end gap-2">
+                {messageEditor.field === "intro_message" && currentTeamMember?.credibility_line ? (
+                  <button
+                    type="button"
+                    onClick={handleDraftAILineForEditor}
+                    disabled={isDraftingAILine}
+                    className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary disabled:opacity-50"
+                  >
+                    {isDraftingAILine ? "Drafting…" : "✨ AI-personalize"}
+                  </button>
+                ) : null}
+                {currentTeamMember?.google_calendar_connected ? (
+                  <button
+                    type="button"
+                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`)}
+                    className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                  >
+                    📅 Copy scheduling link
+                  </button>
+                ) : null}
                 <button type="button" onClick={() => setMessageEditor(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
                 <button type="button" onClick={handleCopyFromEditor} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Copy</button>
               </div>
@@ -1724,6 +2043,7 @@ const ProjectsPage = () => {
                 <option value="all">All</option>
                 <option value="warm_signal">Warm signal</option>
                 <option value="not_contacted">Not Contacted</option>
+                <option value="engaged">Engaged</option>
                 <option value="connection_sent">Connection Sent</option>
                 <option value="introduction_sent">Introduction Sent</option>
                 <option value="follow_up_sent">Follow-Up Sent</option>
