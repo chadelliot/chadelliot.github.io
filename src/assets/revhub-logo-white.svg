@@ -1,0 +1,24 @@
+<svg viewBox="0 0 640 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RevHub">
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="800" font-style="italic" font-size="150">
+    <text x="4" y="150" fill="#FFFFFF">Rev</text>
+    <text x="228" y="150" fill="#1F7F63">Hub</text>
+  </g>
+
+  <!-- Hub/network flourish, riffing on the product name: a small cluster of
+       nodes branching off the tail of "b", in the same green as "Hub". -->
+  <g fill="none" stroke="#1F7F63" stroke-width="6" stroke-linecap="round">
+    <line x1="520" y1="108" x2="586" y2="60" />
+    <line x1="520" y1="108" x2="602" y2="112" />
+    <line x1="520" y1="108" x2="588" y2="152" />
+    <line x1="588" y1="152" x2="560" y2="188" />
+    <line x1="588" y1="152" x2="618" y2="176" />
+  </g>
+  <g fill="#1F7F63">
+    <circle cx="520" cy="108" r="20" />
+    <circle cx="586" cy="60" r="16" />
+    <circle cx="602" cy="112" r="9" />
+    <circle cx="588" cy="152" r="14" />
+    <circle cx="560" cy="188" r="18" />
+    <circle cx="618" cy="176" r="10" />
+  </g>
+</svg>

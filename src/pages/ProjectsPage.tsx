@@ -715,6 +715,21 @@ const ProjectsPage = () => {
     if (session) logContactActivity(session, contact.id, "email_message_copied", field, currentTeamMember?.id);
   };
 
+  // Opens the rep's own default mail client (or whatever handles mailto:
+  // links, e.g. Gmail if they've set that as their browser's default) with
+  // To/Subject/Body pre-filled - this is as close to "send from the popup"
+  // as a browser app can get without a connected mail-sending backend.
+  // Deliberately does NOT auto-mark the stage as sent: opening the compose
+  // window isn't the same as actually hitting send, so the rep still
+  // confirms via the separate Mark sent button once the email is actually
+  // out the door.
+  const handleSendEmail = (contact: ProjectContact, field: string, text: string) => {
+    const subject = contact.email_subject ?? "";
+    const mailto = `mailto:${encodeURIComponent(contact.email ?? "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
+    window.location.href = mailto;
+    if (session) logContactActivity(session, contact.id, "email_send_clicked", field, currentTeamMember?.id);
+  };
+
   const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
     setMessageEditor({ contact, field, label, text: formatMessageForDisplay(contact[field]) });
   };
@@ -1065,7 +1080,14 @@ const ProjectsPage = () => {
                 <div key={stage.position} className={`rounded-lg border p-3.5 ${isSent ? "border-[#EEEDE7] bg-[#FAFAF8]" : "border-[#EEEDE7] bg-white"}`}>
                   <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-primary">{stage.position}. {stage.label}</p>
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleSendEmail(contact, stage.field, formatMessageForDisplay(text))}
+                        className="rounded-md border border-primary bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-foreground hover:opacity-90"
+                      >
+                        Send
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleCopyEmailField(contact, stage.field, formatMessageForDisplay(text), "Copy")}
@@ -1076,12 +1098,13 @@ const ProjectsPage = () => {
                       <button
                         type="button"
                         onClick={() => handleSetEmailPosition(contact, isSent ? stage.position - 1 : stage.position)}
-                        className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] ${isSent ? "border border-[#CBD5E1] bg-white text-[#334155] hover:border-primary hover:text-primary" : "border border-primary bg-primary text-primary-foreground"}`}
+                        className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] ${isSent ? "border border-[#CBD5E1] bg-white text-[#334155] hover:border-primary hover:text-primary" : "border border-[#CBD5E1] bg-white text-[#334155] hover:border-primary hover:text-primary"}`}
                       >
-                        {isSent ? "Undo" : "Mark sent"}
+                        {isSent ? "Undo (mark not sent)" : "Mark as sent"}
                       </button>
                     </div>
                   </div>
+                  {isSent ? <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">✓ Marked sent</p> : null}
                   <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{formatMessageForDisplay(text)}</p>
                 </div>
               );
