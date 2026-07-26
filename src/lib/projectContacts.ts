@@ -32,6 +32,16 @@ export type ProjectContact = {
   follow_up_message?: string | null;
   needs_research: boolean;
   do_not_contact: boolean;
+  // Email outreach thread - separate from the LinkedIn connect/intro/
+  // follow-up messages above. Populated from the email_* columns on the
+  // RevHub-Marketing tab. email_assumption_notice is non-empty when the
+  // email was inferred from a company-domain pattern rather than
+  // confirmed, and gets surfaced as a warning before a rep sends to it.
+  email_subject?: string | null;
+  email_intro_message?: string | null;
+  email_follow_up_1?: string | null;
+  email_follow_up_2?: string | null;
+  email_assumption_notice?: string | null;
 };
 
 export type ContactProgress = {
@@ -40,6 +50,11 @@ export type ContactProgress = {
   assigned_to?: string | null;
   updated_at: string;
   updated_by?: string | null;
+  // How far along the email thread this contact is: 0 = nothing sent yet,
+  // 1 = intro sent, 2 = follow-up 1 sent, 3 = follow-up 2 sent. A plain
+  // ordered number rather than named statuses, kept deliberately separate
+  // from `status` above - see add_email_sequence_fields.sql for why.
+  email_sequence_position?: number;
 };
 
 export type TeamMember = {
@@ -505,7 +520,7 @@ export const updateSignalOutreachModel = async (
 export const updateContactProgress = async (
   session: ProposalSession,
   contactId: string,
-  updates: Partial<Pick<ContactProgress, "status" | "assigned_to">>,
+  updates: Partial<Pick<ContactProgress, "status" | "assigned_to" | "email_sequence_position">>,
   updatedByTeamMemberId?: string | null
 ): Promise<ContactProgress | null> => {
   if (!DB_URL) return null;
@@ -725,6 +740,16 @@ export const STATUS_LABELS: Record<ContactStatus, string> = {
 // gotten. Purely derived from the current status, so reverting a contact
 // to an earlier status automatically brings the relevant buttons back -
 // there's no separate "has this been dismissed" flag to get out of sync.
+// The 3 stages of the email thread, in order - position N means "this
+// stage's message has been sent." Driving the UI off this list (rather
+// than hardcoding 3 separate blocks) means adding a 4th stage later is a
+// one-line change here plus a migration, not a rewrite.
+export const EMAIL_SEQUENCE_STAGES: { position: 1 | 2 | 3; label: string; field: "email_intro_message" | "email_follow_up_1" | "email_follow_up_2" }[] = [
+  { position: 1, label: "Intro", field: "email_intro_message" },
+  { position: 2, label: "Follow-up 1", field: "email_follow_up_1" },
+  { position: 3, label: "Follow-up 2", field: "email_follow_up_2" },
+];
+
 export const STATUS_ORDER: Record<ContactStatus, number> = {
   not_contacted: 0,
   connection_sent: 1,

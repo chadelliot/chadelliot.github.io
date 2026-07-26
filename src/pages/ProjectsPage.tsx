@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info } from "lucide-react";
+import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -31,6 +31,7 @@ import {
   createSelfServeContact,
   STATUS_LABELS,
   STATUS_ORDER,
+  EMAIL_SEQUENCE_STAGES,
   COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
@@ -258,6 +259,7 @@ const ProjectsPage = () => {
     label: string;
     text: string;
   } | null>(null);
+  const [emailPopupContact, setEmailPopupContact] = useState<ProjectContact | null>(null);
   const [nameInput, setNameInput] = useState("");
   const [expandedCompanies, setExpandedCompanies] = useState<Record<string, boolean>>({});
   const toggleCompanyExpanded = (companyId: string) => setExpandedCompanies((current) => ({ ...current, [companyId]: !current[companyId] }));
@@ -691,6 +693,28 @@ const ProjectsPage = () => {
     if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
   };
 
+  // Moves email_sequence_position to an exact value (not just "advance by
+  // one") so both "mark as sent" and "undo" are the same call with
+  // different targets - keeps this reversible the same way status changes
+  // are, without a separate revert code path.
+  const handleSetEmailPosition = async (contact: ProjectContact, position: number) => {
+    if (!session) return;
+    setProgress((current) => ({
+      ...current,
+      [contact.id]: { ...current[contact.id], contact_id: contact.id, status: current[contact.id]?.status ?? "not_contacted", updated_at: new Date().toISOString(), email_sequence_position: position },
+    }));
+    const saved = await updateContactProgress(session, contact.id, { email_sequence_position: position }, currentTeamMember?.id);
+    if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
+    logContactActivity(session, contact.id, "email_sequence_changed", String(position), currentTeamMember?.id);
+  };
+
+  const handleCopyEmailField = async (contact: ProjectContact, field: string, text: string, label: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
+    setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
+    if (session) logContactActivity(session, contact.id, "email_message_copied", field, currentTeamMember?.id);
+  };
+
   const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
     setMessageEditor({ contact, field, label, text: formatMessageForDisplay(contact[field]) });
   };
@@ -732,7 +756,6 @@ const ProjectsPage = () => {
   const renderAssignedContactArticle = (contact: ProjectContact) => {
     const contactProgress = progress[contact.id];
     const status = contactProgress?.status ?? "not_contacted";
-    const tier = getContactTier(contact);
     const meetingBlock = meetingBlocks[contact.id];
     const isBlocked = Boolean(meetingBlock?.is_blocked);
     return (
@@ -746,7 +769,24 @@ const ProjectsPage = () => {
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              {tier === "email" ? <span title="Email on file">📧</span> : null}
+              {contact.email ? (() => {
+                const emailPosition = contactProgress?.email_sequence_position ?? 0;
+                return (
+                  <button
+                    type="button"
+                    onClick={() => setEmailPopupContact(contact)}
+                    title="Email outreach"
+                    className="flex items-center gap-1 rounded-full border border-[#CBD5E1] bg-white px-1.5 py-0.5 text-[#1D4ED8] hover:border-primary hover:text-primary"
+                  >
+                    <Mail size={12} />
+                    <span className="flex items-center gap-0.5">
+                      {[1, 2, 3].map((dot) => (
+                        <span key={dot} className={`h-1.5 w-1.5 rounded-full ${emailPosition >= dot ? "bg-current" : "bg-[#E2E8F0]"}`} />
+                      ))}
+                    </span>
+                  </button>
+                );
+              })() : null}
               {contact.linkedin_url && contact.linkedin_url.includes("/in/") ? (
                 <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="font-display text-lg font-extrabold tracking-tight text-foreground hover:text-primary hover:underline">{contact.contact_name}</a>
               ) : (
@@ -968,6 +1008,94 @@ const ProjectsPage = () => {
     </Sheet>
   );
 
+  // Shared between the Member and Owner render branches (mirrors
+  // addContactSlideout above) so the popup only needs to be built once.
+  const emailPopupModal = emailPopupContact ? (() => {
+    const contact = emailPopupContact;
+    const contactProgress = progress[contact.id];
+    const emailPosition = contactProgress?.email_sequence_position ?? 0;
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Email outreach</p>
+              <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{contact.contact_name} · {contact.company}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{contact.email}</p>
+            </div>
+            {/* At-a-glance progress: one filled dot per stage sent, purely
+                derived from email_sequence_position so an undo instantly
+                un-fills the dot again. */}
+            <div className="flex shrink-0 items-center gap-1 pt-1">
+              {[1, 2, 3].map((dot) => (
+                <span key={dot} className={`h-2 w-2 rounded-full ${emailPosition >= dot ? "bg-primary" : "bg-[#E2E8F0]"}`} />
+              ))}
+            </div>
+          </div>
+
+          {contact.email_assumption_notice ? (
+            <div className="mt-4 rounded-lg border border-[#FBBF24]/40 bg-[#FFFBEB] p-3 text-xs text-[#92400E]">
+              <span className="font-semibold">Assumed email: </span>
+              {contact.email_assumption_notice}
+            </div>
+          ) : null}
+
+          {contact.email_subject ? (
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] px-3 py-2.5">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Subject line</p>
+                <p className="truncate text-sm font-semibold text-foreground">{contact.email_subject}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleCopyEmailField(contact, "email_subject", contact.email_subject ?? "", "Copy subject")}
+                className="shrink-0 rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+              >
+                {copyFeedback[`${contact.id}-email_subject`] ?? "Copy subject"}
+              </button>
+            </div>
+          ) : null}
+
+          <div className="mt-4 grid gap-3">
+            {EMAIL_SEQUENCE_STAGES.map((stage) => {
+              const text = contact[stage.field];
+              if (!text) return null;
+              const isSent = emailPosition >= stage.position;
+              return (
+                <div key={stage.position} className={`rounded-lg border p-3.5 ${isSent ? "border-[#EEEDE7] bg-[#FAFAF8]" : "border-[#EEEDE7] bg-white"}`}>
+                  <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-primary">{stage.position}. {stage.label}</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleCopyEmailField(contact, stage.field, formatMessageForDisplay(text), "Copy")}
+                        className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                      >
+                        {copyFeedback[`${contact.id}-${stage.field}`] ?? "Copy"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSetEmailPosition(contact, isSent ? stage.position - 1 : stage.position)}
+                        className={`rounded-md px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] ${isSent ? "border border-[#CBD5E1] bg-white text-[#334155] hover:border-primary hover:text-primary" : "border border-primary bg-primary text-primary-foreground"}`}
+                      >
+                        {isSent ? "Undo" : "Mark sent"}
+                      </button>
+                    </div>
+                  </div>
+                  <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{formatMessageForDisplay(text)}</p>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-5 flex justify-end">
+            <button type="button" onClick={() => setEmailPopupContact(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Close</button>
+          </div>
+        </div>
+      </div>
+    );
+  })() : null;
+
   if (!IS_DB_READY) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 py-16">
@@ -1132,6 +1260,8 @@ const ProjectsPage = () => {
             </div>
           </div>
         ) : null}
+
+        {emailPopupModal}
 
         {messageEditor ? (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
@@ -1522,6 +1652,8 @@ const ProjectsPage = () => {
       ) : null}
 
       {addContactSlideout}
+
+      {emailPopupModal}
 
       {messageEditor ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
