@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck } from "lucide-react";
+import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck, Camera, Linkedin, FileText, CheckCircle2 } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -591,125 +591,184 @@ const ProjectsPage = () => {
   // supabase/functions/rep-profile-ai for the Edge Function that adds that
   // once you've got a key ready to wire in.
   const renderProfileSection = () => (
-    <div className="max-w-md rounded-2xl border border-[#EEEDE7] bg-white p-6 shadow-sm">
-      <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Your profile</p>
-      <h2 className="mb-5 font-display text-xl font-extrabold tracking-tight text-foreground">Update your info</h2>
-      <div className="grid gap-4">
-        <div className="flex items-center gap-3">
-          {currentTeamMember?.photo_url ? (
-            <img src={currentTeamMember.photo_url} alt={currentTeamMember.name} className="h-14 w-14 rounded-full object-cover" />
-          ) : (
-            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#F1F0EC] text-sm font-semibold text-muted-foreground">
-              {getInitials(currentTeamMember?.name ?? "")}
+    <div className="mx-auto w-full max-w-5xl pb-28">
+      {/* Hero header - full-width banner, oversized avatar with a hover-to-
+          change overlay, name/title edited inline right in the header
+          rather than buried in a plain form field further down. */}
+      <div className="overflow-hidden rounded-2xl border border-[#EEEDE7] bg-white shadow-sm">
+        <div className="h-20 bg-gradient-to-r from-primary to-[#1F7A5C] sm:h-28" />
+        <div className="px-5 pb-6 sm:px-8">
+          <div className="-mt-12 flex flex-col gap-4 sm:-mt-14 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-end">
+              <div className="group relative shrink-0">
+                {currentTeamMember?.photo_url ? (
+                  <img
+                    src={currentTeamMember.photo_url}
+                    alt={currentTeamMember.name}
+                    className="h-24 w-24 rounded-full border-4 border-white object-cover shadow-md sm:h-28 sm:w-28"
+                  />
+                ) : (
+                  <div className="flex h-24 w-24 items-center justify-center rounded-full border-4 border-white bg-[#F1F0EC] font-display text-2xl font-extrabold text-muted-foreground shadow-md sm:h-28 sm:w-28">
+                    {getInitials(currentTeamMember?.name ?? "")}
+                  </div>
+                )}
+                <label className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/0 opacity-0 transition-all group-hover:bg-black/45 group-hover:opacity-100">
+                  {isUploadingPhoto ? (
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-white">Uploading…</span>
+                  ) : (
+                    <Camera size={20} className="text-white" />
+                  )}
+                  <input type="file" accept="image/*" onChange={handleUploadPhoto} disabled={isUploadingPhoto} className="hidden" />
+                </label>
+              </div>
+              <div className="min-w-0 pb-1 sm:pb-2">
+                <input
+                  type="text"
+                  value={profileNameInput}
+                  onChange={(e) => setProfileNameInput(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full min-w-0 border-none bg-transparent p-0 font-display text-2xl font-extrabold tracking-tight text-foreground outline-none focus:outline-none sm:text-3xl"
+                />
+                <input
+                  type="text"
+                  value={profileTitleInput}
+                  onChange={(e) => setProfileTitleInput(e.target.value)}
+                  placeholder="Add a title, e.g. Account Executive"
+                  className="mt-0.5 w-full min-w-0 border-none bg-transparent p-0 text-sm font-semibold text-primary outline-none focus:outline-none"
+                />
+                <p className="mt-0.5 text-xs text-muted-foreground">{currentTeamMember?.email}</p>
+              </div>
             </div>
-          )}
-          <label className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">
-            <span className="cursor-pointer">{isUploadingPhoto ? "Uploading…" : "Upload photo"}</span>
-            <input type="file" accept="image/*" onChange={handleUploadPhoto} disabled={isUploadingPhoto} className="hidden" />
-          </label>
+
+            {/* At-a-glance status badges - what's connected/on file, without
+                having to scan the whole form below. */}
+            <div className="flex flex-wrap items-center gap-2 pb-1 sm:pb-2">
+              {profileLinkedInInput ? (
+                <a
+                  href={profileLinkedInInput}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#BFDBFE] bg-[#EFF6FF] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#1D4ED8] hover:border-primary"
+                >
+                  <Linkedin size={12} /> LinkedIn
+                </a>
+              ) : null}
+              {currentTeamMember?.resume_url ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#DDD6FE] bg-[#F5F3FF] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#6D28D9]">
+                  <FileText size={12} /> Resume on file
+                </span>
+              ) : null}
+              {currentTeamMember?.google_calendar_connected ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#BBF7D0] bg-[#F0FDF4] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#15803D]">
+                  <CheckCircle2 size={12} /> Calendar connected
+                </span>
+              ) : null}
+            </div>
+          </div>
         </div>
-        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
-          Name
-          <input type="text" value={profileNameInput} onChange={(e) => setProfileNameInput(e.target.value)} className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
-        </label>
-        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
-          Title
-          <input type="text" value={profileTitleInput} onChange={(e) => setProfileTitleInput(e.target.value)} placeholder="e.g. Account Executive" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
-        </label>
-        <label className="grid gap-1.5 text-sm font-semibold text-muted-foreground">
-          Email
-          <input type="email" value={currentTeamMember?.email ?? ""} disabled className="rounded-lg border border-border bg-[#F1F0EC] px-3 py-2 text-sm text-muted-foreground outline-none" />
-          <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">This is your sign-in email and can't be changed here.</span>
-        </label>
-        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
-          LinkedIn profile URL
-          <input type="url" value={profileLinkedInInput} onChange={(e) => setProfileLinkedInInput(e.target.value)} placeholder="https://linkedin.com/in/you" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
-        </label>
-        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
-          Signature line
-          <textarea
-            value={profileCredibilityInput}
-            onChange={(e) => setProfileCredibilityInput(e.target.value)}
-            rows={2}
-            placeholder="e.g. I spent 6 years in supply chain ops before this, so I've seen this exact hiring crunch firsthand."
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-          />
-          <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
-            One sentence about your own background - gets woven into your intro messages to add credibility.
-          </span>
-        </label>
-        <label className="grid gap-1.5 text-sm font-semibold text-foreground">
-          Background tags
-          <input
-            type="text"
-            value={profileBackgroundTagsInput}
-            onChange={(e) => setProfileBackgroundTagsInput(e.target.value)}
-            placeholder="e.g. supply chain, logistics, manufacturing"
-            className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
-          />
-          <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
-            Comma-separated industries/keywords from your background. Your signature line only gets added when a contact's industry matches one of these - leave blank to always include it.
-          </span>
-        </label>
-        <div className="grid gap-1.5 text-sm font-semibold text-foreground">
-          Resume
+      </div>
+
+      {/* Detail cards - responsive grid: single column on mobile, two
+          columns on larger screens, personalization spanning the full
+          width since it's the highest-value section to get right. */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        <div className="rounded-2xl border border-[#EEEDE7] bg-white p-6 shadow-sm lg:col-span-2">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Outreach personalization</p>
+          <h3 className="mb-5 font-display text-lg font-extrabold tracking-tight text-foreground">How your outreach represents you</h3>
+          <div className="grid gap-5 md:grid-cols-2">
+            <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+              LinkedIn profile URL
+              <input type="url" value={profileLinkedInInput} onChange={(e) => setProfileLinkedInInput(e.target.value)} placeholder="https://linkedin.com/in/you" className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary" />
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-foreground">
+              Background tags
+              <input
+                type="text"
+                value={profileBackgroundTagsInput}
+                onChange={(e) => setProfileBackgroundTagsInput(e.target.value)}
+                placeholder="e.g. supply chain, logistics, manufacturing"
+                className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+              <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+                Comma-separated industries/keywords. Your signature line only gets added when a contact's industry matches one of these - leave blank to always include it.
+              </span>
+            </label>
+            <label className="grid gap-1.5 text-sm font-semibold text-foreground md:col-span-2">
+              Signature line
+              <textarea
+                value={profileCredibilityInput}
+                onChange={(e) => setProfileCredibilityInput(e.target.value)}
+                rows={2}
+                placeholder="e.g. I spent 6 years in supply chain ops before this, so I've seen this exact hiring crunch firsthand."
+                className="rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+              />
+              <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
+                One sentence about your own background - gets woven into your intro messages to add credibility.
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-[#EEEDE7] bg-white p-6 shadow-sm">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Resume</p>
+          <h3 className="mb-4 font-display text-lg font-extrabold tracking-tight text-foreground">Background details</h3>
           <div className="flex flex-wrap items-center gap-3">
-            <label className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">
+            <label className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary">
               <span className="cursor-pointer">{isUploadingResume ? "Uploading…" : currentTeamMember?.resume_url ? "Replace resume" : "Upload resume"}</span>
               <input type="file" accept=".pdf,.doc,.docx" onChange={handleUploadResume} disabled={isUploadingResume} className="hidden" />
             </label>
             {currentTeamMember?.resume_url ? (
               <button type="button" onClick={handleViewResume} className="text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:text-primary hover:underline">View current</button>
             ) : null}
-            {resumeFileForAI ? (
-              <button type="button" onClick={handleParseResumeAI} disabled={isParsingResumeAI} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline disabled:opacity-50">
-                {isParsingResumeAI ? "Reading resume…" : "Fill in signature line + tags from this resume"}
-              </button>
-            ) : null}
           </div>
-          {resumeAIMessage ? <span className="text-xs font-semibold text-primary">{resumeAIMessage}</span> : null}
-          <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
-            PDF or Word. Stored privately - only you and Owners can view it. PDF resumes can be auto-read (button appears after upload) to suggest your signature line and background tags below - review before saving.
-          </span>
+          {resumeFileForAI ? (
+            <button type="button" onClick={handleParseResumeAI} disabled={isParsingResumeAI} className="mt-3 text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline disabled:opacity-50">
+              {isParsingResumeAI ? "Reading resume…" : "✨ Fill in signature line + tags from this resume"}
+            </button>
+          ) : null}
+          {resumeAIMessage ? <p className="mt-2 text-xs font-semibold text-primary">{resumeAIMessage}</p> : null}
+          <p className="mt-3 text-xs text-muted-foreground">
+            PDF or Word. Stored privately - only you and Owners can view it. PDF resumes can be auto-read (button appears after upload) to suggest your signature line and tags above - review before saving.
+          </p>
         </div>
-        <div className="grid gap-1.5 text-sm font-semibold text-foreground">
-          Google Calendar
+
+        <div className="rounded-2xl border border-[#EEEDE7] bg-white p-6 shadow-sm">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-primary">Google Calendar</p>
+          <h3 className="mb-4 font-display text-lg font-extrabold tracking-tight text-foreground">Let contacts grab time</h3>
           {currentTeamMember?.google_calendar_connected ? (
             <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-full bg-[#EAF3DE] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#3B6D11]">
-                Connected{currentTeamMember.google_calendar_email ? ` · ${currentTeamMember.google_calendar_email}` : ""}
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#EAF3DE] px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#3B6D11]">
+                <CheckCircle2 size={12} /> Connected{currentTeamMember.google_calendar_email ? ` · ${currentTeamMember.google_calendar_email}` : ""}
               </span>
               <button type="button" onClick={handleDisconnectCalendar} className="text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:text-primary hover:underline">Disconnect</button>
             </div>
+          ) : buildGoogleAuthUrl(currentTeamMember?.id ?? "") ? (
+            <a
+              href={buildGoogleAuthUrl(currentTeamMember?.id ?? "") ?? "#"}
+              className="inline-block rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+            >
+              Connect Google Calendar
+            </a>
           ) : (
-            <div>
-              {buildGoogleAuthUrl(currentTeamMember?.id ?? "") ? (
-                <a
-                  href={buildGoogleAuthUrl(currentTeamMember?.id ?? "") ?? "#"}
-                  className="inline-block rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
-                >
-                  Connect Google Calendar
-                </a>
-              ) : (
-                <p className="text-xs text-muted-foreground">Google Calendar isn't set up yet - ask Chad.</p>
-              )}
-            </div>
+            <p className="text-xs text-muted-foreground">Google Calendar isn't set up yet - ask Chad.</p>
           )}
-          {currentTeamMember?.google_calendar_connected ? (
-            <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
-              Your scheduling link: <span className="font-semibold text-foreground">{window.location.origin}/schedule/{currentTeamMember.id}</span> - drop it into an outreach message so contacts can book real open time on your calendar.
-            </span>
-          ) : (
-            <span className="text-xs font-normal normal-case tracking-normal text-muted-foreground">
-              Connect once, then contacts can grab time directly off your real availability instead of a manual back-and-forth.
-            </span>
-          )}
-          {calendarStatusMessage ? <span className="text-xs font-semibold text-primary">{calendarStatusMessage}</span> : null}
+          <p className="mt-3 text-xs text-muted-foreground">
+            {currentTeamMember?.google_calendar_connected ? (
+              <>Your scheduling link: <span className="font-semibold text-foreground">{window.location.origin}/schedule/{currentTeamMember.id}</span> - drop it into an outreach message so contacts can book real open time on your calendar.</>
+            ) : (
+              "Connect once, then contacts can grab time directly off your real availability instead of a manual back-and-forth."
+            )}
+          </p>
+          {calendarStatusMessage ? <p className="mt-2 text-xs font-semibold text-primary">{calendarStatusMessage}</p> : null}
         </div>
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={handleSaveProfile} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save</button>
-          {profileSaveMessage ? <span className="text-xs font-semibold text-primary">{profileSaveMessage}</span> : null}
-        </div>
+      </div>
+
+      {/* Save bar - sticky to the bottom of the viewport so it's always
+          reachable regardless of how tall the cards above get, rather than
+          a plain inline button that could end up far below the fold. */}
+      <div className="sticky bottom-4 left-0 right-0 z-10 mt-6 flex items-center justify-end gap-3 rounded-2xl border border-[#EEEDE7] bg-white/95 px-5 py-3 shadow-lg backdrop-blur">
+        {profileSaveMessage ? <span className="text-xs font-semibold text-primary">{profileSaveMessage}</span> : null}
+        <button type="button" onClick={handleSaveProfile} className="rounded-full border border-primary bg-primary px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save changes</button>
       </div>
     </div>
   );
