@@ -154,7 +154,6 @@ const useInfiniteReveal = (totalCount: number) => {
 // each one independent without threading an id through render props.
 const CompanyWhyPopover = ({ valueHypothesis, outreachAngle }: { valueHypothesis?: string | null; outreachAngle?: string | null }) => {
   const [open, setOpen] = useState(false);
-  if (!valueHypothesis && !outreachAngle) return null;
   return (
     <div className="relative">
       <button
@@ -171,6 +170,9 @@ const CompanyWhyPopover = ({ valueHypothesis, outreachAngle }: { valueHypothesis
           <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-primary">Why we're reaching out</p>
           {valueHypothesis ? <p className="text-xs leading-relaxed text-foreground"><span className="font-semibold">Why it fits: </span>{valueHypothesis}</p> : null}
           {outreachAngle ? <p className="mt-1.5 text-xs leading-relaxed text-foreground"><span className="font-semibold">Why now: </span>{outreachAngle}</p> : null}
+          {!valueHypothesis && !outreachAngle ? (
+            <p className="text-xs text-muted-foreground">No research on file yet for this company.</p>
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -1212,6 +1214,24 @@ const ProjectsPage = () => {
     </div>
   );
 
+  // A contact we CAN reach (real email or LinkedIn profile) but nobody ever
+  // drafted a message for - previously these silently rendered as a normal
+  // card with a status dropdown and no buttons, which is how Taran Sodhi /
+  // Christina Dotchin (and ~69 others) went unnoticed. Surfacing this
+  // explicitly is the fix: it can't disappear into a blank card again.
+  const renderAssignedNoContentRow = (contact: ProjectContact) => (
+    <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#FDE68A] bg-white px-3 py-2">
+      <div>
+        <span className="font-semibold text-foreground">{contact.contact_name}</span>
+        <span className="ml-2 text-sm text-muted-foreground">{contact.title}</span>
+        <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">No message drafted</span>
+      </div>
+      {contact.linkedin_url ? (
+        <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">View LinkedIn</a>
+      ) : null}
+    </div>
+  );
+
   // Shared by both the rep "My assignments" view and the owner view -
   // company card first, one primary contact, everyone else behind a
   // dropdown. companyContacts is whatever set of contacts should be
@@ -1220,7 +1240,8 @@ const ProjectsPage = () => {
   const renderCompanyCard = (company: Company, companyContacts: ProjectContact[]) => {
     const primary = getPrimaryContact(companyContacts);
     const others = companyContacts.filter((c) => c.id !== primary?.id);
-    const othersGood = others.filter((c) => getContactTier(c) !== "research");
+    const othersGood = others.filter((c) => getContactTier(c) === "email" || getContactTier(c) === "linkedin");
+    const othersNoContent = others.filter((c) => getContactTier(c) === "no_content");
     const othersResearch = others.filter((c) => getContactTier(c) === "research");
     const isExpanded = Boolean(expandedCompanies[company.id]);
     const research = getCompanyResearchSummary(companyContacts);
@@ -1245,7 +1266,13 @@ const ProjectsPage = () => {
 
         <div className="grid gap-3 p-4">
           {primary ? (
-            getContactTier(primary) === "research" ? renderAssignedResearchRow(primary) : renderAssignedContactArticle(primary)
+            getContactTier(primary) === "research" ? (
+              renderAssignedResearchRow(primary)
+            ) : getContactTier(primary) === "no_content" ? (
+              renderAssignedNoContentRow(primary)
+            ) : (
+              renderAssignedContactArticle(primary)
+            )
           ) : (
             <p className="text-sm text-muted-foreground">No contacts linked to this company yet.</p>
           )}
@@ -1264,6 +1291,16 @@ const ProjectsPage = () => {
           {isExpanded ? (
             <>
               {othersGood.map((contact) => renderAssignedContactArticle(contact))}
+
+              {othersNoContent.length > 0 ? (
+                <div className="border border-[#FDE68A] bg-[#FFFBEB] p-4">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#92400E]">Missing message content</p>
+                  <p className="mb-3 text-sm text-[#92400E]">Reachable, but no LinkedIn or email draft is on file — flag these for a drafting pass.</p>
+                  <div className="grid gap-2">
+                    {othersNoContent.map((contact) => renderAssignedNoContentRow(contact))}
+                  </div>
+                </div>
+              ) : null}
 
               {othersResearch.length > 0 ? (
                 <div className="border border-[#FDE68A] bg-[#FFFBEB] p-4">
@@ -1386,8 +1423,8 @@ const ProjectsPage = () => {
     const contactProgress = progress[contact.id];
     const emailPosition = contactProgress?.email_sequence_position ?? 0;
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-        <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => setEmailPopupContact(null)}>
+        <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8" onClick={(e) => e.stopPropagation()}>
           <div className="flex items-start justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Email outreach</p>
