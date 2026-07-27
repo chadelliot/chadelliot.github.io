@@ -17,6 +17,7 @@ import {
 
 const STAGE_PILL_CLASS: Record<Company["company_stage"], string> = {
   new_signal: "bg-[#F1F0EC] text-[#5F5E5A]",
+  opportunities_engaged: "bg-[#EFF6FF] text-[#1D4ED8]",
   meeting_scheduled: "bg-primary/10 text-primary",
   closed_won: "bg-[#EAF3DE] text-[#3B6D11]",
   closed_lost: "bg-[#FCEBEB] text-[#A32D2D]",

@@ -27,10 +27,11 @@ const CompanyLogo = ({ domain }: { domain: string | null }) => {
   return <img src={getClearbitLogoUrl(domain)} alt="" onError={() => setFailed(true)} className="h-5 w-5 shrink-0 rounded border border-[#EEEDE7] bg-white object-contain p-0.5" />;
 };
 
-const STAGE_ORDER: CompanyStage[] = ["new_signal", "meeting_scheduled", "closed_won", "closed_lost"];
+const STAGE_ORDER: CompanyStage[] = ["new_signal", "opportunities_engaged", "meeting_scheduled", "closed_won", "closed_lost"];
 
 const STAGE_COLUMN_CLASS: Record<CompanyStage, string> = {
   new_signal: "border-[#EEEDE7] bg-[#FAFAF8]",
+  opportunities_engaged: "border-[#BFDBFE] bg-[#EFF6FF]",
   meeting_scheduled: "border-primary/30 bg-primary/5",
   closed_won: "border-[#BBF7D0] bg-[#F0FDF4]",
   closed_lost: "border-[#FECACA] bg-[#FEF2F2]",
@@ -38,6 +39,7 @@ const STAGE_COLUMN_CLASS: Record<CompanyStage, string> = {
 
 const STAGE_HEADER_CLASS: Record<CompanyStage, string> = {
   new_signal: "text-[#334155]",
+  opportunities_engaged: "text-[#1D4ED8]",
   meeting_scheduled: "text-primary",
   closed_won: "text-[#15803D]",
   closed_lost: "text-[#B91C1C]",
@@ -78,6 +80,7 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [visibleCounts, setVisibleCounts] = useState<Record<CompanyStage, number>>({
     new_signal: BOARD_PAGE_SIZE,
+    opportunities_engaged: BOARD_PAGE_SIZE,
     meeting_scheduled: BOARD_PAGE_SIZE,
     closed_won: BOARD_PAGE_SIZE,
     closed_lost: BOARD_PAGE_SIZE,
@@ -134,7 +137,7 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
   }, [companies, search, repFilter, priorityFilter, companyInsights]);
 
   const companiesByStage = useMemo(() => {
-    const grouped: Record<CompanyStage, Company[]> = { new_signal: [], meeting_scheduled: [], closed_won: [], closed_lost: [] };
+    const grouped: Record<CompanyStage, Company[]> = { new_signal: [], opportunities_engaged: [], meeting_scheduled: [], closed_won: [], closed_lost: [] };
     for (const company of filteredCompanies) grouped[company.company_stage]?.push(company);
     // Most-actionable-first within each column: an open hiring signal beats
     // none, a stalled company beats a fresh one (it needs eyes), and within
@@ -161,7 +164,7 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
   // narrowing down to one rep or priority doesn't leave you scrolled deep
   // into a now-much-shorter list.
   useEffect(() => {
-    setVisibleCounts({ new_signal: BOARD_PAGE_SIZE, meeting_scheduled: BOARD_PAGE_SIZE, closed_won: BOARD_PAGE_SIZE, closed_lost: BOARD_PAGE_SIZE });
+    setVisibleCounts({ new_signal: BOARD_PAGE_SIZE, opportunities_engaged: BOARD_PAGE_SIZE, meeting_scheduled: BOARD_PAGE_SIZE, closed_won: BOARD_PAGE_SIZE, closed_lost: BOARD_PAGE_SIZE });
   }, [search, repFilter, priorityFilter]);
 
   const showMore = (stage: CompanyStage) => setVisibleCounts((current) => ({ ...current, [stage]: current[stage] + BOARD_PAGE_SIZE }));
@@ -195,7 +198,7 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
         ) : null}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-5">
         {STAGE_ORDER.map((stage) => {
           const stageCompanies = companiesByStage[stage];
           const visible = Math.min(visibleCounts[stage], stageCompanies.length);
