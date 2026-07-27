@@ -13,7 +13,6 @@ import {
   fetchClosedDeals,
   fetchCompanySignalsList,
   updateCompanyStage,
-  advanceCompanyToEngaged,
   updateCompanyAssignedRep,
   updateSignalOutreachModel,
   updateContactProgress,
@@ -244,21 +243,11 @@ const CompanyDetailPage = () => {
     logContactActivity(session, contact.id, "email_sequence_changed", String(position), currentTeamMember?.id);
   };
 
-  // First LinkedIn/email send or copy for this company auto-advances it out
-  // of New Opportunity into Opportunities Engaged - see advanceCompanyToEngaged,
-  // a no-op once the company has already left New Opportunity.
-  const handleAdvanceEngagement = async () => {
-    if (!session || !company) return;
-    const updated = await advanceCompanyToEngaged(session, company);
-    if (updated) setCompanies((current) => current.map((c) => (c.id === updated.id ? updated : c)));
-  };
-
   const handleCopyEmailField = async (contact: ProjectContact, field: string, text: string, label: string) => {
     await navigator.clipboard.writeText(text);
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "email_message_copied", field, currentTeamMember?.id);
-    handleAdvanceEngagement();
   };
 
   const handleCopySchedulingLink = async (contactId: string) => {
@@ -273,7 +262,6 @@ const CompanyDetailPage = () => {
     const mailto = `mailto:${encodeURIComponent(contact.email ?? "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
     window.location.href = mailto;
     if (session) logContactActivity(session, contact.id, "email_send_clicked", field, currentTeamMember?.id);
-    handleAdvanceEngagement();
   };
 
   const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
@@ -288,7 +276,6 @@ const CompanyDetailPage = () => {
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "message_copied", field, currentTeamMember?.id);
-    handleAdvanceEngagement();
     setMessageEditor(null);
   };
 

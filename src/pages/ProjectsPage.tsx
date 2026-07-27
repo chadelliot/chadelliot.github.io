@@ -985,6 +985,17 @@ const ProjectsPage = () => {
 
   const { visibleCount: ownerVisibleCount, sentinelRef: ownerSentinelRef } = useInfiniteReveal(ownerCompanyGroups.length);
 
+  // Only these three count as "genuinely reached out" for auto-advancing a
+  // company to Opportunities Engaged - not_contacted and do_not_contact
+  // obviously don't (do_not_contact caused the backfill bug fixed in
+  // fix_opportunities_engaged_backfill.sql), and meeting_set is deliberately
+  // excluded too: it's handled entirely by the handle_meeting_set() DB
+  // trigger, which moves the company straight to meeting_scheduled. Running
+  // our own advance here as well would race against that trigger using a
+  // stale client-side company_stage and could clobber meeting_scheduled
+  // back down to opportunities_engaged.
+  const ENGAGED_STATUS_VALUES: ContactStatus[] = ["connection_sent", "introduction_sent", "follow_up_sent"];
+
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
     const previousStatus = progress[contact.id]?.status ?? "not_contacted";
@@ -995,6 +1006,7 @@ const ProjectsPage = () => {
     const saved = await updateContactProgress(session, contact.id, { status }, currentTeamMember?.id);
     if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
     logContactActivity(session, contact.id, "status_changed", status, currentTeamMember?.id);
+    if (ENGAGED_STATUS_VALUES.includes(status)) handleAdvanceEngagement(contact.company_id);
     if (status === "meeting_set") {
       setMeetingPrompt(contact);
       setMeetingDate("");
@@ -1035,9 +1047,13 @@ const ProjectsPage = () => {
     logContactActivity(session, contact.id, "email_sequence_changed", String(position), currentTeamMember?.id);
   };
 
-  // First LinkedIn/email send or copy for a company auto-advances it out of
-  // New Opportunity into Opportunities Engaged - see advanceCompanyToEngaged,
-  // a no-op once the company has already left New Opportunity. Contacts
+  // Called from handleStatusChange when a contact's status is manually set
+  // to something that counts as genuine outreach - auto-advances the
+  // company out of New Opportunity into Opportunities Engaged (a no-op via
+  // advanceCompanyToEngaged once it's already left New Opportunity).
+  // Deliberately NOT triggered by copying/sending a message: Chad wants to
+  // set status himself before a company gets reclassified, not have
+  // copying text to the clipboard imply he actually reached out. Contacts
   // aren't linked to a full Company object, just company_id, so look it up
   // from the companies already in state.
   const handleAdvanceEngagement = async (companyId?: string | null) => {
@@ -1052,7 +1068,6 @@ const ProjectsPage = () => {
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "email_message_copied", field, currentTeamMember?.id);
-    handleAdvanceEngagement(contact.company_id);
   };
 
   const handleCopySchedulingLink = async (contactId: string) => {
@@ -1075,7 +1090,6 @@ const ProjectsPage = () => {
     const mailto = `mailto:${encodeURIComponent(contact.email ?? "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
     window.location.href = mailto;
     if (session) logContactActivity(session, contact.id, "email_send_clicked", field, currentTeamMember?.id);
-    handleAdvanceEngagement(contact.company_id);
   };
 
   const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
@@ -1095,7 +1109,6 @@ const ProjectsPage = () => {
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "message_copied", field, currentTeamMember?.id);
-    handleAdvanceEngagement(contact.company_id);
     setMessageEditor(null);
   };
 

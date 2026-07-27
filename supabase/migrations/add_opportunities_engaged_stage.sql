@@ -67,12 +67,16 @@ begin
                 updated_at = now()
             where id = target_company_id;
         else
+          -- NOTE: originally `cp.status <> 'not_contacted'` here too - same
+          -- do_not_contact bug as the backfill below, fixed live via
+          -- fix_meeting_revert_engaged_check.sql. Corrected here so
+          -- re-running this file from scratch doesn't reintroduce it.
           select exists (
             select 1
             from public.contact_progress cp
             join public.project_contacts pc on pc.id = cp.contact_id
             where pc.company_id = target_company_id
-              and cp.status <> 'not_contacted'
+              and cp.status in ('connection_sent', 'introduction_sent', 'follow_up_sent')
               and cp.contact_id <> new.contact_id
           ) into still_engaged;
 
