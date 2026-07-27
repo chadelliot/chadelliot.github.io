@@ -559,6 +559,17 @@ const CompanyDetailPage = () => {
                             </div>
                             <a href={buildLinkedInSearchUrl(primaryContact.contact_name, primaryContact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
                           </div>
+                        ) : getContactTier(primaryContact) === "no_content" ? (
+                          <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
+                            <div>
+                              <span className="text-sm font-semibold text-foreground">{primaryContact.contact_name}</span>
+                              <span className="ml-2 text-xs text-muted-foreground">{primaryContact.title}</span>
+                              <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">No message drafted</span>
+                            </div>
+                            {primaryContact.linkedin_url ? (
+                              <a href={primaryContact.linkedin_url} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">View LinkedIn</a>
+                            ) : null}
+                          </div>
                         ) : (
                           renderOutreachContact(primaryContact, true)
                         )
@@ -579,7 +590,7 @@ const CompanyDetailPage = () => {
 
                       {showAllContacts
                         ? otherContacts.map((contact) =>
-                            contact.needs_research ? (
+                            getContactTier(contact) === "research" ? (
                               <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
                                 <div>
                                   <span className="text-sm font-semibold text-foreground">{contact.contact_name}</span>
@@ -587,6 +598,17 @@ const CompanyDetailPage = () => {
                                   <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">Needs research</span>
                                 </div>
                                 <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
+                              </div>
+                            ) : getContactTier(contact) === "no_content" ? (
+                              <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
+                                <div>
+                                  <span className="text-sm font-semibold text-foreground">{contact.contact_name}</span>
+                                  <span className="ml-2 text-xs text-muted-foreground">{contact.title}</span>
+                                  <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">No message drafted</span>
+                                </div>
+                                {contact.linkedin_url ? (
+                                  <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">View LinkedIn</a>
+                                ) : null}
                               </div>
                             ) : (
                               renderOutreachContact(contact, false)
@@ -743,8 +765,8 @@ const CompanyDetailPage = () => {
         const contactProgress = progress[contact.id];
         const emailPosition = contactProgress?.email_sequence_position ?? 0;
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-            <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4" onClick={() => setEmailPopupContact(null)}>
+            <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Email outreach</p>

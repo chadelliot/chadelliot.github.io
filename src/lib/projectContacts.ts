@@ -1108,16 +1108,31 @@ export const getInitials = (name?: string | null) => {
 };
 
 // A contact is only worth handing to a team member if there's a real way to
-// reach them. An email beats a real LinkedIn profile; a bare search link
-// (or nothing at all) means real research is still needed first.
-export type ContactTier = "email" | "linkedin" | "research";
+// reach them AND something to actually send. "research" means we can't find
+// them yet (no email, no real LinkedIn profile). "no_content" is a separate,
+// easy-to-miss failure mode: we CAN find them, but nobody drafted a message
+// for them (the sheet-to-DB sync brought the contact over without any
+// linkedin_connect_message/intro_message/follow_up_message/email_* content).
+// Without this tier, a contact like that silently rendered as a normal card
+// with a status dropdown and zero action buttons - reachable, but a dead
+// end nobody would notice.
+export type ContactTier = "email" | "linkedin" | "no_content" | "research";
 
 export const hasRealLinkedInProfile = (contact: ProjectContact) => Boolean(contact.linkedin_url?.includes("/in/"));
 
+export const hasOutreachContent = (contact: ProjectContact) =>
+  Boolean(
+    contact.linkedin_connect_message ||
+      contact.intro_message ||
+      contact.follow_up_message ||
+      contact.email_intro_message
+  );
+
 export const getContactTier = (contact: ProjectContact): ContactTier => {
-  if (contact.email) return "email";
-  if (hasRealLinkedInProfile(contact)) return "linkedin";
-  return "research";
+  const reachable = Boolean(contact.email) || hasRealLinkedInProfile(contact);
+  if (!reachable) return "research";
+  if (!hasOutreachContent(contact)) return "no_content";
+  return contact.email ? "email" : "linkedin";
 };
 
 // Builds a ready-to-click LinkedIn people-search URL with the contact's name
@@ -1129,12 +1144,14 @@ export const buildLinkedInSearchUrl = (contactName?: string | null, company?: st
   return `https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(query)}`;
 };
 
-const TIER_ORDER: Record<ContactTier, number> = { email: 0, linkedin: 1, research: 2 };
+const TIER_ORDER: Record<ContactTier, number> = { email: 0, linkedin: 1, no_content: 2, research: 3 };
 
 // Pulls the next batch for a team member: up to 25 "good" contacts (email
-// or a real LinkedIn profile, best signal first) plus up to 5 "needs
-// research" contacts (no direct way to reach them yet). Only looks at
-// contacts nobody's already assigned, so batches never overlap.
+// or a real LinkedIn profile, AND a drafted message to actually send - best
+// signal first) plus up to 5 "needs research" contacts (no direct way to
+// reach them, or reachable but with no drafted message yet - both need a
+// human's attention rather than being routed as ordinary work). Only looks
+// at contacts nobody's already assigned, so batches never overlap.
 export const assignNextBatch = async (
   session: ProposalSession,
   teamMemberId: string,
@@ -1151,11 +1168,11 @@ export const assignNextBatch = async (
   );
 
   const good = unassigned
-    .filter((c) => getContactTier(c) !== "research")
+    .filter((c) => getContactTier(c) === "email" || getContactTier(c) === "linkedin")
     .sort((a, b) => TIER_ORDER[getContactTier(a)] - TIER_ORDER[getContactTier(b)])
     .slice(0, 25);
 
-  const research = unassigned.filter((c) => getContactTier(c) === "research").slice(0, 5);
+  const research = unassigned.filter((c) => getContactTier(c) === "research" || getContactTier(c) === "no_content").slice(0, 5);
 
   const allIds = [...good, ...research].map((c) => c.id);
   if (allIds.length && DB_URL) {
