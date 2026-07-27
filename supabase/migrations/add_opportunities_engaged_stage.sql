@@ -98,6 +98,14 @@ create trigger trg_handle_meeting_set
 
 -- One-time backfill: any New Opportunity company with at least one
 -- contacted contact moves to Opportunities Engaged immediately.
+--
+-- NOTE: this originally used `cp.status <> 'not_contacted'`, which wrongly
+-- treats do_not_contact as engagement - it means the opposite (a contact
+-- flagged as one NOT to reach out to). That bug promoted 92 companies with
+-- no real outreach; see fix_opportunities_engaged_backfill.sql for the
+-- correction applied to the live database. The query below is the
+-- corrected version, so re-running this file from scratch (e.g. against a
+-- fresh database) does not reintroduce the bug.
 update public.companies c
 set company_stage = 'opportunities_engaged',
     updated_at = now()
@@ -107,5 +115,5 @@ where c.company_stage = 'new_signal'
     from public.contact_progress cp
     join public.project_contacts pc on pc.id = cp.contact_id
     where pc.company_id = c.id
-      and cp.status <> 'not_contacted'
+      and cp.status in ('connection_sent', 'introduction_sent', 'follow_up_sent', 'meeting_set')
   );
