@@ -142,8 +142,7 @@ const main = async () => {
     classified: 0,
     needsReview: 0,
     companyNotFound: [],
-    inserted: 0,
-    updated: 0,
+    upserted: 0,
     errors: [],
   };
 
@@ -184,26 +183,24 @@ const main = async () => {
 
     if (DRY_RUN) continue;
 
-    // Dedupe on (company, role_title, posted_date, source_url) - the
-    // closest thing to a natural key this data has. Update in place if a
-    // matching row already exists, insert otherwise, so re-running the
-    // script on an unchanged sheet doesn't create duplicate signals.
-    const existingQuery = new URLSearchParams({
-      select: "id",
-      company: `eq.${payload.company}`,
-      role_title: payload.role_title ? `eq.${payload.role_title}` : "is.null",
-      posted_date: payload.posted_date ? `eq.${payload.posted_date}` : "is.null",
-      source_url: payload.source_url ? `eq.${payload.source_url}` : "is.null",
-    });
+    // Real upsert on (company, role_title, posted_date, source_url) - the
+    // closest thing to a natural key this data has, backed by the
+    // company_signals_natural_key unique index (see
+    // supabase/migrations/dedupe_company_signals.sql). This used to be a
+    // separate GET-then-PATCH-or-POST check, which is a classic
+    // check-then-act race: it found 51 duplicate pairs in production (the
+    // GET missed an existing row for reasons that never showed up in this
+    // script's own logs), because a second, independent request always has
+    // a window to fail silently. Resolving the conflict inside a single
+    // request lets Postgres itself guarantee there's never a duplicate,
+    // regardless of what causes any one request to behave unexpectedly.
     try {
-      const existing = await supabaseFetch(`company_signals?${existingQuery}`);
-      if (existing.length > 0) {
-        await supabaseFetch(`company_signals?id=eq.${existing[0].id}`, { method: "PATCH", body: JSON.stringify(payload) });
-        report.updated++;
-      } else {
-        await supabaseFetch("company_signals", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify(payload) });
-        report.inserted++;
-      }
+      await supabaseFetch(`company_signals?on_conflict=company,role_title,posted_date,source_url`, {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=minimal" },
+        body: JSON.stringify(payload),
+      });
+      report.upserted++;
     } catch (err) {
       report.errors.push(`${company}: ${err.message}`);
     }
@@ -215,8 +212,7 @@ const main = async () => {
   console.log(`Classified (typed):    ${report.classified}`);
   console.log(`Needs owner review:    ${report.needsReview} (opportunity_type didn't match an approved value)`);
   if (!DRY_RUN) {
-    console.log(`Inserted:              ${report.inserted}`);
-    console.log(`Updated:               ${report.updated}`);
+    console.log(`Upserted:              ${report.upserted}`);
   }
   if (report.companyNotFound.length) {
     const unique = [...new Set(report.companyNotFound)];
