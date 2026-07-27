@@ -40,6 +40,8 @@ import {
   OWNER_LEAD_TYPE_DOT_COLOR,
   fetchOwnerCompanyLeadFields,
   fetchOwnerSignalFields,
+  fetchMemberCompanyLeadFields,
+  fetchMemberSignalFields,
   formatWhyNow,
   type ProjectContact,
   type ContactProgress,
@@ -121,6 +123,8 @@ const CompanyDetailPage = () => {
   // pattern.
   const [ownerCompanyFields, setOwnerCompanyFields] = useState<Record<string, OwnerCompanyLeadFields>>({});
   const [ownerSignalFields, setOwnerSignalFields] = useState<Record<string, OwnerSignalFields>>({});
+  const [memberCompanyFields, setMemberCompanyFields] = useState<Record<string, OwnerCompanyLeadFields>>({});
+  const [memberSignalFields, setMemberSignalFields] = useState<Record<string, OwnerSignalFields>>({});
   const [showOpportunityIntelligence, setShowOpportunityIntelligence] = useState(false);
 
   useEffect(() => {
@@ -156,6 +160,17 @@ const CompanyDetailPage = () => {
       setOwnerSignalFields(signalFields);
     });
   }, [session, isOwner, companies.length, signals.length]);
+
+  // Same lead-classification data as above, but via the Member-facing RPCs
+  // (no lead_type_needs_review / raw_* fields) - fetched for every signed-in
+  // team member so the Opportunity Intelligence panel isn't Owner-only.
+  useEffect(() => {
+    if (!session) return;
+    Promise.all([fetchMemberCompanyLeadFields(session), fetchMemberSignalFields(session)]).then(([companyFields, signalFields]) => {
+      setMemberCompanyFields(companyFields);
+      setMemberSignalFields(signalFields);
+    });
+  }, [session, companies.length, signals.length]);
 
   const company = useMemo(() => companies.find((c) => c.id === id) ?? null, [companies, id]);
   const canManage = company ? canManageCompany(company, currentTeamMember, isOwner) : false;
@@ -233,6 +248,13 @@ const CompanyDetailPage = () => {
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "email_message_copied", field, currentTeamMember?.id);
+  };
+
+  const handleCopySchedulingLink = async (contactId: string) => {
+    if (!currentTeamMember) return;
+    await navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`);
+    setCopyFeedback((current) => ({ ...current, [`${contactId}-schedule_link`]: "Copied" }));
+    setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contactId}-schedule_link`]: "📅 Copy scheduling link" })), 1500);
   };
 
   const handleSendEmail = (contact: ProjectContact, field: string, text: string) => {
@@ -573,6 +595,67 @@ const CompanyDetailPage = () => {
                         : null}
                     </div>
                   </div>
+
+                  <div className="rounded-lg border border-[#E2E8F0] bg-white">
+                    <button
+                      type="button"
+                      onClick={() => setShowOpportunityIntelligence((v) => !v)}
+                      className="flex w-full items-center justify-between px-4 py-3 text-left"
+                    >
+                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Opportunity intelligence</span>
+                      <span className="text-xs font-semibold text-muted-foreground">{showOpportunityIntelligence ? "Hide ▲" : "Show ▼"}</span>
+                    </button>
+                    {showOpportunityIntelligence ? (
+                      <div className="border-t border-[#E2E8F0] px-4 py-4">
+                        {companyResearch.valueHypothesis || companyResearch.outreachAngle ? (
+                          <div className="mb-4 rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] p-4">
+                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Why this fits RevHub</p>
+                            {companyResearch.valueHypothesis ? (
+                              <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{companyResearch.valueHypothesis}</p>
+                            ) : null}
+                            {companyResearch.outreachAngle ? (
+                              <p className="mt-1 text-sm text-foreground"><span className="font-semibold text-primary">Why now: </span>{companyResearch.outreachAngle}</p>
+                            ) : null}
+                          </div>
+                        ) : null}
+                        {(() => {
+                          const ownerFields = ownerCompanyFields[company.id] ?? memberCompanyFields[company.id];
+                          const canonicalType = ownerFields?.canonical_lead_type;
+                          const primarySignal = ownerFields?.primary_signal_id ? companySignals.find((s) => s.id === ownerFields.primary_signal_id) : null;
+                          const primarySignalOwnerFields = primarySignal ? (ownerSignalFields[primarySignal.id] ?? memberSignalFields[primarySignal.id]) : null;
+                          const leadOrigin = canonicalType === "Cold Outreach" ? "Cold Outreach" : primarySignalOwnerFields?.lead_origin;
+                          const otherTypes = (ownerFields?.all_signal_types ?? []).filter((t) => t !== canonicalType);
+                          return (
+                            <div className="grid gap-4">
+                              <div>
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Canonical lead type</p>
+                                <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                                  {canonicalType ? <span className="h-2 w-2 rounded-full" style={{ backgroundColor: OWNER_LEAD_TYPE_DOT_COLOR[canonicalType] }} /> : null}
+                                  {canonicalType ?? "Not yet classified"}
+                                </p>
+                                {ownerFields?.lead_type_needs_review ? (
+                                  <p className="mt-1 text-xs text-[#B45309]">One or more signals here have no opportunity_type set - flagged for review.</p>
+                                ) : null}
+                              </div>
+                              <div>
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Lead origin</p>
+                                <p className="text-sm font-semibold text-foreground">{leadOrigin ?? "—"}</p>
+                              </div>
+                              <div>
+                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Related signals</p>
+                                <p className="text-sm text-foreground">{ownerFields?.signal_count ?? 0} total</p>
+                                {otherTypes.length > 0 ? (
+                                  <ul className="mt-1 list-inside list-disc text-sm text-muted-foreground">
+                                    {otherTypes.map((t) => <li key={t}>{t}</li>)}
+                                  </ul>
+                                ) : null}
+                              </div>
+                            </div>
+                          );
+                        })()}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
 
                 <div className="grid gap-6">
@@ -614,18 +697,18 @@ const CompanyDetailPage = () => {
                       ) : null}
                       <div className="grid gap-2">
                         {companySignals.map((signal) => (
-                          <div key={signal.id} className="rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2 text-sm">
+                          <div key={signal.id} className="rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] px-3 py-2 text-sm">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div>
-                                <span className="font-semibold text-[#92400E]">{signal.role_title ?? "Open role"}</span>
-                                {signal.posted_date ? <span className="ml-2 text-xs text-[#92400E]">posted {new Date(signal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> : null}
+                                <span className="font-semibold text-foreground">{signal.role_title ?? "Open role"}</span>
+                                {signal.posted_date ? <span className="ml-2 text-xs text-muted-foreground">posted {new Date(signal.posted_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> : null}
                                 {signal.source_url ? <a href={signal.source_url} target="_blank" rel="noreferrer" className="ml-2 text-xs font-semibold text-primary hover:underline">View posting</a> : null}
                               </div>
                               {canManage ? (
                                 <select
                                   value={signal.outreach_model ?? ""}
                                   onChange={(e) => handleSetOutreachModel(signal.id, e.target.value as OutreachModel | "")}
-                                  className="h-8 rounded-md border border-[#FDE68A] bg-white px-2 text-xs font-semibold text-[#92400E] outline-none focus:border-primary"
+                                  className="h-8 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary"
                                 >
                                   <option value="">No model set</option>
                                   {(Object.keys(OUTREACH_MODEL_LABELS) as OutreachModel[]).map((m) => <option key={m} value={m}>{OUTREACH_MODEL_LABELS[m]}</option>)}
@@ -634,87 +717,18 @@ const CompanyDetailPage = () => {
                                 <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${OUTREACH_MODEL_BADGE_CLASS[signal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[signal.outreach_model]}</span>
                               ) : null}
                             </div>
-                            {signal.notes ? <p className="mt-1 text-xs text-[#92400E]">{signal.notes}</p> : null}
+                            {signal.notes ? <p className="mt-1 text-xs text-muted-foreground">{signal.notes}</p> : null}
                             {signal.outreach_model ? (
-                              <p className="mt-1.5 text-xs text-[#92400E]">
-                                <span className="font-semibold">{OUTREACH_MODEL_LABELS[signal.outreach_model]}: </span>
+                              <p className="mt-1.5 text-xs text-muted-foreground">
+                                <span className="font-semibold text-foreground">{OUTREACH_MODEL_LABELS[signal.outreach_model]}: </span>
                                 {OUTREACH_MODEL_DESCRIPTIONS[signal.outreach_model]}
                               </p>
                             ) : canManage ? (
-                              <p className="mt-1.5 text-xs text-[#92400E]/70">Pick a model above for messaging guidance on this signal.</p>
+                              <p className="mt-1.5 text-xs text-muted-foreground/70">Pick a model above for messaging guidance on this signal.</p>
                             ) : null}
                           </div>
                         ))}
                       </div>
-                    </div>
-                  ) : null}
-
-                  {isOwner ? (
-                    <div className="rounded-lg border border-[#E2E8F0] bg-white">
-                      <button
-                        type="button"
-                        onClick={() => setShowOpportunityIntelligence((v) => !v)}
-                        className="flex w-full items-center justify-between px-4 py-3 text-left"
-                      >
-                        <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Opportunity intelligence (owner only)</span>
-                        <span className="text-xs font-semibold text-muted-foreground">{showOpportunityIntelligence ? "Hide ▲" : "Show ▼"}</span>
-                      </button>
-                      {showOpportunityIntelligence ? (
-                        <div className="border-t border-[#E2E8F0] px-4 py-4">
-                          {companyResearch.valueHypothesis || companyResearch.outreachAngle ? (
-                            <div className="mb-4 rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
-                              <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Why this fits RevHub</p>
-                              {companyResearch.valueHypothesis ? (
-                                <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{companyResearch.valueHypothesis}</p>
-                              ) : null}
-                              {companyResearch.outreachAngle ? (
-                                <p className="mt-1 text-sm text-foreground"><span className="font-semibold text-primary">Why now: </span>{companyResearch.outreachAngle}</p>
-                              ) : null}
-                            </div>
-                          ) : null}
-                          {(() => {
-                            const ownerFields = ownerCompanyFields[company.id];
-                            const canonicalType = ownerFields?.canonical_lead_type;
-                            const primarySignal = ownerFields?.primary_signal_id ? companySignals.find((s) => s.id === ownerFields.primary_signal_id) : null;
-                            const primarySignalOwnerFields = primarySignal ? ownerSignalFields[primarySignal.id] : null;
-                            const leadOrigin = canonicalType === "Cold Outreach" ? "Cold Outreach" : primarySignalOwnerFields?.lead_origin;
-                            const otherTypes = (ownerFields?.all_signal_types ?? []).filter((t) => t !== canonicalType);
-                            return (
-                              <div className="grid gap-4">
-                                <div>
-                                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Canonical lead type</p>
-                                  <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                                    {canonicalType ? <span className="h-2 w-2 rounded-full" style={{ backgroundColor: OWNER_LEAD_TYPE_DOT_COLOR[canonicalType] }} /> : null}
-                                    {canonicalType ?? "Not yet classified"}
-                                  </p>
-                                  {ownerFields?.lead_type_needs_review ? (
-                                    <p className="mt-1 text-xs text-[#B45309]">One or more signals here have no opportunity_type set - flagged for review.</p>
-                                  ) : null}
-                                </div>
-                                <div>
-                                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Lead origin</p>
-                                  <p className="text-sm font-semibold text-foreground">{leadOrigin ?? "—"}</p>
-                                </div>
-                                {primarySignalOwnerFields?.engagement_details ? (
-                                  <div>
-                                    <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Engagement details</p>
-                                    <p className="text-sm text-foreground">{primarySignalOwnerFields.engagement_details}</p>
-                                  </div>
-                                ) : null}
-                                <div>
-                                  <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Related signals</p>
-                                  <p className="text-sm text-foreground">{ownerFields?.signal_count ?? 0} total</p>
-                                  {otherTypes.length > 0 ? (
-                                    <ul className="mt-1 list-inside list-disc text-sm text-muted-foreground">
-                                      {otherTypes.map((t) => <li key={t}>{t}</li>)}
-                                    </ul>
-                                  ) : null}
-                                </div>
-                              </div>
-                            );
-                          })()}
-                        </div>
-                      ) : null}
                     </div>
                   ) : null}
                 </div>
@@ -754,10 +768,10 @@ const CompanyDetailPage = () => {
               {currentTeamMember?.google_calendar_connected ? (
                 <button
                   type="button"
-                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`)}
+                  onClick={() => handleCopySchedulingLink(contact.id)}
                   className="mt-4 rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
                 >
-                  📅 Copy scheduling link
+                  {copyFeedback[`${contact.id}-schedule_link`] ?? "📅 Copy scheduling link"}
                 </button>
               ) : null}
 
@@ -877,10 +891,10 @@ const CompanyDetailPage = () => {
               {currentTeamMember?.google_calendar_connected ? (
                 <button
                   type="button"
-                  onClick={() => navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`)}
+                  onClick={() => handleCopySchedulingLink(messageEditor.contact.id)}
                   className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
                 >
-                  📅 Copy scheduling link
+                  {copyFeedback[`${messageEditor.contact.id}-schedule_link`] ?? "📅 Copy scheduling link"}
                 </button>
               ) : null}
               <button type="button" onClick={() => setMessageEditor(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
