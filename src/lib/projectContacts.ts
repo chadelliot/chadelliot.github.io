@@ -235,7 +235,7 @@ export type CompanySignal = {
   raw_opportunity_type?: string | null;
 };
 
-export type CompanyStage = "new_signal" | "meeting_scheduled" | "closed_won" | "closed_lost";
+export type CompanyStage = "new_signal" | "opportunities_engaged" | "meeting_scheduled" | "closed_won" | "closed_lost";
 
 export type Company = {
   id: string;
@@ -266,6 +266,7 @@ export type ContactMeetingBlock = {
 
 export const COMPANY_STAGE_LABELS: Record<CompanyStage, string> = {
   new_signal: "New Opportunity",
+  opportunities_engaged: "Opportunities Engaged",
   meeting_scheduled: "Meeting Scheduled",
   closed_won: "Closed Won",
   closed_lost: "Closed Lost",
@@ -409,6 +410,17 @@ export const updateCompanyStage = async (
   if (!response.ok) return null;
   const rows = (await response.json()) as Company[];
   return rows[0] ?? null;
+};
+
+// Fires on the first LinkedIn message copy, email draft copy, or email send
+// for any contact at a company still sitting at New Opportunity - the
+// company automatically moves to Opportunities Engaged, no manual step
+// required. A no-op once the company has left New Opportunity (including
+// once it's already Opportunities Engaged), so it's safe to call from every
+// outreach action without checking the stage first.
+export const advanceCompanyToEngaged = async (session: ProposalSession, company: Company | null | undefined): Promise<Company | null> => {
+  if (!company || company.company_stage !== "new_signal") return null;
+  return updateCompanyStage(session, company.id, { company_stage: "opportunities_engaged" });
 };
 
 // Owners can reassign any company; a rep can't hand it off to themselves -

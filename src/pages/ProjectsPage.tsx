@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, Zap, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck, Camera, Linkedin, FileText, CheckCircle2 } from "lucide-react";
+import { UserPlus, Zap, Send, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck, Camera, Linkedin, FileText, CheckCircle2 } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -28,6 +28,7 @@ import {
   getContactTier,
   buildLinkedInSearchUrl,
   assignNextCompanyBatch,
+  advanceCompanyToEngaged,
   createSelfServeContact,
   STATUS_LABELS,
   STATUS_ORDER,
@@ -83,6 +84,7 @@ const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
 
 const STAGE_CHART_COLORS: Record<CompanyStage, string> = {
   new_signal: "#94A3B8",
+  opportunities_engaged: "#1D4ED8",
   meeting_scheduled: "#2FA37F",
   closed_won: "#15803D",
   closed_lost: "#B91C1C",
@@ -93,6 +95,7 @@ const STAGE_CHART_COLORS: Record<CompanyStage, string> = {
 // work of carrying meaning.
 const STAGE_TINT_BG: Record<CompanyStage, string> = {
   new_signal: "#94A3B822",
+  opportunities_engaged: "#1D4ED822",
   meeting_scheduled: "#2FA37F22",
   closed_won: "#15803D22",
   closed_lost: "#B91C1C22",
@@ -100,6 +103,7 @@ const STAGE_TINT_BG: Record<CompanyStage, string> = {
 
 const STAGE_ICON: Record<CompanyStage, typeof Zap> = {
   new_signal: Zap,
+  opportunities_engaged: Send,
   meeting_scheduled: CalendarClock,
   closed_won: Trophy,
   closed_lost: XCircle,
@@ -388,7 +392,7 @@ const ProjectsPage = () => {
   // contacts - assigning a company hands them every contact at it. Sorted
   // so active (new_signal) companies surface above ones that already moved
   // to a meeting or closed.
-  const STAGE_SORT_ORDER: Record<string, number> = { new_signal: 0, meeting_scheduled: 1, closed_won: 2, closed_lost: 3 };
+  const STAGE_SORT_ORDER: Record<CompanyStage, number> = { new_signal: 0, opportunities_engaged: 1, meeting_scheduled: 2, closed_won: 3, closed_lost: 4 };
   const myAssignedCompanies = useMemo(() => {
     if (!currentTeamMember) return [];
     return companies
@@ -811,7 +815,7 @@ const ProjectsPage = () => {
   // the funnel, independent of any one contact's status. This is what the
   // owner dashboard leads with now.
   const companyStageCounts = useMemo(() => {
-    const counts: Record<CompanyStage, number> = { new_signal: 0, meeting_scheduled: 0, closed_won: 0, closed_lost: 0 };
+    const counts: Record<CompanyStage, number> = { new_signal: 0, opportunities_engaged: 0, meeting_scheduled: 0, closed_won: 0, closed_lost: 0 };
     for (const company of companies) counts[company.company_stage] = (counts[company.company_stage] ?? 0) + 1;
     return counts;
   }, [companies]);
@@ -938,7 +942,7 @@ const ProjectsPage = () => {
   // always reflect the rep's whole book at a glance) alongside contact-level
   // engagement, which the company-stage counts alone don't surface.
   const myCompanyStageCounts = useMemo(() => {
-    const counts: Record<CompanyStage, number> = { new_signal: 0, meeting_scheduled: 0, closed_won: 0, closed_lost: 0 };
+    const counts: Record<CompanyStage, number> = { new_signal: 0, opportunities_engaged: 0, meeting_scheduled: 0, closed_won: 0, closed_lost: 0 };
     for (const company of myAssignedCompanies) counts[company.company_stage] = (counts[company.company_stage] ?? 0) + 1;
     return counts;
   }, [myAssignedCompanies]);
@@ -1031,11 +1035,24 @@ const ProjectsPage = () => {
     logContactActivity(session, contact.id, "email_sequence_changed", String(position), currentTeamMember?.id);
   };
 
+  // First LinkedIn/email send or copy for a company auto-advances it out of
+  // New Opportunity into Opportunities Engaged - see advanceCompanyToEngaged,
+  // a no-op once the company has already left New Opportunity. Contacts
+  // aren't linked to a full Company object, just company_id, so look it up
+  // from the companies already in state.
+  const handleAdvanceEngagement = async (companyId?: string | null) => {
+    if (!session || !companyId) return;
+    const company = companies.find((c) => c.id === companyId);
+    const updated = await advanceCompanyToEngaged(session, company);
+    if (updated) setCompanies((current) => current.map((c) => (c.id === updated.id ? updated : c)));
+  };
+
   const handleCopyEmailField = async (contact: ProjectContact, field: string, text: string, label: string) => {
     await navigator.clipboard.writeText(text);
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "email_message_copied", field, currentTeamMember?.id);
+    handleAdvanceEngagement(contact.company_id);
   };
 
   const handleCopySchedulingLink = async (contactId: string) => {
@@ -1058,6 +1075,7 @@ const ProjectsPage = () => {
     const mailto = `mailto:${encodeURIComponent(contact.email ?? "")}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(text)}`;
     window.location.href = mailto;
     if (session) logContactActivity(session, contact.id, "email_send_clicked", field, currentTeamMember?.id);
+    handleAdvanceEngagement(contact.company_id);
   };
 
   const handleOpenMessage = (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => {
@@ -1077,6 +1095,7 @@ const ProjectsPage = () => {
     setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: "Copied" }));
     setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contact.id}-${field}`]: label })), 1500);
     if (session) logContactActivity(session, contact.id, "message_copied", field, currentTeamMember?.id);
+    handleAdvanceEngagement(contact.company_id);
     setMessageEditor(null);
   };
 
@@ -1656,7 +1675,7 @@ const ProjectsPage = () => {
                 filter shortcut: the four stage tiles set companyStageFilter,
                 the two contact tiles set activeFilter (status), and clicking
                 an already-active tile clears it back to "all." */}
-            <div className="mb-2 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+            <div className="mb-2 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-7">
               <button
                 type="button"
                 onClick={() => setCompanyStageFilter("all")}
@@ -1689,6 +1708,17 @@ const ProjectsPage = () => {
                 </div>
                 <p className={`text-2xl font-semibold ${activeFilter === "engaged" ? "text-primary" : "text-foreground"}`}>{myContactEngagement.engaged}</p>
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Contacts engaged</p>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCompanyStageFilter(companyStageFilter === "opportunities_engaged" ? "all" : "opportunities_engaged")}
+                className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${companyStageFilter === "opportunities_engaged" ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+              >
+                <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG.opportunities_engaged }}>
+                  <Send size={16} style={{ color: STAGE_CHART_COLORS.opportunities_engaged }} />
+                </div>
+                <p className={`text-2xl font-semibold ${companyStageFilter === "opportunities_engaged" ? "text-primary" : "text-foreground"}`}>{myCompanyStageCounts.opportunities_engaged}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Opportunities engaged</p>
               </button>
               <button
                 type="button"
@@ -2048,7 +2078,7 @@ const ProjectsPage = () => {
               <button type="button" onClick={() => setCompanyStageFilter("all")} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Clear stage filter</button>
             ) : null}
           </div>
-          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-5">
+          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
             {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).map((stage) => {
               const isActive = companyStageFilter === stage;
               const Icon = STAGE_ICON[stage];
