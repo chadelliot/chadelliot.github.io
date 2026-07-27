@@ -1036,6 +1036,13 @@ const ProjectsPage = () => {
     if (session) logContactActivity(session, contact.id, "email_message_copied", field, currentTeamMember?.id);
   };
 
+  const handleCopySchedulingLink = async (contactId: string) => {
+    if (!currentTeamMember) return;
+    await navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`);
+    setCopyFeedback((current) => ({ ...current, [`${contactId}-schedule_link`]: "Copied" }));
+    setTimeout(() => setCopyFeedback((current) => ({ ...current, [`${contactId}-schedule_link`]: "📅 Copy scheduling link" })), 1500);
+  };
+
   // Opens the rep's own default mail client (or whatever handles mailto:
   // links, e.g. Gmail if they've set that as their browser's default) with
   // To/Subject/Body pre-filled - this is as close to "send from the popup"
@@ -1407,10 +1414,10 @@ const ProjectsPage = () => {
           {currentTeamMember?.google_calendar_connected ? (
             <button
               type="button"
-              onClick={() => navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`)}
+              onClick={() => handleCopySchedulingLink(contact.id)}
               className="mt-4 rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
             >
-              📅 Copy scheduling link
+              {copyFeedback[`${contact.id}-schedule_link`] ?? "📅 Copy scheduling link"}
             </button>
           ) : null}
 
@@ -1834,10 +1841,10 @@ const ProjectsPage = () => {
                 {currentTeamMember?.google_calendar_connected ? (
                   <button
                     type="button"
-                    onClick={() => navigator.clipboard.writeText(`${window.location.origin}/schedule/${currentTeamMember.id}`)}
+                    onClick={() => handleCopySchedulingLink(messageEditor.contact.id)}
                     className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
                   >
-                    📅 Copy scheduling link
+                    {copyFeedback[`${messageEditor.contact.id}-schedule_link`] ?? "📅 Copy scheduling link"}
                   </button>
                 ) : null}
                 <button type="button" onClick={() => setMessageEditor(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>

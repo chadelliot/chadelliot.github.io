@@ -362,6 +362,23 @@ export const fetchOwnerCompanyLeadFields = async (session: ProposalSession): Pro
   return Object.fromEntries(rows.map((row) => [row.id, row]));
 };
 
+// Open to all authenticated team members (see get_member_company_lead_fields
+// in supabase/migrations/open_lead_fields_to_members.sql) - same shape as
+// fetchOwnerCompanyLeadFields minus lead_type_needs_review, which stays
+// Owner-only. Call this for every session; call fetchOwnerCompanyLeadFields
+// as well for Owners to also pick up lead_type_needs_review.
+export const fetchMemberCompanyLeadFields = async (session: ProposalSession): Promise<Record<string, OwnerCompanyLeadFields>> => {
+  if (!DB_URL) return {};
+  const response = await fetch(`${DB_URL}/rest/v1/rpc/get_member_company_lead_fields`, {
+    method: "POST",
+    headers: authHeaders(session),
+    body: JSON.stringify({}),
+  });
+  if (!response.ok) return {};
+  const rows = (await response.json()) as OwnerCompanyLeadFields[];
+  return Object.fromEntries(rows.map((row) => [row.id, row]));
+};
+
 // Merges owner-only lead-type fields onto the member-safe Company rows.
 // Call only from an Owner code path - a Member calling this is harmless
 // (the RPC returns nothing for them) but there's no reason to call it.
@@ -575,6 +592,22 @@ export const fetchCompanySignalsList = async (session: ProposalSession): Promise
 export const fetchOwnerSignalFields = async (session: ProposalSession): Promise<Record<string, OwnerSignalFields>> => {
   if (!DB_URL) return {};
   const response = await fetch(`${DB_URL}/rest/v1/rpc/get_owner_signal_fields`, {
+    method: "POST",
+    headers: authHeaders(session),
+    body: JSON.stringify({}),
+  });
+  if (!response.ok) return {};
+  const rows = (await response.json()) as OwnerSignalFields[];
+  return Object.fromEntries(rows.map((row) => [row.id, row]));
+};
+
+// Open to all authenticated team members (see get_member_signal_fields in
+// supabase/migrations/open_lead_fields_to_members.sql) - same shape as
+// fetchOwnerSignalFields, minus raw_lead_origin/raw_opportunity_type which
+// stay Owner-only debugging fields nothing in the UI reads for Members.
+export const fetchMemberSignalFields = async (session: ProposalSession): Promise<Record<string, OwnerSignalFields>> => {
+  if (!DB_URL) return {};
+  const response = await fetch(`${DB_URL}/rest/v1/rpc/get_member_signal_fields`, {
     method: "POST",
     headers: authHeaders(session),
     body: JSON.stringify({}),
