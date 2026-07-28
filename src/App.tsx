@@ -1,8 +1,9 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useNavigate } from "react-router-dom";
 import Index from "./pages/Index";
 import ApproachPage from "./pages/ApproachPage";
 import CareerPage from "./pages/CareerPage";
@@ -26,12 +27,32 @@ const HomeRoute = () => (
   window.location.search.includes("commercial-strategy") ? <CommercialStrategyPage /> : <Index />
 );
 
+// Supabase's invite/reset emails redirect to whatever "Site URL" is set to
+// in the Dashboard - a global setting also used by /company's own auth
+// flow, so it can't just be pointed at /projects for everyone. This runs on
+// every route instead: if an invite/recovery link lands anywhere other than
+// /projects with #access_token=... still in the hash, forward it on to
+// /projects (preserving the hash) where hydrateSessionFromUrlFragment and
+// the "set your password" screen already handle it correctly. A no-op if
+// the link already lands on /projects, or if there's no token to find.
+const AuthLinkRedirect = () => {
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (window.location.hash.includes("access_token") && window.location.pathname !== "/projects") {
+      navigate(`/projects${window.location.hash}`, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <AuthLinkRedirect />
         <ScrollToTop />
         <ContactSlideout />
         <Routes>

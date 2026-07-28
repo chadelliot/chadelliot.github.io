@@ -1,0 +1,53 @@
+<!--
+  RevHub Outreach - "Invite user" email template.
+  Paste into Supabase Dashboard -> Authentication -> Email Templates -> Invite user.
+  Uses Supabase's Go-template variables ({{ .ConfirmationURL }}) - do not
+  rename or remove those, Supabase substitutes them at send time.
+  Colors match src/index.css's --primary (#2FA37F) / --primary-deep
+  (#1F7F63), and the card/border tones used throughout /projects
+  (bg #FAFAF8, border #EEEDE7). Logo hosted at a stable path so it survives
+  Vite's build hashing: public/revhub-logo.png -> https://aboutchad.com/revhub-logo.png.
+  Deliberately a plain white header with the logo's native black/teal
+  colors (no CSS filters/dark-background tricks - too unreliable across
+  email clients); brand color shows up in the accent bar and CTA button.
+-->
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#F5F4F0;padding:32px 16px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background-color:#FFFFFF;border:1px solid #EEEDE7;border-radius:16px;overflow:hidden;">
+        <tr>
+          <td style="height:4px;background-color:#2FA37F;font-size:0;line-height:0;">&nbsp;</td>
+        </tr>
+        <tr>
+          <td style="padding:28px 32px 8px 32px;text-align:center;">
+            <img src="https://aboutchad.com/revhub-logo.png" width="130" alt="RevHub" style="display:inline-block;height:auto;max-width:130px;" />
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:20px 32px 8px 32px;">
+            <p style="margin:0 0 6px 0;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#2FA37F;">RevHub Outreach</p>
+            <h1 style="margin:0 0 16px 0;font-size:22px;line-height:1.3;font-weight:800;color:#1A1A1A;">You've been invited to the team</h1>
+            <p style="margin:0 0 24px 0;font-size:15px;line-height:1.6;color:#4B4B47;">
+              Chad has added you as a team member on RevHub Outreach. Click below to activate your account and set your own password - you'll land straight in your assignments, ready to go.
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 32px 36px 32px;text-align:center;">
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;background-color:#2FA37F;color:#FFFFFF;font-size:14px;font-weight:700;text-decoration:none;letter-spacing:0.04em;padding:14px 32px;border-radius:999px;">
+              ACCEPT INVITE &amp; SET PASSWORD
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:0 32px 32px 32px;border-top:1px solid #EEEDE7;">
+            <p style="margin:20px 0 0 0;font-size:12px;line-height:1.6;color:#8A8A85;">
+              This link is single-use and expires soon. If you weren't expecting this invite, you can safely ignore this email.
+            </p>
+          </td>
+        </tr>
+      </table>
+      <p style="margin:20px 0 0 0;font-size:11px;color:#A6A6A0;">RevHub Outreach &middot; aboutchad.com</p>
+    </td>
+  </tr>
+</table>
