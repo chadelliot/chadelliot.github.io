@@ -19,6 +19,7 @@ import {
   fetchMeetingBlocks,
   fetchCompanySignalsList,
   createMeeting,
+  deleteMeetingForContact,
   createClosedDeal,
   findCurrentTeamMember,
   updateTeamMemberName,
@@ -1027,15 +1028,29 @@ const ProjectsPage = () => {
       setMeetingDate("");
       setMeetingNotes("");
     }
+    // Reverting a contact away from meeting_set has to delete the meetings
+    // row itself, not just let the DB trigger flip the company's stage back -
+    // otherwise the Team page's "Meetings set" list and per-rep tallies keep
+    // showing a meeting that's no longer true forever (this row is never
+    // touched by anything else). See deleteMeetingForContact's own comment;
+    // CompanyDetailPage's "Reopen" flow already does this, this path didn't.
+    if (previousStatus === "meeting_set" && status !== "meeting_set") {
+      await deleteMeetingForContact(session, contact.id);
+    }
     // Setting a contact to meeting_set (or reverting one away from it) can
     // flip the company's stage server-side via the handle_meeting_set DB
     // trigger (see supabase/migrations/revert_meeting_status.sql) - refetch
-    // both directions so the stage stat tiles and meeting blocks never go
-    // stale after a revert.
+    // everything meeting-related so the stage stat tiles, meeting blocks, and
+    // "Meetings set" list never go stale after a revert.
     if (status === "meeting_set" || previousStatus === "meeting_set") {
-      const [freshCompanies, freshBlocks] = await Promise.all([fetchCompanies(session), fetchMeetingBlocks(session)]);
+      const [freshCompanies, freshBlocks, freshMeetings] = await Promise.all([
+        fetchCompanies(session),
+        fetchMeetingBlocks(session),
+        fetchMeetings(session),
+      ]);
       setCompanies(freshCompanies);
       setMeetingBlocks(freshBlocks);
+      setMeetings(freshMeetings);
     }
   };
 
