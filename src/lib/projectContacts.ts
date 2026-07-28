@@ -474,6 +474,28 @@ export const fetchTeamMembers = async (session: ProposalSession): Promise<TeamMe
   return (await response.json()) as TeamMember[];
 };
 
+// Deleting someone's login (Authentication -> Users -> delete) doesn't
+// remove their team_members row - only their contact assignments get
+// reassigned (see reassign_contacts_on_user_deletion.sql). This is the
+// subset of fetchTeamMembers with a live matching auth.users row, so the
+// Team page can stop showing someone the moment their account is gone,
+// without hard-deleting the row - that would either fail (meetings/closed
+// deals/activity log all reference team_members with no ON DELETE clause)
+// or, for anyone without that history, destroy the name behind any
+// historical credit. Use this ONLY for what the Team page displays -
+// everywhere else (assigned_rep names, credited_to names) should keep
+// using fetchTeamMembers so a departed member's name still resolves.
+export const fetchTeamMembersWithLogin = async (session: ProposalSession): Promise<TeamMember[]> => {
+  if (!DB_URL) return [];
+  const response = await fetch(`${DB_URL}/rest/v1/rpc/get_team_members_with_login`, {
+    method: "POST",
+    headers: authHeaders(session),
+    body: JSON.stringify({}),
+  });
+  if (!response.ok) return [];
+  return (await response.json()) as TeamMember[];
+};
+
 export const updateTeamMemberName = async (session: ProposalSession, teamMemberId: string, name: string): Promise<TeamMember | null> => {
   if (!DB_URL) return null;
   const response = await fetch(`${DB_URL}/rest/v1/team_members?id=eq.${teamMemberId}&select=${TEAM_MEMBER_COLUMNS}`, {
