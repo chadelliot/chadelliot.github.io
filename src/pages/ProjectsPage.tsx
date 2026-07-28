@@ -12,6 +12,7 @@ import {
   fetchProjectContacts,
   fetchContactProgress,
   fetchTeamMembers,
+  fetchTeamMembersWithLogin,
   fetchMeetings,
   fetchClosedDeals,
   fetchCompanies,
@@ -232,6 +233,12 @@ const ProjectsPage = () => {
   const [contacts, setContacts] = useState<ProjectContact[]>([]);
   const [progress, setProgress] = useState<Record<string, ContactProgress>>({});
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  // Same rows as teamMembers, filtered to only those with a live login -
+  // only for what the Team page displays, so a deleted account disappears
+  // from the roster without breaking name lookups (assigned_rep,
+  // credited_to) elsewhere, which intentionally keep resolving departed
+  // members' names for historical attribution.
+  const [teamMembersWithLogin, setTeamMembersWithLogin] = useState<TeamMember[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -307,15 +314,17 @@ const ProjectsPage = () => {
       fetchProjectContacts(session),
       fetchContactProgress(session),
       fetchTeamMembers(session),
+      fetchTeamMembersWithLogin(session),
       fetchMeetings(session),
       fetchClosedDeals(session),
       fetchCompanies(session),
       fetchMeetingBlocks(session),
       fetchCompanySignalsList(session),
-    ]).then(([contactRows, progressRows, teamRows, meetingRows, dealRows, companyRows, blockRows, signalListRows]) => {
+    ]).then(([contactRows, progressRows, teamRows, teamRowsWithLogin, meetingRows, dealRows, companyRows, blockRows, signalListRows]) => {
       setContacts(contactRows);
       setProgress(progressRows);
       setTeamMembers(teamRows);
+      setTeamMembersWithLogin(teamRowsWithLogin);
       setMeetings(meetingRows);
       setClosedDeals(dealRows);
       setCompanies(companyRows);
@@ -450,14 +459,20 @@ const ProjectsPage = () => {
 
   const handleChangeRole = async (memberId: string, role: "owner" | "member") => {
     if (!session) return;
-    const target = teamMembers.find((m) => m.id === memberId);
-    const ownerCount = teamMembers.filter((m) => m.role === "owner").length;
+    // Counted from teamMembersWithLogin, not teamMembers - a departed
+    // member's old "owner" role shouldn't count toward this safeguard,
+    // since they can't log in to act as one anymore.
+    const target = teamMembersWithLogin.find((m) => m.id === memberId);
+    const ownerCount = teamMembersWithLogin.filter((m) => m.role === "owner").length;
     if (target?.role === "owner" && role === "member" && ownerCount <= 1) {
       window.alert("You can't remove the last owner — add another owner first.");
       return;
     }
     const updated = await updateTeamMemberRole(session, memberId, role);
-    if (updated) setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+    if (updated) {
+      setTeamMembers((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+      setTeamMembersWithLogin((current) => current.map((m) => (m.id === updated.id ? updated : m)));
+    }
   };
 
   const handleAddContact = async (event: FormEvent<HTMLFormElement>) => {
@@ -1970,7 +1985,7 @@ const ProjectsPage = () => {
               <div className="mb-6 border-b border-[#E2E8F0] pb-6">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Team members</p>
                 <div className="grid gap-2">
-                  {teamMembers.map((member) => (
+                  {teamMembersWithLogin.map((member) => (
                     <div key={member.id} className="flex flex-wrap items-center justify-between gap-2 border border-[#E2E8F0] px-3 py-2">
                       <div>
                         <span className="font-semibold text-foreground">{member.name}</span>
@@ -1986,10 +2001,10 @@ const ProjectsPage = () => {
                       </select>
                     </div>
                   ))}
-                  {teamMembers.length === 0 ? <p className="text-sm text-muted-foreground">No team members yet.</p> : null}
+                  {teamMembersWithLogin.length === 0 ? <p className="text-sm text-muted-foreground">No team members yet.</p> : null}
                 </div>
 
-                {teamMembers.length > 0 ? (
+                {teamMembersWithLogin.length > 0 ? (
                   <div className="mt-4 overflow-x-auto">
                     <table className="w-full min-w-[640px] border-collapse text-sm">
                       <thead>
@@ -2004,7 +2019,7 @@ const ProjectsPage = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {teamMembers.map((member) => {
+                        {teamMembersWithLogin.map((member) => {
                           const c = statusCountsByMember[member.id];
                           return (
                             <tr key={member.id} className="border-b border-[#E2E8F0]">
