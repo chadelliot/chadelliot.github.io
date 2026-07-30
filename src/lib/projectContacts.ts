@@ -937,6 +937,57 @@ export const getCompanyResearchSummary = (contacts: ProjectContact[]): CompanyRe
   };
 };
 
+// "Stalled" thresholds - deliberately computed from data that's already
+// fetched (signal posted_date, meeting_date) rather than a new schema
+// column, so this ships without anyone needing to run a migration first.
+// Shared by CompanyBoard and the /projects dashboards so "stalled" means
+// exactly the same thing everywhere it's tracked, rather than two pages
+// quietly drifting toward two different definitions.
+export const STALE_NEW_OPPORTUNITY_DAYS = 30;
+export const STALE_MEETING_DAYS = 3;
+
+export const daysAgo = (dateStr?: string | null): number | null => {
+  if (!dateStr) return null;
+  const then = new Date(dateStr).getTime();
+  if (Number.isNaN(then)) return null;
+  return Math.floor((Date.now() - then) / (1000 * 60 * 60 * 24));
+};
+
+export type CompanyInsight = { engaged: number; total: number; priority?: string | null; stalled: boolean };
+
+// Per-company engagement, priority, and stalled-ness in one pass, so
+// filtering, sorting, and any card/row/tile all read the same numbers
+// instead of every caller recomputing it slightly differently.
+export const computeCompanyInsights = (
+  companies: Company[],
+  contactsByCompanyId: Record<string, ProjectContact[]>,
+  progress: Record<string, ContactProgress>,
+  signalsByCompanyId: Record<string, CompanySignal[]>
+): Record<string, CompanyInsight> => {
+  const map: Record<string, CompanyInsight> = {};
+  for (const company of companies) {
+    const companyContacts = (contactsByCompanyId[company.id] ?? []).filter((c) => !c.do_not_contact);
+    const engaged = companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length;
+    const research = getCompanyResearchSummary(companyContacts);
+    const companySignals = signalsByCompanyId[company.id] ?? [];
+    const oldestSignalDays = companySignals.length ? Math.max(...companySignals.map((s) => daysAgo(s.posted_date) ?? 0)) : null;
+
+    let stalled = false;
+    if (company.company_stage === "new_signal") {
+      // Nobody's touched a single contact here, and the signal that
+      // brought it in is over a month old - this is the one quietly
+      // going cold in a 300-deep list.
+      stalled = engaged === 0 && (oldestSignalDays ?? 0) >= STALE_NEW_OPPORTUNITY_DAYS;
+    } else if (company.company_stage === "meeting_scheduled") {
+      const meetingAge = daysAgo(company.meeting_date);
+      stalled = meetingAge !== null && meetingAge >= STALE_MEETING_DAYS;
+    }
+
+    map[company.id] = { engaged, total: companyContacts.length, priority: research.priority, stalled };
+  }
+  return map;
+};
+
 // Matches the signed-in session to a team_members row by email, since that's
 // what the person actually logs in with - avoids needing team_members.id to
 // be manually set to match their Supabase Auth user ID.

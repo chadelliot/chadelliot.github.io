@@ -6,9 +6,9 @@ import {
   OUTREACH_MODEL_LABELS,
   OUTREACH_MODEL_BADGE_CLASS,
   OUTREACH_MODEL_DESCRIPTIONS,
-  getCompanyResearchSummary,
   getCompanyDomain,
   getClearbitLogoUrl,
+  computeCompanyInsights,
   PRIORITY_ORDER,
   type Company,
   type CompanyStage,
@@ -65,32 +65,26 @@ const STAGE_ICON: Record<CompanyStage, typeof Zap> = {
 // rendering the whole filtered list up front.
 const BOARD_PAGE_SIZE = 20;
 
-// "Stalled" thresholds - deliberately computed from data that's already
-// fetched (signal posted_date, meeting_date) rather than a new schema
-// column, so this ships without anyone needing to run a migration first.
-const STALE_NEW_OPPORTUNITY_DAYS = 30;
-const STALE_MEETING_DAYS = 3;
-
 type CompanyBoardProps = {
   companies: Company[];
   contacts: ProjectContact[];
   progress: Record<string, ContactProgress>;
   signalsByCompanyId: Record<string, CompanySignal[]>;
   teamMembers: TeamMember[];
+  // Same rows as teamMembers, filtered to only those with a live login -
+  // used for the rep-filter dropdown's options so a departed member never
+  // appears as something to filter by. teamMembers itself stays the full
+  // list, since repById still needs to resolve a name for any existing
+  // assignment (including, in principle, a historical one).
+  teamMembersWithLogin: TeamMember[];
 };
 
-const daysAgo = (dateStr?: string | null): number | null => {
-  if (!dateStr) return null;
-  const then = new Date(dateStr).getTime();
-  if (Number.isNaN(then)) return null;
-  return Math.floor((Date.now() - then) / (1000 * 60 * 60 * 24));
-};
-
-const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamMembers }: CompanyBoardProps) => {
+const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamMembers, teamMembersWithLogin }: CompanyBoardProps) => {
   const [search, setSearch] = useState("");
   const [repFilter, setRepFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [stageFilter, setStageFilter] = useState<CompanyStage | "all">("all");
+  const [stalledOnly, setStalledOnly] = useState(false);
   const [visibleCount, setVisibleCount] = useState(BOARD_PAGE_SIZE);
 
   const contactsByCompanyId = useMemo(() => {
@@ -104,33 +98,13 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
 
   const repById = useMemo(() => Object.fromEntries(teamMembers.map((m) => [m.id, m])), [teamMembers]);
 
-  // Per-company engagement, priority, and stalled-ness in one pass, so
-  // filtering, sorting, and the row itself all read the same numbers
-  // instead of recomputing three times.
-  const companyInsights = useMemo(() => {
-    const map: Record<string, { engaged: number; total: number; priority?: string | null; stalled: boolean }> = {};
-    for (const company of companies) {
-      const companyContacts = (contactsByCompanyId[company.id] ?? []).filter((c) => !c.do_not_contact);
-      const engaged = companyContacts.filter((c) => (progress[c.id]?.status ?? "not_contacted") !== "not_contacted").length;
-      const research = getCompanyResearchSummary(companyContacts);
-      const companySignals = signalsByCompanyId[company.id] ?? [];
-      const oldestSignalDays = companySignals.length ? Math.max(...companySignals.map((s) => daysAgo(s.posted_date) ?? 0)) : null;
-
-      let stalled = false;
-      if (company.company_stage === "new_signal") {
-        // Nobody's touched a single contact here, and the signal that
-        // brought it in is over a month old - this is the one quietly
-        // going cold in a 300-deep list.
-        stalled = engaged === 0 && (oldestSignalDays ?? 0) >= STALE_NEW_OPPORTUNITY_DAYS;
-      } else if (company.company_stage === "meeting_scheduled") {
-        const meetingAge = daysAgo(company.meeting_date);
-        stalled = meetingAge !== null && meetingAge >= STALE_MEETING_DAYS;
-      }
-
-      map[company.id] = { engaged, total: companyContacts.length, priority: research.priority, stalled };
-    }
-    return map;
-  }, [companies, contactsByCompanyId, progress, signalsByCompanyId]);
+  // Per-company engagement, priority, and stalled-ness in one pass - shared
+  // with the /projects dashboards via computeCompanyInsights so "stalled"
+  // means exactly the same thing everywhere it's tracked.
+  const companyInsights = useMemo(
+    () => computeCompanyInsights(companies, contactsByCompanyId, progress, signalsByCompanyId),
+    [companies, contactsByCompanyId, progress, signalsByCompanyId]
+  );
 
   // Stage counts for the KPI tiles - deliberately independent of the other
   // filters, so clicking "New Opportunity" always reflects the true total
@@ -152,8 +126,9 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
     }
     if (repFilter !== "all") rows = rows.filter((c) => (c.assigned_rep ?? "") === repFilter);
     if (priorityFilter !== "all") rows = rows.filter((c) => (companyInsights[c.id]?.priority ?? "") === priorityFilter);
+    if (stalledOnly) rows = rows.filter((c) => companyInsights[c.id]?.stalled);
     return rows;
-  }, [companies, stageFilter, search, repFilter, priorityFilter, companyInsights]);
+  }, [companies, stageFilter, search, repFilter, priorityFilter, stalledOnly, companyInsights]);
 
   // Most-actionable-first: an open (non-closed) stage beats a closed one
   // when viewing everything together - closed_won/closed_lost are
@@ -184,16 +159,52 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
   // now-much-shorter list.
   useEffect(() => {
     setVisibleCount(BOARD_PAGE_SIZE);
-  }, [search, repFilter, priorityFilter, stageFilter]);
+  }, [search, repFilter, priorityFilter, stageFilter, stalledOnly]);
 
   const visibleCompanies = sortedCompanies.slice(0, visibleCount);
   const remaining = sortedCompanies.length - visibleCompanies.length;
-  const hasActiveFilter = stageFilter !== "all" || repFilter !== "all" || priorityFilter !== "all" || Boolean(search);
+  const hasActiveFilter = stageFilter !== "all" || repFilter !== "all" || priorityFilter !== "all" || stalledOnly || Boolean(search);
 
   return (
     <div>
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-5">
-        {STAGE_ORDER.map((stage) => {
+      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
+        {STAGE_ORDER.slice(0, 3).map((stage) => {
+          const isActive = stageFilter === stage;
+          const Icon = STAGE_ICON[stage];
+          return (
+            <button
+              key={stage}
+              type="button"
+              onClick={() => setStageFilter(isActive ? "all" : stage)}
+              className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${isActive ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+            >
+              <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG[stage] }}>
+                <Icon size={16} style={{ color: STAGE_CHART_COLORS[stage] }} />
+              </div>
+              <p className={`text-2xl font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>{stageCounts[stage]}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
+            </button>
+          );
+        })}
+
+        {/* Stalled tracked as its own primary metric, right after Meeting
+            Scheduled - a company can be stalled in either new_signal or
+            meeting_scheduled (see companyInsights), so this cuts across
+            stages rather than being one more stage itself. Clicking it
+            filters the list below to just the stalled ones. */}
+        <button
+          type="button"
+          onClick={() => setStalledOnly((v) => !v)}
+          className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${stalledOnly ? "border-[#B91C1C] bg-[#FEF2F2]" : "border-[#EEEDE7] bg-white hover:border-[#B91C1C]/40"}`}
+        >
+          <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#B91C1C22]">
+            <AlertTriangle size={16} className="text-[#B91C1C]" />
+          </div>
+          <p className={`text-2xl font-semibold ${stalledOnly ? "text-[#B91C1C]" : "text-foreground"}`}>{stalledCount}</p>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">Stalled</p>
+        </button>
+
+        {STAGE_ORDER.slice(3).map((stage) => {
           const isActive = stageFilter === stage;
           const Icon = STAGE_ICON[stage];
           return (
@@ -213,18 +224,9 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
         })}
       </div>
 
-      {stalledCount > 0 ? (
-        <div className="mb-4 flex items-center gap-2 rounded-xl border border-[#FECACA] bg-[#FEF2F2] px-4 py-2.5 text-sm text-[#B91C1C]">
-          <AlertTriangle size={15} className="shrink-0" />
-          <span>
-            <strong className="font-semibold">{stalledCount}</strong> {stalledCount === 1 ? "opportunity has" : "opportunities have"} gone quiet and could use a look.
-          </span>
-        </div>
-      ) : null}
-
       <div className="mb-4 flex flex-wrap items-center gap-3">
         <p className="mr-auto text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-          {stageFilter === "all" ? `All companies (${sortedCompanies.length})` : `${COMPANY_STAGE_LABELS[stageFilter]} (${sortedCompanies.length})`}
+          {stalledOnly ? `Stalled (${sortedCompanies.length})` : stageFilter === "all" ? `All companies (${sortedCompanies.length})` : `${COMPANY_STAGE_LABELS[stageFilter]} (${sortedCompanies.length})`}
         </p>
         <input
           type="text"
@@ -235,7 +237,7 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
         />
         <select value={repFilter} onChange={(e) => setRepFilter(e.target.value)} className="h-9 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">
           <option value="all">All reps</option>
-          {teamMembers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+          {teamMembersWithLogin.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
         </select>
         <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="h-9 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">
           <option value="all">All priorities</option>
@@ -247,7 +249,7 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
         {hasActiveFilter ? (
           <button
             type="button"
-            onClick={() => { setSearch(""); setRepFilter("all"); setPriorityFilter("all"); setStageFilter("all"); }}
+            onClick={() => { setSearch(""); setRepFilter("all"); setPriorityFilter("all"); setStageFilter("all"); setStalledOnly(false); }}
             className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
           >
             Clear

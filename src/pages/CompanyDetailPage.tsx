@@ -8,6 +8,7 @@ import {
   fetchProjectContacts,
   fetchContactProgress,
   fetchTeamMembers,
+  fetchTeamMembersWithLogin,
   fetchCompanies,
   fetchMeetings,
   fetchClosedDeals,
@@ -90,6 +91,12 @@ const CompanyDetailPage = () => {
   const [contacts, setContacts] = useState<ProjectContact[]>([]);
   const [progress, setProgress] = useState<Record<string, ContactProgress>>({});
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  // Same rows as teamMembers, filtered to only those with a live login -
+  // only for what a rep/credit-to dropdown offers to pick from, so a
+  // departed member never appears as an assignment option. Historical name
+  // lookups (assigned_rep display, credited_to display) keep using the full
+  // teamMembers list. See fetchTeamMembersWithLogin's own comment.
+  const [teamMembersWithLogin, setTeamMembersWithLogin] = useState<TeamMember[]>([]);
   const [signals, setSignals] = useState<CompanySignal[]>([]);
   const [meetings, setMeetings] = useState<Meeting[]>([]);
   const [closedDeals, setClosedDeals] = useState<ClosedDeal[]>([]);
@@ -135,14 +142,16 @@ const CompanyDetailPage = () => {
       fetchProjectContacts(session),
       fetchContactProgress(session),
       fetchTeamMembers(session),
+      fetchTeamMembersWithLogin(session),
       fetchCompanySignalsList(session),
       fetchMeetings(session),
       fetchClosedDeals(session),
-    ]).then(([companyRows, contactRows, progressRows, teamRows, signalRows, meetingRows, dealRows]) => {
+    ]).then(([companyRows, contactRows, progressRows, teamRows, teamRowsWithLogin, signalRows, meetingRows, dealRows]) => {
       setCompanies(companyRows);
       setContacts(contactRows);
       setProgress(progressRows);
       setTeamMembers(teamRows);
+      setTeamMembersWithLogin(teamRowsWithLogin);
       setSignals(signalRows);
       setMeetings(meetingRows);
       setClosedDeals(dealRows);
@@ -439,7 +448,7 @@ const CompanyDetailPage = () => {
                         className="h-8 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary"
                       >
                         <option value="">Unassigned</option>
-                        {teamMembers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                        {teamMembersWithLogin.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                       </select>
                     ) : (
                       <span className="text-xs font-semibold text-muted-foreground">
@@ -526,7 +535,7 @@ const CompanyDetailPage = () => {
                                   Credit to
                                   <select value={dealCreditedTo} onChange={(e) => setDealCreditedTo(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary">
                                     <option value="">Unassigned</option>
-                                    {teamMembers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                                    {teamMembersWithLogin.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                                   </select>
                                 </label>
                                 <label className="grid gap-1 text-xs font-semibold text-muted-foreground">

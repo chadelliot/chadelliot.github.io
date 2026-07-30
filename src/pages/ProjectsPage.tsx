@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { UserPlus, Zap, Send, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck, Camera, Linkedin, FileText, CheckCircle2 } from "lucide-react";
+import { UserPlus, Zap, Send, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck, Camera, Linkedin, FileText, CheckCircle2, AlertTriangle } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
@@ -50,6 +50,7 @@ import {
   PRIORITY_ORDER,
   getPrimaryContact,
   getCompanyResearchSummary,
+  computeCompanyInsights,
   formatWhyNow,
   getInitials,
   fetchOwnerCompanyLeadFields,
@@ -297,6 +298,10 @@ const ProjectsPage = () => {
   const toggleCompanyExpanded = (companyId: string) => setExpandedCompanies((current) => ({ ...current, [companyId]: !current[companyId] }));
   const [showCharts, setShowCharts] = useState(false);
   const [companyStageFilter, setCompanyStageFilter] = useState<CompanyStage | "all">("all");
+  // Cuts across stages (a company can be stalled in new_signal or
+  // meeting_scheduled - see computeCompanyInsights), so it's a separate
+  // toggle rather than one more CompanyStage value.
+  const [stalledOnlyFilter, setStalledOnlyFilter] = useState(false);
   // Owner-only. Not fetched, rendered, or read by anything on the Member
   // render path below - the data itself never reaches a Member's session
   // (see fetchOwnerCompanyLeadFields), this is just the UI half of that.
@@ -398,6 +403,25 @@ const ProjectsPage = () => {
     return grouped;
   }, [signalList]);
 
+  const contactsByCompanyId = useMemo(() => {
+    const grouped: Record<string, ProjectContact[]> = {};
+    for (const contact of contacts) {
+      if (!contact.company_id) continue;
+      (grouped[contact.company_id] ??= []).push(contact);
+    }
+    return grouped;
+  }, [contacts]);
+
+  // Shared with CompanyBoard via computeCompanyInsights so "stalled" means
+  // the same thing on both dashboards. companyInsightsAll covers every
+  // company (what the owner tile needs); the member tile filters this same
+  // map down to myAssignedCompanies rather than recomputing it.
+  const companyInsightsAll = useMemo(
+    () => computeCompanyInsights(companies, contactsByCompanyId, progress, signalsByCompanyId),
+    [companies, contactsByCompanyId, progress, signalsByCompanyId]
+  );
+  const stalledCountAll = useMemo(() => companies.filter((c) => companyInsightsAll[c.id]?.stalled).length, [companies, companyInsightsAll]);
+
   // A rep owns whole companies now, not a scattered list of individual
   // contacts - assigning a company hands them every contact at it. Sorted
   // so active (new_signal) companies surface above ones that already moved
@@ -409,6 +433,11 @@ const ProjectsPage = () => {
       .filter((c) => c.assigned_rep === currentTeamMember.id)
       .sort((a, b) => STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name));
   }, [companies, currentTeamMember]);
+
+  const stalledCountMine = useMemo(
+    () => myAssignedCompanies.filter((c) => companyInsightsAll[c.id]?.stalled).length,
+    [myAssignedCompanies, companyInsightsAll]
+  );
 
   // A company only has to be "touched," not fully worked, before a rep can
   // ask for more - once at least one contact there has been reached out to
@@ -938,7 +967,9 @@ const ProjectsPage = () => {
     // companyStageFilter mirrors the owner view's clickable stage tiles
     // (see ownerCompanyGroups) - lets the "Meetings scheduled"/"Closed
     // won"/"Closed lost" KPI tiles below double as filters too.
-    const stageScoped = myAssignedCompanies.filter((c) => companyStageFilter === "all" || c.company_stage === companyStageFilter);
+    const stageScoped = myAssignedCompanies
+      .filter((c) => companyStageFilter === "all" || c.company_stage === companyStageFilter)
+      .filter((c) => !stalledOnlyFilter || companyInsightsAll[c.id]?.stalled);
     const myCompanyIds = new Set(stageScoped.map((c) => c.id));
     const byCompanyId: Record<string, ProjectContact[]> = {};
     for (const contact of filteredContacts) {
@@ -948,7 +979,7 @@ const ProjectsPage = () => {
     return stageScoped
       .filter((c) => byCompanyId[c.id]?.length)
       .map((company) => ({ company, matchingContacts: byCompanyId[company.id] }));
-  }, [myAssignedCompanies, filteredContacts, companyStageFilter]);
+  }, [myAssignedCompanies, filteredContacts, companyStageFilter, stalledOnlyFilter, companyInsightsAll]);
 
   const { visibleCount: memberVisibleCount, sentinelRef: memberSentinelRef } = useInfiniteReveal(myFilteredCompanyGroups.length);
 
@@ -990,6 +1021,7 @@ const ProjectsPage = () => {
       .filter((c) => byCompanyId[c.id]?.length)
       .filter((c) => companyStageFilter === "all" || c.company_stage === companyStageFilter)
       .filter((c) => leadTypeFilter === "all" || ownerCompanyFields[c.id]?.canonical_lead_type === leadTypeFilter)
+      .filter((c) => !stalledOnlyFilter || companyInsightsAll[c.id]?.stalled)
       .sort((a, b) => {
         const sa = signalsByCompanyId[a.id]?.length ? 0 : 1;
         const sb = signalsByCompanyId[b.id]?.length ? 0 : 1;
@@ -997,7 +1029,7 @@ const ProjectsPage = () => {
         return STAGE_SORT_ORDER[a.company_stage] - STAGE_SORT_ORDER[b.company_stage] || a.name.localeCompare(b.name);
       })
       .map((company) => ({ company, matchingContacts: byCompanyId[company.id] }));
-  }, [companies, filteredContacts, signalsByCompanyId, companyStageFilter, leadTypeFilter, ownerCompanyFields]);
+  }, [companies, filteredContacts, signalsByCompanyId, companyStageFilter, leadTypeFilter, stalledOnlyFilter, companyInsightsAll, ownerCompanyFields]);
 
   const { visibleCount: ownerVisibleCount, sentinelRef: ownerSentinelRef } = useInfiniteReveal(ownerCompanyGroups.length);
 
@@ -1718,7 +1750,7 @@ const ProjectsPage = () => {
                 filter shortcut: the four stage tiles set companyStageFilter,
                 the two contact tiles set activeFilter (status), and clicking
                 an already-active tile clears it back to "all." */}
-            <div className="mb-2 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-7">
+            <div className="mb-2 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-8">
               <button
                 type="button"
                 onClick={() => setCompanyStageFilter("all")}
@@ -1776,6 +1808,17 @@ const ProjectsPage = () => {
               </button>
               <button
                 type="button"
+                onClick={() => setStalledOnlyFilter((v) => !v)}
+                className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${stalledOnlyFilter ? "border-[#B91C1C] bg-[#FEF2F2]" : "border-[#EEEDE7] bg-white hover:border-[#B91C1C]/40"}`}
+              >
+                <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#B91C1C22]">
+                  <AlertTriangle size={16} className="text-[#B91C1C]" />
+                </div>
+                <p className={`text-2xl font-semibold ${stalledOnlyFilter ? "text-[#B91C1C]" : "text-foreground"}`}>{stalledCountMine}</p>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Stalled</p>
+              </button>
+              <button
+                type="button"
                 onClick={() => setCompanyStageFilter(companyStageFilter === "closed_won" ? "all" : "closed_won")}
                 className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${companyStageFilter === "closed_won" ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
               >
@@ -1797,9 +1840,9 @@ const ProjectsPage = () => {
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Closed lost</p>
               </button>
             </div>
-            {companyStageFilter !== "all" ? (
+            {companyStageFilter !== "all" || stalledOnlyFilter ? (
               <div className="mb-8 flex justify-end">
-                <button type="button" onClick={() => setCompanyStageFilter("all")} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Clear stage filter</button>
+                <button type="button" onClick={() => { setCompanyStageFilter("all"); setStalledOnlyFilter(false); }} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Clear stage filter</button>
               </div>
             ) : (
               <div className="mb-6" />
@@ -1991,7 +2034,7 @@ const ProjectsPage = () => {
 
           {activeSection === "board" ? (
             <div className="mb-8 rounded-2xl border border-[#EEEDE7] bg-white p-5 shadow-sm">
-              <CompanyBoard companies={companies} contacts={contacts} progress={progress} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} />
+              <CompanyBoard companies={companies} contacts={contacts} progress={progress} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} teamMembersWithLogin={teamMembersWithLogin} />
             </div>
           ) : null}
 
@@ -2063,7 +2106,7 @@ const ProjectsPage = () => {
                   Credit to
                   <select value={dealCreditedTo} onChange={(e) => setDealCreditedTo(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary">
                     <option value="">Unassigned</option>
-                    {teamMembers.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+                    {teamMembersWithLogin.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                   </select>
                 </label>
                 <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
@@ -2117,12 +2160,41 @@ const ProjectsPage = () => {
           <>
           <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Company penetration</p>
-            {companyStageFilter !== "all" ? (
-              <button type="button" onClick={() => setCompanyStageFilter("all")} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Clear stage filter</button>
+            {companyStageFilter !== "all" || stalledOnlyFilter ? (
+              <button type="button" onClick={() => { setCompanyStageFilter("all"); setStalledOnlyFilter(false); }} className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">Clear stage filter</button>
             ) : null}
           </div>
-          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-            {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).map((stage) => {
+          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-7">
+            {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).slice(0, 3).map((stage) => {
+              const isActive = companyStageFilter === stage;
+              const Icon = STAGE_ICON[stage];
+              return (
+                <button
+                  key={stage}
+                  type="button"
+                  onClick={() => setCompanyStageFilter(isActive ? "all" : stage)}
+                  className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${isActive ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
+                >
+                  <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG[stage] }}>
+                    <Icon size={16} style={{ color: STAGE_CHART_COLORS[stage] }} />
+                  </div>
+                  <p className={`text-2xl font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>{companyStageCounts[stage]}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={() => setStalledOnlyFilter((v) => !v)}
+              className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${stalledOnlyFilter ? "border-[#B91C1C] bg-[#FEF2F2]" : "border-[#EEEDE7] bg-white hover:border-[#B91C1C]/40"}`}
+            >
+              <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#B91C1C22]">
+                <AlertTriangle size={16} className="text-[#B91C1C]" />
+              </div>
+              <p className={`text-2xl font-semibold ${stalledOnlyFilter ? "text-[#B91C1C]" : "text-foreground"}`}>{stalledCountAll}</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">Stalled</p>
+            </button>
+            {(Object.keys(COMPANY_STAGE_LABELS) as CompanyStage[]).slice(3).map((stage) => {
               const isActive = companyStageFilter === stage;
               const Icon = STAGE_ICON[stage];
               return (
