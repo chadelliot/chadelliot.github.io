@@ -1,8 +1,10 @@
 {
   "note": "Tracks progress through the published CSV export of the 'RevHub-Marketing' tab in Chad's RevHub Target Accounts Google Sheet, so the daily email-draft sync only processes rows added since the last run instead of re-reading the whole sheet every time. Updated automatically by the scheduled 'revhub-email-draft-sync' task.",
   "csvUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vSLKem89kammP8oGHNI3TEEmHQ0euvVCOtUh-mUdTaFY_gbBHtJtYo98Ok1Uq9FDwaCqXMVUIR2omyI/pub?gid=146415020&single=true&output=csv",
-  "lastSyncedDate": "2026-07-26",
-  "csvLineCount": 221,
-  "lastRowCompany": "CLUTCH",
-  "lastRowContact": "Troy Schroeder"
+  "lastSyncedDate": "2026-07-29",
+  "csvLineCount": null,
+  "lastRowCompany": "BleuBully Bedding",
+  "lastRowContact": "Kelsey Koster",
+  "lastRowNumber": 116,
+  "note2": "csvLineCount is no longer used for change detection as of 2026-07-29 - the CSV export link stopped returning data via automated fetch (see chat), so this sync now reads the sheet directly via browser. lastRowNumber tracks the last processed row in the RevHub-Marketing tab instead."
 }
