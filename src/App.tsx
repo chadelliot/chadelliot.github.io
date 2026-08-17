@@ -20,6 +20,7 @@ import SyneosMarketResearchPage from "./pages/SyneosMarketResearchPage";
 import NotFound from "./pages/NotFound";
 import ContactSlideout from "./components/ContactSlideout";
 import ScrollToTop from "./components/ScrollToTop";
+import ProjectsDataSync from "./components/ProjectsDataSync";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthLinkRedirect />
+        <ProjectsDataSync />
         <ScrollToTop />
         <ContactSlideout />
         <Routes>
