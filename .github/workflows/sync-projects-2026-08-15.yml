@@ -6,6 +6,7 @@ on:
     paths:
       - "scripts/sync-target-accounts-2026-08-15.mjs"
       - "scripts/run-target-account-sync-2026-08-15.mjs"
+      - "scripts/run-target-account-sync-with-credentials-2026-08-15.mjs"
       - ".github/workflows/sync-projects-2026-08-15.yml"
   workflow_dispatch:
 
@@ -27,5 +28,11 @@ jobs:
       - name: Sync and verify production /projects data
         env:
           SUPABASE_URL: ${{ vars.VITE_PROPOSAL_DB_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY || vars.VITE_PROPOSAL_DB_PUBLIC }}
-        run: node scripts/run-target-account-sync-2026-08-15.mjs
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          SUPABASE_SERVICE_ROLE: ${{ secrets.SUPABASE_SERVICE_ROLE }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PAT: ${{ secrets.SUPABASE_PAT }}
+          SUPABASE_TOKEN: ${{ secrets.SUPABASE_TOKEN }}
+        run: node scripts/run-target-account-sync-with-credentials-2026-08-15.mjs
