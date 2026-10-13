@@ -653,6 +653,53 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .profile-grid{grid-template-columns:1fr !important;}
 }
 
+
+/* ── STORY LAYER ── */
+.story-beat{display:flex;gap:14px;align-items:flex-start;max-width:640px;margin:2px 0 24px;}
+.sb-avatar{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.sb-who{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:3px;}
+.sb-q{font-size:16px;font-style:italic;font-weight:600;color:var(--ink);line-height:1.35;letter-spacing:-0.2px;}
+.sb-do{font-size:13px;color:var(--body);line-height:1.55;margin-top:5px;}
+
+.scqa{max-width:680px;margin:0 0 28px;border-top:1px solid var(--rule);}
+.scqa-row{display:grid;grid-template-columns:104px 1fr;gap:16px;padding:14px 0;border-bottom:1px solid var(--rule);}
+.scqa-k{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding-top:3px;}
+.scqa-v{font-size:14px;line-height:1.65;color:var(--body);}
+.scqa-row.q .scqa-k{color:var(--green);}
+.scqa-row.q .scqa-v{font-size:17px;font-weight:700;font-style:italic;color:var(--ink);line-height:1.4;}
+.scqa-row.a{background:var(--green-pale);margin:0 -14px;padding:14px;border-bottom:none;border-radius:4px;}
+.scqa-row.a .scqa-k{color:var(--green);}
+.scqa-row.a .scqa-v{color:var(--ink);font-weight:500;}
+.scqa-v b{color:var(--ink);font-weight:700;}
+
+.gap-chart{margin:0 0 26px;max-width:760px;border:1px solid var(--rule);border-radius:4px;padding:16px 18px 14px;background:var(--white);}
+.gap-chart .section-eye{margin-bottom:12px;}
+.gap-scale{display:grid;grid-template-columns:110px 1fr 170px;gap:12px;align-items:center;}
+.gap-row{display:contents;}
+.gap-lab{font-size:11px;font-weight:700;color:var(--ink);}
+.gap-track{position:relative;height:26px;background:var(--surface);border-radius:3px;margin:7px 0;}
+.gap-fill{position:absolute;left:0;top:0;bottom:0;border-radius:3px 0 0 3px;background:#9aa6a0;}
+.gap-fill.after{background:var(--green);}
+.gap-rem{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(135deg,rgba(180,83,9,.22) 0 3px,transparent 3px 7px);border:1px dashed rgba(180,83,9,.55);border-left:none;}
+.gap-target{position:absolute;top:-6px;bottom:-6px;width:0;border-left:2px solid var(--ink);}
+.gap-val{font-size:12px;color:var(--body);line-height:1.35;}
+.gap-val strong{font-size:15px;color:var(--ink);font-weight:800;display:block;}
+.gap-val .short{color:var(--sig-a);font-weight:700;font-size:11px;}
+.gap-axis{grid-column:2;position:relative;height:16px;font-size:10px;color:var(--muted);}
+.gap-axis span{position:absolute;transform:translateX(-50%);white-space:nowrap;}
+.gap-axis .tgt{color:var(--ink);font-weight:700;}
+.gap-note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5;}
+.story-note{font-size:11px;color:var(--muted);max-width:640px;line-height:1.55;margin-top:6px;}
+.epilogue{border-left:3px solid var(--green);padding:4px 0 4px 16px;margin:6px 0 24px;max-width:640px;}
+.epilogue .sb-q{font-size:15px;}
+@media (max-width:767px){
+  .scqa-row{grid-template-columns:1fr;gap:4px;}
+  .scqa-row.a{margin:0 -8px;padding:12px 8px;}
+  .gap-scale{grid-template-columns:1fr;gap:2px;}
+  .gap-axis{grid-column:1;}
+  .gap-val{margin-bottom:8px;}
+  .gap-lab{margin-top:4px;}
+}
 </style>
 </head>
 <body>
@@ -670,7 +717,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 </nav>
 
 <!-- PROGRESS BAR -->
-<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:11.1%"></div></div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
 
 <div class="shell">
 
@@ -680,10 +727,52 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   <!-- STAGE AREA -->
   <main class="stage-area" id="stageArea">
 
-    <!-- ══ STAGE 1: KPI Foundation ══ -->
+    <!-- ══ PROLOGUE: The Problem ══ -->
     <div class="stage active" id="stage-0">
+      <div class="stage-eyebrow">Prologue — The Problem</div>
+      <h1 class="stage-title">Revenue is growing. <em>So what's the problem?</em></h1>
+
+      <div class="scqa">
+        <div class="scqa-row"><div class="scqa-k">The situation</div><div class="scqa-v">Maya Chen has just joined Meridian Supply as VP of Marketing. Revenue grew <b>8.5%</b> last year and the leadership team is in a good mood.</div></div>
+        <div class="scqa-row"><div class="scqa-k">The complication</div><div class="scqa-v">Only <b>24.0%</b> of opportunities become customers, against a <b>38%</b> target. Marketing returns <b>2.7×</b> on spend. Net revenue retention is <b>94%</b>, so the customers Meridian already has are spending less in total each year.</div></div>
+        <div class="scqa-row q"><div class="scqa-k">The question</div><div class="scqa-v">Where is growth leaking, and what would a system that stops it look like?</div></div>
+        <div class="scqa-row a"><div class="scqa-k">Maya's answer</div><div class="scqa-v">Build one connected system: a shared scoreboard, sharper segments, signal-driven timing, and a single plan that sales and marketing both run. The next nine chapters follow her through it, one question at a time.</div></div>
+      </div>
+
+      <figure class="gap-chart">
+        <div class="section-eye">Win rate · share of opportunities that become customers</div>
+        <div class="gap-scale">
+        <div class="gap-row">
+          <div class="gap-lab">What Maya inherits</div>
+          <div class="gap-track" role="img" aria-label="What Maya inherits: win rate 24.0%, 14.0 points below the 38% target">
+            <div class="gap-fill" style="width:48.0%"></div>
+            <div class="gap-rem" style="left:48.0%;width:28.0%"></div>
+            <div class="gap-target" style="left:76.0%"></div>
+          </div>
+          <div class="gap-val"><strong>24.0%</strong><span class="short">▼ 14.0 pts below target</span></div>
+        </div>
+        <div class="gap-axis" aria-hidden="true"><span style="left:0;transform:none">0%</span><span class="tgt" style="left:76.0%">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
+        </div>
+        <div class="gap-note">Maya's first question isn't "how do we generate more leads?" It's "why does a qualified opportunity so rarely turn into a customer?"</div>
+      </figure>
+
+      <div class="section-label">Everything else Maya inherits</div>
+      <div class="kpi-dash" id="dash-0">
+        <div class="kd-card"><div class="kd-eye">Market Share</div><div class="kd-val">14.5%</div><div class="kd-delta flat">Before</div></div>
+        <div class="kd-card"><div class="kd-eye">Pipeline</div><div class="kd-val">$19.2M</div><div class="kd-delta flat">Before</div></div>
+        <div class="kd-card"><div class="kd-eye">MQL → SQL</div><div class="kd-val">21%</div><div class="kd-delta flat">Before</div></div>
+        <div class="kd-card"><div class="kd-eye">Customer LTV</div><div class="kd-val">$16.8K</div><div class="kd-delta flat">Before</div></div>
+      </div>
+      <p class="story-note">Maya and Meridian Supply are illustrative, a stand-in so the method is easy to follow. The framework and the figures are the ones used on every page that follows.</p>
+
+      <div class="chapter-transition">Maya's first move: <strong>agree on what success looks like.</strong></div>
+    </div>
+
+    <!-- ══ STAGE 1: KPI Foundation ══ -->
+    <div class="stage" id="stage-1">
       <div class="stage-eyebrow">Chapter 01 — The Scoreboard</div>
       <h1 class="stage-title">What defines <em>success?</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Before I fix anything, what are we actually trying to move?”</div><div class="sb-do">She sits down with the CEO and the head of sales and agrees on one scoreboard. Win rate and pipeline are the two numbers that gate everything else.</div></div></div>
       <p class="stage-body">Before any activation starts, leadership needs a scoreboard connecting revenue growth, market share, margin, payback, pipeline coverage, and expansion. That scoreboard is the operating system every commercial decision is measured against.</p>
 
       <div class="kpi-dash" id="dash-1">
@@ -702,13 +791,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         <div class="exec-reco-body">Prioritize Sales Conversion and Pipeline Contribution first — both sit below target and gate every other number on this board. Revenue Growth, Retention, and LTV are already ahead of plan; protect them, don't optimize them further this cycle.</div>
       </div>
 
-      <div class="chapter-transition">Next: <strong>Segmentation</strong> determines where those outcomes can be created.</div>
+      <div class="chapter-transition">Next, Maya asks: where are we actually worth competing? <strong>Segmentation</strong> answers it.</div>
     </div>
 
     <!-- ══ STAGE 2: Segmentation (merged Ch 2 + 3) ══ -->
-    <div class="stage" id="stage-1">
+    <div class="stage" id="stage-2">
       <div class="stage-eyebrow">Chapter 02 — Segmentation</div>
       <h1 class="stage-title">Where Should We <em>Compete?</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“We can't win everywhere. Where is competing actually worth it?”</div><div class="sb-do">She ranks four segments by deal size, buying committee, sales cycle and room to expand.</div></div></div>
       <p class="stage-body">Commercial segmentation identifies where incremental investment is most likely to create profitable growth. Rather than treating every customer equally, we prioritize the markets that create the highest enterprise value.</p>
 
       <div class="exec-reco">
@@ -789,13 +879,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         </div>
       </div>
 
-      <div class="chapter-transition">Next: <strong>Total Addressable Market</strong> quantifies the opportunity inside these prioritized segments.</div>
+      <div class="chapter-transition">Next, Maya asks: is the prize big enough? <strong>Total Addressable Market</strong> sizes it.</div>
     </div>
 
     <!-- ══ STAGE 3: TAM ══ -->
-    <div class="stage" id="stage-2">
+    <div class="stage" id="stage-3">
       <div class="stage-eyebrow">Chapter 03 — Total Addressable Market</div>
       <h1 class="stage-title">How big is this, <em>really?</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Is the prize big enough to justify the bet?”</div><div class="sb-do">She sizes the market in three layers: 895 target accounts, 475 reachable today, 161 already active.</div></div></div>
       <p class="stage-body">With segments defined, we size the addressable market in three layers — the full universe, what we can realistically reach today, and what we already hold.</p>
 
       <div class="tam-visual">
@@ -902,14 +993,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         <div class="exec-reco-body">Enterprise is 8% of accounts but ~49% of addressable revenue — investment should follow value, not volume. Mid-Market carries the accounts but not the return; keep it efficient, don't overfund it.</div>
       </div>
 
-      <div class="chapter-transition">Next: <strong>Audience Architecture</strong> defines who inside these accounts we need to reach.</div>
+      <div class="chapter-transition">Next, Maya asks: who exactly are we talking to? <strong>Audience Architecture</strong> answers it.</div>
     </div>
 
     <!-- ══ STAGE 5: Personas ══ -->
     <!-- ══ STAGE 3: Audience Architecture (Tiers + Personas merged) ══ -->
-    <div class="stage" id="stage-3">
+    <div class="stage" id="stage-4">
       <div class="stage-eyebrow">Chapter 04 — Audience Architecture</div>
       <h1 class="stage-title">Who gets the message. <em>And what it says.</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Now that we know which accounts, who exactly are we talking to?”</div><div class="sb-do">She tiers accounts by value, then writes a message for the buyer inside each one.</div></div></div>
       <p class="stage-body">We tier accounts by revenue value to focus effort, then define the personas making decisions inside each tier — so messaging matches both the account's value and the buyer's job to be done.</p>
 
       <!-- TIER SECTION — interactive: click a tier to reveal its personas below -->
@@ -1112,13 +1204,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
       </div>
 
-      <div class="chapter-transition">Next: <strong>Prospect Funnel</strong> shows how these tiers convert into pipeline.</div>
+      <div class="chapter-transition">Next, Maya asks: where do prospects stall? The <strong>Prospect Funnel</strong> shows her.</div>
     </div>
 
     <!-- ══ STAGE 4: Prospect Funnel ══ -->
-    <div class="stage" id="stage-4">
+    <div class="stage" id="stage-5">
       <div class="stage-eyebrow">Chapter 05 — Prospect Funnel</div>
       <h1 class="stage-title">Turn market opportunity into <em>qualified pipeline.</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Where do qualified prospects stall on the way to revenue?”</div><div class="sb-do">She walks the funnel from 2.4M impressions to 196 customers, and finds the leak between opportunity and closed-won.</div></div></div>
       <p class="stage-body">For prospects, the goal is converting TAM into pipeline. Segmentation, TAM fit, and signal data prioritize who marketing targets and who sales pursues, at every stage of the funnel.</p>
 
       <div style="margin-bottom:20px;">
@@ -1211,13 +1304,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         <div class="exec-reco-body">Fund win-rate enablement before adding top-of-funnel spend. The funnel already produces enough qualified opportunity; the leak is late-stage, and it's the same gap flagged in the KPI Foundation.</div>
       </div>
 
-      <div class="chapter-transition">Next: <strong>Signal Intelligence</strong> shows which accounts to act on and when.</div>
+      <div class="chapter-transition">Next, Maya asks: which accounts are ready now? <strong>Signal Intelligence</strong> tells her.</div>
     </div>
 
     <!-- ══ STAGE 8: Signal Intelligence ══ -->
-    <div class="stage" id="stage-5">
+    <div class="stage" id="stage-6">
       <div class="stage-eyebrow">Chapter 06 — Signal Intelligence</div>
       <h1 class="stage-title">Act on the right signal <em>at the right moment.</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“How do we know which accounts are ready right now?”</div><div class="sb-do">She sets up eleven buying and risk signals, so marketing and sales act on timing instead of guesswork.</div></div></div>
       <p class="stage-body">Signals aren't generic — the ones worth acting on depend on where an account sits in the funnel. Click a stage below to see what to watch for there.</p>
 
       <div class="signal-funnel-strip">
@@ -1397,13 +1491,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         </div>
       </div>
 
-      <div class="chapter-transition">Next: <strong>GTM Strategy</strong> turns these signals into a funded campaign.</div>
+      <div class="chapter-transition">Next, Maya asks: where does the money go? <strong>GTM Strategy</strong> decides it.</div>
     </div>
 
     <!-- ══ STAGE 9: GTM Strategy ══ -->
-    <div class="stage" id="stage-6">
+    <div class="stage" id="stage-7">
       <div class="stage-eyebrow">Chapter 07 — GTM Strategy</div>
       <h1 class="stage-title">Where should we <em>invest?</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“With $150K and one quarter, where does each dollar go?”</div><div class="sb-do">She chooses a growth motion, then tests how the budget could split across five channels.</div></div></div>
       <p class="stage-body">A GTM motion is a choice about where growth comes from — new logos, expansion, retention, or a launch. Picking the right one determines who we target, what we say, where we spend, and what we measure. We have $150K to deploy; the motion below decides how.</p>
 
       <div class="signal-picker">
@@ -1525,13 +1620,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         </div>
       </div>
 
-      <div class="chapter-transition">Next: <strong>GTM Alignment</strong> shows how marketing hands this off to sales.</div>
+      <div class="chapter-transition">Next, Maya asks: who picks it up from here? <strong>GTM Alignment</strong> answers it.</div>
     </div>
 
     <!-- ══ STAGE 8: Alignment ══ -->
-    <div class="stage" id="stage-7">
+    <div class="stage" id="stage-8">
       <div class="stage-eyebrow">Chapter 08 — GTM Alignment</div>
       <h1 class="stage-title">One system. <em>Two engines.</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“How do we make sure sales picks up what marketing hands off?”</div><div class="sb-do">She writes one handoff rule and a 30-60-90 day plan that both teams sign.</div></div></div>
       <p class="stage-body">Marketing and sales aren't working from separate plans — both run on the same segmentation, tiering, and signal data. Here's what that looks like for each motion.</p>
 
       <div class="section-label" style="margin-top:6px;">How Marketing and Sales Connect</div>
@@ -1606,14 +1702,41 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         </div>
       </div>
 
-      <div class="chapter-transition">Next: <strong>Impact</strong> proves the system worked.</div>
+      <div class="chapter-transition">Next, Maya asks: did it work? <strong>Impact</strong> is her answer.</div>
     </div>
 
     <!-- ══ STAGE 9: Outcomes ══ -->
-    <div class="stage" id="stage-8">
+    <div class="stage" id="stage-9">
       <div class="stage-eyebrow">Chapter 09 — Impact</div>
       <h1 class="stage-title">The strategy is working. <em>Here's the proof.</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Did it work? And would the CEO believe it?”</div><div class="sb-do">She takes the results back to the table, with every lift traced to the decision behind it.</div></div></div>
       <p class="stage-body">Every metric below started somewhere before this system existed. This is the lift — and which part of the strategy drove it.</p>
+
+            <figure class="gap-chart">
+        <div class="section-eye">Back to Maya's problem · win rate against the 38% target</div>
+        <div class="gap-scale">
+        <div class="gap-row">
+          <div class="gap-lab">Before</div>
+          <div class="gap-track" role="img" aria-label="Before: win rate 24.0%, 14.0 points below the 38% target">
+            <div class="gap-fill" style="width:48.0%"></div>
+            <div class="gap-rem" style="left:48.0%;width:28.0%"></div>
+            <div class="gap-target" style="left:76.0%"></div>
+          </div>
+          <div class="gap-val"><strong>24.0%</strong><span class="short">▼ 14.0 pts below target</span></div>
+        </div>
+        <div class="gap-row">
+          <div class="gap-lab">Now</div>
+          <div class="gap-track" role="img" aria-label="Now: win rate 31.9%, 6.1 points below the 38% target">
+            <div class="gap-fill after" style="width:63.8%"></div>
+            <div class="gap-rem" style="left:63.8%;width:12.2%"></div>
+            <div class="gap-target" style="left:76.0%"></div>
+          </div>
+          <div class="gap-val"><strong>31.9%</strong><span class="short">▼ 6.1 pts below target</span></div>
+        </div>
+        <div class="gap-axis" aria-hidden="true"><span style="left:0;transform:none">0%</span><span class="tgt" style="left:76.0%">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
+        </div>
+        <div class="gap-note">The gap to target went from 14.0 points to 6.1, so 7.9 points (56%) of it is closed. The remaining 6.1 points are the next quarter's work.</div>
+      </figure>
 
       <div class="return-grid">
         <div class="rg-card"><div class="rg-layer">Segmentation + TAM</div><div class="outcome-compare"><span class="outcome-before">14.5%</span><span class="outcome-arrow">→</span><span class="outcome-after">18.0%</span></div><div class="outcome-lift">+3.5 pts · Market Share</div></div>
@@ -1649,6 +1772,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           <div class="decision-content"><span class="decision-q">What should leadership do next?</span> <span class="decision-a">Fund win-rate enablement now; protect what's already ahead of plan; revisit at the 90-day mark.</span></div>
         </div>
       </div>
+
+      <div class="epilogue"><div class="sb-who">Maya, closing the loop</div><div class="sb-q">“I started with a 24.0% win rate. It's 31.9% now. The next 6.1 points are what we fund next quarter.”</div></div>
     </div>
 
   </main>
@@ -1663,7 +1788,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
 <!-- NAV BUTTONS -->
 <div class="nav-buttons">
-  <div class="stage-counter" id="stageCounter">Chapter 1 of 9</div>
+  <div class="stage-counter" id="stageCounter">Prologue · The Problem</div>
   <div class="btn-group">
     <button class="btn btn-back" id="btnBack" onclick="navigate(-1)" disabled>← Back</button>
     <button class="btn btn-next" id="btnNext" onclick="navigate(1)">Next →</button>
@@ -1672,6 +1797,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
 <script>
 const STAGES = [
+  { label: "The Problem",              eyebrow: "Prologue" },
   { label: "KPI Foundation",           eyebrow: "The Scoreboard" },
   { label: "Segmentation",             eyebrow: "Audience + Growth Objective" },
   { label: "Total Addressable Market", eyebrow: "Intelligence Layer" },
@@ -1687,9 +1813,10 @@ let current = 0;
 
 // Section headers
 const sections = [
-  {start:0, label:'Foundation',           foundation:true},
-  {start:4, label:'Execution',            foundation:false},
-  {start:7, label:'Performance',          foundation:false},
+  {start:0, label:'Start here',           foundation:true},
+  {start:1, label:'Diagnose',             foundation:false},
+  {start:5, label:'Act',                  foundation:false},
+  {start:8, label:'Prove',                foundation:false},
 ];
 
 // Build rail
@@ -1744,12 +1871,12 @@ function goTo(n) {
     document.getElementById('btnNext').textContent = 'Next →';
   }
   document.getElementById('btnNext').disabled = false;
-  document.getElementById('stageCounter').textContent = `Chapter ${current + 1} of ${STAGES.length}`;
+  document.getElementById('stageCounter').textContent = current === 0 ? 'Prologue · The Problem' : `Chapter ${current} of ${STAGES.length - 1}`;
   document.getElementById('progressFill').style.width = ((current + 1) / STAGES.length * 100) + '%';
 
   document.getElementById('stageArea').scrollTop = 0;
   updateNextBubble();
-  if (current === 6) {
+  if (current === 7) {
     scheduleEconomicsReveal();
   } else if (econRevealTimeout) {
     clearTimeout(econRevealTimeout);
