@@ -1082,7 +1082,67 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .rm-grid{grid-template-columns:1fr;}
   .close-cta{flex-direction:column;align-items:flex-start;}
 }
-.hx-cell{height:40px !important;}.hx-legend{font-size:11.5px !important;line-height:1.45;max-width:720px;}.hx-legend b{color:var(--ink);}.tam-strip{padding:6px 0 8px !important;margin-bottom:10px !important;}.tam-strip .tam-rings{flex-basis:58px !important;width:58px !important;}.ts-stats b{font-size:17px !important;}@media (min-width:768px){.next-bubble{right:236px !important;bottom:14px !important;max-width:330px !important;padding:8px 12px !important;font-size:11.5px !important;}.next-bubble .next-bubble-caret{display:none !important;}.next-bubble-text{font-size:11.5px !important;line-height:1.35 !important;}}</style>
+.hx-cell{height:40px !important;}.hx-legend{font-size:11.5px !important;line-height:1.45;max-width:720px;}.hx-legend b{color:var(--ink);}.tam-strip{padding:6px 0 8px !important;margin-bottom:10px !important;}.tam-strip .tam-rings{flex-basis:58px !important;width:58px !important;}.ts-stats b{font-size:17px !important;}@media (min-width:768px){.next-bubble{right:236px !important;bottom:14px !important;max-width:330px !important;padding:8px 12px !important;font-size:11.5px !important;}.next-bubble .next-bubble-caret{display:none !important;}.next-bubble-text{font-size:11.5px !important;line-height:1.35 !important;}}
+/* ═══ Executive summary ═══ */
+@keyframes wipeY{from{clip-path:inset(100% 0 0 0);}to{clip-path:inset(0 0 0 0);}}
+.es-by{font-size:12px;color:var(--muted);margin:2px 0 18px;max-width:760px;line-height:1.5;}
+.es-by b{color:var(--ink);font-weight:700;}
+.es-tag{display:inline-block;margin-left:6px;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);border:1px solid var(--rule);border-radius:9px;padding:2px 8px;vertical-align:1px;}
+.es-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:16px;max-width:960px;margin-bottom:14px;align-items:start;}
+.es-k{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:8px;}
+.es-impact{border:1px solid var(--ink);border-radius:8px;padding:18px 20px 14px;background:var(--white);}
+.es-impact .es-k{color:var(--ink);}
+.es-big{display:grid;grid-template-columns:1.25fr 1fr 1fr;gap:14px;margin-bottom:16px;}
+.es-big span{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:4px;}
+.es-big b{font-size:34px;font-weight:800;letter-spacing:-1.2px;color:var(--ink);line-height:1;}
+.es-big div:first-child b{font-size:44px;color:var(--sig-g);}
+.es-big div:nth-child(n+2) b{font-size:26px;letter-spacing:-.8px;}
+.wf{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;height:168px;position:relative;border-bottom:1px solid #cfd5d1;margin:26px 2px 0;}
+.wf-col{position:relative;}
+.wf-bar{position:absolute;left:10%;right:10%;border-radius:3px 3px 0 0;}
+.wf-bar.pos{background:var(--green);}
+.wf-bar.neg{background:var(--sig-a);opacity:.88;}
+.wf-bar.end{background:var(--sig-g);}
+.wf-val{position:absolute;left:0;right:0;text-align:center;font-size:12px;font-weight:800;color:var(--ink);margin-bottom:4px;}
+.wf-val.neg{color:var(--sig-a);}
+.wf-cap{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:6px 2px 0;font-size:10px;font-weight:600;color:var(--muted);text-align:center;line-height:1.3;}
+.es-stretch{margin-top:12px;padding-top:10px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--body);}
+.es-stretch b{color:var(--ink);}
+.es-side{display:flex;flex-direction:column;gap:12px;}
+.es-card{border:1px solid var(--rule);border-radius:6px;padding:13px 15px;background:var(--white);}
+.es-card p{font-size:12.5px;color:var(--ink);line-height:1.5;font-weight:500;}
+.es-card p b{font-weight:800;}
+.es-card.prob{border-color:var(--sig-a);background:#fffaf3;}
+.es-card.prob .es-k{color:var(--sig-a);}
+.es-card ol{list-style:none;display:grid;gap:9px;}
+.es-card li{display:grid;grid-template-columns:62px 1fr;gap:8px;font-size:12px;line-height:1.4;color:var(--body);}
+.es-card li b{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--green);padding-top:2px;}
+.es-card li span{color:var(--ink);font-weight:500;}
+.es-card.ask{background:var(--ink);border-color:var(--ink);}
+.es-card.ask .es-k{color:#9fb3a9;}
+.es-card.ask p{color:#fff;}
+.es-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:6px;overflow:hidden;max-width:960px;margin-bottom:12px;}
+.es-m{background:var(--white);padding:12px 14px;}
+.es-m span{display:block;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-bottom:5px;}
+.es-m b{display:block;font-size:22px;font-weight:800;letter-spacing:-.6px;color:var(--ink);line-height:1.05;}
+.es-m small{display:block;font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.35;}
+.es-proof{display:flex;flex-wrap:wrap;gap:4px 22px;max-width:960px;padding:10px 0;border-top:1px solid var(--rule);font-size:11.5px;color:var(--muted);}
+.es-proof b{color:var(--ink);font-weight:800;}
+.es-proof .is-lead{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);align-self:center;}
+.es-assume{max-width:960px;font-size:10.5px;color:var(--muted);line-height:1.55;margin:4px 0 6px;}
+.es-assume b{color:var(--body);}
+.stage.active .wf-bar{animation:wipeY .8s cubic-bezier(.3,.7,.2,1) calc(var(--d,0s) + .5s + var(--i,0) * .38s) both;}
+.stage.active .wf-val{animation:softIn .5s ease calc(var(--d,0s) + 1s + var(--i,0) * .38s) both;}
+@media (max-width:860px){
+  .es-grid{grid-template-columns:1fr;}
+  .es-metrics{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:520px){
+  .es-big{grid-template-columns:1fr 1fr;}
+  .es-big div:first-child{grid-column:1/-1;}
+  .wf{height:140px;}
+}
+.es-big div:nth-child(3) b{font-size:21px !important;white-space:nowrap;letter-spacing:-.5px !important;}.es-big{grid-template-columns:1.3fr 1fr 1fr !important;}</style>
 </head>
 <body>
 
@@ -1109,48 +1169,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   <!-- STAGE AREA -->
   <main class="stage-area" id="stageArea">
 
-    <!-- ══ PROLOGUE: The Case ══ -->
-    <div class="stage active" id="stage-0">
-      <div class="stage-eyebrow">Prologue — The Case</div>
-      <h1 class="stage-title">How Maya stopped growth from <em>leaking.</em></h1>
-      <p class="stage-body rv" style="--d:.4s;margin-bottom:18px;">Maya Chen joined Meridian Supply as VP of Marketing. Revenue was growing, but only 24.0% of opportunities were becoming customers. This is what she changed, and then how she did it.</p>
-
-      <figure class="gap-chart rv" style="--d:1.3s;--bb:1.6s">
-        <div class="section-eye">Win rate · opportunities that become customers</div>
-        <div class="gap-scale">
-            <div class="gap-row">
-              <div class="gap-lab">Before</div>
-              <div class="gap-track" role="img" aria-label="Before: win rate 24.0%, 14.0 points below the 38% target">
-                <div class="gap-fill" style="width:48.0%"></div>
-                <div class="gap-rem" style="left:48.0%;width:28.0%"></div>
-                <div class="gap-target" style="left:76.0%"></div>
-              </div>
-              <div class="gap-val"><strong data-cu-delay="1600">24.0%</strong><span class="short">▼ 14.0 pts below target</span></div>
-            </div>
-            <div class="gap-row">
-              <div class="gap-lab">Now</div>
-              <div class="gap-track" role="img" aria-label="Now: win rate 31.9%, 6.1 points below the 38% target">
-                <div class="gap-fill after" style="width:63.8%"></div>
-                <div class="gap-rem" style="left:63.8%;width:12.2%"></div>
-                <div class="gap-target" style="left:76.0%"></div>
-              </div>
-              <div class="gap-val"><strong data-cu-delay="2400">31.9%</strong><span class="short">▼ 6.1 pts below target</span></div>
-            </div>
-            <div class="gap-axis" aria-hidden="true"><span style="left:0;transform:none">0%</span><span class="tgt" style="left:76%">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
-        </div>
-      </figure>
-
-      <div class="case-grid">
-        <div class="case-card rv" style="--d:3.2s"><div class="cc-k">Focus</div><div class="cc-h">Back the right segment in the right market.</div><div class="cc-b">Enterprise in the Northeast. Mid-Market in the Southwest.</div><div class="cc-ch">Chapters 2–4</div></div>
-        <div class="case-card rv" style="--d:3.6s"><div class="cc-k">Fix</div><div class="cc-h">Close the late-stage leak.</div><div class="cc-b">Win-rate enablement, timed by buying signals.</div><div class="cc-ch">Chapters 5–6</div></div>
-        <div class="case-card rv" style="--d:4.0s"><div class="cc-k">Align</div><div class="cc-h">Run one plan across sales and marketing.</div><div class="cc-b">A funded play per market, one handoff rule, one 30-60-90 day roadmap.</div><div class="cc-ch">Chapter 7</div></div>
-      </div>
-
-      <div class="case-result rv" style="--d:4.6s"><span class="is-lead">The result</span><span>Pipeline <b>$19.2M → $27.8M</b></span><span>Net revenue retention <b>94% → 108%</b></span><span>MQL→SQL <b>21% → 32%</b></span><span>Blended ROI <b>2.7× → 3.9×</b></span></div>
-      <p class="story-note rv" style="--d:5.2s">Maya and Meridian Supply are illustrative; the framework and figures are the ones used throughout. Next: how she did it, one decision at a time.</p>
-
-      <div class="chapter-transition">Maya's first move: <strong>agree on what success looks like.</strong></div>
-    </div>
+    <!-- ══ EXECUTIVE SUMMARY (rendered from CASE in the script below) ══ -->
+    <div class="stage active" id="stage-0"></div>
 
     <!-- ══ STAGE 1: KPI Foundation ══ -->
     <div class="stage" id="stage-1">
@@ -1605,7 +1625,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
 <!-- NAV BUTTONS -->
 <div class="nav-buttons">
-  <div class="stage-counter" id="stageCounter">Prologue · The Case</div>
+  <div class="stage-counter" id="stageCounter">Executive Summary</div>
   <div class="btn-group">
     <button class="btn btn-back" id="btnBack" onclick="navigate(-1)" disabled>← Back</button>
     <button class="btn btn-next" id="btnNext" onclick="navigate(1)">Next →</button>
@@ -1614,7 +1634,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
 <script>
 const STAGES = [
-  { label: "The Case",                 eyebrow: "Prologue" },
+  { label: "Executive Summary",       eyebrow: "Prologue" },
   { label: "KPI Foundation",           eyebrow: "The Scoreboard" },
   { label: "Segmentation",             eyebrow: "Audience + Growth Objective" },
   { label: "Market Sizing",            eyebrow: "Intelligence Layer" },
@@ -1628,7 +1648,7 @@ let current = 0;
 
 // Section headers
 const sections = [
-  {start:0, label:'Start here',           foundation:true},
+  {start:0, label:'The case',              foundation:true},
   {start:1, label:'Diagnose',             foundation:false},
   {start:5, label:'Act',                  foundation:false},
 ];
@@ -1685,7 +1705,7 @@ function goTo(n) {
     document.getElementById('btnNext').textContent = 'Next →';
   }
   document.getElementById('btnNext').disabled = false;
-  document.getElementById('stageCounter').textContent = current === 0 ? 'Prologue · The Case' : `Chapter ${current} of ${STAGES.length - 1}`;
+  document.getElementById('stageCounter').textContent = current === 0 ? 'Executive Summary' : `Chapter ${current} of ${STAGES.length - 1}`;
   document.getElementById('progressFill').style.width = ((current + 1) / STAGES.length * 100) + '%';
 
   document.getElementById('stageArea').scrollTop = 0;
@@ -1796,6 +1816,84 @@ document.getElementById('nextBubbleClose').addEventListener('click', () => {
 });
 updateNextBubble();
 
+
+
+// ═══ CASE: everything the executive summary says comes from this object ═══
+// To build a case for another company, replace these inputs. Items marked ASSUMED are placeholders for the company's actuals.
+const CASE = {
+  company: 'Meridian Supply', author: 'Maya Chen', role: 'VP Marketing',
+  horizonMonths: 12,
+  baseline: { winRate: 31.9, targetWinRate: 38, growth: 14.3 },
+  gapRevenueM: 16.0,            // annual revenue lost between today's win rate and target (+37 deals, Ch 5)
+  captureShare: 0.5,            // share of that gap closed in the base case
+  contributionMargin: 0.40,     // ASSUMED: share of incremental revenue left after variable costs
+  program: { campaignsM: 0.6, enablementM: 0.4 },   // campaigns = $150K x 4 quarters (Ch 7); enablement + tooling ASSUMED
+  campaignReturn: { plan: 4.4, today: 3.9 },        // revenue per $1 of campaign spend (Ch 7)
+  coverage: 3.2,                // pipeline coverage today (Ch 1)
+  problem: 'Growth is healthy at 14.3%, but only 31.9% of opportunities close against a 38% target. The leak is at the last stage, between opportunity and closed-won.',
+  plan: [
+    ['Focus', 'Enterprise in the Northeast and Mid-Market in the Southwest, funded first.'],
+    ['Fix', 'Win-rate enablement at the close, timed by eleven buying signals.'],
+    ['Align', 'One plan: $150K a quarter in campaigns, a sales handoff per market, a 90-day review.'],
+  ],
+  proof: [['Win rate', '24.0% → 31.9%'], ['Pipeline', '$19.2M → $27.8M'], ['Net revenue retention', '94% → 108%'], ['Blended ROI', '2.7× → 3.9×']],
+};
+(function renderCase() {
+  const c = CASE, st = document.getElementById('stage-0');
+  if (!st) return;
+  const fm = v => v >= 1 ? '$' + v.toFixed(1) + 'M' : '$' + Math.round(v * 1000) + 'K';
+  const prog = c.program.campaignsM + c.program.enablementM;
+  const rev = c.gapRevenueM * c.captureShare;
+  const contrib = rev * c.contributionMargin, varCost = rev - contrib, ebitda = contrib - prog;
+  const stretchRev = c.gapRevenueM, stretchE = stretchRev * c.contributionMargin - prog;
+  const win = c.baseline.winRate + (c.baseline.targetWinRate - c.baseline.winRate) * c.captureShare;
+  const payback = Math.max(1, Math.round(prog / (contrib / c.horizonMonths)));
+  const flow = Math.round(ebitda / rev * 1000) / 10;
+  const pct = v => (v / rev * 100).toFixed(1) + '%';
+  const bars = [
+    { cls: 'pos', bottom: 0, h: rev, val: '+' + fm(rev), cap: 'Incremental<br>revenue' },
+    { cls: 'neg', bottom: contrib, h: varCost, val: '−' + fm(varCost), cap: 'Variable<br>costs', neg: 1 },
+    { cls: 'neg', bottom: ebitda, h: prog, val: '−' + fm(prog), cap: 'Program<br>investment', neg: 1 },
+    { cls: 'end', bottom: 0, h: ebitda, val: '+' + fm(ebitda), cap: 'EBITDA<br>impact' },
+  ];
+  const wf = bars.map((b, i) => `<div class="wf-col" style="--i:${i}"><div class="wf-bar ${b.cls}" style="bottom:${pct(b.bottom)};height:${pct(b.h)}"></div><div class="wf-val${b.neg ? ' neg' : ''}" style="bottom:${(b.bottom + b.h) / rev * 100}%">${b.val}</div></div>`).join('');
+  const caps = bars.map(b => `<div>${b.cap}</div>`).join('');
+  const sum = bars.map(b => b.cap.replace('<br>', ' ') + ' ' + b.val).join(', ');
+  st.innerHTML = `
+    <div class="stage-eyebrow">Prologue — Executive Summary</div>
+    <h1 class="stage-title">Recover ${fm(rev)} of revenue and add <em>${fm(ebitda)} of EBITDA</em> in ${c.horizonMonths} months.</h1>
+    <p class="es-by rv" style="--d:.3s">Prepared by <b>${c.author}</b>, ${c.role}, ${c.company}. Recommendation: fund a <b>${fm(prog)}</b> win-rate and market-focus program.<span class="es-tag">Illustrative</span></p>
+
+    <div class="es-grid">
+      <section class="es-impact rv" style="--d:1.4s" aria-label="Business impact">
+        <div class="es-k">Business impact · base case, next ${c.horizonMonths} months</div>
+        <div class="es-big">
+          <div><span>EBITDA</span><b class="cu">+${fm(ebitda)}</b></div>
+          <div><span>Revenue</span><b class="cu">+${fm(rev)}</b></div>
+          <div><span>Payback</span><b class="cu">~${payback} months</b></div>
+        </div>
+        <div class="wf" role="img" aria-label="Revenue to EBITDA bridge: ${sum}">${wf}</div>
+        <div class="wf-cap" aria-hidden="true">${caps}</div>
+        <div class="es-stretch">Stretch case, closing the full gap to ${c.baseline.targetWinRate}%: <b>+${fm(stretchRev)} revenue</b> and <b>+${fm(stretchE)} EBITDA</b>.</div>
+      </section>
+      <div class="es-side">
+        <section class="es-card prob rv" style="--d:.7s"><div class="es-k">The problem</div><p>${c.problem}</p></section>
+        <section class="es-card rv" style="--d:1.0s"><div class="es-k">The plan</div><ol>${c.plan.map(p => `<li><b>${p[0]}</b><span>${p[1]}</span></li>`).join('')}</ol></section>
+        <section class="es-card ask rv" style="--d:4.4s"><div class="es-k">The ask</div><p>${fm(prog)} over ${c.horizonMonths} months. Review returns at day 90 and move budget to the market earning more.</p></section>
+      </div>
+    </div>
+
+    <div class="es-metrics rv" style="--d:3.2s">
+      <div class="es-m"><span>Win rate, base case</span><b class="cu">~${win.toFixed(1)}%</b><small>from ${c.baseline.winRate}% today. The ${c.baseline.targetWinRate}% target is the stretch.</small></div>
+      <div class="es-m"><span>Campaign return</span><b class="cu">${c.campaignReturn.plan}×</b><small>vs ${c.campaignReturn.today}× today, in revenue per $1 of spend.</small></div>
+      <div class="es-m"><span>EBITDA flow-through</span><b class="cu">${flow}%</b><small>of incremental revenue, after variable and program costs.</small></div>
+      <div class="es-m"><span>Pipeline coverage</span><b class="cu">${c.coverage}×</b><small>Enough already. The gap is at the close, so no added top-of-funnel spend.</small></div>
+    </div>
+    <div class="es-proof rv" style="--d:3.9s"><span class="is-lead">Same system, last phase</span>${c.proof.map(p => `<span>${p[0]} <b>${p[1]}</b></span>`).join('')}</div>
+    <p class="es-assume rv" style="--d:4.8s"><b>Assumptions.</b> ${Math.round(c.contributionMargin * 100)}% of incremental revenue remains after variable costs; ${fm(c.program.enablementM)} of sales enablement and signal tooling on top of ${fm(c.program.campaignsM)} of campaigns ($150K a quarter); base case closes ${Math.round(c.captureShare * 100)}% of the win-rate gap. Replace with ${c.company}'s actuals.</p>
+
+    <div class="chapter-transition">Now, how Maya gets there. First move: <strong>agree on what success looks like.</strong></div>`;
+})();
 
 // ── Motion: index stagger groups, count numbers up, let the prologue be skipped ──
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
