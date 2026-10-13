@@ -709,7 +709,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 @keyframes softIn{from{opacity:0;}to{opacity:1;}}
 
 .stage.active .rv{animation:rvIn .6s cubic-bezier(.2,.7,.2,1) var(--d,.15s) both;}
-.stage.active :is(.story-beat,.kd-card,.fss-cell,.rg-card,.profile-card,.signal-funnel-stage,.tam-tier-row,.tier-card,.decision-item,.epilogue){
+.stage.active :is(.kd-card,.fss-cell,.rg-card,.profile-card,.signal-funnel-stage,.tam-tier-row,.tier-card,.decision-item){
   animation:rvIn .55s cubic-bezier(.2,.7,.2,1) calc(.12s + var(--i,0) * 70ms) both;
 }
 .stage.active :is(.tam-seg-bar-fill,.tier-comp-seg,.gap-fill){
@@ -719,9 +719,6 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .stage.active .gap-target{transform-origin:top;animation:lineDrop .45s ease calc(var(--bd,.45s) - .15s) both;}
 .stage.active .gap-row:nth-of-type(2) :is(.gap-fill,.gap-rem,.gap-target){--bd:1.1s;}
 .stage.active .tam-rings circle{transform-box:fill-box;transform-origin:center;animation:ringIn .7s cubic-bezier(.2,.8,.2,1) both;}
-.stage.active .tam-rings circle:nth-of-type(1){animation-delay:.15s;}
-.stage.active .tam-rings circle:nth-of-type(2){animation-delay:.4s;}
-.stage.active .tam-rings circle:nth-of-type(3){animation-delay:.65s;}
 .stage.active .tam-rings text{animation:softIn .5s ease 1s both;}
 
 .inherit-strip{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--muted);}
@@ -735,7 +732,232 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 @media (prefers-reduced-motion:reduce){
   .stage.active *{animation:none !important;}
 }
-</style>
+.stage.active .hm-gap{animation:softIn .6s ease calc(var(--d,0s) + 1.3s) both;}.stage.active .hm-target{transform-origin:top;animation:lineDrop .45s ease calc(var(--d,0s) + .3s) both;}
+/* ═══ V3: progressive reveal for every chapter ═══ */
+/* inner delays are relative to the revealing block's own --d */
+.stage.active :is(.kd-card,.fss-cell,.rg-card,.profile-card,.signal-funnel-stage,.tam-tier-row,.tier-card,.decision-item,.tactic,.case-card,.mm,.seg-card,.tc-row,.handoff-node,.roadmap-col){
+  animation:rvIn .55s cubic-bezier(.2,.7,.2,1) calc(var(--d,0s) + .12s + var(--i,0) * 80ms) both;
+}
+.stage.active :is(.tam-seg-bar-fill,.tier-comp-seg,.tc-track i,.alloc-seg,.hm-fill){
+  animation:wipeX .95s cubic-bezier(.3,.7,.2,1) calc(var(--d,0s) + .45s + var(--i,0) * 60ms) both;
+}
+.gap-chart{--bb:calc(var(--d,0s) + .45s);}
+.stage.active .gap-fill{animation:wipeX .95s cubic-bezier(.3,.7,.2,1) var(--bd,var(--bb)) both;}
+.stage.active .gap-rem{animation:softIn .6s ease calc(var(--bd,var(--bb)) + .85s) both;}
+.stage.active .gap-target{transform-origin:top;animation:lineDrop .45s ease calc(var(--bd,var(--bb)) - .15s) both;}
+.stage.active .gap-row:nth-of-type(2) :is(.gap-fill,.gap-rem,.gap-target){--bd:calc(var(--bb) + .8s);}
+.stage.active .tam-rings circle{animation-delay:calc(var(--d,0s) + var(--cd,.15s));}
+.stage.active .tam-rings circle:nth-of-type(1){--cd:.15s;}
+.stage.active .tam-rings circle:nth-of-type(2){--cd:.4s;}
+.stage.active .tam-rings circle:nth-of-type(3){--cd:.65s;}
+.stage.active .tam-rings text{animation-delay:calc(var(--d,0s) + 1s);}
+.stage.active .tc-tip.show{animation:tipPop .5s cubic-bezier(.2,.9,.3,1.3) calc(var(--d,0s) + 1.6s) both;}
+@keyframes tipPop{from{opacity:0;transform:translateY(6px) scale(.92);}to{opacity:1;transform:none;}}
+
+/* ═══ Ch 1: one hero metric, everything else quiet ═══ */
+.hero-metric{display:grid;grid-template-columns:minmax(200px,260px) 1fr;gap:28px;align-items:center;border:1px solid var(--sig-a);background:#fffaf3;border-radius:6px;padding:22px 26px;margin-bottom:18px;max-width:820px;}
+.hm-eye{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--sig-a);margin-bottom:8px;}
+.hero-val{font-size:56px;font-weight:800;letter-spacing:-2px;line-height:1;color:var(--ink);}
+.hm-delta{font-size:12px;font-weight:700;color:var(--sig-a);margin-top:10px;}
+.hm-bar{position:relative;}
+.hm-track{position:relative;height:28px;background:#f3ece1;border-radius:3px;}
+.hm-fill{position:absolute;left:0;top:0;bottom:0;width:63.8%;background:var(--green);border-radius:3px 0 0 3px;}
+.hm-gap{position:absolute;top:0;bottom:0;left:63.8%;width:12.2%;background:repeating-linear-gradient(135deg,rgba(180,83,9,.22) 0 3px,transparent 3px 7px);border:1px dashed rgba(180,83,9,.55);border-left:none;}
+.hm-target{position:absolute;top:-6px;bottom:-6px;left:76%;border-left:2px solid var(--ink);}
+.hm-ticks{position:relative;height:16px;font-size:10px;color:var(--muted);margin-top:4px;}
+.hm-ticks span{position:absolute;transform:translateX(-50%);white-space:nowrap;}
+.muted-metrics-h{margin:6px 0 8px;}
+.muted-metrics{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:18px;max-width:820px;}
+.mm{background:var(--surface);padding:12px 12px 11px;}
+.mm-lab{display:block;font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:#a3a8a5;margin-bottom:5px;}
+.mm-val{display:block;font-size:15px;font-weight:700;color:#8a8f8c;letter-spacing:-.3px;}
+.mm-note{display:block;font-size:9.5px;color:#a3a8a5;margin-top:3px;line-height:1.3;}
+.mm.watch{background:#fffaf3;}
+.mm.watch .mm-lab{color:var(--sig-a);}
+.mm.watch .mm-val{color:var(--ink);}
+.mm.watch .mm-note{color:var(--sig-a);font-weight:600;}
+
+/* ═══ Ch 2: overlapping segment deck ═══ */
+.verdicts{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 16px;}
+.vd{font-size:11px;font-weight:700;padding:6px 12px;border-radius:14px;border:1px solid var(--rule);color:var(--body);background:var(--white);}
+.vd b{font-weight:800;text-transform:uppercase;font-size:9px;letter-spacing:.8px;margin-right:6px;}
+.vd.inc{background:var(--green-pale);border-color:var(--green);color:var(--sig-g);}
+.vd.sel b{color:var(--sig-a);}
+.seg-deck{max-width:820px;margin-bottom:18px;}
+.seg-viewport{overflow:hidden;padding:6px 0 18px;margin:-6px 0 -10px;}
+.seg-track{display:flex;transition:transform .5s cubic-bezier(.3,.7,.2,1);will-change:transform;}
+.seg-card{position:relative;flex:0 0 calc((100% + 36px) / 2);margin-right:-36px;min-height:268px;background:var(--white);border:1px solid var(--rule);border-top:3px solid var(--c,var(--green));border-radius:6px;padding:18px 54px 18px 20px;box-shadow:-10px 0 22px rgba(0,0,0,.06);transition:opacity .4s ease;}
+.seg-card:nth-child(1){z-index:1}.seg-card:nth-child(2){z-index:2}.seg-card:nth-child(3){z-index:3}.seg-card:nth-child(4){z-index:4}
+.seg-card.dim{opacity:.35;}
+.seg-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.seg-rank{width:24px;height:24px;border-radius:50%;background:var(--c,var(--green));color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.seg-name{font-size:16px;font-weight:800;color:var(--ink);letter-spacing:-.3px;}
+.seg-verdict{margin-left:auto;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:var(--sig-g);background:var(--green-pale);padding:3px 8px;border-radius:9px;white-space:nowrap;}
+.seg-verdict.keep{color:var(--body);background:var(--surface);}
+.seg-verdict.sel{color:var(--sig-a);background:#fdf3e6;}
+.seg-why{font-size:11px;color:var(--muted);margin-bottom:10px;}
+.seg-acv{font-size:30px;font-weight:800;letter-spacing:-1px;color:var(--ink);line-height:1;}
+.seg-acv small{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.9px;color:var(--muted);margin-top:5px;letter-spacing:.9px;}
+.seg-pairs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0 10px;padding-top:12px;border-top:1px solid var(--rule);}
+.seg-pairs span{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:3px;}
+.seg-pairs b{font-size:13px;font-weight:700;color:var(--ink);}
+.seg-stars{color:var(--green);font-size:12px;letter-spacing:1px;}
+.seg-more{margin-top:8px;font-size:11px;}
+.seg-more summary{cursor:pointer;color:var(--green);font-weight:700;list-style:none;}
+.seg-more summary::-webkit-details-marker{display:none;}
+.seg-more summary::after{content:' +';}
+.seg-more[open] summary::after{content:' −';}
+.seg-more div{margin-top:6px;color:var(--body);line-height:1.5;}
+.seg-ctrl{display:flex;align-items:center;gap:12px;margin-top:2px;}
+.seg-btn{width:34px;height:34px;border-radius:50%;border:1px solid var(--rule);background:var(--white);font-size:18px;line-height:1;color:var(--ink);cursor:pointer;transition:all .15s;}
+.seg-btn:hover:not(:disabled){border-color:var(--green);color:var(--green);}
+.seg-btn:disabled{opacity:.3;cursor:default;}
+.seg-btn:focus-visible,.seg-card summary:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+.seg-pos{font-size:11px;font-weight:600;color:var(--muted);}
+
+/* ═══ Ch 3: one segment lit, the rest quiet ═══ */
+.tam-visual{max-width:820px;}
+.tam-visual .tam-rings{max-width:190px;}
+.tc-wrap{max-width:820px;margin-bottom:18px;}
+.tc-legend{display:flex;gap:18px;font-size:10.5px;color:var(--muted);margin-bottom:6px;}
+.tc-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;}
+.tc-row{position:relative;display:grid;grid-template-columns:118px 1fr;gap:14px;align-items:center;padding:11px 0;border-top:1px solid var(--rule);outline:none;}
+.tc-row.focus{margin-top:46px;}
+.tc-name{font-size:13px;font-weight:700;color:#8a8f8c;}
+.tc-row.focus .tc-name{color:var(--ink);font-size:14px;font-weight:800;}
+.tc-bar{display:flex;align-items:center;gap:10px;}
+.tc-bar+.tc-bar{margin-top:6px;}
+.tc-track{position:relative;flex:1;height:10px;background:var(--surface);border-radius:3px;overflow:hidden;}
+.tc-track i{position:absolute;left:0;top:0;bottom:0;background:#c9cfcc;border-radius:3px;}
+.tc-bar.opp .tc-track i{background:#9aa6a0;}
+.tc-row.focus .tc-bar.opp .tc-track i{background:var(--green);}
+.tc-row.focus .tc-bar.opp .tc-track{height:14px;}
+.tc-val{flex:0 0 150px;font-size:11px;color:#8a8f8c;}
+.tc-val b{font-weight:800;color:#6f7572;}
+.tc-row.focus .tc-bar.opp .tc-val,.tc-row.focus .tc-bar.opp .tc-val b{color:var(--ink);}
+.tc-tip{position:absolute;left:150px;bottom:calc(100% - 6px);max-width:300px;background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;line-height:1.4;padding:9px 12px;border-radius:6px;opacity:0;pointer-events:none;transform:translateY(4px);transition:opacity .2s,transform .2s;z-index:5;}
+.tc-tip::after{content:'';position:absolute;left:22px;top:100%;border:6px solid transparent;border-top-color:var(--ink);}
+.tc-tip b{color:#9fe0c0;}
+.tc-tip.show,.tc-row:hover .tc-tip,.tc-row:focus .tc-tip{opacity:1;transform:none;}
+.tc-row.focus .tc-tip{bottom:calc(100% - 4px);}
+
+/* ═══ Ch 4: succinct tiers + persona cards ═══ */
+.tier-grid{margin-bottom:6px !important;}
+.tier-card{padding:14px 16px !important;}
+.tier-card .tier-num{font-size:20px !important;margin-bottom:0 !important;}
+.tier-card .tier-label{font-size:11px !important;margin-bottom:0 !important;text-transform:none !important;letter-spacing:0 !important;font-weight:800 !important;color:var(--ink);}
+.tier-card.selectable.active .tier-label{color:var(--tc-text,var(--white));}
+.tier-card .tier-desc{display:none;}
+.tier-card.active .tier-desc{display:block;margin:6px 0 4px !important;font-size:11.5px !important;font-weight:600;color:var(--tc-text,var(--white)) !important;line-height:1.35 !important;}
+.tier-card .tier-stat{font-size:10px;}
+.tier-persona-bridge-wrap{height:26px !important;}
+.persona-primary{max-width:820px;}
+.pc2-head{display:flex;align-items:center;gap:12px;padding:14px 16px 10px;}
+.pc2-head .pc-avatar{width:40px;height:40px;font-size:13px;}
+.pc2-who .pc-name{font-size:14.5px;margin-bottom:2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.pc2-who .pc-title{font-size:11px;color:var(--muted);margin:0;}
+.pc2-jp{padding:0 16px 10px;display:grid;gap:5px;font-size:11px;color:var(--body);line-height:1.4;}
+.pc2-jp b,.pc2-say b{display:inline-block;min-width:34px;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);}
+.pc2-say{margin:auto 12px 12px;padding:10px 12px;background:var(--green-pale);border-radius:4px;font-size:12px;font-weight:600;color:var(--ink);line-height:1.4;}
+.pc2-say b{color:var(--green);display:block;margin-bottom:3px;}
+
+/* ═══ Ch 5: the leak, and nothing else shouting ═══ */
+.funnel-stage-strip{background:#e3e6e4;}
+.fss-cell{background:var(--surface) !important;}
+.fss-cell .fss-label{color:#a3a8a5 !important;}
+.fss-cell .fss-val{color:#8a8f8c;}
+.fss-cell .fss-note{color:#a3a8a5 !important;font-weight:500 !important;}
+.fss-cell.leak,.fss-cell.leak-in{background:#fffaf3 !important;box-shadow:inset 0 3px 0 var(--sig-a);}
+.fss-cell.leak .fss-label,.fss-cell.leak-in .fss-label{color:var(--sig-a) !important;}
+.fss-cell.leak .fss-val,.fss-cell.leak-in .fss-val{color:var(--ink);}
+.fss-cell.leak .fss-note{color:var(--sig-a) !important;font-weight:700 !important;}
+.fss-cell.rev{background:var(--green-pale) !important;}
+.fss-cell.rev .fss-label,.fss-cell.rev .fss-note{color:var(--green) !important;}
+.fss-cell.rev .fss-val{color:var(--ink);}
+.leak-card{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:stretch;margin:14px 0 22px;max-width:900px;}
+.lk{border:1px solid var(--rule);border-radius:5px;padding:13px 15px;background:var(--white);}
+.lk.bad{border-color:var(--sig-a);background:#fffaf3;}
+.lk.good{border-color:var(--green);background:var(--green-pale);}
+.lk-eye{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;color:var(--muted);}
+.lk.bad .lk-eye{color:var(--sig-a);}.lk.good .lk-eye{color:var(--green);}
+.lk-body{font-size:13px;font-weight:700;color:var(--ink);line-height:1.35;}
+.lk-arrow{align-self:center;color:var(--muted);font-size:18px;}
+.mix-title{margin-bottom:8px;}
+.mix-legend{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;max-width:900px;}
+.mix-legend div{font-size:11px;color:var(--body);line-height:1.4;}
+.mix-legend b{display:block;font-size:11px;color:var(--ink);margin-bottom:2px;}
+.mix-legend span{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px;}
+
+/* ═══ Ch 7: one strategy, four tactics, one outcome ═══ */
+.strategy-hero{border:1px solid var(--green);background:var(--green-pale);border-radius:6px;padding:22px 26px;margin-bottom:22px;max-width:900px;display:grid;grid-template-columns:1fr auto;gap:8px 28px;align-items:center;}
+.sh-eye{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);grid-column:1/-1;}
+.sh-title{font-size:26px;font-weight:800;letter-spacing:-.6px;color:var(--ink);}
+.sh-share{display:flex;align-items:baseline;gap:10px;font-weight:800;color:var(--ink);}
+.sh-from{font-size:20px;color:var(--muted);}.sh-arrow{color:var(--green);}.sh-to{font-size:34px;letter-spacing:-1px;}
+.sh-lab{font-size:10px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700;}
+.sh-sub{grid-column:1/-1;font-size:13px;color:var(--ink);line-height:1.55;max-width:640px;}
+.sh-kpis{grid-column:1/-1;font-size:11px;color:var(--muted);}
+.sh-kpis b{color:var(--ink);}
+.alloc-bar{display:flex;gap:2px;height:34px;max-width:900px;margin-bottom:6px;}
+.alloc-seg{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;border-radius:3px;white-space:nowrap;overflow:hidden;}
+.alloc-legend{font-size:10.5px;color:var(--muted);margin-bottom:16px;}
+.tactic-list{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:900px;margin-bottom:18px;}
+.tactic{border:1px solid var(--rule);border-top:3px solid var(--tc,var(--green));border-radius:5px;padding:14px 16px;background:var(--white);display:flex;flex-direction:column;gap:8px;}
+.t-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.t-name{font-size:14px;font-weight:800;color:var(--ink);}
+.t-amt{font-size:18px;font-weight:800;color:var(--ink);letter-spacing:-.4px;}
+.t-sub{font-size:10.5px;color:var(--muted);margin-top:-4px;}
+.t-align{display:grid;gap:5px;font-size:11.5px;color:var(--body);line-height:1.4;}
+.t-align b{display:inline-block;min-width:62px;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--green);}
+.t-out{margin-top:auto;font-size:11px;font-weight:700;color:var(--sig-g);}
+.impact-strip{display:grid;grid-template-columns:repeat(4,1fr);max-width:900px;border:1px solid var(--ink);border-radius:6px;overflow:hidden;background:var(--ink);gap:1px;margin-bottom:6px;}
+.is-cell{background:var(--ink);padding:16px 18px;color:#fff;}
+.is-cell span{display:block;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#9fb3a9;margin-bottom:6px;}
+.is-cell b{font-size:26px;font-weight:800;letter-spacing:-.8px;}
+.is-cell.hi b{color:#9fe0c0;}
+
+/* ═══ Prologue as a case study ═══ */
+.case-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:900px;margin:16px 0;}
+.case-card{border:1px solid var(--rule);border-radius:5px;padding:14px 16px;background:var(--white);}
+.cc-k{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;}
+.cc-h{font-size:14px;font-weight:800;color:var(--ink);line-height:1.3;margin-bottom:5px;}
+.cc-b{font-size:12px;color:var(--body);line-height:1.5;}
+.cc-ch{font-size:10px;color:var(--muted);margin-top:8px;}
+.case-result{display:flex;flex-wrap:wrap;gap:6px 22px;max-width:900px;padding:12px 0;border-top:1px solid var(--rule);font-size:12px;color:var(--muted);}
+.case-result b{color:var(--ink);font-weight:800;}
+.case-result .is-lead{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);align-self:center;}
+
+/* ═══ Mobile ═══ */
+@media (max-width:767px){
+  .hero-metric{grid-template-columns:1fr;gap:16px;padding:18px;}
+  .hero-val{font-size:46px;}
+  .muted-metrics{grid-template-columns:repeat(2,1fr);}
+  .seg-card{flex:0 0 calc(100% - 22px);margin-right:10px;min-height:0;padding:16px 18px;box-shadow:none;}
+  .seg-card.dim{opacity:.5;}
+  .tc-row{grid-template-columns:1fr;gap:6px;}
+  .tc-row.focus{margin-top:56px;}
+  .tc-val{flex-basis:96px;font-size:10.5px;}
+  .tc-tip{left:0;max-width:92%;}
+  .persona-primary{grid-template-columns:1fr !important;}
+  /* funnel becomes a vertical list with width bars */
+  .funnel-stage-strip{display:flex !important;flex-direction:column;gap:1px;}
+  .funnel-stage-strip > *:nth-child(n){grid-column:auto !important;}
+  .fss-cell{display:grid !important;grid-template-columns:1fr auto;grid-template-areas:"l v" "n v" "b b";gap:1px 12px;padding:10px 14px !important;position:relative;}
+  .fss-cell .fss-label{grid-area:l;margin:0;}
+  .fss-cell .fss-val{grid-area:v;font-size:18px;align-self:center;}
+  .fss-cell .fss-note{grid-area:n;margin:0;}
+  .fss-cell::after{content:'';grid-area:b;height:4px;margin-top:6px;border-radius:2px;background:#c9cfcc;width:var(--w,100%);}
+  .fss-cell.leak::after,.fss-cell.leak-in::after{background:var(--sig-a);}
+  .fss-cell.rev::after{display:none;}
+  .leak-card{grid-template-columns:1fr;}
+  .lk-arrow{transform:rotate(90deg);justify-self:center;}
+  .mix-legend{grid-template-columns:1fr;gap:8px;}
+  .strategy-hero{grid-template-columns:1fr;}
+  .tactic-list{grid-template-columns:1fr;}
+  .impact-strip{grid-template-columns:1fr 1fr;}
+  .case-grid{grid-template-columns:1fr;}
+}
+.t-align div{display:grid;grid-template-columns:72px 1fr;gap:6px;align-items:baseline;}.t-align b{min-width:0;}@media (max-width:767px){.fss-cell{text-align:left !important;}.tc-val{flex-basis:124px !important;font-size:10px !important;}}</style>
 </head>
 <body>
 
@@ -762,35 +984,45 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   <!-- STAGE AREA -->
   <main class="stage-area" id="stageArea">
 
-    <!-- ══ PROLOGUE: The Problem ══ -->
+    <!-- ══ PROLOGUE: The Case ══ -->
     <div class="stage active" id="stage-0">
-      <div class="stage-eyebrow">Prologue — The Problem</div>
-      <h1 class="stage-title">Revenue is growing. <em>So what's the problem?</em></h1>
+      <div class="stage-eyebrow">Prologue — The Case</div>
+      <h1 class="stage-title">How Maya stopped growth from <em>leaking.</em></h1>
+      <p class="stage-body rv" style="--d:.4s;margin-bottom:18px;">Maya Chen joined Meridian Supply as VP of Marketing. Revenue was growing, but only 24.0% of opportunities were becoming customers. This is what she changed, and then how she did it.</p>
 
-      <div class="scqa">
-        <div class="scqa-row rv" style="--d:.5s"><div class="scqa-k">The situation</div><div class="scqa-v">Maya Chen just joined Meridian Supply as VP of Marketing. Revenue grew <b>8.5%</b> last year, and the mood is good.</div></div>
-        <div class="scqa-row rv" style="--d:1.6s"><div class="scqa-k">The complication</div><div class="scqa-v">But only <b>24.0%</b> of opportunities become customers. The target is <b>38%</b>.</div></div>
-
-        <figure class="gap-chart rv" style="--d:2.7s;--bd:3.0s">
-          <div class="section-eye">Win rate · opportunities that become customers</div>
-          <div class="gap-scale"><div class="gap-row">
-          <div class="gap-lab">What Maya inherits</div>
-          <div class="gap-track" role="img" aria-label="What Maya inherits: win rate 24.0%, 14.0 points below the 38% target">
-            <div class="gap-fill" style="width:48.0%"></div>
-            <div class="gap-rem" style="left:48.0%;width:28.0%"></div>
-            <div class="gap-target" style="left:76.0%"></div>
-          </div>
-          <div class="gap-val"><strong data-cu-delay="3000">24.0%</strong><span class="short">▼ 14.0 pts below target</span></div>
+      <figure class="gap-chart rv" style="--d:1.3s;--bb:1.6s">
+        <div class="section-eye">Win rate · opportunities that become customers</div>
+        <div class="gap-scale">
+            <div class="gap-row">
+              <div class="gap-lab">Before</div>
+              <div class="gap-track" role="img" aria-label="Before: win rate 24.0%, 14.0 points below the 38% target">
+                <div class="gap-fill" style="width:48.0%"></div>
+                <div class="gap-rem" style="left:48.0%;width:28.0%"></div>
+                <div class="gap-target" style="left:76.0%"></div>
+              </div>
+              <div class="gap-val"><strong data-cu-delay="1600">24.0%</strong><span class="short">▼ 14.0 pts below target</span></div>
+            </div>
+            <div class="gap-row">
+              <div class="gap-lab">Now</div>
+              <div class="gap-track" role="img" aria-label="Now: win rate 31.9%, 6.1 points below the 38% target">
+                <div class="gap-fill after" style="width:63.8%"></div>
+                <div class="gap-rem" style="left:63.8%;width:12.2%"></div>
+                <div class="gap-target" style="left:76.0%"></div>
+              </div>
+              <div class="gap-val"><strong data-cu-delay="2400">31.9%</strong><span class="short">▼ 6.1 pts below target</span></div>
+            </div>
+            <div class="gap-axis" aria-hidden="true"><span style="left:0;transform:none">0%</span><span class="tgt" style="left:76%">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
         </div>
-         <div class="gap-axis" aria-hidden="true"><span style="left:0;transform:none">0%</span><span class="tgt" style="left:76.0%">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
-          </div>
-          <div class="inherit-strip rv" style="--d:4.2s"><span class="is-lead">Also on her desk</span><span>Market share <b>14.5%</b></span><span>Pipeline <b>$19.2M</b></span><span>MQL→SQL <b>21%</b></span><span>ROI <b>2.7×</b></span><span>Retention <b>94%</b></span><span>LTV <b>$16.8K</b></span></div>
-        </figure>
+      </figure>
 
-        <div class="scqa-row q rv" style="--d:5.2s"><div class="scqa-k">The question</div><div class="scqa-v">Where is growth leaking, and what would stop it?</div></div>
-        <div class="scqa-row a rv" style="--d:6.2s"><div class="scqa-k">Maya's answer</div><div class="scqa-v">One connected system that sales and marketing run together. Nine chapters, one question at a time.</div></div>
+      <div class="case-grid">
+        <div class="case-card rv" style="--d:3.2s"><div class="cc-k">Focus</div><div class="cc-h">Back the accounts worth winning.</div><div class="cc-b">Enterprise is 8% of accounts but 49% of the opportunity.</div><div class="cc-ch">Chapters 2–4</div></div>
+        <div class="case-card rv" style="--d:3.6s"><div class="cc-k">Fix</div><div class="cc-h">Close the late-stage leak.</div><div class="cc-b">Win-rate enablement, timed by buying signals.</div><div class="cc-ch">Chapters 5–6</div></div>
+        <div class="case-card rv" style="--d:4.0s"><div class="cc-k">Align</div><div class="cc-h">Run one plan across sales and marketing.</div><div class="cc-b">One handoff rule and a 30-60-90 day roadmap.</div><div class="cc-ch">Chapters 7–8</div></div>
       </div>
-      <p class="story-note rv" style="--d:7s">Maya and Meridian Supply are illustrative; the framework and figures are the ones used throughout.</p>
+
+      <div class="case-result rv" style="--d:4.6s"><span class="is-lead">The result</span><span>Pipeline <b>$19.2M → $27.8M</b></span><span>Net revenue retention <b>94% → 108%</b></span><span>MQL→SQL <b>21% → 32%</b></span><span>Blended ROI <b>2.7× → 3.9×</b></span></div>
+      <p class="story-note rv" style="--d:5.2s">Maya and Meridian Supply are illustrative; the framework and figures are the ones used throughout. Next: how she did it, one decision at a time.</p>
 
       <div class="chapter-transition">Maya's first move: <strong>agree on what success looks like.</strong></div>
     </div>
@@ -800,22 +1032,35 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <div class="stage-eyebrow">Chapter 01 — The Scoreboard</div>
       <h1 class="stage-title">What defines <em>success?</em></h1>
       <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Before I fix anything, what are we actually trying to move?”</div><div class="sb-do">She sits down with the CEO and the head of sales and agrees on one scoreboard. Win rate and pipeline are the two numbers that gate everything else.</div></div></div>
-      <p class="stage-body">Before any activation starts, leadership needs a scoreboard connecting revenue growth, market share, margin, payback, pipeline coverage, and expansion. That scoreboard is the operating system every commercial decision is measured against.</p>
 
-      <div class="kpi-dash" id="dash-1">
-        <div class="kd-card"><div class="kd-eye">Revenue Growth</div><div class="kd-val">14.3%</div><div class="kd-delta pos">▲ Above 12% target</div></div>
-        <div class="kd-card"><div class="kd-eye">Market Share</div><div class="kd-val">18.0%</div><div class="kd-delta pos">▲ Acct-based share</div></div>
-        <div class="kd-card"><div class="kd-eye">Customer Acquisition</div><div class="kd-val">196</div><div class="kd-delta pos">▲ New customers TTM</div></div>
-        <div class="kd-card"><div class="kd-eye">Net Revenue Retention</div><div class="kd-val">108%</div><div class="kd-delta pos">▲ Expanding base</div></div>
-        <div class="kd-card"><div class="kd-eye">Pipeline Contribution</div><div class="kd-val">$27.8M</div><div class="kd-delta flat">3.2× coverage ratio</div></div>
-        <div class="kd-card"><div class="kd-eye">Sales Conversion</div><div class="kd-val">31.9%</div><div class="kd-delta warn">▼ Below 38% target</div></div>
-        <div class="kd-card"><div class="kd-eye">Customer LTV</div><div class="kd-val">$23.1K</div><div class="kd-delta pos">▲ Exceeds $20K goal</div></div>
-        <div class="kd-card"><div class="kd-eye">Marketing ROI</div><div class="kd-val">5.0×</div><div class="kd-delta pos">▲ Above 4.5× target</div></div>
+      <p class="stage-body">One scoreboard connects revenue, share, pipeline and expansion. Seven numbers are healthy. One is holding the rest back.</p>
+
+      <div class="hero-metric">
+        <div>
+          <div class="hm-eye">Sales conversion · opportunities that close</div>
+          <div class="hero-val cu">31.9%</div>
+          <div class="hm-delta">▼ 6.1 pts below the 38% target</div>
+        </div>
+        <div class="hm-bar" role="img" aria-label="Sales conversion 31.9% against a 38% target">
+          <div class="hm-track"><div class="hm-fill"></div><div class="hm-gap"></div><div class="hm-target"></div></div>
+          <div class="hm-ticks" aria-hidden="true"><span style="left:0;transform:none">0%</span><span style="left:76%;color:var(--ink);font-weight:700">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
+        </div>
+      </div>
+
+      <div class="section-label muted-metrics-h">The rest of the board</div>
+      <div class="muted-metrics">
+        <div class="mm"><span class="mm-lab">Revenue growth</span><span class="mm-val cu">14.3%</span><span class="mm-note">Above 12% target</span></div>
+        <div class="mm"><span class="mm-lab">Market share</span><span class="mm-val cu">18.0%</span><span class="mm-note">Account-based</span></div>
+        <div class="mm"><span class="mm-lab">New customers</span><span class="mm-val cu">196</span><span class="mm-note">Trailing 12 months</span></div>
+        <div class="mm"><span class="mm-lab">Net revenue retention</span><span class="mm-val cu">108%</span><span class="mm-note">Expanding base</span></div>
+        <div class="mm watch"><span class="mm-lab">Pipeline</span><span class="mm-val cu">$27.8M</span><span class="mm-note">3.2× coverage · watch</span></div>
+        <div class="mm"><span class="mm-lab">Customer LTV</span><span class="mm-val cu">$23.1K</span><span class="mm-note">Above $20K goal</span></div>
+        <div class="mm"><span class="mm-lab">Marketing ROI</span><span class="mm-val cu">5.0×</span><span class="mm-note">Above 4.5× target</span></div>
       </div>
 
       <div class="exec-reco">
         <div class="exec-reco-eye">Executive Recommendation</div>
-        <div class="exec-reco-body">Prioritize Sales Conversion and Pipeline Contribution first — both sit below target and gate every other number on this board. Revenue Growth, Retention, and LTV are already ahead of plan; protect them, don't optimize them further this cycle.</div>
+        <div class="exec-reco-body">Prioritize Sales Conversion and Pipeline Contribution first. Both gate every other number on this board. Revenue Growth, Retention, and LTV are already ahead of plan, so protect them rather than optimize them further.</div>
       </div>
 
       <div class="chapter-transition">Next, Maya asks: where are we actually worth competing? <strong>Segmentation</strong> answers it.</div>
@@ -826,84 +1071,50 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <div class="stage-eyebrow">Chapter 02 — Segmentation</div>
       <h1 class="stage-title">Where Should We <em>Compete?</em></h1>
       <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“We can't win everywhere. Where is competing actually worth it?”</div><div class="sb-do">She ranks four segments by deal size, buying committee, sales cycle and room to expand.</div></div></div>
-      <p class="stage-body">Commercial segmentation identifies where incremental investment is most likely to create profitable growth. Rather than treating every customer equally, we prioritize the markets that create the highest enterprise value.</p>
+
+            <div class="verdicts">
+        <span class="vd inc"><b>Increase</b>Enterprise, Growth Accounts</span>
+        <span class="vd"><b>Maintain</b>Mid-Market</span>
+        <span class="vd sel"><b>Selective</b>Emerging</span>
+      </div>
+
+      <div class="seg-deck" id="segDeck">
+        <div class="seg-viewport"><div class="seg-track" id="segTrack">
+          <article class="seg-card" style="--c:#4a9e7a"><div class="seg-top"><span class="seg-rank">1</span><span class="seg-name">Enterprise</span><span class="seg-verdict ">Increase</span></div>
+            <div class="seg-why">Highest expansion opportunity</div>
+            <div class="seg-acv">$250K–$1M+<small>Typical deal size (ACV)</small></div>
+            <div class="seg-pairs"><div><span>Sales cycle</span><b>6–9 months</b></div><div><span>Expansion</span><b>High</b></div></div>
+            <div class="seg-stars" aria-label="5 of 5 stars">★★★★★</div>
+            <details class="seg-more"><summary>Buyers and motion</summary><div>C-suite + Procurement · Expansion-led</div></details>
+          </article>
+          <article class="seg-card" style="--c:#5aa886"><div class="seg-top"><span class="seg-rank">2</span><span class="seg-name">Growth Accounts</span><span class="seg-verdict ">Increase</span></div>
+            <div class="seg-why">Highest acquisition efficiency</div>
+            <div class="seg-acv">$50K–$250K<small>Typical deal size (ACV)</small></div>
+            <div class="seg-pairs"><div><span>Sales cycle</span><b>2–4 months</b></div><div><span>Expansion</span><b>High</b></div></div>
+            <div class="seg-stars" aria-label="4 of 5 stars">★★★★☆</div>
+            <details class="seg-more"><summary>Buyers and motion</summary><div>VP + Category Owner · Land &amp; expand</div></details>
+          </article>
+          <article class="seg-card" style="--c:#8fbfa9"><div class="seg-top"><span class="seg-rank">3</span><span class="seg-name">Mid-Market</span><span class="seg-verdict keep">Maintain</span></div>
+            <div class="seg-why">Largest addressable volume</div>
+            <div class="seg-acv">$10K–$50K<small>Typical deal size (ACV)</small></div>
+            <div class="seg-pairs"><div><span>Sales cycle</span><b>3–6 weeks</b></div><div><span>Expansion</span><b>Moderate</b></div></div>
+            <div class="seg-stars" aria-label="3 of 5 stars">★★★☆☆</div>
+            <details class="seg-more"><summary>Buyers and motion</summary><div>Manager + Ops · Volume acquisition</div></details>
+          </article>
+          <article class="seg-card" style="--c:#b7d3c4"><div class="seg-top"><span class="seg-rank">4</span><span class="seg-name">Emerging</span><span class="seg-verdict sel">Selective</span></div>
+            <div class="seg-why">Selective investment</div>
+            <div class="seg-acv">Under $10K<small>Typical deal size (ACV)</small></div>
+            <div class="seg-pairs"><div><span>Sales cycle</span><b>1–3 weeks</b></div><div><span>Expansion</span><b>Unproven</b></div></div>
+            <div class="seg-stars" aria-label="2 of 5 stars">★★☆☆☆</div>
+            <details class="seg-more"><summary>Buyers and motion</summary><div>Owner-operator · Selective pilot</div></details>
+          </article>
+        </div></div>
+        <div class="seg-ctrl"><button class="seg-btn" id="segPrev" aria-label="Previous segments">‹</button><button class="seg-btn" id="segNext" aria-label="Next segments">›</button><span class="seg-pos" id="segPos" aria-live="polite"></span></div>
+      </div>
 
       <div class="exec-reco">
         <div class="exec-reco-eye">Executive Recommendation</div>
-        <div class="exec-reco-body">Increase investment toward Enterprise and Growth segments, where expansion revenue, strategic account value, and long-term commercial opportunity are highest. Maintain efficient acquisition in Mid-Market while selectively investing in Emerging opportunities.</div>
-      </div>
-
-      <div class="section-label">Investment Matrix</div>
-      <div class="invest-matrix">
-        <div class="invest-col">
-          <div class="invest-label" style="color:var(--green);">Increase Investment</div>
-          <div class="invest-segs">Enterprise, Growth Accounts</div>
-        </div>
-        <div class="invest-col">
-          <div class="invest-label" style="color:var(--ink);">Maintain</div>
-          <div class="invest-segs">Mid-Market</div>
-        </div>
-        <div class="invest-col">
-          <div class="invest-label" style="color:#b45309;">Selective</div>
-          <div class="invest-segs">Emerging</div>
-        </div>
-      </div>
-
-      <div class="section-label">Segment Profiles</div>
-      <div class="profile-grid">
-        <div class="profile-card">
-          <div class="profile-rank" style="background:var(--green);">1</div>
-          <div class="profile-name">Enterprise</div>
-          <div class="profile-reason">Highest expansion opportunity</div>
-          <div class="profile-stars">★★★★★</div>
-          <div class="profile-row"><span class="profile-key">Opportunity</span><span class="profile-val">$250K–$1M+ ACV</span></div>
-          <div class="profile-row"><span class="profile-key">Buying committee</span><span class="profile-val">C-suite + Procurement</span></div>
-          <div class="profile-row"><span class="profile-key">Sales cycle</span><span class="profile-val">6–9 months</span></div>
-          <div class="profile-row"><span class="profile-key">Growth motion</span><span class="profile-val">Expansion-led</span></div>
-          <div class="profile-row"><span class="profile-key">Expansion potential</span><span class="profile-val">High</span></div>
-        </div>
-        <div class="profile-card">
-          <div class="profile-rank" style="background:#5aa886;">2</div>
-          <div class="profile-name">Growth Accounts</div>
-          <div class="profile-reason">Highest acquisition efficiency</div>
-          <div class="profile-stars">★★★★☆</div>
-          <div class="profile-row"><span class="profile-key">Opportunity</span><span class="profile-val">$50K–$250K ACV</span></div>
-          <div class="profile-row"><span class="profile-key">Buying committee</span><span class="profile-val">VP + Category Owner</span></div>
-          <div class="profile-row"><span class="profile-key">Sales cycle</span><span class="profile-val">2–4 months</span></div>
-          <div class="profile-row"><span class="profile-key">Growth motion</span><span class="profile-val">Land &amp; expand</span></div>
-          <div class="profile-row"><span class="profile-key">Expansion potential</span><span class="profile-val">High</span></div>
-        </div>
-        <div class="profile-card">
-          <div class="profile-rank" style="background:#8fbfa9;">3</div>
-          <div class="profile-name">Mid-Market</div>
-          <div class="profile-reason">Largest addressable volume</div>
-          <div class="profile-stars">★★★☆☆</div>
-          <div class="profile-row"><span class="profile-key">Opportunity</span><span class="profile-val">$10K–$50K ACV</span></div>
-          <div class="profile-row"><span class="profile-key">Buying committee</span><span class="profile-val">Manager + Ops</span></div>
-          <div class="profile-row"><span class="profile-key">Sales cycle</span><span class="profile-val">3–6 weeks</span></div>
-          <div class="profile-row"><span class="profile-key">Growth motion</span><span class="profile-val">Volume acquisition</span></div>
-          <div class="profile-row"><span class="profile-key">Expansion potential</span><span class="profile-val">Moderate</span></div>
-        </div>
-        <div class="profile-card">
-          <div class="profile-rank" style="background:#b7d3c4;color:#2e5c42;">4</div>
-          <div class="profile-name">Emerging</div>
-          <div class="profile-reason">Selective investment</div>
-          <div class="profile-stars">★★☆☆☆</div>
-          <div class="profile-row"><span class="profile-key">Opportunity</span><span class="profile-val">Under $10K ACV</span></div>
-          <div class="profile-row"><span class="profile-key">Buying committee</span><span class="profile-val">Owner-operator</span></div>
-          <div class="profile-row"><span class="profile-key">Sales cycle</span><span class="profile-val">1–3 weeks</span></div>
-          <div class="profile-row"><span class="profile-key">Growth motion</span><span class="profile-val">Selective pilot</span></div>
-          <div class="profile-row"><span class="profile-key">Expansion potential</span><span class="profile-val">Unproven</span></div>
-        </div>
-      </div>
-
-      <div class="exec-takeaways">
-        <div class="section-label" style="margin-bottom:8px;">Executive Takeaways</div>
-        <div style="display:flex;flex-direction:column;gap:7px;">
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;margin-top:5px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Invest first in Enterprise and Growth Accounts — that's where expansion economics are strongest.</div>
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;margin-top:5px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Mid-Market funds volume; it doesn't need more investment, just efficient execution.</div>
-          <div style="display:flex;align-items:flex-start;gap:8px;font-size:12px;font-weight:600;color:var(--ink);"><span style="width:6px;height:6px;margin-top:5px;border-radius:50%;background:var(--green);flex-shrink:0;"></span>Selective Emerging bets protect optionality without diluting focus on the segments that move the P&amp;L today.</div>
-        </div>
+        <div class="exec-reco-body">Invest first in Enterprise and Growth Accounts, where expansion economics are strongest. Keep Mid-Market efficient, and treat Emerging as optionality that doesn't dilute focus on the segments moving the P&amp;L today.</div>
       </div>
 
       <div class="chapter-transition">Next, Maya asks: is the prize big enough? <strong>Total Addressable Market</strong> sizes it.</div>
@@ -914,7 +1125,8 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <div class="stage-eyebrow">Chapter 03 — Total Addressable Market</div>
       <h1 class="stage-title">How big is this, <em>really?</em></h1>
       <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Is the prize big enough to justify the bet?”</div><div class="sb-do">She sizes the market in three layers: 895 target accounts, 475 reachable today, 161 already active.</div></div></div>
-      <p class="stage-body">With segments defined, we size the addressable market in three layers — the full universe, what we can realistically reach today, and what we already hold.</p>
+
+      <p class="stage-body">The prize is 895 target accounts, but it isn't spread evenly. The value sits with a small group.</p>
 
       <div class="tam-visual">
         <div class="tam-rings">
@@ -957,67 +1169,46 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
         </div>
       </div>
 
-      <div class="section-label">TAM by Segment</div>
-      <div class="tiny" style="margin-bottom:14px;">The same 895 accounts, cut by the priority segments from Chapter 02.</div>
-
-      <div class="profile-grid" style="margin-bottom:20px;">
-        <div class="profile-card">
-          <div class="tam-seg-head"><div class="tam-seg-dot" style="background:var(--green);"></div><div class="tam-seg-name">Enterprise</div></div>
-          <div class="tam-seg-stat">
-            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Accounts</span><span class="tam-seg-stat-pct">8%</span></div>
-            <div class="tam-seg-stat-val">70</div>
-            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:8%;background:var(--green);"></div></div>
+      <div class="section-label">Where the value sits</div>
+      <div class="tc-wrap">
+        <div class="tc-legend"><span><i style="background:#c9cfcc"></i>Share of accounts</span><span><i style="background:var(--green)"></i>Share of opportunity</span></div>
+        <div class="tc-row focus" tabindex="0">
+          <div class="tc-name">Enterprise</div>
+          <div>
+            <div class="tc-bar acc"><div class="tc-track"><i style="width:13.3%"></i></div><span class="tc-val"><b>8%</b> of accounts · 70</span></div>
+            <div class="tc-bar opp"><div class="tc-track"><i style="width:81.7%"></i></div><span class="tc-val"><b>49%</b> of opportunity · $42M</span></div>
           </div>
-          <div class="tam-seg-stat">
-            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Opportunity</span><span class="tam-seg-stat-pct">49%</span></div>
-            <div class="tam-seg-stat-val">$42M</div>
-            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:49%;background:var(--green);"></div></div>
-          </div>
+          <div class="tc-tip show" role="note"><b>Focus here.</b> 8% of accounts hold 49% of the opportunity ($42M).</div>
         </div>
-        <div class="profile-card">
-          <div class="tam-seg-head"><div class="tam-seg-dot" style="background:#5aa886;"></div><div class="tam-seg-name">Growth Accounts</div></div>
-          <div class="tam-seg-stat">
-            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Accounts</span><span class="tam-seg-stat-pct">22%</span></div>
-            <div class="tam-seg-stat-val">195</div>
-            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:22%;background:#5aa886;"></div></div>
+        <div class="tc-row" tabindex="0">
+          <div class="tc-name">Growth Accounts</div>
+          <div>
+            <div class="tc-bar acc"><div class="tc-track"><i style="width:36.7%"></i></div><span class="tc-val"><b>22%</b> of accounts · 195</span></div>
+            <div class="tc-bar opp"><div class="tc-track"><i style="width:56.7%"></i></div><span class="tc-val"><b>34%</b> of opportunity · $29M</span></div>
           </div>
-          <div class="tam-seg-stat">
-            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Opportunity</span><span class="tam-seg-stat-pct">34%</span></div>
-            <div class="tam-seg-stat-val">$29M</div>
-            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:34%;background:#5aa886;"></div></div>
-          </div>
+          <div class="tc-tip" role="note">Second priority: 22% of accounts, 34% of the opportunity.</div>
         </div>
-        <div class="profile-card">
-          <div class="tam-seg-head"><div class="tam-seg-dot" style="background:#8fbfa9;"></div><div class="tam-seg-name">Mid-Market</div></div>
-          <div class="tam-seg-stat">
-            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Accounts</span><span class="tam-seg-stat-pct">52%</span></div>
-            <div class="tam-seg-stat-val">465</div>
-            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:52%;background:#8fbfa9;"></div></div>
+        <div class="tc-row" tabindex="0">
+          <div class="tc-name">Mid-Market</div>
+          <div>
+            <div class="tc-bar acc"><div class="tc-track"><i style="width:86.7%"></i></div><span class="tc-val"><b>52%</b> of accounts · 465</span></div>
+            <div class="tc-bar opp"><div class="tc-track"><i style="width:26.7%"></i></div><span class="tc-val"><b>16%</b> of opportunity · $14M</span></div>
           </div>
-          <div class="tam-seg-stat">
-            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Opportunity</span><span class="tam-seg-stat-pct">16%</span></div>
-            <div class="tam-seg-stat-val">$14M</div>
-            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:16%;background:#8fbfa9;"></div></div>
-          </div>
+          <div class="tc-tip" role="note">Most of the accounts, but only 16% of the return. Keep it efficient.</div>
         </div>
-        <div class="profile-card">
-          <div class="tam-seg-head"><div class="tam-seg-dot" style="background:#b7d3c4;"></div><div class="tam-seg-name">Emerging</div></div>
-          <div class="tam-seg-stat">
-            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Accounts</span><span class="tam-seg-stat-pct">18%</span></div>
-            <div class="tam-seg-stat-val">165</div>
-            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:18%;background:#b7d3c4;"></div></div>
+        <div class="tc-row" tabindex="0">
+          <div class="tc-name">Emerging</div>
+          <div>
+            <div class="tc-bar acc"><div class="tc-track"><i style="width:30.0%"></i></div><span class="tc-val"><b>18%</b> of accounts · 165</span></div>
+            <div class="tc-bar opp"><div class="tc-track"><i style="width:1.7%"></i></div><span class="tc-val"><b>1%</b> of opportunity · $1M</span></div>
           </div>
-          <div class="tam-seg-stat">
-            <div class="tam-seg-stat-top"><span class="tam-seg-stat-label">Opportunity</span><span class="tam-seg-stat-pct">1%</span></div>
-            <div class="tam-seg-stat-val">$1M</div>
-            <div class="tam-seg-bar-track"><div class="tam-seg-bar-fill" style="width:1%;background:#b7d3c4;"></div></div>
-          </div>
+          <div class="tc-tip" role="note">165 accounts, 1% of the opportunity. Selective pilots only.</div>
         </div>
       </div>
 
       <div class="exec-reco">
         <div class="exec-reco-eye">Executive Recommendation</div>
-        <div class="exec-reco-body">Enterprise is 8% of accounts but ~49% of addressable revenue — investment should follow value, not volume. Mid-Market carries the accounts but not the return; keep it efficient, don't overfund it.</div>
+        <div class="exec-reco-body">Enterprise is 8% of accounts but ~49% of addressable revenue. Investment should follow value, not volume. Mid-Market carries the accounts but not the return; keep it efficient, don't overfund it.</div>
       </div>
 
       <div class="chapter-transition">Next, Maya asks: who exactly are we talking to? <strong>Audience Architecture</strong> answers it.</div>
@@ -1029,42 +1220,42 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <div class="stage-eyebrow">Chapter 04 — Audience Architecture</div>
       <h1 class="stage-title">Who gets the message. <em>And what it says.</em></h1>
       <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Now that we know which accounts, who exactly are we talking to?”</div><div class="sb-do">She tiers accounts by value, then writes a message for the buyer inside each one.</div></div></div>
-      <p class="stage-body">We tier accounts by revenue value to focus effort, then define the personas making decisions inside each tier — so messaging matches both the account's value and the buyer's job to be done.</p>
+      
 
       <!-- TIER SECTION — interactive: click a tier to reveal its personas below -->
-      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Step 1 — Account Tiering</div>
+      
       <div class="tier-grid" style="margin-bottom:8px;">
 
         <div class="tier-card selectable active" data-tier="T1" tabindex="0" role="button" aria-pressed="true" style="--tc:#4a9e7a;">
           <div class="tier-num">1</div>
           <div class="tier-label">Enterprise</div>
-          <div class="tier-desc">Largest revenue, deepest relationship. Goal is expansion, not just retention.</div>
+          <div class="tier-desc">Goal: expand, don't just retain.</div>
           <div class="tier-stat">$250K–$1M+ typical ACV</div>
         </div>
 
         <div class="tier-card selectable" data-tier="T2" tabindex="0" role="button" aria-pressed="false" style="--tc:#5aa886;">
           <div class="tier-num">2</div>
           <div class="tier-label">Growth Accounts</div>
-          <div class="tier-desc">Solid base, underpenetrated category. Right motion moves these to Enterprise.</div>
+          <div class="tier-desc">Goal: grow them toward Enterprise.</div>
           <div class="tier-stat">$50K–$250K typical ACV</div>
         </div>
 
         <div class="tier-card selectable" data-tier="T3" tabindex="0" role="button" aria-pressed="false" style="--tc:#8fbfa9;">
           <div class="tier-num">3</div>
           <div class="tier-label">Mid-Market</div>
-          <div class="tier-desc">Steady volume, standard needs. Efficient service retains them without executive reach.</div>
+          <div class="tier-desc">Goal: retain efficiently, no executive reach.</div>
           <div class="tier-stat">$10K–$50K typical ACV</div>
         </div>
 
         <div class="tier-card selectable" data-tier="T4" tabindex="0" role="button" aria-pressed="false" style="--tc:#b7d3c4;--tc-text:#2e5c42;">
           <div class="tier-num">4</div>
           <div class="tier-label">Emerging</div>
-          <div class="tier-desc">Narrow engagement or low frequency. Education-first motions activate the relationship.</div>
+          <div class="tier-desc">Goal: educate first, then activate.</div>
           <div class="tier-stat">Under $10K typical ACV</div>
         </div>
 
       </div>
-      <div class="tier-hint">Click a tier — the personas below update to match it.</div>
+      
 
       <!-- BRIDGE — caret tracks and points up to the selected tier -->
       <div class="tier-persona-bridge-wrap">
@@ -1076,159 +1267,46 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
       <!-- Persona cards — two per tier, toggled by the tier selection above -->
       <div class="persona-primary">
-
         <div class="persona-card-lg show" data-tier="T1" style="--pc-accent:#4a9e7a;">
-          <div class="pc-header">
-            <div class="pc-avatar">AM</div>
-            <div class="pc-header-text">
-              <div class="pc-role">Executive Buyer</div>
-              <div class="pc-name">Alexandra M.</div>
-              <div class="pc-title">VP / C-Suite Leader</div>
-              <div class="pc-seg-row"><span class="pc-seg">Enterprise</span><span class="pc-pill dm">Decision-Maker</span></div>
-            </div>
-          </div>
-          <div class="pc-body">
-            <div class="pc-rows">
-              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Drive revenue growth and competitive positioning</div></div>
-              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Suppliers that don't scale or speak to strategic outcomes</div></div>
-              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Business outcomes, ROI, and strategic fit</div></div>
-            </div>
-          </div>
+          <div class="pc2-head"><div class="pc-avatar">AM</div><div class="pc2-who"><div class="pc-name">Alexandra M.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">VP / C-Suite Leader · Executive Buyer</div></div></div>
+          <div class="pc2-jp"><div><b>Job</b>Drive revenue growth and competitive positioning</div><div><b>Pain</b>Suppliers that don't scale or speak to strategic outcomes</div></div>
+          <div class="pc2-say"><b>What we say</b>Business outcomes, ROI, and strategic fit</div>
         </div>
-
         <div class="persona-card-lg show" data-tier="T1" style="--pc-accent:#4a9e7a;">
-          <div class="pc-header">
-            <div class="pc-avatar">DP</div>
-            <div class="pc-header-text">
-              <div class="pc-role">Procurement / Strategic Sourcing</div>
-              <div class="pc-name">Derek P.</div>
-              <div class="pc-title">VP Procurement</div>
-              <div class="pc-seg-row"><span class="pc-seg">Enterprise</span><span class="pc-pill inf">Influencer</span></div>
-            </div>
-          </div>
-          <div class="pc-body">
-            <div class="pc-rows">
-              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Protect margin and consolidate supplier risk</div></div>
-              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Fragmented vendors and unpredictable pricing</div></div>
-              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Consolidated terms, reliability, and total cost of ownership</div></div>
-            </div>
-          </div>
+          <div class="pc2-head"><div class="pc-avatar">DP</div><div class="pc2-who"><div class="pc-name">Derek P.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">VP Procurement · Procurement / Strategic Sourcing</div></div></div>
+          <div class="pc2-jp"><div><b>Job</b>Protect margin and consolidate supplier risk</div><div><b>Pain</b>Fragmented vendors and unpredictable pricing</div></div>
+          <div class="pc2-say"><b>What we say</b>Consolidated terms, reliability, and total cost of ownership</div>
         </div>
-
         <div class="persona-card-lg" data-tier="T2" style="--pc-accent:#5aa886;">
-          <div class="pc-header">
-            <div class="pc-avatar">MT</div>
-            <div class="pc-header-text">
-              <div class="pc-role">Operational Buyer</div>
-              <div class="pc-name">Marcus T.</div>
-              <div class="pc-title">Category / Ops Manager</div>
-              <div class="pc-seg-row"><span class="pc-seg">Growth Accounts</span><span class="pc-pill dm">Decision-Maker</span></div>
-            </div>
-          </div>
-          <div class="pc-body">
-            <div class="pc-rows">
-              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Keep operations running — right product, right time</div></div>
-              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Stockouts, unreliable suppliers, limited category options</div></div>
-              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Availability, service levels, and ease of reorder</div></div>
-            </div>
-          </div>
+          <div class="pc2-head"><div class="pc-avatar">MT</div><div class="pc2-who"><div class="pc-name">Marcus T.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">Category / Ops Manager · Operational Buyer</div></div></div>
+          <div class="pc2-jp"><div><b>Job</b>Keep operations running — right product, right time</div><div><b>Pain</b>Stockouts, unreliable suppliers, limited category options</div></div>
+          <div class="pc2-say"><b>What we say</b>Availability, service levels, and ease of reorder</div>
         </div>
-
         <div class="persona-card-lg" data-tier="T2" style="--pc-accent:#5aa886;">
-          <div class="pc-header">
-            <div class="pc-avatar">PS</div>
-            <div class="pc-header-text">
-              <div class="pc-role">Category Manager</div>
-              <div class="pc-name">Priya S.</div>
-              <div class="pc-title">Category / Merchandising Lead</div>
-              <div class="pc-seg-row"><span class="pc-seg">Growth Accounts</span><span class="pc-pill inf">Influencer</span></div>
-            </div>
-          </div>
-          <div class="pc-body">
-            <div class="pc-rows">
-              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Expand category penetration and assortment fit</div></div>
-              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Slow-moving SKUs and limited vendor support</div></div>
-              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Category growth data and merchandising support</div></div>
-            </div>
-          </div>
+          <div class="pc2-head"><div class="pc-avatar">PS</div><div class="pc2-who"><div class="pc-name">Priya S.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">Category / Merchandising Lead · Category Manager</div></div></div>
+          <div class="pc2-jp"><div><b>Job</b>Expand category penetration and assortment fit</div><div><b>Pain</b>Slow-moving SKUs and limited vendor support</div></div>
+          <div class="pc2-say"><b>What we say</b>Category growth data and merchandising support</div>
         </div>
-
         <div class="persona-card-lg" data-tier="T3" style="--pc-accent:#8fbfa9;">
-          <div class="pc-header">
-            <div class="pc-avatar">MD</div>
-            <div class="pc-header-text">
-              <div class="pc-role">Operations Manager</div>
-              <div class="pc-name">Morgan D.</div>
-              <div class="pc-title">Ops / Facilities Manager</div>
-              <div class="pc-seg-row"><span class="pc-seg">Mid-Market</span><span class="pc-pill dm">Decision-Maker</span></div>
-            </div>
-          </div>
-          <div class="pc-body">
-            <div class="pc-rows">
-              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Keep day-to-day operations running within a fixed budget</div></div>
-              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Juggling multiple vendors without dedicated account support</div></div>
-              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Reliable service and simple terms, no executive overhead needed</div></div>
-            </div>
-          </div>
+          <div class="pc2-head"><div class="pc-avatar">MD</div><div class="pc2-who"><div class="pc-name">Morgan D.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">Ops / Facilities Manager · Operations Manager</div></div></div>
+          <div class="pc2-jp"><div><b>Job</b>Keep day-to-day operations running within a fixed budget</div><div><b>Pain</b>Juggling multiple vendors without dedicated account support</div></div>
+          <div class="pc2-say"><b>What we say</b>Reliable service and simple terms, no executive overhead needed</div>
         </div>
-
         <div class="persona-card-lg" data-tier="T3" style="--pc-accent:#8fbfa9;">
-          <div class="pc-header">
-            <div class="pc-avatar">CL</div>
-            <div class="pc-header-text">
-              <div class="pc-role">Purchasing Coordinator</div>
-              <div class="pc-name">Casey L.</div>
-              <div class="pc-title">Purchasing / Procurement Coordinator</div>
-              <div class="pc-seg-row"><span class="pc-seg">Mid-Market</span><span class="pc-pill inf">Influencer</span></div>
-            </div>
-          </div>
-          <div class="pc-body">
-            <div class="pc-rows">
-              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Process orders quickly and keep reordering simple</div></div>
-              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Manual processes and slow vendor response times</div></div>
-              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Streamlined ordering and fast turnaround</div></div>
-            </div>
-          </div>
+          <div class="pc2-head"><div class="pc-avatar">CL</div><div class="pc2-who"><div class="pc-name">Casey L.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">Purchasing / Procurement Coordinator · Purchasing Coordinator</div></div></div>
+          <div class="pc2-jp"><div><b>Job</b>Process orders quickly and keep reordering simple</div><div><b>Pain</b>Manual processes and slow vendor response times</div></div>
+          <div class="pc2-say"><b>What we say</b>Streamlined ordering and fast turnaround</div>
         </div>
-
         <div class="persona-card-lg" data-tier="T4" style="--pc-accent:#b7d3c4;--pc-accent-text:#2e5c42;">
-          <div class="pc-header">
-            <div class="pc-avatar">JK</div>
-            <div class="pc-header-text">
-              <div class="pc-role">Founder / Owner</div>
-              <div class="pc-name">Jordan K.</div>
-              <div class="pc-title">Founder or Small Business Owner</div>
-              <div class="pc-seg-row"><span class="pc-seg">Emerging</span><span class="pc-pill dm">Decision-Maker</span></div>
-            </div>
-          </div>
-          <div class="pc-body">
-            <div class="pc-rows">
-              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Find a reliable, affordable partner to get started</div></div>
-              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Limited budget, limited time to evaluate options</div></div>
-              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Simple onboarding, fast time-to-value, low commitment</div></div>
-            </div>
-          </div>
+          <div class="pc2-head"><div class="pc-avatar">JK</div><div class="pc2-who"><div class="pc-name">Jordan K.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">Founder or Small Business Owner · Founder / Owner</div></div></div>
+          <div class="pc2-jp"><div><b>Job</b>Find a reliable, affordable partner to get started</div><div><b>Pain</b>Limited budget, limited time to evaluate options</div></div>
+          <div class="pc2-say"><b>What we say</b>Simple onboarding, fast time-to-value, low commitment</div>
         </div>
-
         <div class="persona-card-lg" data-tier="T4" style="--pc-accent:#b7d3c4;--pc-accent-text:#2e5c42;">
-          <div class="pc-header">
-            <div class="pc-avatar">TB</div>
-            <div class="pc-header-text">
-              <div class="pc-role">Ops Coordinator</div>
-              <div class="pc-name">Taylor B.</div>
-              <div class="pc-title">Frontline Operator</div>
-              <div class="pc-seg-row"><span class="pc-seg">Emerging</span><span class="pc-pill inf">Influencer</span></div>
-            </div>
-          </div>
-          <div class="pc-body">
-            <div class="pc-rows">
-              <div class="pc-row"><div class="pc-key">Job to do</div><div class="pc-val">Get set up quickly without heavy onboarding lift</div></div>
-              <div class="pc-row"><div class="pc-key">Pain point</div><div class="pc-val">Confusing tools and unclear next steps</div></div>
-              <div class="pc-row"><div class="pc-key">Message</div><div class="pc-val">Clear, guided setup and responsive support</div></div>
-            </div>
-          </div>
+          <div class="pc2-head"><div class="pc-avatar">TB</div><div class="pc2-who"><div class="pc-name">Taylor B.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">Frontline Operator · Ops Coordinator</div></div></div>
+          <div class="pc2-jp"><div><b>Job</b>Get set up quickly without heavy onboarding lift</div><div><b>Pain</b>Confusing tools and unclear next steps</div></div>
+          <div class="pc2-say"><b>What we say</b>Clear, guided setup and responsive support</div>
         </div>
-
       </div>
 
       <div class="chapter-transition">Next, Maya asks: where do prospects stall? The <strong>Prospect Funnel</strong> shows her.</div>
@@ -1239,96 +1317,42 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <div class="stage-eyebrow">Chapter 05 — Prospect Funnel</div>
       <h1 class="stage-title">Turn market opportunity into <em>qualified pipeline.</em></h1>
       <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Where do qualified prospects stall on the way to revenue?”</div><div class="sb-do">She walks the funnel from 2.4M impressions to 196 customers, and finds the leak between opportunity and closed-won.</div></div></div>
-      <p class="stage-body">For prospects, the goal is converting TAM into pipeline. Segmentation, TAM fit, and signal data prioritize who marketing targets and who sales pursues, at every stage of the funnel.</p>
 
-      <div style="margin-bottom:20px;">
-        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;">Funnel Stage Breakdown</div>
-        <div class="funnel-stage-strip">
+      <p class="stage-body">Qualified opportunity isn't the problem. Deals are being lost late.</p>
 
-          <div class="fss-cell">
-            <div class="fss-label">Market Reach</div>
-            <div class="fss-val">2.4M</div>
-            <div class="fss-note">Impressions</div>
-          </div>
-
-          <div class="fss-cell">
-            <div class="fss-label">Leads</div>
-            <div class="fss-val">12,400</div>
-            <div class="fss-note">Accounts</div>
-          </div>
-
-          <div class="fss-cell">
-            <div class="fss-label">MQL</div>
-            <div class="fss-val">3,840</div>
-            <div class="fss-note" style="color:var(--sig-g);font-weight:600;">31% of leads</div>
-          </div>
-
-          <div class="fss-cell">
-            <div class="fss-label">SQL</div>
-            <div class="fss-val">1,228</div>
-            <div class="fss-note" style="color:var(--sig-g);font-weight:600;">32% conv.</div>
-          </div>
-
-          <div class="fss-cell">
-            <div class="fss-label">Opportunity</div>
-            <div class="fss-val">614</div>
-            <div class="fss-note" style="color:var(--sig-g);font-weight:600;">50% conv.</div>
-          </div>
-
-          <div class="fss-cell">
-            <div class="fss-label">Closed Won</div>
-            <div class="fss-val">196</div>
-            <div class="fss-note" style="color:var(--sig-g);font-weight:600;">31.9% win rate</div>
-          </div>
-
-          <div class="fss-cell" style="background:var(--green-pale);">
-            <div class="fss-label" style="color:var(--green);">Revenue</div>
-            <div class="fss-val">$84.2M</div>
-            <div class="fss-note" style="color:var(--green);font-weight:600;">TTM closed</div>
-          </div>
-
-        </div>
+      <div class="funnel-stage-strip">
+        <div class="fss-cell " style="--w:100%"><div class="fss-label">Market Reach</div><div class="fss-val">2.4M</div><div class="fss-note">Impressions</div></div>
+        <div class="fss-cell " style="--w:80%"><div class="fss-label">Leads</div><div class="fss-val">12,400</div><div class="fss-note">Accounts</div></div>
+        <div class="fss-cell " style="--w:62%"><div class="fss-label">MQL</div><div class="fss-val">3,840</div><div class="fss-note">31% of leads</div></div>
+        <div class="fss-cell " style="--w:46%"><div class="fss-label">SQL</div><div class="fss-val">1,228</div><div class="fss-note">32% conv.</div></div>
+        <div class="fss-cell leak-in" style="--w:34%"><div class="fss-label">Opportunity</div><div class="fss-val">614</div><div class="fss-note">50% conv.</div></div>
+        <div class="fss-cell leak" style="--w:24%"><div class="fss-label">Closed Won</div><div class="fss-val">196</div><div class="fss-note">31.9% win rate</div></div>
+        <div class="fss-cell rev"><div class="fss-label">Revenue</div><div class="fss-val">$84.2M</div><div class="fss-note">TTM closed</div></div>
       </div>
 
-      <div class="funnel-bridge">
-        <div class="funnel-bridge-caret">⌃</div>
-        <div class="funnel-bridge-label">Tier mix behind Closed Won revenue</div>
+      <div class="leak-card">
+        <div class="lk bad"><div class="lk-eye">Primary bottleneck</div><div class="lk-body">Opportunity → Closed Won, at a 31.9% win rate</div></div>
+        <div class="lk-arrow" aria-hidden="true">→</div>
+        <div class="lk"><div class="lk-eye">Highest-leverage fix</div><div class="lk-body">Win-rate enablement on active opportunities</div></div>
+        <div class="lk-arrow" aria-hidden="true">→</div>
+        <div class="lk good"><div class="lk-eye">Expected lift</div><div class="lk-body">+37 deals, ~$16M at the 38% target rate</div></div>
       </div>
+
+      <div class="section-label mix-title">Who the closed revenue comes from</div>
       <div class="tier-comp-bar">
         <div class="tier-comp-seg" style="width:52%;background:var(--green);">T1 · 52%</div>
-        <div class="tier-comp-seg" style="width:33%;background:#2d6bcd;">T2 · 33%</div>
-        <div class="tier-comp-seg" style="width:15%;background:#b45309;">T3 · 15%</div>
+        <div class="tier-comp-seg" style="width:33%;background:#8fbfa9;">T2 · 33%</div>
+        <div class="tier-comp-seg" style="width:15%;background:#cfe3d8;color:#2e5c42;">T3 · 15%</div>
       </div>
-      <div class="tier-comp-legend">
-        <div><span style="background:var(--green);"></span>Tier 1 — high-fit, high-value</div>
-        <div><span style="background:#2d6bcd;"></span>Tier 2 — strong fit, needs nurture</div>
-        <div><span style="background:#b45309;"></span>Tier 3 — early-stage, lower fit</div>
-      </div>
-
-      <div class="three-col" style="margin-bottom:0;">
-        <div class="card"><div class="card-eye">Tier 1</div><div class="card-title">Priority Accounts</div><div class="card-body">Account-based selling, direct outreach, priority sales assignment, executive access plays.</div><span class="card-tag tag-g">Actively pursue</span></div>
-        <div class="card"><div class="card-eye">Tier 2</div><div class="card-title">High-Fit Leads</div><div class="card-body">Demand generation campaigns, content nurture, intent monitoring, seller follow-up on signal.</div><span class="card-tag tag-b">Nurture to SQL</span></div>
-        <div class="card"><div class="card-eye">Tier 3</div><div class="card-title">Early-Stage Leads</div><div class="card-body">Broad awareness, category education, low-cost digital programs. Move to Tier 2 on engagement signal.</div><span class="card-tag tag-a">Qualify and promote</span></div>
-      </div>
-
-      <div class="invest-matrix" style="grid-template-columns:repeat(3,1fr);margin-top:20px;">
-        <div class="invest-col">
-          <div class="invest-label" style="color:#b45309;">Primary Bottleneck</div>
-          <div class="invest-segs">Opportunity → Closed Won, 31.9% win rate</div>
-        </div>
-        <div class="invest-col">
-          <div class="invest-label" style="color:var(--ink);">Highest-Leverage Fix</div>
-          <div class="invest-segs">Win-rate enablement on active opportunities</div>
-        </div>
-        <div class="invest-col">
-          <div class="invest-label" style="color:var(--green);">Expected Lift</div>
-          <div class="invest-segs">+37 deals, ~$16M at the 38% target rate</div>
-        </div>
+      <div class="mix-legend">
+        <div><b><span style="background:var(--green)"></span>Tier 1 · Actively pursue</b>Direct outreach, priority sales, executive access.</div>
+        <div><b><span style="background:#8fbfa9"></span>Tier 2 · Nurture to SQL</b>Demand generation, content nurture, intent monitoring.</div>
+        <div><b><span style="background:#cfe3d8"></span>Tier 3 · Qualify and promote</b>Broad awareness and low-cost digital; promote on engagement.</div>
       </div>
 
       <div class="exec-reco">
         <div class="exec-reco-eye">Executive Recommendation</div>
-        <div class="exec-reco-body">Fund win-rate enablement before adding top-of-funnel spend. The funnel already produces enough qualified opportunity; the leak is late-stage, and it's the same gap flagged in the KPI Foundation.</div>
+        <div class="exec-reco-body">Fund win-rate enablement before adding top-of-funnel spend. The funnel already produces enough qualified opportunity; the leak is late-stage, and it's the same gap flagged on the scoreboard.</div>
       </div>
 
       <div class="chapter-transition">Next, Maya asks: which accounts are ready now? <strong>Signal Intelligence</strong> tells her.</div>
@@ -1525,127 +1549,45 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
     <div class="stage" id="stage-7">
       <div class="stage-eyebrow">Chapter 07 — GTM Strategy</div>
       <h1 class="stage-title">Where should we <em>invest?</em></h1>
-      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“With $150K and one quarter, where does each dollar go?”</div><div class="sb-do">She chooses a growth motion, then tests how the budget could split across five channels.</div></div></div>
-      <p class="stage-body">A GTM motion is a choice about where growth comes from — new logos, expansion, retention, or a launch. Picking the right one determines who we target, what we say, where we spend, and what we measure. We have $150K to deploy; the motion below decides how.</p>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“With $150K and one quarter, where does each dollar go?”</div><div class="sb-do">She commits to one growth motion and funds only the four tactics that serve it.</div></div></div>
 
-      <div class="signal-picker">
-        <div class="signal-picker-label">Select the GTM motion this campaign serves</div>
-        <div class="motion-picker-list">
-          <label class="signal-check"><input type="radio" name="gtmMotionCh7" checked value="share" onchange="selectGtmMotion('share')"><span class="radio-dot"></span> Grow Market Share</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh7" value="expand" onchange="selectGtmMotion('expand')"><span class="radio-dot"></span> Expand Within Existing Accounts</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh7" value="revenue" onchange="selectGtmMotion('revenue')"><span class="radio-dot"></span> Increase Revenue or Margin</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh7" value="launch" onchange="selectGtmMotion('launch')"><span class="radio-dot"></span> Launch a New Product</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh7" value="newmarket" onchange="selectGtmMotion('newmarket')"><span class="radio-dot"></span> Enter a New Market</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh7" value="retention" onchange="selectGtmMotion('retention')"><span class="radio-dot"></span> Improve Customer Retention</label>
-        </div>
-        <div class="motion-impact">
-          <span class="motion-impact-label">Projected Impact</span>
-          <span id="motionImpactText">Capturing just 5% of these 660 whitespace accounts moves share from 18.0% to ~21.7%.</span>
-        </div>
+      <p class="stage-body">Maya commits to one growth motion for the quarter and funds only the tactics that serve it.</p>
+
+      <div class="strategy-hero">
+        <div class="sh-eye">Core strategy</div>
+        <div class="sh-title">Grow market share</div>
+        <div class="sh-share"><span class="sh-from">18.0%</span><span class="sh-arrow">→</span><span class="sh-to cu">~21.7%</span><span class="sh-lab">share</span></div>
+        <div class="sh-sub">Win 5% of the 660 whitespace accounts in Growth and Mid-Market, 74% of TAM, surfaced by the Funding Received signal.</div>
+        <div class="sh-kpis">Measured by <b>market share</b>, <b>new logos won</b> and <b>win rate</b>.</div>
       </div>
 
-      <div style="border:1px solid var(--rule);border-radius:4px;overflow:hidden;margin-bottom:20px;">
-        <div class="campaign-grid">
-          <div class="activation-card">
-            <div class="step-badge-row"><div class="step-badge">1</div><div class="step-name">Audience</div></div>
-            <div class="card-title" id="stepAudienceTitle">Growth Accounts + Mid-Market</div>
-            <div class="card-body" id="stepAudienceBody">660 whitespace accounts — 74% of TAM — surfaced by the Funding Received signal.</div>
-          </div>
-          <div class="activation-card">
-            <div class="step-badge-row"><div class="step-badge">2</div><div class="step-name">Message</div></div>
-            <div class="card-title" id="stepMessageTitle">Fit and momentum</div>
-            <div class="card-body" id="stepMessageBody">Lead with category momentum and fast time-to-value; these buyers are comparing options now.</div>
-          </div>
-          <div class="activation-card">
-            <div class="step-badge-row"><div class="step-badge">3</div><div class="step-name">Channels</div></div>
-            <div class="card-title" id="stepChannelsTitle">Display-led activation</div>
-            <div class="card-body" id="stepChannelsBody">Ordered by emphasis for this motion.</div>
-            <div class="activation-pills" id="stepChannelPills">
-              <span class="tag">Display</span>
-              <span class="tag">LinkedIn</span>
-              <span class="tag">SDR outreach</span>
-              <span class="tag">Workshop</span>
-              <span class="tag">Email</span>
-            </div>
-          </div>
-          <div class="activation-card">
-            <div class="step-badge-row"><div class="step-badge">4</div><div class="step-name">Measurement</div></div>
-            <div class="card-title">KPIs that matter most</div>
-            <div class="activation-pills" id="stepMeasurementKpis">
-              <span class="tag">Market Share</span>
-              <span class="tag">New Logos Won</span>
-              <span class="tag">Win Rate</span>
-            </div>
-          </div>
-        </div>
-        <div class="activation-economics">
-          <div class="activation-bridge">
-            <div class="activation-bridge-pin" id="econToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="econBody" onclick="toggleEconomics()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleEconomics();}">
-              <div class="activation-bridge-caret" id="econCaret">⌄</div>
-              <div class="activation-bridge-label">Channel investment and return</div>
-            </div>
-          </div>
-          <div class="activation-economics-head">
-            <div class="activation-economics-head-text">
-              <div class="section-eye" style="margin-bottom:0;">Channel economics</div>
-              <div class="tiny">Connected to Step 03: Channels — edit investment below to see the return update</div>
-            </div>
-            <button class="optimize-btn" onclick="optimizeMix()">Optimize Mix</button>
-          </div>
-          <div class="econ-body collapsed" id="econBody">
-
-          <div class="budget-summary">
-            <div class="kd-card"><div class="kd-eye">Total Investment</div><div class="kd-val"><span id="sumInvestment">$150K</span><span class="kd-of">of $150K</span></div></div>
-            <div class="kd-card"><div class="kd-eye">Est. Pipeline</div><div class="kd-val" id="sumPipeline">$1,521K</div></div>
-            <div class="kd-card"><div class="kd-eye">Est. Revenue</div><div class="kd-val" id="sumRevenue">$563K</div></div>
-            <div class="kd-card"><div class="kd-eye">Blended ROI</div><div class="kd-val" id="sumROI">3.8×</div></div>
-          </div>
-
-          <div class="activation-table">
-            <div class="activation-table-head">
-              <div>Channel</div><div>Investment</div><div>Pipeline</div><div>Revenue</div><div>ROI</div>
-            </div>
-            <div class="activation-table-row" id="row-social">
-              <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">Paid Social Targeting<span class="top-roi-badge" id="badge-social">Top ROI</span></span></div>
-              <div class="activation-cell"><span class="activation-label">Investment</span><div class="spend-input-wrap"><span>$</span><input class="spend-input" type="number" value="48" min="5" step="0.5" oninput="onSpendInput('social', this.value)"><span>K</span></div></div>
-              <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value val-pipeline">$496K</span></div>
-              <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value val-revenue">$198K</span></div>
-              <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value val-roi">4.1×</span></div>
-            </div>
-            <div class="activation-table-row" id="row-display">
-              <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">Display Retargeting<span class="top-roi-badge" id="badge-display">Top ROI</span></span></div>
-              <div class="activation-cell"><span class="activation-label">Investment</span><div class="spend-input-wrap"><span>$</span><input class="spend-input" type="number" value="36" min="0" step="0.5" oninput="onSpendInput('display', this.value)"><span>K</span></div></div>
-              <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value val-pipeline">$305K</span></div>
-              <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value val-revenue">$134K</span></div>
-              <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value val-roi">3.7×</span></div>
-            </div>
-            <div class="activation-table-row" id="row-email">
-              <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">Executive Email Nurture<span class="top-roi-badge" id="badge-email">Top ROI</span></span></div>
-              <div class="activation-cell"><span class="activation-label">Investment</span><div class="spend-input-wrap"><span>$</span><input class="spend-input" type="number" value="15" min="8" step="0.5" oninput="onSpendInput('email', this.value)"><span>K</span></div></div>
-              <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value val-pipeline">$152K</span></div>
-              <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value val-revenue">$33K</span></div>
-              <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value val-roi">2.2×</span></div>
-            </div>
-            <div class="activation-table-row" id="row-sdr">
-              <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">SDR-Assisted Outreach<span class="top-roi-badge" id="badge-sdr">Top ROI</span></span></div>
-              <div class="activation-cell"><span class="activation-label">Investment</span><div class="spend-input-wrap"><span>$</span><input class="spend-input" type="number" value="30" min="5" step="0.5" oninput="onSpendInput('sdr', this.value)"><span>K</span></div></div>
-              <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value val-pipeline">$328K</span></div>
-              <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value val-revenue">$124K</span></div>
-              <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value val-roi">4.1×</span></div>
-            </div>
-            <div class="activation-table-row" id="row-workshop">
-              <div class="activation-cell"><span class="activation-label">Channel</span><span class="activation-value">Executive Workshop Promotion<span class="top-roi-badge" id="badge-workshop">Top ROI</span></span></div>
-              <div class="activation-cell"><span class="activation-label">Investment</span><div class="spend-input-wrap"><span>$</span><input class="spend-input" type="number" value="21" min="8" step="0.5" oninput="onSpendInput('workshop', this.value)"><span>K</span></div></div>
-              <div class="activation-cell"><span class="activation-label">Pipeline</span><span class="activation-value val-pipeline">$241K</span></div>
-              <div class="activation-cell"><span class="activation-label">Revenue</span><span class="activation-value val-revenue">$72K</span></div>
-              <div class="activation-cell"><span class="activation-label">ROI</span><span class="activation-value val-roi">3.4×</span></div>
-            </div>
-          </div>
-
-          <div class="optimize-disclaimer">Directional scenario based on illustrative response and conversion assumptions. Not a media forecast.</div>
-          </div>
-        </div>
+      <div class="section-label">The plan · $150K, four tactics, one motion</div>
+      <div class="alloc-bar" role="img" aria-label="Budget split: paid media $84K, SDR-assisted outreach $30K, executive workshops $21K, executive email nurture $15K">
+        <div class="alloc-seg" style="flex:84;background:var(--green)">$84K</div>
+        <div class="alloc-seg" style="flex:30;background:#5aa886">$30K</div>
+        <div class="alloc-seg" style="flex:21;background:#8fbfa9">$21K</div>
+        <div class="alloc-seg" style="flex:15;background:#b7d3c4;color:#2e5c42">$15K</div>
       </div>
+      <div class="alloc-legend">Paid media · SDR outreach · Workshops · Email nurture</div>
+
+      <div class="tactic-list">
+        <div class="tactic" style="--tc:#4a9e7a"><div class="t-head"><span class="t-name">Paid media</span><span class="t-amt">$84K</span></div><div class="t-sub">Paid social + display retargeting</div>
+          <div class="t-align"><div><b>Marketing</b>Reaches Growth and Mid-Market whitespace with a category-momentum message.</div><div><b>Sales</b>Gets the engaged-account list, ranked by the Funding Received signal.</div></div><div class="t-out">≈ $0.8M pipeline</div></div>
+        <div class="tactic" style="--tc:#5aa886"><div class="t-head"><span class="t-name">SDR-assisted outreach</span><span class="t-amt">$30K</span></div><div class="t-sub">Signal-timed calls and email</div>
+          <div class="t-align"><div><b>Marketing</b>Hands SDRs the target list and a talk track.</div><div><b>Sales</b>SDRs call when a signal fires; qualified meetings pass to AEs.</div></div><div class="t-out">≈ $0.3M pipeline</div></div>
+        <div class="tactic" style="--tc:#8fbfa9"><div class="t-head"><span class="t-name">Executive workshops</span><span class="t-amt">$21K</span></div><div class="t-sub">Promotion to Growth Accounts</div>
+          <div class="t-align"><div><b>Marketing</b>Promotes the workshops and captures attendees.</div><div><b>Sales</b>AEs host and follow up, building multi-contact account plays.</div></div><div class="t-out">≈ $0.2M pipeline</div></div>
+        <div class="tactic" style="--tc:#b7d3c4"><div class="t-head"><span class="t-name">Executive email nurture</span><span class="t-amt">$15K</span></div><div class="t-sub">Decision-makers stay warm</div>
+          <div class="t-align"><div><b>Marketing</b>Keeps decision-makers warm until a signal fires.</div><div><b>Sales</b>Follows up on replies and clicks the same day.</div></div><div class="t-out">≈ $0.2M pipeline</div></div>
+      </div>
+
+      <div class="impact-strip" aria-label="Projected impact of the $150K plan">
+        <div class="is-cell"><span>Invested</span><b class="cu">$150K</b></div>
+        <div class="is-cell"><span>Est. pipeline</span><b class="cu">$1.5M</b></div>
+        <div class="is-cell"><span>Est. revenue</span><b class="cu">$563K</b></div>
+        <div class="is-cell hi"><span>Blended ROI</span><b class="cu">3.8×</b></div>
+      </div>
+      <div class="optimize-disclaimer">Directional scenario based on illustrative response and conversion assumptions. Not a media forecast.</div>
 
       <div class="chapter-transition">Next, Maya asks: who picks it up from here? <strong>GTM Alignment</strong> answers it.</div>
     </div>
@@ -1655,21 +1597,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <div class="stage-eyebrow">Chapter 08 — GTM Alignment</div>
       <h1 class="stage-title">One system. <em>Two engines.</em></h1>
       <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“How do we make sure sales picks up what marketing hands off?”</div><div class="sb-do">She writes one handoff rule and a 30-60-90 day plan that both teams sign.</div></div></div>
-      <p class="stage-body">Marketing and sales aren't working from separate plans — both run on the same segmentation, tiering, and signal data. Here's what that looks like for each motion.</p>
+      <p class="stage-body">Both teams run on the same segments, tiers and signals. Here is the handoff for Maya's strategy: grow market share.</p>
 
       <div class="section-label" style="margin-top:6px;">How Marketing and Sales Connect</div>
-      <div class="tiny" style="margin-bottom:14px;">Same 6 motions as GTM Strategy — select one to see the specific handoff.</div>
-      <div class="signal-picker">
-        <div class="motion-picker-list">
-          <label class="signal-check"><input type="radio" name="gtmMotionCh8" checked value="share" onchange="selectGtmMotion('share')"><span class="radio-dot"></span> Grow Market Share</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh8" value="expand" onchange="selectGtmMotion('expand')"><span class="radio-dot"></span> Expand Within Existing Accounts</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh8" value="revenue" onchange="selectGtmMotion('revenue')"><span class="radio-dot"></span> Increase Revenue or Margin</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh8" value="launch" onchange="selectGtmMotion('launch')"><span class="radio-dot"></span> Launch a New Product</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh8" value="newmarket" onchange="selectGtmMotion('newmarket')"><span class="radio-dot"></span> Enter a New Market</label>
-          <label class="signal-check"><input type="radio" name="gtmMotionCh8" value="retention" onchange="selectGtmMotion('retention')"><span class="radio-dot"></span> Improve Customer Retention</label>
-        </div>
-      </div>
-
       <div class="handoff-flow">
         <div class="handoff-node">
           <div class="step-badge-row"><div class="step-badge">1</div><div class="step-name">Marketing Activates</div></div>
@@ -1739,31 +1669,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Did it work? And would the CEO believe it?”</div><div class="sb-do">She takes the results back to the table, with every lift traced to the decision behind it.</div></div></div>
       <p class="stage-body">Every metric below started somewhere before this system existed. This is the lift — and which part of the strategy drove it.</p>
 
-            <figure class="gap-chart">
-        <div class="section-eye">Back to Maya's problem · win rate against the 38% target</div>
-        <div class="gap-scale">
-        <div class="gap-row">
-          <div class="gap-lab">Before</div>
-          <div class="gap-track" role="img" aria-label="Before: win rate 24.0%, 14.0 points below the 38% target">
-            <div class="gap-fill" style="width:48.0%"></div>
-            <div class="gap-rem" style="left:48.0%;width:28.0%"></div>
-            <div class="gap-target" style="left:76.0%"></div>
-          </div>
-          <div class="gap-val"><strong>24.0%</strong><span class="short">▼ 14.0 pts below target</span></div>
-        </div>
-        <div class="gap-row">
-          <div class="gap-lab">Now</div>
-          <div class="gap-track" role="img" aria-label="Now: win rate 31.9%, 6.1 points below the 38% target">
-            <div class="gap-fill after" style="width:63.8%"></div>
-            <div class="gap-rem" style="left:63.8%;width:12.2%"></div>
-            <div class="gap-target" style="left:76.0%"></div>
-          </div>
-          <div class="gap-val"><strong>31.9%</strong><span class="short">▼ 6.1 pts below target</span></div>
-        </div>
-        <div class="gap-axis" aria-hidden="true"><span style="left:0;transform:none">0%</span><span class="tgt" style="left:76.0%">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
-        </div>
-        <div class="gap-note">The gap to target went from 14.0 points to 6.1, so 7.9 points (56%) of it is closed. The remaining 6.1 points are the next quarter's work.</div>
-      </figure>
+            
 
       <div class="return-grid">
         <div class="rg-card"><div class="rg-layer">Segmentation + TAM</div><div class="outcome-compare"><span class="outcome-before">14.5%</span><span class="outcome-arrow">→</span><span class="outcome-after">18.0%</span></div><div class="outcome-lift">+3.5 pts · Market Share</div></div>
@@ -1815,7 +1721,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
 <!-- NAV BUTTONS -->
 <div class="nav-buttons">
-  <div class="stage-counter" id="stageCounter">Prologue · The Problem</div>
+  <div class="stage-counter" id="stageCounter">Prologue · The Case</div>
   <div class="btn-group">
     <button class="btn btn-back" id="btnBack" onclick="navigate(-1)" disabled>← Back</button>
     <button class="btn btn-next" id="btnNext" onclick="navigate(1)">Next →</button>
@@ -1824,7 +1730,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
 <script>
 const STAGES = [
-  { label: "The Problem",              eyebrow: "Prologue" },
+  { label: "The Case",                 eyebrow: "Prologue" },
   { label: "KPI Foundation",           eyebrow: "The Scoreboard" },
   { label: "Segmentation",             eyebrow: "Audience + Growth Objective" },
   { label: "Total Addressable Market", eyebrow: "Intelligence Layer" },
@@ -1898,18 +1804,12 @@ function goTo(n) {
     document.getElementById('btnNext').textContent = 'Next →';
   }
   document.getElementById('btnNext').disabled = false;
-  document.getElementById('stageCounter').textContent = current === 0 ? 'Prologue · The Problem' : `Chapter ${current} of ${STAGES.length - 1}`;
+  document.getElementById('stageCounter').textContent = current === 0 ? 'Prologue · The Case' : `Chapter ${current} of ${STAGES.length - 1}`;
   document.getElementById('progressFill').style.width = ((current + 1) / STAGES.length * 100) + '%';
 
   document.getElementById('stageArea').scrollTop = 0;
   updateNextBubble();
   if (typeof playStage === 'function') playStage(current);
-  if (current === 7) {
-    scheduleEconomicsReveal();
-  } else if (econRevealTimeout) {
-    clearTimeout(econRevealTimeout);
-    econRevealTimeout = null;
-  }
 }
 
 function navigate(dir) {
@@ -1981,318 +1881,6 @@ document.querySelectorAll('.signal-funnel-stage').forEach(c => {
   c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSignalStage(c.dataset.stage); } });
 });
 
-// ── GTM Strategy: motion shapes the approach, KPIs, and budget ──
-const GTM_MOTIONS = {
-  share: {
-    label: 'Grow Market Share',
-    impact: 'Capturing just 5% of these 660 whitespace accounts moves share from 18.0% to ~21.7%.',
-    audience: { title: 'Growth Accounts + Mid-Market', body: '660 whitespace accounts — 74% of TAM — surfaced by the Funding Received signal.' },
-    message: { title: 'Fit and momentum', body: 'Lead with category momentum and fast time-to-value; these buyers are comparing options now.' },
-    channels: ['Display', 'LinkedIn', 'SDR outreach', 'Workshop', 'Email'],
-    kpis: ['Market Share', 'New Logos Won', 'Win Rate'],
-    budgetWeights: { social: 0.32, display: 0.24, email: 0.10, sdr: 0.20, workshop: 0.14 },
-    winRates: { social: 0.40, display: 0.44, email: 0.22, sdr: 0.38, workshop: 0.30 },
-  },
-  expand: {
-    label: 'Expand Within Existing Accounts',
-    impact: '$71M in expansion opportunity — the fastest lever on NRR, currently at 108%.',
-    audience: { title: 'Enterprise + Growth Accounts', body: '265 existing accounts with $71M in cross-sell and upsell opportunity, flagged by the Cross-Sell Gap signal.' },
-    message: { title: 'Depth over breadth', body: "Lead with adjacent use cases and proof from the account's own history with us." },
-    channels: ['Workshop', 'Email', 'SDR outreach', 'LinkedIn', 'Display'],
-    kpis: ['NRR', 'Expansion Revenue', 'Wallet Share'],
-    budgetWeights: { social: 0.12, display: 0.06, email: 0.30, sdr: 0.14, workshop: 0.38 },
-    winRates: { social: 0.20, display: 0.14, email: 0.40, sdr: 0.34, workshop: 0.48 },
-  },
-  revenue: {
-    label: 'Increase Revenue or Margin',
-    impact: '$56M blended opportunity — Enterprise margin plus Mid-Market volume.',
-    audience: { title: 'Enterprise + Mid-Market', body: '535 accounts, $56M blended opportunity, surfaced by Multi-Contact Engagement.' },
-    message: { title: 'Value and efficiency', body: 'Executive ROI framing for Enterprise; low-friction, efficient messaging for Mid-Market volume.' },
-    channels: ['SDR outreach', 'LinkedIn', 'Email', 'Workshop', 'Display'],
-    kpis: ['Revenue Growth', 'Blended ROI', 'Avg. Deal Size'],
-    budgetWeights: { social: 0.26, display: 0.10, email: 0.16, sdr: 0.36, workshop: 0.12 },
-    winRates: { social: 0.36, display: 0.20, email: 0.28, sdr: 0.50, workshop: 0.24 },
-  },
-  launch: {
-    label: 'Launch a New Product',
-    impact: '235 accounts positioned to pilot and prove the product before broader rollout.',
-    audience: { title: 'Enterprise + Emerging', body: '235 accounts positioned to pilot, prompted by the Executive Hire signal opening the door.' },
-    message: { title: 'Early-mover advantage', body: 'Position as first to bring this capability to their specific problem.' },
-    channels: ['Workshop', 'Email', 'LinkedIn', 'Display', 'SDR outreach'],
-    kpis: ['Pilot Adoption', 'Time to First Value', 'Pipeline Coverage'],
-    budgetWeights: { social: 0.20, display: 0.10, email: 0.24, sdr: 0.10, workshop: 0.36 },
-    winRates: { social: 0.24, display: 0.18, email: 0.38, sdr: 0.20, workshop: 0.46 },
-  },
-  newmarket: {
-    label: 'Enter a New Market',
-    impact: '360 net-new whitespace accounts — a ~$30M opportunity outside our current 18.0% share base.',
-    audience: { title: 'Growth Accounts + Emerging', body: '360 net-new whitespace accounts, surfaced by the Market Intent Surge signal.' },
-    message: { title: 'Category education', body: "Lead with category framing before product specifics; this audience doesn't know us yet." },
-    channels: ['Display', 'LinkedIn', 'Workshop', 'Email', 'SDR outreach'],
-    kpis: ['New Logos', 'Market Share', 'Cost per Meeting'],
-    budgetWeights: { social: 0.34, display: 0.34, email: 0.08, sdr: 0.14, workshop: 0.10 },
-    winRates: { social: 0.46, display: 0.48, email: 0.16, sdr: 0.18, workshop: 0.26 },
-  },
-  retention: {
-    label: 'Improve Customer Retention',
-    impact: '265 accounts to protect — the Declining Spend signal already flags early risk here.',
-    audience: { title: 'Enterprise + Growth Accounts', body: '265 accounts to protect, with the Declining Spend signal already flagging early risk.' },
-    message: { title: 'Proactive value reinforcement', body: 'Lead with account health and outcomes delivered, before spend erodes further.' },
-    channels: ['Email', 'SDR outreach', 'Workshop', 'LinkedIn', 'Display'],
-    kpis: ['NRR', 'Churn Rate', 'Renewal Rate'],
-    budgetWeights: { social: 0.08, display: 0.04, email: 0.34, sdr: 0.30, workshop: 0.24 },
-    winRates: { social: 0.14, display: 0.10, email: 0.44, sdr: 0.42, workshop: 0.34 },
-  },
-};
-let currentGtmMotion = 'share';
-
-const HANDOFF_DATA = {
-  share: {
-    marketing: 'Display + LinkedIn campaigns target Growth Accounts and Mid-Market whitespace.',
-    trigger: 'MQL reaches SQL threshold — Funding Received signal confirmed.',
-    sales: 'AE-led outreach, multi-contact account plays, competitive positioning.',
-    outcome: 'Market Share',
-  },
-  expand: {
-    marketing: 'Workshop + Email nurture surfaces adjacent use cases to Enterprise and Growth accounts.',
-    trigger: 'Cross-Sell Gap signal flags an open category.',
-    sales: "Account manager leads the expansion conversation, warm intro to the new use case.",
-    outcome: 'NRR',
-  },
-  revenue: {
-    marketing: 'SDR-supported outreach and LinkedIn ABM target Enterprise and Mid-Market.',
-    trigger: 'Multi-Contact Engagement signal — buying committee forming.',
-    sales: 'Senior AE engages the full buying committee, builds a multi-thread account plan.',
-    outcome: 'Revenue Growth',
-  },
-  launch: {
-    marketing: 'Workshop-led early access campaign reaches Enterprise and Emerging pilot accounts.',
-    trigger: 'Executive Hire signal — new leader opens the door.',
-    sales: 'AE schedules an executive briefing, positions the pilot program.',
-    outcome: 'Pilot Adoption',
-  },
-  newmarket: {
-    marketing: 'Display + social awareness introduces the category to Growth and Emerging accounts.',
-    trigger: 'Market Intent Surge signal — category search activity detected.',
-    sales: 'New-logo AE prioritizes inbound interest, leads with category education.',
-    outcome: 'New Logos',
-  },
-  retention: {
-    marketing: 'Email + SDR-supported account-health campaign reaches Enterprise and Growth accounts.',
-    trigger: 'Declining Spend signal — early risk flagged.',
-    sales: 'Account manager schedules a save call, reinforces delivered value.',
-    outcome: 'NRR',
-  },
-};
-
-function renderHandoffFlow() {
-  const h = HANDOFF_DATA[currentGtmMotion];
-  if (!h) return;
-  const marketingEl = document.getElementById('handoffMarketingBody');
-  const triggerEl = document.getElementById('handoffTriggerBody');
-  const salesEl = document.getElementById('handoffSalesBody');
-  const outcomeEl = document.getElementById('handoffOutcomeBody');
-  if (marketingEl) marketingEl.textContent = h.marketing;
-  if (triggerEl) triggerEl.textContent = h.trigger;
-  if (salesEl) salesEl.textContent = h.sales;
-  if (outcomeEl) outcomeEl.textContent = h.outcome;
-}
-
-function selectGtmMotion(key) {
-  currentGtmMotion = key;
-  // Explicitly set checked/unchecked on every gtmMotion radio across both chapters —
-  // don't rely on native radio-group exclusivity to propagate correctly across
-  // two separate (one hidden/inactive) stages sharing the same input name.
-  document.querySelectorAll('input[name^="gtmMotion"]').forEach(r => { r.checked = (r.value === key); });
-  renderMotionApproach();
-  applyMotionBudget();
-  renderHandoffFlow();
-}
-
-function renderMotionApproach() {
-  const m = GTM_MOTIONS[currentGtmMotion];
-
-  const impactEl = document.getElementById('motionImpactText');
-  if (impactEl) impactEl.textContent = m.impact;
-
-  const audienceTitleEl = document.getElementById('stepAudienceTitle');
-  const audienceBodyEl = document.getElementById('stepAudienceBody');
-  if (audienceTitleEl) audienceTitleEl.textContent = m.audience.title;
-  if (audienceBodyEl) audienceBodyEl.textContent = m.audience.body;
-
-  const messageTitleEl = document.getElementById('stepMessageTitle');
-  const messageBodyEl = document.getElementById('stepMessageBody');
-  if (messageTitleEl) messageTitleEl.textContent = m.message.title;
-  if (messageBodyEl) messageBodyEl.textContent = m.message.body;
-
-  const channelsTitleEl = document.getElementById('stepChannelsTitle');
-  const channelsBodyEl = document.getElementById('stepChannelsBody');
-  if (channelsTitleEl) channelsTitleEl.textContent = m.channels[0] + '-led activation';
-  if (channelsBodyEl) channelsBodyEl.textContent = 'Ordered by emphasis for this motion.';
-  const pillContainer = document.getElementById('stepChannelPills');
-  if (pillContainer) pillContainer.innerHTML = m.channels.map(c => '<span class="tag">' + c + '</span>').join('');
-
-  const kpiContainer = document.getElementById('stepMeasurementKpis');
-  if (kpiContainer) kpiContainer.innerHTML = m.kpis.map(k => '<span class="tag">' + k + '</span>').join('');
-}
-renderMotionApproach();
-renderHandoffFlow();
-
-function applyMotionBudget() {
-  const w = GTM_MOTIONS[currentGtmMotion].budgetWeights;
-  CHANNELS.forEach(ch => {
-    ch.spend = Math.round(w[ch.id] * MAX_BUDGET * 10) / 10;
-  });
-  renderEconomics();
-}
-
-// ── Commercial Activation: editable directional budget optimizer ──
-// Diminishing-returns model: pipeline(spend) = cap * (1 - e^(-spend / k))
-// revenue(spend) = pipeline(spend) * winRate   (win rate keeps revenue below pipeline, as it should be)
-const CHANNELS = [
-  { id: 'social',   cap: 900, k: 60, min: 5, spend: 48 },
-  { id: 'display',  cap: 400, k: 25, min: 0, spend: 36 },
-  { id: 'email',    cap: 250, k: 16, min: 8, spend: 15 },
-  { id: 'sdr',      cap: 600, k: 38, min: 5, spend: 30 },
-  { id: 'workshop', cap: 500, k: 32, min: 8, spend: 21 },
-];
-const MAX_BUDGET = 150;
-const MAX_SHARE = 0.45; // no single channel above 45% of total allocated budget
-
-function channelWinRate(id) {
-  return GTM_MOTIONS[currentGtmMotion].winRates[id];
-}
-
-function channelReturn(ch, spend) {
-  const pipeline = ch.cap * (1 - Math.exp(-spend / ch.k));
-  const revenue = pipeline * channelWinRate(ch.id);
-  return { pipeline, revenue };
-}
-
-function clampChannelSpend(ch, value) {
-  const maxForChannel = MAX_BUDGET * MAX_SHARE;
-  value = Math.max(ch.min, Math.min(maxForChannel, value));
-  const othersTotal = CHANNELS.filter(c => c.id !== ch.id).reduce((s, c) => s + c.spend, 0);
-  if (othersTotal + value > MAX_BUDGET) value = Math.max(ch.min, MAX_BUDGET - othersTotal);
-  return Math.round(value * 10) / 10;
-}
-
-function onSpendInput(id, raw) {
-  const ch = CHANNELS.find(c => c.id === id);
-  let value = parseFloat(raw);
-  if (isNaN(value)) value = ch.min;
-  ch.spend = clampChannelSpend(ch, value);
-  renderEconomics();
-}
-
-function toggleEconomics() {
-  const body = document.getElementById('econBody');
-  const toggle = document.getElementById('econToggle');
-  const caret = document.getElementById('econCaret');
-  const collapsed = body.classList.toggle('collapsed');
-  toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-  caret.textContent = collapsed ? '⌄' : '⌃';
-  // A manual click always wins — cancel any pending auto-reveal so it doesn't
-  // fight the person's own choice a moment later.
-  if (econRevealTimeout) { clearTimeout(econRevealTimeout); econRevealTimeout = null; }
-}
-
-let econRevealTimeout = null;
-function scheduleEconomicsReveal() {
-  const body = document.getElementById('econBody');
-  const toggle = document.getElementById('econToggle');
-  const caret = document.getElementById('econCaret');
-  if (!body) return;
-  if (econRevealTimeout) { clearTimeout(econRevealTimeout); econRevealTimeout = null; }
-  body.classList.add('collapsed');
-  if (toggle) toggle.setAttribute('aria-expanded', 'false');
-  if (caret) caret.textContent = '⌄';
-  econRevealTimeout = setTimeout(() => {
-    body.classList.remove('collapsed');
-    if (toggle) toggle.setAttribute('aria-expanded', 'true');
-    if (caret) caret.textContent = '⌃';
-    econRevealTimeout = null;
-  }, 150);
-}
-
-function optimizeMix() {
-  const maxForChannel = MAX_BUDGET * MAX_SHARE;
-  CHANNELS.forEach(ch => ch.spend = ch.min);
-  let remaining = MAX_BUDGET - CHANNELS.reduce((s, c) => s + c.spend, 0);
-  const step = 0.5;
-  let guard = 0;
-  while (remaining > 0.01 && guard < 2000) {
-    guard++;
-    let best = null, bestMarginal = -Infinity;
-    CHANNELS.forEach(ch => {
-      if (ch.spend >= maxForChannel - 1e-6) return;
-      // marginal return = d(revenue)/d(spend) at current allocation, using this motion's win rate
-      const marginal = (ch.cap * channelWinRate(ch.id) / ch.k) * Math.exp(-ch.spend / ch.k);
-      if (marginal > bestMarginal) { bestMarginal = marginal; best = ch; }
-    });
-    if (!best) break;
-    const add = Math.min(step, remaining, maxForChannel - best.spend);
-    best.spend = Math.round((best.spend + add) * 10) / 10;
-    remaining -= add;
-  }
-  renderEconomics();
-}
-
-function pulseCell(el) {
-  el.classList.remove('value-pulse');
-  void el.offsetWidth; // force reflow so the animation restarts every time
-  el.classList.add('value-pulse');
-}
-
-function renderEconomics() {
-  let totalSpend = 0, totalPipeline = 0, totalRevenue = 0;
-  const computed = CHANNELS.map(ch => {
-    const { pipeline, revenue } = channelReturn(ch, ch.spend);
-    const roi = ch.spend > 0 ? revenue / ch.spend : 0;
-    totalSpend += ch.spend; totalPipeline += pipeline; totalRevenue += revenue;
-    return { ch, pipeline, revenue, roi };
-  });
-
-  let bestId = null, bestRoi = -Infinity;
-  computed.forEach(c => { if (c.ch.spend > 0 && c.roi > bestRoi) { bestRoi = c.roi; bestId = c.ch.id; } });
-
-  computed.forEach(({ ch, pipeline, revenue, roi }) => {
-    const row = document.getElementById('row-' + ch.id);
-    if (!row) return;
-    const pipelineEl = row.querySelector('.val-pipeline');
-    const revenueEl = row.querySelector('.val-revenue');
-    const roiEl = row.querySelector('.val-roi');
-
-    const newPipeline = '$' + Math.round(pipeline) + 'K';
-    const newRevenue = '$' + Math.round(revenue) + 'K';
-    const newRoi = ch.spend > 0 ? roi.toFixed(1) + '×' : '—';
-
-    // Only pulse a cell when its value actually changed — editing one
-    // channel shouldn't flash the other four.
-    if (pipelineEl.textContent !== newPipeline) { pipelineEl.textContent = newPipeline; pulseCell(pipelineEl); }
-    if (revenueEl.textContent !== newRevenue) { revenueEl.textContent = newRevenue; pulseCell(revenueEl); }
-    if (roiEl.textContent !== newRoi) { roiEl.textContent = newRoi; pulseCell(roiEl); }
-
-    roiEl.style.color = roi >= 4.5 ? 'var(--sig-g)' : (roi > 0 && roi < 3.0) ? 'var(--sig-a)' : 'var(--ink)';
-
-    const badge = document.getElementById('badge-' + ch.id);
-    if (badge) badge.classList.toggle('show', ch.id === bestId);
-
-    const input = row.querySelector('.spend-input');
-    if (input && document.activeElement !== input) input.value = ch.spend.toFixed(1).replace(/\.0$/, '');
-  });
-
-  const investEl = document.getElementById('sumInvestment');
-  const pipelineEl = document.getElementById('sumPipeline');
-  const revenueEl = document.getElementById('sumRevenue');
-  const roiEl = document.getElementById('sumROI');
-  if (investEl) investEl.textContent = '$' + Math.round(totalSpend) + 'K';
-  if (pipelineEl) pipelineEl.textContent = '$' + Math.round(totalPipeline).toLocaleString() + 'K';
-  if (revenueEl) revenueEl.textContent = '$' + Math.round(totalRevenue).toLocaleString() + 'K';
-  if (roiEl) roiEl.textContent = totalSpend > 0 ? (totalRevenue / totalSpend).toFixed(1) + '×' : '—';
-}
-applyMotionBudget();
-
 // ── Next-chapter bubble: shows the transition text above the Next button ──
 function updateNextBubble() {
   const bubble = document.getElementById('nextBubble');
@@ -2351,10 +1939,12 @@ function playStage(n) {
   cuTimers.splice(0).forEach(clearTimeout);
   document.querySelectorAll('.stage.instant').forEach(st => st.classList.remove('instant'));
   const stage = document.getElementById('stage-' + n);
-  stage.querySelectorAll('.kd-val,.outcome-after,.fss-val,.gap-val strong').forEach(el => {
-    const card = el.closest('.kd-card,.rg-card,.fss-cell');
+  if (n === 2 && window.segRender) setTimeout(window.segRender, 30);
+  stage.querySelectorAll('.kd-val,.outcome-after,.fss-val,.gap-val strong,.cu').forEach(el => {
+    const card = el.closest('.kd-card,.rg-card,.fss-cell,.mm,.is-cell');
     const idx = card ? [...card.parentElement.children].indexOf(card) : 0;
-    const delay = el.dataset.cuDelay ? +el.dataset.cuDelay : 250 + idx * 70;
+    const base = (parseFloat(getComputedStyle(el).getPropertyValue('--d')) || 0) * 1000;
+    const delay = el.dataset.cuDelay ? +el.dataset.cuDelay : base + 300 + idx * 80;
     countUp(el, delay, stage);
   });
 }
@@ -2363,6 +1953,43 @@ document.getElementById('stageArea').addEventListener('click', () => {
   if (st) st.classList.add('instant');
 });
 playStage(0);
+
+// ── V3: every chapter reveals in sequence, like the prologue ──
+document.querySelectorAll('.stage:not(#stage-0)').forEach(st => {
+  const kids = [...st.children].filter(c => !c.matches('.stage-eyebrow,.stage-title,.chapter-transition'));
+  const step = Math.min(.5, 3 / Math.max(kids.length, 1));
+  kids.forEach((c, k) => { c.classList.add('rv'); c.style.setProperty('--d', (.3 + k * step).toFixed(2) + 's'); });
+});
+document.querySelectorAll('.tc-row,.mm,.tactic,.case-card,.seg-card,.alloc-seg,.handoff-node,.roadmap-col').forEach(el => {
+  el.style.setProperty('--i', [...el.parentElement.children].indexOf(el));
+});
+
+// ── Segmentation deck: two overlapping cards at a time ──
+(function () {
+  const track = document.getElementById('segTrack');
+  if (!track) return;
+  const cards = [...track.children], prev = document.getElementById('segPrev'), next = document.getElementById('segNext'), pos = document.getElementById('segPos');
+  let idx = 0;
+  const vis = () => (window.innerWidth < 768 ? 1 : 2);
+  function render() {
+    const c = cards[0], w = c.offsetWidth;
+    if (!w) return;
+    const step = w + parseFloat(getComputedStyle(c).marginRight);
+    const max = cards.length - vis();
+    idx = Math.max(0, Math.min(idx, max));
+    track.style.transform = `translateX(${-idx * step}px)`;
+    prev.disabled = idx === 0; next.disabled = idx === max;
+    pos.textContent = vis() === 1 ? `${idx + 1} of ${cards.length}` : `${idx + 1}–${idx + 2} of ${cards.length}`;
+    cards.forEach((el, i) => el.classList.toggle('dim', i < idx || i >= idx + vis()));
+  }
+  prev.addEventListener('click', () => { idx -= 1; render(); });
+  next.addEventListener('click', () => { idx += 1; render(); });
+  let x0 = null;
+  track.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 40) { idx += dx < 0 ? 1 : -1; render(); } x0 = null; });
+  window.addEventListener('resize', render);
+  window.segRender = () => { idx = 0; render(); };
+})();
 </script>
 </body>
 </html>
