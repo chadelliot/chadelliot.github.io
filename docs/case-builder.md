@@ -33,7 +33,8 @@ program.campaignsM campaign spend over the horizon
 program.enablementM sales enablement and tooling                            ASSUMED
 campaignReturn     revenue per $1 of campaign spend, plan vs today
 coverage           pipeline coverage today
-proof              before to after results from a prior phase, if any
+nrr                net revenue retention today (secondary line)
+plan               three short moves: focus, fix, align
 ```
 
 Derived on the page:
@@ -60,7 +61,9 @@ Chapters 1 to 7 are static HTML plus small scripts. Where numbers must tie out, 
 
 ## 4. Story rules this page follows
 
-- Open with the executive summary: recommendation, impact, then problem and plan. Impact leads, down to EBITDA.
+- Open with a short executive summary that is a story first: the character, the company, the problem in two numbers, a three-move plan, then the returns.
+- Metric tiers: **primary** (three, big): revenue recovered, ad return, margin defended (EBITDA after program cost). **Secondary** (one small line, never boxes): win rate, payback, pipeline coverage, NRR. If a case has no ad spend or margin data, pick the three marketing-impact numbers the evidence supports and say what is assumed.
+- No charts in the summary that need explaining. Numbers carry it; charts belong in the chapters.
 - One focus per chapter. Highlight the one thing that matters and grey out the rest.
 - Make the answer non-obvious where the data supports it (the best segment differs by market).
 - Everything loads in progressively, and charts animate in. Honor reduced motion.
