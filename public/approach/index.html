@@ -957,7 +957,132 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .impact-strip{grid-template-columns:1fr 1fr;}
   .case-grid{grid-template-columns:1fr;}
 }
-.t-align div{display:grid;grid-template-columns:72px 1fr;gap:6px;align-items:baseline;}.t-align b{min-width:0;}@media (max-width:767px){.fss-cell{text-align:left !important;}.tc-val{flex-basis:124px !important;font-size:10px !important;}}</style>
+.t-align div{display:grid;grid-template-columns:72px 1fr;gap:6px;align-items:baseline;}.t-align b{min-width:0;}@media (max-width:767px){.fss-cell{text-align:left !important;}.tc-val{flex-basis:124px !important;font-size:10px !important;}}
+/* ═══ V4 ═══ */
+@keyframes litUp{from{background:var(--surface);color:#8a8f8c;box-shadow:none;}to{background:var(--green);color:#fff;box-shadow:0 0 0 3px rgba(74,158,122,.22);}}
+
+/* ── Ch 3: compact sizing strip + market × segment headroom grid ── */
+.tam-strip{display:flex;align-items:center;gap:22px;max-width:900px;margin:0 0 14px;padding:10px 0 12px;border-bottom:1px solid var(--rule);}
+.tam-strip .tam-rings{flex:0 0 78px;width:78px;}
+.ts-stats{display:flex;gap:26px;flex-wrap:wrap;}
+.ts-stats b{display:block;font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--ink);line-height:1.1;}
+.ts-stats span{font-size:10px;color:var(--muted);}
+.hx{max-width:940px;margin-bottom:14px;}
+.hx-legend{font-size:10.5px;color:var(--muted);margin-bottom:8px;}
+.hx-head,.hx-row{display:grid;grid-template-columns:116px repeat(4,minmax(0,1fr)) 236px;gap:6px;align-items:center;}
+.hx-head{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding-bottom:6px;}
+.hx-head span{text-align:center;}
+.hx-row{padding:3px 0;}
+.hx-mkt b{display:block;font-size:12.5px;font-weight:800;color:#8a8f8c;}
+.hx-mkt small{font-size:10px;color:#a3a8a5;}
+.hx-row.go .hx-mkt b{color:var(--ink);}
+.hx-cell{height:46px;border-radius:5px;background:var(--surface);color:#8a8f8c;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+.hx-cell b{font-size:13px;font-weight:800;letter-spacing:-.3px;}
+.hx-cell small{font-size:9px;opacity:.8;}
+.stage.active .hx-cell{animation:rvIn .5s cubic-bezier(.2,.7,.2,1) calc(var(--d,0s) + .15s + var(--i,0) * 90ms) both;}
+.stage.active .hx-cell.focus{animation:rvIn .5s cubic-bezier(.2,.7,.2,1) calc(var(--d,0s) + .15s + var(--i,0) * 90ms) both, litUp .8s ease calc(var(--d,0s) + 1.5s) both;}
+.hx-call{position:relative;margin-left:12px;background:var(--ink);color:#fff;font-size:11px;font-weight:600;line-height:1.38;padding:9px 11px;border-radius:6px;}
+.hx-call::before{content:'';position:absolute;right:100%;top:50%;margin-top:-6px;border:6px solid transparent;border-right-color:var(--ink);}
+.hx-call b{color:#9fe0c0;}
+.stage.active .hx-call{animation:tipPop .5s cubic-bezier(.2,.9,.3,1.3) calc(var(--d,0s) + var(--cd2,2s)) both;}
+.hx-row.go .hx-call{--cd2:2s;}
+.hx-row.go.second .hx-call{--cd2:2.7s;}
+.stage.active .hx-row.second .hx-cell.focus{animation:rvIn .5s cubic-bezier(.2,.7,.2,1) calc(var(--d,0s) + .15s + var(--i,0) * 90ms) both, litUp .8s ease calc(var(--d,0s) + 2.2s) both;}
+
+/* ── Ch 4: market-based messaging ── */
+.mkt-tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:760px;margin-bottom:12px;}
+.mkt-tab{text-align:left;font-family:inherit;border:1px solid var(--rule);background:var(--white);border-radius:6px;padding:12px 16px;cursor:pointer;transition:all .2s;}
+.mkt-tab:hover{border-color:var(--green);}
+.mkt-tab .mt-k{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.mkt-tab .mt-v{display:block;font-size:18px;font-weight:800;letter-spacing:-.4px;color:var(--ink);margin:2px 0;}
+.mkt-tab .mt-s{display:block;font-size:10.5px;color:var(--muted);}
+.mkt-tab.active{background:var(--green);border-color:var(--green);}
+.mkt-tab.active .mt-k,.mkt-tab.active .mt-s{color:rgba(255,255,255,.85);}
+.mkt-tab.active .mt-v{color:#fff;}
+.mkt-tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+.mkt-msg{max-width:760px;margin-bottom:14px;padding:12px 16px;border-left:3px solid var(--green);background:var(--green-pale);font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.45;border-radius:0 5px 5px 0;}
+.mkt-msg small{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:3px;}
+.mkt-next{max-width:760px;font-size:11px;color:var(--muted);margin-top:4px;}
+
+/* ── Ch 5: no green, only the leak ── */
+#stage-5 .exec-reco{background:#fffaf3;border-color:var(--sig-a);}
+#stage-5 .exec-reco-eye{color:var(--sig-a);}
+#stage-5 .lk.good{background:var(--white);border-color:var(--ink);}
+#stage-5 .lk.good .lk-eye{color:var(--ink);}
+#stage-5 .fss-cell.rev{background:var(--surface) !important;}
+#stage-5 .fss-cell.rev .fss-label,#stage-5 .fss-cell.rev .fss-note{color:#a3a8a5 !important;}
+#stage-5 .fss-cell.rev .fss-val{color:#8a8f8c;}
+#stage-5 .story-beat .sb-avatar{background:#8a8f8c;}
+#stage-5 .story-beat .sb-who{color:#8a8f8c;}
+
+/* ── Ch 6: a funnel graph that lights up stage by stage ── */
+.sig-layout{display:grid;grid-template-columns:minmax(250px,320px) 1fr;gap:26px;align-items:start;max-width:940px;}
+.sig-left .signal-funnel-strip{display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:none;overflow:visible;margin:0;}
+.signal-funnel-stage{width:var(--w,100%);background:#e6e9e7 !important;border-radius:4px;padding:9px 14px !important;text-align:left !important;display:flex;align-items:baseline;justify-content:space-between;gap:8px;transition:background .35s ease,transform .35s ease,box-shadow .35s ease !important;}
+.signal-funnel-stage:hover{background:#d8ded9 !important;}
+.signal-funnel-stage .sfs-label{margin:0;font-size:9px;color:#6f7572;white-space:nowrap;}
+.signal-funnel-stage .sfs-val{font-size:15px;color:#4b5563;}
+.signal-funnel-stage .sfs-note{display:none;}
+.signal-funnel-stage.active{background:var(--green) !important;transform:scale(1.04);box-shadow:0 6px 16px rgba(74,158,122,.35);}
+.signal-funnel-stage.active .sfs-label,.signal-funnel-stage.active .sfs-val{color:#fff !important;}
+.signal-funnel-stage:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
+.sig-right{border-left:3px solid var(--green);padding-left:20px;min-height:260px;}
+.sig-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.sig-head #signalStageLabel{font-size:15px;font-weight:800;color:var(--ink);letter-spacing:-.3px;}
+.sig-head .sig-count{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--green);}
+.sig-head .sig-auto{margin-left:auto;font-size:10px;color:var(--muted);transition:opacity .4s;}
+.sig-head .sig-auto.off{opacity:0;}
+.sig-right .signal-set.show{grid-template-columns:1fr;gap:12px;}
+.stage.active .sig-left .signal-funnel-stage{animation:wipeX .7s cubic-bezier(.3,.7,.2,1) calc(var(--d,0s) + .15s + var(--i,0) * 110ms) both;}
+
+/* ── Ch 7: two market plays, compared ── */
+.mc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:940px;margin-bottom:14px;}
+.mc-card{position:relative;border:1px solid var(--rule);border-top:3px solid var(--green);border-radius:6px;padding:16px 18px;background:var(--white);display:flex;flex-direction:column;gap:10px;}
+.mc-top{display:flex;align-items:baseline;gap:10px;}
+.mc-mkt{font-size:19px;font-weight:800;letter-spacing:-.4px;color:var(--ink);}
+.mc-seg{font-size:11px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.8px;}
+.mc-motion{font-size:11px;color:var(--muted);margin-top:-6px;}
+.mc-row{display:grid;grid-template-columns:78px 1fr;gap:8px;font-size:12px;line-height:1.4;}
+.mc-row span{font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);padding-top:2px;}
+.mc-row b{font-weight:600;color:var(--ink);}
+.mc-alloc .alloc-bar{height:26px;margin:2px 0 4px;}
+.mc-alloc .alloc-seg{font-size:10px;}
+.mc-alloc .alloc-legend{margin-bottom:0;font-size:10px;}
+.mc-ret{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:5px;overflow:hidden;margin-top:auto;}
+.mc-ret div{background:var(--surface);padding:9px 10px;}
+.mc-ret span{display:block;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:3px;}
+.mc-ret b{font-size:17px;font-weight:800;letter-spacing:-.4px;color:var(--ink);}
+.mc-ret .hi{background:var(--green-pale);}
+.mc-ret .hi b{color:var(--sig-g);}
+.mc-badge{position:absolute;top:-11px;right:14px;background:var(--green);color:#fff;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:4px 10px;border-radius:10px;}
+.rm-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:5px;overflow:hidden;max-width:940px;margin:6px 0 18px;}
+.rm-col{background:var(--white);padding:12px 14px;}
+.rm-col span{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);}
+.rm-col b{display:block;font-size:13px;margin:2px 0 4px;color:var(--ink);}
+.rm-col p{font-size:11.5px;color:var(--body);line-height:1.45;}
+.close-cta{display:flex;align-items:center;justify-content:space-between;gap:18px;max-width:940px;border-top:2px solid var(--ink);padding-top:14px;margin-bottom:10px;}
+.close-cta .ask{font-size:14px;font-weight:600;line-height:1.5;color:var(--ink);max-width:560px;}
+.close-cta .ask b{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:3px;}
+.cta-btn{flex-shrink:0;background:var(--ink);color:#fff;text-decoration:none;font-size:12px;font-weight:700;padding:12px 20px;border-radius:5px;transition:background .15s;}
+.cta-btn:hover{background:var(--green);}
+
+@media (max-width:767px){
+  .tam-strip{gap:14px;}
+  .ts-stats{gap:14px;}
+  .hx-head{display:none;}
+  .hx-row{grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;padding:8px 0;border-top:1px solid var(--rule);}
+  .hx-mkt{grid-column:1/-1;display:flex;align-items:baseline;gap:8px;}
+  .hx-call{grid-column:1/-1;margin:4px 0 0;}
+  .hx-call::before{right:auto;left:18px;top:auto;bottom:100%;margin:0;border-right-color:transparent;border-bottom-color:var(--ink);}
+  .hx-cell::before{content:attr(data-seg);font-size:7.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;opacity:.7;}
+  .mkt-tabs{grid-template-columns:1fr;}
+  .sig-layout{grid-template-columns:1fr;gap:16px;}
+  .sig-right{padding-left:14px;}
+  .mc-grid{grid-template-columns:1fr;}
+  .rm-grid{grid-template-columns:1fr;}
+  .close-cta{flex-direction:column;align-items:flex-start;}
+}
+.hx-cell{height:40px !important;}.hx-legend{font-size:11.5px !important;line-height:1.45;max-width:720px;}.hx-legend b{color:var(--ink);}.tam-strip{padding:6px 0 8px !important;margin-bottom:10px !important;}.tam-strip .tam-rings{flex-basis:58px !important;width:58px !important;}.ts-stats b{font-size:17px !important;}@media (min-width:768px){.next-bubble{right:236px !important;bottom:14px !important;max-width:330px !important;padding:8px 12px !important;font-size:11.5px !important;}.next-bubble .next-bubble-caret{display:none !important;}.next-bubble-text{font-size:11.5px !important;line-height:1.35 !important;}}</style>
 </head>
 <body>
 
@@ -1016,9 +1141,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       </figure>
 
       <div class="case-grid">
-        <div class="case-card rv" style="--d:3.2s"><div class="cc-k">Focus</div><div class="cc-h">Back the accounts worth winning.</div><div class="cc-b">Enterprise is 8% of accounts but 49% of the opportunity.</div><div class="cc-ch">Chapters 2–4</div></div>
+        <div class="case-card rv" style="--d:3.2s"><div class="cc-k">Focus</div><div class="cc-h">Back the right segment in the right market.</div><div class="cc-b">Enterprise in the Northeast. Mid-Market in the Southwest.</div><div class="cc-ch">Chapters 2–4</div></div>
         <div class="case-card rv" style="--d:3.6s"><div class="cc-k">Fix</div><div class="cc-h">Close the late-stage leak.</div><div class="cc-b">Win-rate enablement, timed by buying signals.</div><div class="cc-ch">Chapters 5–6</div></div>
-        <div class="case-card rv" style="--d:4.0s"><div class="cc-k">Align</div><div class="cc-h">Run one plan across sales and marketing.</div><div class="cc-b">One handoff rule and a 30-60-90 day roadmap.</div><div class="cc-ch">Chapters 7–8</div></div>
+        <div class="case-card rv" style="--d:4.0s"><div class="cc-k">Align</div><div class="cc-h">Run one plan across sales and marketing.</div><div class="cc-b">A funded play per market, one handoff rule, one 30-60-90 day roadmap.</div><div class="cc-ch">Chapter 7</div></div>
       </div>
 
       <div class="case-result rv" style="--d:4.6s"><span class="is-lead">The result</span><span>Pipeline <b>$19.2M → $27.8M</b></span><span>Net revenue retention <b>94% → 108%</b></span><span>MQL→SQL <b>21% → 32%</b></span><span>Blended ROI <b>2.7× → 3.9×</b></span></div>
@@ -1114,200 +1239,79 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
       <div class="exec-reco">
         <div class="exec-reco-eye">Executive Recommendation</div>
-        <div class="exec-reco-body">Invest first in Enterprise and Growth Accounts, where expansion economics are strongest. Keep Mid-Market efficient, and treat Emerging as optionality that doesn't dilute focus on the segments moving the P&amp;L today.</div>
+        <div class="exec-reco-body">Nationally, Enterprise and Growth Accounts lead on expansion economics. But a national ranking isn't a plan, so Maya tests it market by market next.</div>
       </div>
 
-      <div class="chapter-transition">Next, Maya asks: is the prize big enough? <strong>Total Addressable Market</strong> sizes it.</div>
+      <div class="chapter-transition">Next, Maya asks: does that hold in every market? <strong>Market sizing</strong> shows her.</div>
     </div>
 
     <!-- ══ STAGE 3: TAM ══ -->
     <div class="stage" id="stage-3">
-      <div class="stage-eyebrow">Chapter 03 — Total Addressable Market</div>
-      <h1 class="stage-title">How big is this, <em>really?</em></h1>
-      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Is the prize big enough to justify the bet?”</div><div class="sb-do">She sizes the market in three layers: 895 target accounts, 475 reachable today, 161 already active.</div></div></div>
+      <div class="stage-eyebrow">Chapter 03 — Market Sizing</div>
+      <h1 class="stage-title">Where is the headroom, <em>market by market?</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Is the prize big enough, and is it big everywhere?”</div><div class="sb-do">She sizes the market, then cuts it by region to see where the open opportunity actually sits.</div></div></div>
 
-      <p class="stage-body">The prize is 895 target accounts, but it isn't spread evenly. The value sits with a small group.</p>
-
-      <div class="tam-visual">
-        <div class="tam-rings">
-          <svg viewBox="0 0 240 240" style="width:100%;height:auto;" role="img" aria-label="Total addressable market of 895 accounts, narrowing to a serviceable addressable market of 475, narrowing to a serviceable obtainable market of 161 active today.">
-            <circle cx="120" cy="120" r="108" fill="#edf6f1" stroke="#dfe9e3" stroke-width="1"/>
-            <circle cx="120" cy="120" r="74" fill="#bfe0cd" stroke="#a8d4bd" stroke-width="1"/>
+      <div class="tam-strip">
+        <div class="tam-rings"><svg viewBox="0 0 240 240" style="width:100%;height:auto;" role="img" aria-label="895 target accounts, 475 reachable today, 161 active today.">
+            <circle cx="120" cy="120" r="108" fill="#edf6f1" stroke="#dfe9e3" stroke-width="2"/>
+            <circle cx="120" cy="120" r="74" fill="#bfe0cd" stroke="#a8d4bd" stroke-width="2"/>
             <circle cx="120" cy="120" r="42" fill="#4a9e7a"/>
-            <text x="120" y="115" text-anchor="middle" font-family="Inter,sans-serif" font-size="26" font-weight="800" fill="#ffffff">161</text>
-            <text x="120" y="131" text-anchor="middle" font-family="Inter,sans-serif" font-size="8" font-weight="700" fill="rgba(255,255,255,0.88)" letter-spacing="1.2">SOM TODAY</text>
-          </svg>
-        </div>
-        <div class="tam-breakdown">
-          <div class="tam-tier-row">
-            <div class="tam-tier-dot" style="background:#edf6f1;border:1px solid #dfe9e3;"></div>
-            <div>
-              <div class="tam-tier-label">TAM</div>
-              <div class="tam-tier-name">Total Addressable Market</div>
-              <div class="tam-tier-desc">Every account that fits our target profile</div>
-            </div>
-            <div class="tam-tier-val">895</div>
-          </div>
-          <div class="tam-tier-row">
-            <div class="tam-tier-dot" style="background:#bfe0cd;"></div>
-            <div>
-              <div class="tam-tier-label">SAM</div>
-              <div class="tam-tier-name">Serviceable Addressable Market</div>
-              <div class="tam-tier-desc">Reachable with today's motion and coverage</div>
-            </div>
-            <div class="tam-tier-val">475</div>
-          </div>
-          <div class="tam-tier-row">
-            <div class="tam-tier-dot" style="background:var(--green);"></div>
-            <div>
-              <div class="tam-tier-label">SOM</div>
-              <div class="tam-tier-name">Serviceable Obtainable Market</div>
-              <div class="tam-tier-desc">Active today — 18% share of TAM</div>
-            </div>
-            <div class="tam-tier-val">161</div>
-          </div>
-        </div>
+          </svg></div>
+        <div class="ts-stats"><div><b>895</b><span>TAM · target-profile accounts</span></div><div><b>475</b><span>SAM · reachable today</span></div><div><b>161</b><span>SOM · active, 18% of TAM</span></div></div>
       </div>
 
-      <div class="section-label">Where the value sits</div>
-      <div class="tc-wrap">
-        <div class="tc-legend"><span><i style="background:#c9cfcc"></i>Share of accounts</span><span><i style="background:var(--green)"></i>Share of opportunity</span></div>
-        <div class="tc-row focus" tabindex="0">
-          <div class="tc-name">Enterprise</div>
-          <div>
-            <div class="tc-bar acc"><div class="tc-track"><i style="width:13.3%"></i></div><span class="tc-val"><b>8%</b> of accounts · 70</span></div>
-            <div class="tc-bar opp"><div class="tc-track"><i style="width:81.7%"></i></div><span class="tc-val"><b>49%</b> of opportunity · $42M</span></div>
-          </div>
-          <div class="tc-tip show" role="note"><b>Focus here.</b> 8% of accounts hold 49% of the opportunity ($42M).</div>
-        </div>
-        <div class="tc-row" tabindex="0">
-          <div class="tc-name">Growth Accounts</div>
-          <div>
-            <div class="tc-bar acc"><div class="tc-track"><i style="width:36.7%"></i></div><span class="tc-val"><b>22%</b> of accounts · 195</span></div>
-            <div class="tc-bar opp"><div class="tc-track"><i style="width:56.7%"></i></div><span class="tc-val"><b>34%</b> of opportunity · $29M</span></div>
-          </div>
-          <div class="tc-tip" role="note">Second priority: 22% of accounts, 34% of the opportunity.</div>
-        </div>
-        <div class="tc-row" tabindex="0">
-          <div class="tc-name">Mid-Market</div>
-          <div>
-            <div class="tc-bar acc"><div class="tc-track"><i style="width:86.7%"></i></div><span class="tc-val"><b>52%</b> of accounts · 465</span></div>
-            <div class="tc-bar opp"><div class="tc-track"><i style="width:26.7%"></i></div><span class="tc-val"><b>16%</b> of opportunity · $14M</span></div>
-          </div>
-          <div class="tc-tip" role="note">Most of the accounts, but only 16% of the return. Keep it efficient.</div>
-        </div>
-        <div class="tc-row" tabindex="0">
-          <div class="tc-name">Emerging</div>
-          <div>
-            <div class="tc-bar acc"><div class="tc-track"><i style="width:30.0%"></i></div><span class="tc-val"><b>18%</b> of accounts · 165</span></div>
-            <div class="tc-bar opp"><div class="tc-track"><i style="width:1.7%"></i></div><span class="tc-val"><b>1%</b> of opportunity · $1M</span></div>
-          </div>
-          <div class="tc-tip" role="note">165 accounts, 1% of the opportunity. Selective pilots only.</div>
-        </div>
+      <div class="hx">
+        <div class="hx-legend"><b>Nationally, Enterprise looks like the answer</b> (8% of accounts, 49% of the opportunity). By market, it isn't. Open opportunity we don't hold yet, with the share of accounts we already hold:</div>
+        <div class="hx-head"><span></span><span>Enterprise</span><span>Growth</span><span>Mid-Market</span><span>Emerging</span><span></span></div>
+        <div class="hx-row go" style="--i:0"><div class="hx-mkt"><b>Northeast</b><small>268 accounts</small></div><div class="hx-cell focus" data-seg="Enterprise" title="Northeast Enterprise: $15.6M open, 24% of 34 accounts held"><b>$15.6M</b><small>24% held</small></div><div class="hx-cell" data-seg="Growth" title="Northeast Growth: $9.5M open, 18% of 78 accounts held"><b>$9.5M</b><small>18% held</small></div><div class="hx-cell" data-seg="Mid-Market" title="Northeast Mid-Market: $3.0M open, 17% of 120 accounts held"><b>$3.0M</b><small>17% held</small></div><div class="hx-cell" data-seg="Emerging" title="Northeast Emerging: $0.2M open, 3% of 36 accounts held"><b>$0.2M</b><small>3% held</small></div><div class="hx-call"><b>Focus: Northeast Enterprise.</b> The biggest open pool, and we hold just 24% of its 34 accounts.</div></div>
+        <div class="hx-row go second" style="--i:1"><div class="hx-mkt"><b>Southwest</b><small>235 accounts</small></div><div class="hx-cell" data-seg="Enterprise" title="Southwest Enterprise: $1.2M open, 67% of 6 accounts held"><b>$1.2M</b><small>67% held</small></div><div class="hx-cell" data-seg="Growth" title="Southwest Growth: $2.5M open, 29% of 24 accounts held"><b>$2.5M</b><small>29% held</small></div><div class="hx-cell focus" data-seg="Mid-Market" title="Southwest Mid-Market: $4.2M open, 11% of 155 accounts held"><b>$4.2M</b><small>11% held</small></div><div class="hx-cell" data-seg="Emerging" title="Southwest Emerging: $0.3M open, 4% of 50 accounts held"><b>$0.3M</b><small>4% held</small></div><div class="hx-call"><b>Focus: Southwest Mid-Market.</b> 138 open accounts, only 11% held, and deals close in 3–6 weeks.</div></div>
+        <div class="hx-row" style="--i:2"><div class="hx-mkt"><b>Southeast</b><small>212 accounts</small></div><div class="hx-cell" data-seg="Enterprise" title="Southeast Enterprise: $4.8M open, 43% of 14 accounts held"><b>$4.8M</b><small>43% held</small></div><div class="hx-cell" data-seg="Growth" title="Southeast Growth: $5.7M open, 21% of 48 accounts held"><b>$5.7M</b><small>21% held</small></div><div class="hx-cell" data-seg="Mid-Market" title="Southeast Mid-Market: $2.7M open, 18% of 110 accounts held"><b>$2.7M</b><small>18% held</small></div><div class="hx-cell" data-seg="Emerging" title="Southeast Emerging: $0.2M open, 5% of 40 accounts held"><b>$0.2M</b><small>5% held</small></div><div></div></div>
+        <div class="hx-row" style="--i:3"><div class="hx-mkt"><b>Midwest</b><small>180 accounts</small></div><div class="hx-cell" data-seg="Enterprise" title="Midwest Enterprise: $3.6M open, 62% of 16 accounts held"><b>$3.6M</b><small>62% held</small></div><div class="hx-cell" data-seg="Growth" title="Midwest Growth: $4.3M open, 36% of 45 accounts held"><b>$4.3M</b><small>36% held</small></div><div class="hx-cell" data-seg="Mid-Market" title="Midwest Mid-Market: $1.7M open, 28% of 80 accounts held"><b>$1.7M</b><small>28% held</small></div><div class="hx-cell" data-seg="Emerging" title="Midwest Emerging: $0.2M open, 5% of 39 accounts held"><b>$0.2M</b><small>5% held</small></div><div></div></div>
       </div>
 
       <div class="exec-reco">
         <div class="exec-reco-eye">Executive Recommendation</div>
-        <div class="exec-reco-body">Enterprise is 8% of accounts but ~49% of addressable revenue. Investment should follow value, not volume. Mid-Market carries the accounts but not the return; keep it efficient, don't overfund it.</div>
+        <div class="exec-reco-body">Fund Northeast Enterprise and Southwest Mid-Market first: the biggest pool and the fastest payback. Growth Accounts in the Southeast and Midwest queue next.</div>
       </div>
 
-      <div class="chapter-transition">Next, Maya asks: who exactly are we talking to? <strong>Audience Architecture</strong> answers it.</div>
+      <div class="chapter-transition">Next, Maya asks: what do we say in each market? <strong>Market Messaging</strong> answers it.</div>
     </div>
 
     <!-- ══ STAGE 5: Personas ══ -->
     <!-- ══ STAGE 3: Audience Architecture (Tiers + Personas merged) ══ -->
     <div class="stage" id="stage-4">
-      <div class="stage-eyebrow">Chapter 04 — Audience Architecture</div>
-      <h1 class="stage-title">Who gets the message. <em>And what it says.</em></h1>
-      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Now that we know which accounts, who exactly are we talking to?”</div><div class="sb-do">She tiers accounts by value, then writes a message for the buyer inside each one.</div></div></div>
-      
+      <div class="stage-eyebrow">Chapter 04 — Market Messaging</div>
+      <h1 class="stage-title">Who gets the message, <em>and where.</em></h1>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Same product, different buyer. Does one message fit both markets?”</div><div class="sb-do">She writes the message for each focus market and the buyers inside it, not one per tier.</div></div></div>
 
-      <!-- TIER SECTION — interactive: click a tier to reveal its personas below -->
-      
-      <div class="tier-grid" style="margin-bottom:8px;">
-
-        <div class="tier-card selectable active" data-tier="T1" tabindex="0" role="button" aria-pressed="true" style="--tc:#4a9e7a;">
-          <div class="tier-num">1</div>
-          <div class="tier-label">Enterprise</div>
-          <div class="tier-desc">Goal: expand, don't just retain.</div>
-          <div class="tier-stat">$250K–$1M+ typical ACV</div>
-        </div>
-
-        <div class="tier-card selectable" data-tier="T2" tabindex="0" role="button" aria-pressed="false" style="--tc:#5aa886;">
-          <div class="tier-num">2</div>
-          <div class="tier-label">Growth Accounts</div>
-          <div class="tier-desc">Goal: grow them toward Enterprise.</div>
-          <div class="tier-stat">$50K–$250K typical ACV</div>
-        </div>
-
-        <div class="tier-card selectable" data-tier="T3" tabindex="0" role="button" aria-pressed="false" style="--tc:#8fbfa9;">
-          <div class="tier-num">3</div>
-          <div class="tier-label">Mid-Market</div>
-          <div class="tier-desc">Goal: retain efficiently, no executive reach.</div>
-          <div class="tier-stat">$10K–$50K typical ACV</div>
-        </div>
-
-        <div class="tier-card selectable" data-tier="T4" tabindex="0" role="button" aria-pressed="false" style="--tc:#b7d3c4;--tc-text:#2e5c42;">
-          <div class="tier-num">4</div>
-          <div class="tier-label">Emerging</div>
-          <div class="tier-desc">Goal: educate first, then activate.</div>
-          <div class="tier-stat">Under $10K typical ACV</div>
-        </div>
-
+      <div class="mkt-tabs" role="tablist" aria-label="Focus market">
+        <button class="mkt-tab active" role="tab" aria-selected="true" data-mkt="ne"><span class="mt-k">Northeast</span><span class="mt-v">Enterprise</span><span class="mt-s">C-suite + Procurement · 6–9 month cycle</span></button>
+        <button class="mkt-tab" role="tab" aria-selected="false" data-mkt="sw"><span class="mt-k">Southwest</span><span class="mt-v">Mid-Market</span><span class="mt-s">Manager + Ops · 3–6 week cycle</span></button>
       </div>
-      
-
-      <!-- BRIDGE — caret tracks and points up to the selected tier -->
-      <div class="tier-persona-bridge-wrap">
-        <div class="tier-persona-bridge" id="tierPersonaBridge" style="left:12.5%;">
-          <div class="funnel-bridge-caret">⌃</div>
-          <div class="funnel-bridge-label" id="personaStepLabel">Personas inside Enterprise</div>
-        </div>
-      </div>
-
-      <!-- Persona cards — two per tier, toggled by the tier selection above -->
+      <div class="mkt-msg" id="mktMsg"><small>The market message</small><span id="mktMsgText">Lead with outcomes and supplier consolidation. Executives sign for strategic fit; procurement signs for lower supplier risk.</span></div>
       <div class="persona-primary">
-        <div class="persona-card-lg show" data-tier="T1" style="--pc-accent:#4a9e7a;">
+        <div class="persona-card-lg show" data-mkt="ne" style="--pc-accent:#4a9e7a;">
           <div class="pc2-head"><div class="pc-avatar">AM</div><div class="pc2-who"><div class="pc-name">Alexandra M.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">VP / C-Suite Leader · Executive Buyer</div></div></div>
           <div class="pc2-jp"><div><b>Job</b>Drive revenue growth and competitive positioning</div><div><b>Pain</b>Suppliers that don't scale or speak to strategic outcomes</div></div>
           <div class="pc2-say"><b>What we say</b>Business outcomes, ROI, and strategic fit</div>
         </div>
-        <div class="persona-card-lg show" data-tier="T1" style="--pc-accent:#4a9e7a;">
+        <div class="persona-card-lg show" data-mkt="ne" style="--pc-accent:#4a9e7a;">
           <div class="pc2-head"><div class="pc-avatar">DP</div><div class="pc2-who"><div class="pc-name">Derek P.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">VP Procurement · Procurement / Strategic Sourcing</div></div></div>
           <div class="pc2-jp"><div><b>Job</b>Protect margin and consolidate supplier risk</div><div><b>Pain</b>Fragmented vendors and unpredictable pricing</div></div>
           <div class="pc2-say"><b>What we say</b>Consolidated terms, reliability, and total cost of ownership</div>
         </div>
-        <div class="persona-card-lg" data-tier="T2" style="--pc-accent:#5aa886;">
-          <div class="pc2-head"><div class="pc-avatar">MT</div><div class="pc2-who"><div class="pc-name">Marcus T.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">Category / Ops Manager · Operational Buyer</div></div></div>
-          <div class="pc2-jp"><div><b>Job</b>Keep operations running — right product, right time</div><div><b>Pain</b>Stockouts, unreliable suppliers, limited category options</div></div>
-          <div class="pc2-say"><b>What we say</b>Availability, service levels, and ease of reorder</div>
-        </div>
-        <div class="persona-card-lg" data-tier="T2" style="--pc-accent:#5aa886;">
-          <div class="pc2-head"><div class="pc-avatar">PS</div><div class="pc2-who"><div class="pc-name">Priya S.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">Category / Merchandising Lead · Category Manager</div></div></div>
-          <div class="pc2-jp"><div><b>Job</b>Expand category penetration and assortment fit</div><div><b>Pain</b>Slow-moving SKUs and limited vendor support</div></div>
-          <div class="pc2-say"><b>What we say</b>Category growth data and merchandising support</div>
-        </div>
-        <div class="persona-card-lg" data-tier="T3" style="--pc-accent:#8fbfa9;">
+        <div class="persona-card-lg" data-mkt="sw" style="--pc-accent:#8fbfa9;">
           <div class="pc2-head"><div class="pc-avatar">MD</div><div class="pc2-who"><div class="pc-name">Morgan D.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">Ops / Facilities Manager · Operations Manager</div></div></div>
           <div class="pc2-jp"><div><b>Job</b>Keep day-to-day operations running within a fixed budget</div><div><b>Pain</b>Juggling multiple vendors without dedicated account support</div></div>
           <div class="pc2-say"><b>What we say</b>Reliable service and simple terms, no executive overhead needed</div>
         </div>
-        <div class="persona-card-lg" data-tier="T3" style="--pc-accent:#8fbfa9;">
+        <div class="persona-card-lg" data-mkt="sw" style="--pc-accent:#8fbfa9;">
           <div class="pc2-head"><div class="pc-avatar">CL</div><div class="pc2-who"><div class="pc-name">Casey L.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">Purchasing / Procurement Coordinator · Purchasing Coordinator</div></div></div>
           <div class="pc2-jp"><div><b>Job</b>Process orders quickly and keep reordering simple</div><div><b>Pain</b>Manual processes and slow vendor response times</div></div>
           <div class="pc2-say"><b>What we say</b>Streamlined ordering and fast turnaround</div>
         </div>
-        <div class="persona-card-lg" data-tier="T4" style="--pc-accent:#b7d3c4;--pc-accent-text:#2e5c42;">
-          <div class="pc2-head"><div class="pc-avatar">JK</div><div class="pc2-who"><div class="pc-name">Jordan K.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">Founder or Small Business Owner · Founder / Owner</div></div></div>
-          <div class="pc2-jp"><div><b>Job</b>Find a reliable, affordable partner to get started</div><div><b>Pain</b>Limited budget, limited time to evaluate options</div></div>
-          <div class="pc2-say"><b>What we say</b>Simple onboarding, fast time-to-value, low commitment</div>
-        </div>
-        <div class="persona-card-lg" data-tier="T4" style="--pc-accent:#b7d3c4;--pc-accent-text:#2e5c42;">
-          <div class="pc2-head"><div class="pc-avatar">TB</div><div class="pc2-who"><div class="pc-name">Taylor B.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">Frontline Operator · Ops Coordinator</div></div></div>
-          <div class="pc2-jp"><div><b>Job</b>Get set up quickly without heavy onboarding lift</div><div><b>Pain</b>Confusing tools and unclear next steps</div></div>
-          <div class="pc2-say"><b>What we say</b>Clear, guided setup and responsive support</div>
-        </div>
       </div>
+      <div class="mkt-next">Next in line: Growth Accounts in the Southeast and Midwest, with messaging built the same way.</div>
 
       <div class="chapter-transition">Next, Maya asks: where do prospects stall? The <strong>Prospect Funnel</strong> shows her.</div>
     </div>
@@ -1340,14 +1344,14 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
       <div class="section-label mix-title">Who the closed revenue comes from</div>
       <div class="tier-comp-bar">
-        <div class="tier-comp-seg" style="width:52%;background:var(--green);">T1 · 52%</div>
-        <div class="tier-comp-seg" style="width:33%;background:#8fbfa9;">T2 · 33%</div>
-        <div class="tier-comp-seg" style="width:15%;background:#cfe3d8;color:#2e5c42;">T3 · 15%</div>
+        <div class="tier-comp-seg" style="width:52%;background:#5b6360;">T1 · 52%</div>
+        <div class="tier-comp-seg" style="width:33%;background:#9aa3a0;">T2 · 33%</div>
+        <div class="tier-comp-seg" style="width:15%;background:#d3d8d5;color:#4b5563;">T3 · 15%</div>
       </div>
       <div class="mix-legend">
-        <div><b><span style="background:var(--green)"></span>Tier 1 · Actively pursue</b>Direct outreach, priority sales, executive access.</div>
-        <div><b><span style="background:#8fbfa9"></span>Tier 2 · Nurture to SQL</b>Demand generation, content nurture, intent monitoring.</div>
-        <div><b><span style="background:#cfe3d8"></span>Tier 3 · Qualify and promote</b>Broad awareness and low-cost digital; promote on engagement.</div>
+        <div><b><span style="background:#5b6360"></span>Tier 1 · Actively pursue</b>Direct outreach, priority sales, executive access.</div>
+        <div><b><span style="background:#9aa3a0"></span>Tier 2 · Nurture to SQL</b>Demand generation, content nurture, intent monitoring.</div>
+        <div><b><span style="background:#d3d8d5"></span>Tier 3 · Qualify and promote</b>Broad awareness and low-cost digital; promote on engagement.</div>
       </div>
 
       <div class="exec-reco">
@@ -1357,15 +1361,15 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
       <div class="chapter-transition">Next, Maya asks: which accounts are ready now? <strong>Signal Intelligence</strong> tells her.</div>
     </div>
-
-    <!-- ══ STAGE 8: Signal Intelligence ══ -->
     <div class="stage" id="stage-6">
       <div class="stage-eyebrow">Chapter 06 — Signal Intelligence</div>
       <h1 class="stage-title">Act on the right signal <em>at the right moment.</em></h1>
-      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“How do we know which accounts are ready right now?”</div><div class="sb-do">She sets up eleven buying and risk signals, so marketing and sales act on timing instead of guesswork.</div></div></div>
-      <p class="stage-body">Signals aren't generic — the ones worth acting on depend on where an account sits in the funnel. Click a stage below to see what to watch for there.</p>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“How do we know which accounts are ready right now?”</div><div class="sb-do">She sets up eleven signals across the funnel. Each stage has its own, so marketing and sales act on timing, not guesswork.</div></div></div>
+      <p class="stage-body">Every stage of the funnel has its own signals and its own plays. Watch the funnel light up, or click a stage.</p>
 
-      <div class="signal-funnel-strip">
+      <div class="sig-layout">
+        <div class="sig-left">
+        <div class="signal-funnel-strip">
         <div class="signal-funnel-stage active" data-stage="reach" tabindex="0" role="button" aria-pressed="true">
           <div class="sfs-label">Market Reach</div>
           <div class="sfs-val">2.4M</div>
@@ -1402,16 +1406,10 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           <div class="sfs-note">TTM closed</div>
         </div>
       </div>
-      <div class="tier-hint">Click a stage to see the signals that matter at that point in the buyer's journey.</div>
-
-      <div class="tier-persona-bridge-wrap">
-        <div class="tier-persona-bridge" id="signalBridge" style="left:7.14%;">
-          <div class="funnel-bridge-caret">⌃</div>
-          <div class="funnel-bridge-label" id="signalStageLabel">Signals at Market Reach</div>
         </div>
-      </div>
-
-      <div class="signal-set show" data-stage="reach">
+        <div class="sig-right">
+          <div class="sig-head"><span id="signalStageLabel">Market Reach</span><span class="sig-count" id="sigCount"></span><span class="sig-auto" id="sigAuto">Auto-tour · click any stage to take over</span></div>
+          <div class="signal-set show" data-stage="reach">
         <div class="signal-card">
           <div class="signal-header"><div class="signal-icon">📈</div><div><div class="signal-hed">Market Intent Surge</div><div class="signal-sub">Category search volume up 40% among target segments</div></div><span class="signal-tag tag-b">Awareness</span></div>
           <div class="signal-body">
@@ -1541,175 +1539,61 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
           </div>
         </div>
       </div>
+        </div>
+      </div>
 
       <div class="chapter-transition">Next, Maya asks: where does the money go? <strong>GTM Strategy</strong> decides it.</div>
     </div>
-
-    <!-- ══ STAGE 9: GTM Strategy ══ -->
     <div class="stage" id="stage-7">
       <div class="stage-eyebrow">Chapter 07 — GTM Strategy</div>
       <h1 class="stage-title">Where should we <em>invest?</em></h1>
-      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“With $150K and one quarter, where does each dollar go?”</div><div class="sb-do">She commits to one growth motion and funds only the four tactics that serve it.</div></div></div>
+      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“With $150K, which market gets what, and what does it return?”</div><div class="sb-do">She funds the two plays the map points to, compares what each returns, and sets one 90-day roadmap.</div></div></div>
 
-      <p class="stage-body">Maya commits to one growth motion for the quarter and funds only the tactics that serve it.</p>
+      <p class="stage-body" style="margin-bottom:18px;">Same $150K, two markets, two motions. Each play has its own message, tactics, sales handoff and return.</p>
 
-      <div class="strategy-hero">
-        <div class="sh-eye">Core strategy</div>
-        <div class="sh-title">Grow market share</div>
-        <div class="sh-share"><span class="sh-from">18.0%</span><span class="sh-arrow">→</span><span class="sh-to cu">~21.7%</span><span class="sh-lab">share</span></div>
-        <div class="sh-sub">Win 5% of the 660 whitespace accounts in Growth and Mid-Market, 74% of TAM, surfaced by the Funding Received signal.</div>
-        <div class="sh-kpis">Measured by <b>market share</b>, <b>new logos won</b> and <b>win rate</b>.</div>
-      </div>
-
-      <div class="section-label">The plan · $150K, four tactics, one motion</div>
-      <div class="alloc-bar" role="img" aria-label="Budget split: paid media $84K, SDR-assisted outreach $30K, executive workshops $21K, executive email nurture $15K">
-        <div class="alloc-seg" style="flex:84;background:var(--green)">$84K</div>
-        <div class="alloc-seg" style="flex:30;background:#5aa886">$30K</div>
-        <div class="alloc-seg" style="flex:21;background:#8fbfa9">$21K</div>
-        <div class="alloc-seg" style="flex:15;background:#b7d3c4;color:#2e5c42">$15K</div>
-      </div>
-      <div class="alloc-legend">Paid media · SDR outreach · Workshops · Email nurture</div>
-
-      <div class="tactic-list">
-        <div class="tactic" style="--tc:#4a9e7a"><div class="t-head"><span class="t-name">Paid media</span><span class="t-amt">$84K</span></div><div class="t-sub">Paid social + display retargeting</div>
-          <div class="t-align"><div><b>Marketing</b>Reaches Growth and Mid-Market whitespace with a category-momentum message.</div><div><b>Sales</b>Gets the engaged-account list, ranked by the Funding Received signal.</div></div><div class="t-out">≈ $0.8M pipeline</div></div>
-        <div class="tactic" style="--tc:#5aa886"><div class="t-head"><span class="t-name">SDR-assisted outreach</span><span class="t-amt">$30K</span></div><div class="t-sub">Signal-timed calls and email</div>
-          <div class="t-align"><div><b>Marketing</b>Hands SDRs the target list and a talk track.</div><div><b>Sales</b>SDRs call when a signal fires; qualified meetings pass to AEs.</div></div><div class="t-out">≈ $0.3M pipeline</div></div>
-        <div class="tactic" style="--tc:#8fbfa9"><div class="t-head"><span class="t-name">Executive workshops</span><span class="t-amt">$21K</span></div><div class="t-sub">Promotion to Growth Accounts</div>
-          <div class="t-align"><div><b>Marketing</b>Promotes the workshops and captures attendees.</div><div><b>Sales</b>AEs host and follow up, building multi-contact account plays.</div></div><div class="t-out">≈ $0.2M pipeline</div></div>
-        <div class="tactic" style="--tc:#b7d3c4"><div class="t-head"><span class="t-name">Executive email nurture</span><span class="t-amt">$15K</span></div><div class="t-sub">Decision-makers stay warm</div>
-          <div class="t-align"><div><b>Marketing</b>Keeps decision-makers warm until a signal fires.</div><div><b>Sales</b>Follows up on replies and clicks the same day.</div></div><div class="t-out">≈ $0.2M pipeline</div></div>
+      <div class="mc-grid">
+        <article class="mc-card"><div class="mc-badge">Bigger prize</div>
+          <div class="mc-top"><span class="mc-mkt">Northeast</span><span class="mc-seg">Enterprise</span></div>
+          <div class="mc-motion">Motion: Increase revenue</div>
+          <div class="mc-row"><span>Target</span><b>26 open accounts · $15.6M headroom</b></div>
+          <div class="mc-row"><span>Message</span><b>Outcomes and supplier consolidation</b></div>
+          <div class="mc-alloc"><div class="alloc-bar" role="img" aria-label="Budget split: paid media $32K, SDR outreach $33K, workshops $11K, email nurture $14K"><div class="alloc-seg" style="flex:32;background:#4a9e7a">$32K</div><div class="alloc-seg" style="flex:33;background:#5aa886">$33K</div><div class="alloc-seg" style="flex:11;background:#8fbfa9;color:#2e5c42">$11K</div><div class="alloc-seg" style="flex:14;background:#b7d3c4;color:#2e5c42">$14K</div></div><div class="alloc-legend">Paid media · SDR outreach · Workshops · Email</div></div>
+          <div class="mc-row"><span>Handoff</span><b>Multi-Contact Engagement signal, then a senior AE builds a multi-thread account plan</b></div>
+          <div class="mc-ret"><div class=""><span>Budget</span><b class="cu">$90K</b></div><div class=""><span>Pipeline</span><b class="cu">$1.0M</b></div><div class="hi"><span>Revenue</span><b class="cu">$377K</b></div><div class=""><span>Return</span><b class="cu">4.2×</b></div></div>
+        </article>
+        <article class="mc-card"><div class="mc-badge">Faster return</div>
+          <div class="mc-top"><span class="mc-mkt">Southwest</span><span class="mc-seg">Mid-Market</span></div>
+          <div class="mc-motion">Motion: Grow market share</div>
+          <div class="mc-row"><span>Target</span><b>138 open accounts · $4.2M headroom</b></div>
+          <div class="mc-row"><span>Message</span><b>Speed, simplicity, reliable service</b></div>
+          <div class="mc-alloc"><div class="alloc-bar" role="img" aria-label="Budget split: paid media $34K, SDR outreach $12K, workshops $8K, email nurture $6K"><div class="alloc-seg" style="flex:34;background:#4a9e7a">$34K</div><div class="alloc-seg" style="flex:12;background:#5aa886">$12K</div><div class="alloc-seg" style="flex:8;background:#8fbfa9;color:#2e5c42">$8K</div><div class="alloc-seg" style="flex:6;background:#b7d3c4;color:#2e5c42">$6K</div></div><div class="alloc-legend">Paid media · SDR outreach · Workshops · Email</div></div>
+          <div class="mc-row"><span>Handoff</span><b>MQL reaches SQL threshold on a Funding Received signal, then AE-led outreach</b></div>
+          <div class="mc-ret"><div class=""><span>Budget</span><b class="cu">$60K</b></div><div class=""><span>Pipeline</span><b class="cu">$0.8M</b></div><div class=""><span>Revenue</span><b class="cu">$289K</b></div><div class="hi"><span>Return</span><b class="cu">4.8×</b></div></div>
+        </article>
       </div>
 
       <div class="impact-strip" aria-label="Projected impact of the $150K plan">
         <div class="is-cell"><span>Invested</span><b class="cu">$150K</b></div>
-        <div class="is-cell"><span>Est. pipeline</span><b class="cu">$1.5M</b></div>
-        <div class="is-cell"><span>Est. revenue</span><b class="cu">$563K</b></div>
-        <div class="is-cell hi"><span>Blended ROI</span><b class="cu">3.8×</b></div>
+        <div class="is-cell"><span>Est. pipeline</span><b class="cu">$1.8M</b></div>
+        <div class="is-cell"><span>Est. revenue</span><b class="cu">$666K</b></div>
+        <div class="is-cell hi"><span>Blended return</span><b class="cu">4.4×</b></div>
       </div>
-      <div class="optimize-disclaimer">Directional scenario based on illustrative response and conversion assumptions. Not a media forecast.</div>
+      <div class="optimize-disclaimer" style="margin-bottom:18px;">Directional scenario from the page's response and conversion model, not a media forecast. Today's blended return is 3.9×.</div>
 
-      <div class="chapter-transition">Next, Maya asks: who picks it up from here? <strong>GTM Alignment</strong> answers it.</div>
+      <div class="section-label">90-day roadmap</div>
+      <div class="rm-grid">
+        <div class="rm-col"><span>30 days</span><b>Align</b><p>Confirm KPIs, validate segments, set baselines and data ownership.</p></div>
+        <div class="rm-col"><span>60 days</span><b>Activate</b><p>Launch signal use cases and one campaign per market. Equip sales with talk tracks.</p></div>
+        <div class="rm-col"><span>90 days</span><b>Optimize</b><p>Move budget toward the market earning more. Scale what works, present the next-quarter roadmap.</p></div>
+      </div>
+
+      <div class="close-cta">
+        <div class="ask"><b>The ask</b>Fund both plays now, review returns at day 90, and shift budget to whichever market earns more.</div>
+        <a class="cta-btn" href="/contact">Build this for your team →</a>
+      </div>
+
     </div>
-
-    <!-- ══ STAGE 8: Alignment ══ -->
-    <div class="stage" id="stage-8">
-      <div class="stage-eyebrow">Chapter 08 — GTM Alignment</div>
-      <h1 class="stage-title">One system. <em>Two engines.</em></h1>
-      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“How do we make sure sales picks up what marketing hands off?”</div><div class="sb-do">She writes one handoff rule and a 30-60-90 day plan that both teams sign.</div></div></div>
-      <p class="stage-body">Both teams run on the same segments, tiers and signals. Here is the handoff for Maya's strategy: grow market share.</p>
-
-      <div class="section-label" style="margin-top:6px;">How Marketing and Sales Connect</div>
-      <div class="handoff-flow">
-        <div class="handoff-node">
-          <div class="step-badge-row"><div class="step-badge">1</div><div class="step-name">Marketing Activates</div></div>
-          <div class="card-body" id="handoffMarketingBody">Display + LinkedIn campaigns target Growth Accounts and Mid-Market whitespace.</div>
-        </div>
-        <div class="handoff-arrow">→</div>
-        <div class="handoff-node">
-          <div class="step-badge-row"><div class="step-badge">2</div><div class="step-name">Handoff Trigger</div></div>
-          <div class="card-body" id="handoffTriggerBody">MQL reaches SQL threshold — Funding Received signal confirmed.</div>
-        </div>
-        <div class="handoff-arrow">→</div>
-        <div class="handoff-node">
-          <div class="step-badge-row"><div class="step-badge">3</div><div class="step-name">Sales Executes</div></div>
-          <div class="card-body" id="handoffSalesBody">AE-led outreach, multi-contact account plays, competitive positioning.</div>
-        </div>
-        <div class="handoff-arrow">→</div>
-        <div class="handoff-node highlight">
-          <div class="step-badge-row"><div class="step-badge">4</div><div class="step-name">Shared Outcome</div></div>
-          <div class="card-body" id="handoffOutcomeBody" style="font-weight:700;color:var(--ink);">Market Share</div>
-        </div>
-      </div>
-
-      <div class="roadmap-eyebrow">Execution Roadmap</div>
-      <div class="roadmap-grid">
-        <div class="roadmap-col">
-          <div class="roadmap-days">30 Days</div>
-          <div class="roadmap-phase">Align</div>
-          <ul class="roadmap-list">
-            <li>Confirm executive KPIs</li>
-            <li>Validate priority segments</li>
-            <li>Establish baseline performance</li>
-            <li>Align data sources and ownership</li>
-            <li>Identify immediate commercial friction</li>
-          </ul>
-        </div>
-        <div class="roadmap-col">
-          <div class="roadmap-days">60 Days</div>
-          <div class="roadmap-phase">Activate</div>
-          <ul class="roadmap-list">
-            <li>Launch priority signal use cases</li>
-            <li>Activate one cross-channel campaign</li>
-            <li>Enable sales talk tracks and account prioritization</li>
-            <li>Launch executive measurement cadence</li>
-            <li>Test initial investment assumptions</li>
-          </ul>
-        </div>
-        <div class="roadmap-col">
-          <div class="roadmap-days">90 Days</div>
-          <div class="roadmap-phase">Optimize</div>
-          <ul class="roadmap-list">
-            <li>Reallocate channel investment based on return</li>
-            <li>Refine segmentation and opportunity scoring</li>
-            <li>Scale proven activation plays</li>
-            <li>Operationalize marketing and sales feedback loops</li>
-            <li>Present executive performance and next-quarter roadmap</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="chapter-transition">Next, Maya asks: did it work? <strong>Impact</strong> is her answer.</div>
-    </div>
-
-    <!-- ══ STAGE 9: Outcomes ══ -->
-    <div class="stage" id="stage-9">
-      <div class="stage-eyebrow">Chapter 09 — Impact</div>
-      <h1 class="stage-title">The strategy is working. <em>Here's the proof.</em></h1>
-      <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Did it work? And would the CEO believe it?”</div><div class="sb-do">She takes the results back to the table, with every lift traced to the decision behind it.</div></div></div>
-      <p class="stage-body">Every metric below started somewhere before this system existed. This is the lift — and which part of the strategy drove it.</p>
-
-            
-
-      <div class="return-grid">
-        <div class="rg-card"><div class="rg-layer">Segmentation + TAM</div><div class="outcome-compare"><span class="outcome-before">14.5%</span><span class="outcome-arrow">→</span><span class="outcome-after">18.0%</span></div><div class="outcome-lift">+3.5 pts · Market Share</div></div>
-        <div class="rg-card"><div class="rg-layer">Customer Tiering</div><div class="outcome-compare"><span class="outcome-before">8.5%</span><span class="outcome-arrow">→</span><span class="outcome-after">14.3%</span></div><div class="outcome-lift">+5.8 pts · Revenue Growth</div></div>
-        <div class="rg-card"><div class="rg-layer">Prospect Funnel</div><div class="outcome-compare"><span class="outcome-before">$19.2M</span><span class="outcome-arrow">→</span><span class="outcome-after">$27.8M</span></div><div class="outcome-lift">+45% · Pipeline</div></div>
-        <div class="rg-card"><div class="rg-layer">GTM Strategy</div><div class="outcome-compare"><span class="outcome-before">2.7×</span><span class="outcome-arrow">→</span><span class="outcome-after">3.9×</span></div><div class="outcome-lift">+44% · Blended ROI</div></div>
-        <div class="rg-card"><div class="rg-layer">GTM Alignment</div><div class="outcome-compare"><span class="outcome-before">24.0%</span><span class="outcome-arrow">→</span><span class="outcome-after">31.9%</span></div><div class="outcome-lift">+7.9 pts · Win Rate</div></div>
-        <div class="rg-card"><div class="rg-layer">Signal Intelligence</div><div class="outcome-compare"><span class="outcome-before">21%</span><span class="outcome-arrow">→</span><span class="outcome-after">32%</span></div><div class="outcome-lift">+11 pts · MQL→SQL</div></div>
-        <div class="rg-card"><div class="rg-layer">Audience Architecture</div><div class="outcome-compare"><span class="outcome-before">$16.8K</span><span class="outcome-arrow">→</span><span class="outcome-after">$23.1K</span></div><div class="outcome-lift">+37% · Customer LTV</div></div>
-        <div class="rg-card"><div class="rg-layer">Full System</div><div class="outcome-compare"><span class="outcome-before">94%</span><span class="outcome-arrow">→</span><span class="outcome-after">108%</span></div><div class="outcome-lift">+14 pts · NRR</div></div>
-      </div>
-
-      <div class="section-label" style="margin-top:6px;">Executive Decision Framework</div>
-      <div class="decision-list">
-        <div class="decision-item">
-          <div class="decision-num">1</div>
-          <div class="decision-content"><span class="decision-q">Where should we invest?</span> <span class="decision-a">Enterprise and Growth Accounts — highest expansion and acquisition efficiency.</span></div>
-        </div>
-        <div class="decision-item">
-          <div class="decision-num">2</div>
-          <div class="decision-content"><span class="decision-q">What should we stop?</span> <span class="decision-a">Adding top-of-funnel spend into Mid-Market and Emerging beyond current levels.</span></div>
-        </div>
-        <div class="decision-item">
-          <div class="decision-num">3</div>
-          <div class="decision-content"><span class="decision-q">Which segments deserve more funding?</span> <span class="decision-a">Enterprise and Growth Accounts, per the Investment Matrix in Segmentation.</span></div>
-        </div>
-        <div class="decision-item">
-          <div class="decision-num">4</div>
-          <div class="decision-content"><span class="decision-q">Where is pipeline slowing?</span> <span class="decision-a">Opportunity → Closed Won. Win rate sits at 31.9%, below the 38% target.</span></div>
-        </div>
-        <div class="decision-item">
-          <div class="decision-num">5</div>
-          <div class="decision-content"><span class="decision-q">What should leadership do next?</span> <span class="decision-a">Fund win-rate enablement now; protect what's already ahead of plan; revisit at the 90-day mark.</span></div>
-        </div>
-      </div>
-
-      <div class="epilogue"><div class="sb-who">Maya, closing the loop</div><div class="sb-q">“I started with a 24.0% win rate. It's 31.9% now. The next 6.1 points are what we fund next quarter.”</div></div>
-    </div>
-
-  </main>
+      </main>
 </div>
 
 <!-- NEXT-CHAPTER BUBBLE -->
@@ -1733,13 +1617,11 @@ const STAGES = [
   { label: "The Case",                 eyebrow: "Prologue" },
   { label: "KPI Foundation",           eyebrow: "The Scoreboard" },
   { label: "Segmentation",             eyebrow: "Audience + Growth Objective" },
-  { label: "Total Addressable Market", eyebrow: "Intelligence Layer" },
-  { label: "Audience Architecture",    eyebrow: "Tiers + Personas" },
+  { label: "Market Sizing",            eyebrow: "Intelligence Layer" },
+  { label: "Market Messaging",         eyebrow: "Markets + Personas" },
   { label: "Prospect Funnel",          eyebrow: "Prospect Strategy" },
   { label: "Signal Intelligence",      eyebrow: "Activation Layer" },
   { label: "GTM Strategy",             eyebrow: "GTM Strategy" },
-  { label: "GTM Alignment",            eyebrow: "Operating Model" },
-  { label: "Impact",                   eyebrow: "Performance Layer" },
 ];
 
 let current = 0;
@@ -1749,7 +1631,6 @@ const sections = [
   {start:0, label:'Start here',           foundation:true},
   {start:1, label:'Diagnose',             foundation:false},
   {start:5, label:'Act',                  foundation:false},
-  {start:8, label:'Prove',                foundation:false},
 ];
 
 // Build rail
@@ -1829,32 +1710,20 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
 });
 
-// ── Audience Architecture: interactive tier → persona ──
-const TIER_ORDER = ['T1', 'T2', 'T3', 'T4'];
-const TIER_NAMES = { T1: 'Enterprise', T2: 'Growth Accounts', T3: 'Mid-Market', T4: 'Emerging' };
-function selectTier(tier) {
-  document.querySelectorAll('.tier-card.selectable').forEach(c => {
-    const isActive = c.dataset.tier === tier;
-    c.classList.toggle('active', isActive);
-    c.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+// ── Market Messaging: pick a focus market, the personas and message follow ──
+const MKT_MSG = {
+  ne: 'Lead with outcomes and supplier consolidation. Executives sign for strategic fit; procurement signs for lower supplier risk.',
+  sw: 'Lead with speed and simplicity. These teams sign for reliable service and fast turnaround, with no executive overhead.',
+};
+function selectMarket(m) {
+  document.querySelectorAll('.mkt-tab').forEach(t => {
+    const on = t.dataset.mkt === m;
+    t.classList.toggle('active', on); t.setAttribute('aria-selected', on ? 'true' : 'false');
   });
-  document.querySelectorAll('.persona-card-lg').forEach(c => {
-    c.classList.toggle('show', c.dataset.tier === tier);
-  });
-  const label = document.getElementById('personaStepLabel');
-  if (label) label.textContent = `Personas inside ${TIER_NAMES[tier]}`;
-  // Move the caret bridge to sit under the selected tier's column
-  const bridge = document.getElementById('tierPersonaBridge');
-  if (bridge) {
-    const index = TIER_ORDER.indexOf(tier);
-    const columnCenter = ((index + 0.5) / TIER_ORDER.length) * 100;
-    bridge.style.left = columnCenter + '%';
-  }
+  document.querySelectorAll('.persona-card-lg').forEach(c => c.classList.toggle('show', c.dataset.mkt === m));
+  const msg = document.getElementById('mktMsgText'); if (msg) msg.textContent = MKT_MSG[m];
 }
-document.querySelectorAll('.tier-card.selectable').forEach(c => {
-  c.addEventListener('click', () => selectTier(c.dataset.tier));
-  c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectTier(c.dataset.tier); } });
-});
+document.querySelectorAll('.mkt-tab').forEach(t => t.addEventListener('click', () => selectMarket(t.dataset.mkt)));
 
 // ── Signal Intelligence: click a funnel stage to see its signals ──
 const SIGNAL_STAGE_ORDER = ['reach', 'leads', 'mql', 'sql', 'opp', 'won', 'revenue'];
@@ -1865,20 +1734,39 @@ function selectSignalStage(stage) {
     c.classList.toggle('active', isActive);
     c.setAttribute('aria-pressed', isActive ? 'true' : 'false');
   });
-  document.querySelectorAll('.signal-set').forEach(s => {
-    s.classList.toggle('show', s.dataset.stage === stage);
+  let n = 0;
+  document.querySelectorAll('.signal-set').forEach(set => {
+    const on = set.dataset.stage === stage;
+    set.classList.toggle('show', on);
+    if (on) n = set.querySelectorAll('.signal-card').length;
   });
   const label = document.getElementById('signalStageLabel');
-  if (label) label.textContent = `Signals at ${SIGNAL_STAGE_NAMES[stage]}`;
-  const bridge = document.getElementById('signalBridge');
-  if (bridge) {
-    const index = SIGNAL_STAGE_ORDER.indexOf(stage);
-    bridge.style.left = ((index + 0.5) / SIGNAL_STAGE_ORDER.length) * 100 + '%';
-  }
+  if (label) label.textContent = SIGNAL_STAGE_NAMES[stage];
+  const count = document.getElementById('sigCount');
+  if (count) count.textContent = `${n} signal${n === 1 ? '' : 's'}`;
+}
+let sigTour = null;
+function stopSignalTour() {
+  if (sigTour) { clearInterval(sigTour); clearTimeout(sigTour); sigTour = null; }
+  const a = document.getElementById('sigAuto'); if (a) a.classList.add('off');
+}
+function startSignalTour() {
+  stopSignalTour();
+  const a = document.getElementById('sigAuto'); if (a) a.classList.remove('off');
+  selectSignalStage(SIGNAL_STAGE_ORDER[0]);
+  if (REDUCED) { a && a.classList.add('off'); return; }
+  let i = 0;
+  sigTour = setTimeout(() => {
+    sigTour = setInterval(() => {
+      i += 1;
+      if (i >= SIGNAL_STAGE_ORDER.length) { stopSignalTour(); selectSignalStage(SIGNAL_STAGE_ORDER[0]); return; }
+      selectSignalStage(SIGNAL_STAGE_ORDER[i]);
+    }, 2600);
+  }, 2400);
 }
 document.querySelectorAll('.signal-funnel-stage').forEach(c => {
-  c.addEventListener('click', () => selectSignalStage(c.dataset.stage));
-  c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectSignalStage(c.dataset.stage); } });
+  c.addEventListener('click', () => { stopSignalTour(); selectSignalStage(c.dataset.stage); });
+  c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); stopSignalTour(); selectSignalStage(c.dataset.stage); } });
 });
 
 // ── Next-chapter bubble: shows the transition text above the Next button ──
@@ -1895,8 +1783,12 @@ function updateNextBubble() {
 
   // Wait a frame so the removal above actually paints before re-adding —
   // otherwise the browser can collapse both changes and skip the transition.
+  clearTimeout(window.__bubbleT);
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => bubble.classList.add('show'));
+    requestAnimationFrame(() => {
+      bubble.classList.add('show');
+      if (window.innerWidth < 768) window.__bubbleT = setTimeout(() => bubble.classList.remove('show'), 8000);
+    });
   });
 }
 document.getElementById('nextBubbleClose').addEventListener('click', () => {
@@ -1910,6 +1802,8 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 document.querySelectorAll('.kd-card,.fss-cell,.rg-card,.profile-card,.signal-funnel-stage,.tam-tier-row,.tier-card,.decision-item').forEach(el => {
   el.style.setProperty('--i', [...el.parentElement.children].indexOf(el));
 });
+[100, 91, 82, 73, 65, 58, 58].forEach((w, i) => { const el = document.querySelectorAll('.signal-funnel-stage')[i]; if (el) el.style.setProperty('--w', w + '%'); });
+document.querySelectorAll('.mc-card,.rm-col,.mkt-tab').forEach(el => el.style.setProperty('--i', [...el.parentElement.children].indexOf(el)));
 const cuTimers = [];
 function countUp(el, delay, stage) {
   if (el.dataset.final === undefined) el.dataset.final = el.textContent;
@@ -1940,6 +1834,7 @@ function playStage(n) {
   document.querySelectorAll('.stage.instant').forEach(st => st.classList.remove('instant'));
   const stage = document.getElementById('stage-' + n);
   if (n === 2 && window.segRender) setTimeout(window.segRender, 30);
+  if (n === 6) startSignalTour(); else stopSignalTour();
   stage.querySelectorAll('.kd-val,.outcome-after,.fss-val,.gap-val strong,.cu').forEach(el => {
     const card = el.closest('.kd-card,.rg-card,.fss-cell,.mm,.is-cell');
     const idx = card ? [...card.parentElement.children].indexOf(card) : 0;
