@@ -63,6 +63,7 @@ Chapters 1 to 7 are static HTML plus small scripts. Where numbers must tie out, 
 
 - Open with a short executive summary that is a story first: the character, the company, the problem in two numbers, a three-move plan, then the returns.
 - Metric tiers: **primary** (three, big): revenue recovered, ad return, margin defended (EBITDA after program cost). **Secondary** (one small line, never boxes): win rate, payback, pipeline coverage, NRR. If a case has no ad spend or margin data, pick the three marketing-impact numbers the evidence supports and say what is assumed.
+- The summary shows targets, not results. Label every headline number "Target", use future tense, show "today → target" where a baseline exists, keep numbers modest in size with a dashed outline, and never count them up from zero. Results-style styling reads like a success story.
 - No charts in the summary that need explaining. Numbers carry it; charts belong in the chapters.
 - One focus per chapter. Highlight the one thing that matters and grey out the rest.
 - Make the answer non-obvious where the data supports it (the best segment differs by market).
