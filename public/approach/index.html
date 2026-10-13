@@ -1002,7 +1002,7 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .mkt-tab:focus-visible{outline:2px solid var(--ink);outline-offset:2px;}
 .mkt-msg{max-width:760px;margin-bottom:14px;padding:12px 16px;border-left:3px solid var(--green);background:var(--green-pale);font-size:13.5px;font-weight:600;color:var(--ink);line-height:1.45;border-radius:0 5px 5px 0;}
 .mkt-msg small{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:3px;}
-.mkt-next{max-width:760px;font-size:11px;color:var(--muted);margin-top:4px;}
+.mkt-next{max-width:900px;font-size:11px;color:var(--muted);margin-top:4px;}
 
 /* ── Ch 5: no green, only the leak ── */
 #stage-5 .exec-reco{background:#fffaf3;border-color:var(--sig-a);}
@@ -1117,7 +1117,32 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .es2-intro{margin-bottom:30px;}
   .es2-ask{flex-direction:column;gap:6px;}
 }
-</style>
+
+/* ═══ Ch 4: one product, two messages, side by side ═══ */
+.ms{display:grid;grid-template-columns:86px minmax(0,1fr) minmax(0,1fr);gap:14px 18px;max-width:900px;margin:6px 0 14px;align-items:start;}
+.ms-lab{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);padding-top:6px;}
+.ms-head{border-top:3px solid var(--green);padding-top:10px;}
+.ms-head span{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.ms-head b{display:block;font-size:22px;font-weight:800;letter-spacing:-.6px;color:var(--ink);margin:2px 0 3px;}
+.ms-head small{font-size:11px;color:var(--muted);}
+.ms-lead{font-size:15px;font-weight:700;line-height:1.35;color:var(--ink);padding-top:4px;}
+.ms-say{position:relative;}
+.ms-say q{display:block;quotes:none;background:var(--green-pale);border-left:3px solid var(--green);border-radius:0 6px 6px 0;padding:14px 16px;font-size:15.5px;font-weight:600;font-style:italic;line-height:1.45;color:var(--ink);}
+.ms-who{display:grid;gap:10px;}
+.ms-who div{font-size:11.5px;line-height:1.45;color:var(--body);}
+.ms-who b{display:inline;font-size:12px;font-weight:800;color:var(--ink);}
+.ms-who small{margin-left:6px;font-size:10px;color:var(--muted);}
+.ms-who span{display:block;margin-top:2px;}
+.stage.active .ms .ms-cell,.stage.active .ms .ms-lab{animation:rvIn .6s cubic-bezier(.2,.7,.2,1) var(--d,0s) both;}
+.stage.active .ms-say q{animation:wipeX .9s cubic-bezier(.3,.7,.2,1) calc(var(--d,0s) + .2s) both;}
+@media (max-width:767px){
+  .ms{grid-template-columns:1fr;gap:10px;}
+  .ms-lab{padding-top:14px;}
+  .ms-head,.ms-lead,.ms-say,.ms-who{position:relative;}
+  .ms-cell[data-mkt]:not(.ms-head)::before{content:attr(data-mkt);display:block;font-size:8.5px;font-weight:800;text-transform:uppercase;letter-spacing:.9px;color:var(--green);margin-bottom:4px;}
+  .ms-lab:first-child{display:none;}
+}
+.stage.active .mkt-next{animation:rvIn .6s ease 4.8s both;}</style>
 </head>
 <body>
 
@@ -1279,34 +1304,32 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <h1 class="stage-title">Who gets the message, <em>and where.</em></h1>
       <div class="story-beat"><div class="sb-avatar" aria-hidden="true">M</div><div><div class="sb-who">Maya, asking</div><div class="sb-q">“Same product, different buyer. Does one message fit both markets?”</div><div class="sb-do">She writes the message for each focus market and the buyers inside it, not one per tier.</div></div></div>
 
-      <div class="mkt-tabs" role="tablist" aria-label="Focus market">
-        <button class="mkt-tab active" role="tab" aria-selected="true" data-mkt="ne"><span class="mt-k">Northeast</span><span class="mt-v">Enterprise</span><span class="mt-s">C-suite + Procurement · 6–9 month cycle</span></button>
-        <button class="mkt-tab" role="tab" aria-selected="false" data-mkt="sw"><span class="mt-k">Southwest</span><span class="mt-v">Mid-Market</span><span class="mt-s">Manager + Ops · 3–6 week cycle</span></button>
-      </div>
-      <div class="mkt-msg" id="mktMsg"><small>The market message</small><span id="mktMsgText">Lead with outcomes and supplier consolidation. Executives sign for strategic fit; procurement signs for lower supplier risk.</span></div>
-      <div class="persona-primary">
-        <div class="persona-card-lg show" data-mkt="ne" style="--pc-accent:#4a9e7a;">
-          <div class="pc2-head"><div class="pc-avatar">AM</div><div class="pc2-who"><div class="pc-name">Alexandra M.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">VP / C-Suite Leader · Executive Buyer</div></div></div>
-          <div class="pc2-jp"><div><b>Job</b>Drive revenue growth and competitive positioning</div><div><b>Pain</b>Suppliers that don't scale or speak to strategic outcomes</div></div>
-          <div class="pc2-say"><b>What we say</b>Business outcomes, ROI, and strategic fit</div>
+      <p class="stage-body">Same company, same product, two different messages. The market changes what Maya leads with, not just the tier.</p>
+
+      <div class="ms">
+        <div class="ms-lab"></div>
+        <div class="ms-cell ms-head" data-mkt="Northeast" style="--d:.5s"><span>Northeast</span><b>Enterprise</b><small>C-suite + Procurement · 6–9 month cycle</small></div>
+        <div class="ms-cell ms-head" data-mkt="Southwest" style="--d:.8s"><span>Southwest</span><b>Mid-Market</b><small>Manager + Ops · 3–6 week cycle</small></div>
+
+        <div class="ms-lab" style="--d:1.3s">Lead with</div>
+        <div class="ms-cell ms-lead" data-mkt="Northeast" style="--d:1.4s">Business outcomes and supplier consolidation</div>
+        <div class="ms-cell ms-lead" data-mkt="Southwest" style="--d:1.7s">Speed, simplicity and reliable service</div>
+
+        <div class="ms-lab" style="--d:2.3s">Sounds like</div>
+        <div class="ms-cell ms-say" data-mkt="Northeast" style="--d:2.4s"><q>One partner for every site. Fewer vendors, lower risk, clear ROI.</q></div>
+        <div class="ms-cell ms-say" data-mkt="Southwest" style="--d:3.0s"><q>Orders in, trucks out. Same-week delivery and one number to call.</q></div>
+
+        <div class="ms-lab" style="--d:3.8s">Who hears it</div>
+        <div class="ms-cell ms-who" data-mkt="Northeast" style="--d:3.9s">
+          <div><b>Alexandra M.</b><small>VP / C-Suite · decides</small><span>Business outcomes, ROI, and strategic fit</span></div>
+          <div><b>Derek P.</b><small>VP Procurement · influences</small><span>Consolidated terms, reliability, and total cost of ownership</span></div>
         </div>
-        <div class="persona-card-lg show" data-mkt="ne" style="--pc-accent:#4a9e7a;">
-          <div class="pc2-head"><div class="pc-avatar">DP</div><div class="pc2-who"><div class="pc-name">Derek P.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">VP Procurement · Procurement / Strategic Sourcing</div></div></div>
-          <div class="pc2-jp"><div><b>Job</b>Protect margin and consolidate supplier risk</div><div><b>Pain</b>Fragmented vendors and unpredictable pricing</div></div>
-          <div class="pc2-say"><b>What we say</b>Consolidated terms, reliability, and total cost of ownership</div>
-        </div>
-        <div class="persona-card-lg" data-mkt="sw" style="--pc-accent:#8fbfa9;">
-          <div class="pc2-head"><div class="pc-avatar">MD</div><div class="pc2-who"><div class="pc-name">Morgan D.<span class="pc-pill dm">Decision-Maker</span></div><div class="pc-title">Ops / Facilities Manager · Operations Manager</div></div></div>
-          <div class="pc2-jp"><div><b>Job</b>Keep day-to-day operations running within a fixed budget</div><div><b>Pain</b>Juggling multiple vendors without dedicated account support</div></div>
-          <div class="pc2-say"><b>What we say</b>Reliable service and simple terms, no executive overhead needed</div>
-        </div>
-        <div class="persona-card-lg" data-mkt="sw" style="--pc-accent:#8fbfa9;">
-          <div class="pc2-head"><div class="pc-avatar">CL</div><div class="pc2-who"><div class="pc-name">Casey L.<span class="pc-pill inf">Influencer</span></div><div class="pc-title">Purchasing / Procurement Coordinator · Purchasing Coordinator</div></div></div>
-          <div class="pc2-jp"><div><b>Job</b>Process orders quickly and keep reordering simple</div><div><b>Pain</b>Manual processes and slow vendor response times</div></div>
-          <div class="pc2-say"><b>What we say</b>Streamlined ordering and fast turnaround</div>
+        <div class="ms-cell ms-who" data-mkt="Southwest" style="--d:4.2s">
+          <div><b>Morgan D.</b><small>Ops Manager · decides</small><span>Reliable service and simple terms, no executive overhead needed</span></div>
+          <div><b>Casey L.</b><small>Purchasing Coordinator · influences</small><span>Streamlined ordering and fast turnaround</span></div>
         </div>
       </div>
-      <div class="mkt-next">Next in line: Growth Accounts in the Southeast and Midwest, with messaging built the same way.</div>
+      <div class="mkt-next">Example headlines are illustrative. Next in line: Growth Accounts in the Southeast and Midwest, with messaging built the same way.</div>
 
       <div class="chapter-transition">Next, Maya asks: where do prospects stall? The <strong>Prospect Funnel</strong> shows her.</div>
     </div>
@@ -1705,21 +1728,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
 });
 
-// ── Market Messaging: pick a focus market, the personas and message follow ──
-const MKT_MSG = {
-  ne: 'Lead with outcomes and supplier consolidation. Executives sign for strategic fit; procurement signs for lower supplier risk.',
-  sw: 'Lead with speed and simplicity. These teams sign for reliable service and fast turnaround, with no executive overhead.',
-};
-function selectMarket(m) {
-  document.querySelectorAll('.mkt-tab').forEach(t => {
-    const on = t.dataset.mkt === m;
-    t.classList.toggle('active', on); t.setAttribute('aria-selected', on ? 'true' : 'false');
-  });
-  document.querySelectorAll('.persona-card-lg').forEach(c => c.classList.toggle('show', c.dataset.mkt === m));
-  const msg = document.getElementById('mktMsgText'); if (msg) msg.textContent = MKT_MSG[m];
-}
-document.querySelectorAll('.mkt-tab').forEach(t => t.addEventListener('click', () => selectMarket(t.dataset.mkt)));
-
 // ── Signal Intelligence: click a funnel stage to see its signals ──
 const SIGNAL_STAGE_ORDER = ['reach', 'leads', 'mql', 'sql', 'opp', 'won', 'revenue'];
 const SIGNAL_STAGE_NAMES = { reach: 'Market Reach', leads: 'Leads', mql: 'MQL', sql: 'SQL', opp: 'Opportunity', won: 'Closed Won', revenue: 'Revenue' };
@@ -1906,7 +1914,7 @@ playStage(0);
 
 // ── V3: every chapter reveals in sequence, like the prologue ──
 document.querySelectorAll('.stage:not(#stage-0)').forEach(st => {
-  const kids = [...st.children].filter(c => !c.matches('.stage-eyebrow,.stage-title,.chapter-transition'));
+  const kids = [...st.children].filter(c => !c.matches('.stage-eyebrow,.stage-title,.chapter-transition,.ms,.mkt-next'));
   const step = Math.min(.5, 3 / Math.max(kids.length, 1));
   kids.forEach((c, k) => { c.classList.add('rv'); c.style.setProperty('--d', (.3 + k * step).toFixed(2) + 's'); });
 });
