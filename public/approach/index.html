@@ -700,6 +700,41 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .gap-val{margin-bottom:8px;}
   .gap-lab{margin-top:4px;}
 }
+
+/* ── MOTION: charts and cards load in ── */
+@keyframes rvIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+@keyframes wipeX{from{clip-path:inset(0 100% 0 0);}to{clip-path:inset(0 0 0 0);}}
+@keyframes ringIn{from{opacity:0;transform:scale(.55);}to{opacity:1;transform:scale(1);}}
+@keyframes lineDrop{from{transform:scaleY(0);}to{transform:scaleY(1);}}
+@keyframes softIn{from{opacity:0;}to{opacity:1;}}
+
+.stage.active .rv{animation:rvIn .6s cubic-bezier(.2,.7,.2,1) var(--d,.15s) both;}
+.stage.active :is(.story-beat,.kd-card,.fss-cell,.rg-card,.profile-card,.signal-funnel-stage,.tam-tier-row,.tier-card,.decision-item,.epilogue){
+  animation:rvIn .55s cubic-bezier(.2,.7,.2,1) calc(.12s + var(--i,0) * 70ms) both;
+}
+.stage.active :is(.tam-seg-bar-fill,.tier-comp-seg,.gap-fill){
+  animation:wipeX .95s cubic-bezier(.3,.7,.2,1) var(--bd,.45s) both;
+}
+.stage.active .gap-rem{animation:softIn .6s ease calc(var(--bd,.45s) + .85s) both;}
+.stage.active .gap-target{transform-origin:top;animation:lineDrop .45s ease calc(var(--bd,.45s) - .15s) both;}
+.stage.active .gap-row:nth-of-type(2) :is(.gap-fill,.gap-rem,.gap-target){--bd:1.1s;}
+.stage.active .tam-rings circle{transform-box:fill-box;transform-origin:center;animation:ringIn .7s cubic-bezier(.2,.8,.2,1) both;}
+.stage.active .tam-rings circle:nth-of-type(1){animation-delay:.15s;}
+.stage.active .tam-rings circle:nth-of-type(2){animation-delay:.4s;}
+.stage.active .tam-rings circle:nth-of-type(3){animation-delay:.65s;}
+.stage.active .tam-rings text{animation:softIn .5s ease 1s both;}
+
+.inherit-strip{display:flex;flex-wrap:wrap;gap:4px 16px;margin-top:14px;padding-top:12px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--muted);}
+.inherit-strip b{color:var(--ink);font-weight:700;}
+.inherit-strip .is-lead{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);align-self:center;}
+.scqa-row{padding:11px 0;}
+.scqa .gap-chart{margin:6px 0 10px;}
+
+/* click anywhere in the prologue to skip the sequence */
+.stage.instant *{animation-delay:0s !important;animation-duration:.01s !important;}
+@media (prefers-reduced-motion:reduce){
+  .stage.active *{animation:none !important;}
+}
 </style>
 </head>
 <body>
@@ -733,37 +768,29 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
       <h1 class="stage-title">Revenue is growing. <em>So what's the problem?</em></h1>
 
       <div class="scqa">
-        <div class="scqa-row"><div class="scqa-k">The situation</div><div class="scqa-v">Maya Chen has just joined Meridian Supply as VP of Marketing. Revenue grew <b>8.5%</b> last year and the leadership team is in a good mood.</div></div>
-        <div class="scqa-row"><div class="scqa-k">The complication</div><div class="scqa-v">Only <b>24.0%</b> of opportunities become customers, against a <b>38%</b> target. Marketing returns <b>2.7×</b> on spend. Net revenue retention is <b>94%</b>, so the customers Meridian already has are spending less in total each year.</div></div>
-        <div class="scqa-row q"><div class="scqa-k">The question</div><div class="scqa-v">Where is growth leaking, and what would a system that stops it look like?</div></div>
-        <div class="scqa-row a"><div class="scqa-k">Maya's answer</div><div class="scqa-v">Build one connected system: a shared scoreboard, sharper segments, signal-driven timing, and a single plan that sales and marketing both run. The next nine chapters follow her through it, one question at a time.</div></div>
-      </div>
+        <div class="scqa-row rv" style="--d:.5s"><div class="scqa-k">The situation</div><div class="scqa-v">Maya Chen just joined Meridian Supply as VP of Marketing. Revenue grew <b>8.5%</b> last year, and the mood is good.</div></div>
+        <div class="scqa-row rv" style="--d:1.6s"><div class="scqa-k">The complication</div><div class="scqa-v">But only <b>24.0%</b> of opportunities become customers. The target is <b>38%</b>.</div></div>
 
-      <figure class="gap-chart">
-        <div class="section-eye">Win rate · share of opportunities that become customers</div>
-        <div class="gap-scale">
-        <div class="gap-row">
+        <figure class="gap-chart rv" style="--d:2.7s;--bd:3.0s">
+          <div class="section-eye">Win rate · opportunities that become customers</div>
+          <div class="gap-scale"><div class="gap-row">
           <div class="gap-lab">What Maya inherits</div>
           <div class="gap-track" role="img" aria-label="What Maya inherits: win rate 24.0%, 14.0 points below the 38% target">
             <div class="gap-fill" style="width:48.0%"></div>
             <div class="gap-rem" style="left:48.0%;width:28.0%"></div>
             <div class="gap-target" style="left:76.0%"></div>
           </div>
-          <div class="gap-val"><strong>24.0%</strong><span class="short">▼ 14.0 pts below target</span></div>
+          <div class="gap-val"><strong data-cu-delay="3000">24.0%</strong><span class="short">▼ 14.0 pts below target</span></div>
         </div>
-        <div class="gap-axis" aria-hidden="true"><span style="left:0;transform:none">0%</span><span class="tgt" style="left:76.0%">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
-        </div>
-        <div class="gap-note">Maya's first question isn't "how do we generate more leads?" It's "why does a qualified opportunity so rarely turn into a customer?"</div>
-      </figure>
+         <div class="gap-axis" aria-hidden="true"><span style="left:0;transform:none">0%</span><span class="tgt" style="left:76.0%">38% target</span><span style="left:100%;transform:translateX(-100%)">50%</span></div>
+          </div>
+          <div class="inherit-strip rv" style="--d:4.2s"><span class="is-lead">Also on her desk</span><span>Market share <b>14.5%</b></span><span>Pipeline <b>$19.2M</b></span><span>MQL→SQL <b>21%</b></span><span>ROI <b>2.7×</b></span><span>Retention <b>94%</b></span><span>LTV <b>$16.8K</b></span></div>
+        </figure>
 
-      <div class="section-label">Everything else Maya inherits</div>
-      <div class="kpi-dash" id="dash-0">
-        <div class="kd-card"><div class="kd-eye">Market Share</div><div class="kd-val">14.5%</div><div class="kd-delta flat">Before</div></div>
-        <div class="kd-card"><div class="kd-eye">Pipeline</div><div class="kd-val">$19.2M</div><div class="kd-delta flat">Before</div></div>
-        <div class="kd-card"><div class="kd-eye">MQL → SQL</div><div class="kd-val">21%</div><div class="kd-delta flat">Before</div></div>
-        <div class="kd-card"><div class="kd-eye">Customer LTV</div><div class="kd-val">$16.8K</div><div class="kd-delta flat">Before</div></div>
+        <div class="scqa-row q rv" style="--d:5.2s"><div class="scqa-k">The question</div><div class="scqa-v">Where is growth leaking, and what would stop it?</div></div>
+        <div class="scqa-row a rv" style="--d:6.2s"><div class="scqa-k">Maya's answer</div><div class="scqa-v">One connected system that sales and marketing run together. Nine chapters, one question at a time.</div></div>
       </div>
-      <p class="story-note">Maya and Meridian Supply are illustrative, a stand-in so the method is easy to follow. The framework and the figures are the ones used on every page that follows.</p>
+      <p class="story-note rv" style="--d:7s">Maya and Meridian Supply are illustrative; the framework and figures are the ones used throughout.</p>
 
       <div class="chapter-transition">Maya's first move: <strong>agree on what success looks like.</strong></div>
     </div>
@@ -1876,6 +1903,7 @@ function goTo(n) {
 
   document.getElementById('stageArea').scrollTop = 0;
   updateNextBubble();
+  if (typeof playStage === 'function') playStage(current);
   if (current === 7) {
     scheduleEconomicsReveal();
   } else if (econRevealTimeout) {
@@ -2288,6 +2316,53 @@ document.getElementById('nextBubbleClose').addEventListener('click', () => {
 });
 updateNextBubble();
 
+
+// ── Motion: index stagger groups, count numbers up, let the prologue be skipped ──
+const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+document.querySelectorAll('.kd-card,.fss-cell,.rg-card,.profile-card,.signal-funnel-stage,.tam-tier-row,.tier-card,.decision-item').forEach(el => {
+  el.style.setProperty('--i', [...el.parentElement.children].indexOf(el));
+});
+const cuTimers = [];
+function countUp(el, delay, stage) {
+  if (el.dataset.final === undefined) el.dataset.final = el.textContent;
+  const final = el.dataset.final;
+  const m = final.match(/^([^0-9]*)([0-9][0-9,]*\.?[0-9]*)(.*)$/);
+  el.textContent = final;
+  if (REDUCED || !m) return;
+  const raw = m[2], dec = (raw.split('.')[1] || '').length, commas = raw.includes(',');
+  const target = parseFloat(raw.replace(/,/g, ''));
+  const fmt = v => {
+    let t = v.toFixed(dec);
+    if (commas) { const [i, d] = t.split('.'); t = i.replace(/\B(?=(\d{3})+(?!\d))/g, ',') + (d ? '.' + d : ''); }
+    return m[1] + t + m[3];
+  };
+  el.textContent = fmt(0);
+  cuTimers.push(setTimeout(() => {
+    const t0 = performance.now(), dur = 1000;
+    (function tick(now) {
+      if (!stage.classList.contains('active')) { el.textContent = final; return; }
+      const p = stage.classList.contains('instant') ? 1 : Math.min(1, (now - t0) / dur);
+      el.textContent = p >= 1 ? final : fmt(target * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }, delay));
+}
+function playStage(n) {
+  cuTimers.splice(0).forEach(clearTimeout);
+  document.querySelectorAll('.stage.instant').forEach(st => st.classList.remove('instant'));
+  const stage = document.getElementById('stage-' + n);
+  stage.querySelectorAll('.kd-val,.outcome-after,.fss-val,.gap-val strong').forEach(el => {
+    const card = el.closest('.kd-card,.rg-card,.fss-cell');
+    const idx = card ? [...card.parentElement.children].indexOf(card) : 0;
+    const delay = el.dataset.cuDelay ? +el.dataset.cuDelay : 250 + idx * 70;
+    countUp(el, delay, stage);
+  });
+}
+document.getElementById('stageArea').addEventListener('click', () => {
+  const st = document.querySelector('.stage.active');
+  if (st) st.classList.add('instant');
+});
+playStage(0);
 </script>
 </body>
 </html>
