@@ -1,6 +1,6 @@
 # GTM Strategy page generator
 
-Builds `public/gtm-strategy/index.html`: a stepped story about one market, shown on a zoomed-in state map with market and competitive intelligence layered on county by county. Meridian Supply and Maya Chen are illustrative. All figures are illustrative and the page says so on every map.
+Builds `public/gtm-strategy/index.html`: a stepped story about one market, shown on a zoomed-in state map with market and competitive intelligence layered on county by county. Meridian Mechanical (a commercial HVAC and mechanical services contractor) and Maya Chen are illustrative. All figures are illustrative and the page says so on every map.
 
 ## Rebuild the page
 
@@ -26,7 +26,7 @@ Edit `MARKET` at the top of `gen_market.py`:
 | `fips`, `counties` | State FIPS and each county's name, opportunity weight and territory |
 | `neighbors` | Surrounding states drawn for context (state FIPS) |
 | `cities`, `pois` | City coordinates, and the market-intelligence points (port, airport, hubs) with a one-line reason each |
-| `competitors`, `reach_miles` | Depot cities per competitor and how far each reaches. Open ground and win rates come from this |
+| `competitors`, `reach_miles` | Branch cities per competitor and how far each service area reaches. Open ground and win rates come from this |
 | `territories` | Name, owner, colour, message, hub city, and the response curve (`cap`, `k`) used for budget |
 | `named`, `n_random_accounts` | Named target accounts (fit, intent, signal) and how many scored dots to add |
 | `budget`, `total_opportunity_m` | Quarterly budget in $K, and addressable opportunity in $M |
@@ -39,7 +39,7 @@ Replace illustrative values with sourced ones for a real client, and tag each as
 | Step | Map layer | Intelligence |
 |---|---|---|
 | Market | Opportunity by county, top cluster outlined | Port, airport, biotech corridor, logistics hubs |
-| Competition | Depots, reach circles, open ground | Competitor coverage and white space |
+| Competition | Branches, reach circles, open ground | Competitor coverage and white space |
 | Customer | Scored account dots | Fit and intent, tiering, one record per account |
 | Journey | Win rate by county | Where buyers stall, by competitor density |
 | Touchpoints | Territory media zones | Geo-targeted advertising and message by zone |
