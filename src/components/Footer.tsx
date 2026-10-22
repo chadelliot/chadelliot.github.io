@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 const footerLinks = [
   { label: "About", href: "/" },
   { label: "My Approach", href: "/approach/", staticPage: true },
+  { label: "GTM Strategy", href: "/gtm-strategy/", staticPage: true },
   { label: "Career", href: "/career" },
   { label: "Skills", href: "/skills" },
   { label: "Contact", href: "/contact" },

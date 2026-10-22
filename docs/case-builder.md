@@ -78,3 +78,9 @@ Chapters 1 to 7 are static HTML plus small scripts. Where numbers must tie out, 
 3. Search the file for stray names from the previous company.
 4. Re-read every assumption and every "stated" number against the source notes.
 5. Do not publish until the owner approves. Work on a branch and open a pull request.
+
+## The GTM Strategy page (a second kind of case)
+
+`/gtm-strategy/` shows how a go-to-market strategy comes together for one market, on a zoomed-in state map. It is generated, not hand-edited: see `scripts/gtm-map/README.md`. For a real client, the market data in `scripts/gtm-map/gen_market.py` (counties, competitor depots, territories, named accounts, budget) should come from their calls and data, tagged stated, derived or assumed, and the illustrative label removed only once everything on the map is sourced.
+
+The two approaches in the My Approach dropdown: **Growth Engine** (`/approach/`, the signal-based marketing system) and **GTM Strategy** (`/gtm-strategy/`, one market end to end).
