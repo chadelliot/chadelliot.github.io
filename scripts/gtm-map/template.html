@@ -324,7 +324,7 @@ const label = (parent, x, y, text, cls = '', dx = 16, dy = 4) => { const t = mk(
 Object.entries(D.corridors).forEach(([n, d]) => mk('path', { d, class: 'corr' }, $('#g-corr')));
 // market intelligence
 D.pois.forEach((p, i) => { const g = ic($('#g-poi'), p.x, p.y, p.icon, '', i); g.dataset.k = p.label; label($('#g-poi'), p.x, p.y, p.label, '', 17, 4); });
-// competitor depots and reach
+// competitor branches and reach
 D.competitors.forEach((k, ki) => k.depots.forEach((d, di) => {
   mk('circle', { cx: d.x, cy: d.y, r: D.market.reach, class: 'reach' }, $('#g-reach'));
   const g = ic($('#g-comp'), d.x, d.y, 'truck', 'cp', ki * 2 + di);
@@ -436,7 +436,7 @@ const legend = items => `<div class="legend">${items.map(i => i.sw ? `<span><i c
 const STEPS = [
   { id: 'strategy', group: 'The case', title: 'The strategy', eyebrow: 'The case · Go-to-market strategy', maya: 'Maya’s plan',
     q: 'Build the go-to-market strategy for one market, then run it again.',
-    body: 'Maya Chen is VP of Marketing at Meridian Supply, a B2B distributor. She builds the strategy for one market, Maryland, from three layers of evidence, then ties them into one motion that sales and marketing run together.',
+    body: 'Maya Chen is VP of Marketing at Meridian Mechanical, a commercial HVAC and mechanical services contractor. She builds the strategy for one market, Maryland, from three layers of evidence, then ties them into one motion that sales and marketing run together.',
     layers: [['Data', 'Who the buyer is, county by county, and who else is selling here.'], ['Journey', 'How buyers decide in this market, and where they stall.'], ['Experience', 'Every touchpoint and signal, fed back in to sharpen the next move.']],
     rec: 'Start with one market. Prove the playbook, then repeat it.',
     cam: () => [1, cx0, cy0], fill: () => setFill('base'), layers_on: [],
@@ -450,11 +450,11 @@ const STEPS = [
     ov: () => `<div class="ov"><span class="k">Where the demand is</span><span class="big">${pct(top4Share)}</span>of the ${fm(M.total_opp_m)} opportunity sits in four counties:<ul>${top4.map(c => `<li><span>${c.name}</span><b>${fm(c.opp)}</b></li>`).join('')}</ul></div>` },
   { id: 'competition', group: 'Data', title: 'Competition', num: '02', eyebrow: 'Data · 02 Competition', maya: 'Maya, asking',
     q: 'Who else sells here, and where are they thin?', claim: 'Find the open ground before you pick a fight.',
-    body: `Maya maps three competitors’ depots and how far each reaches. Counties no depot reaches are open ground. Counties two or more reach are contested, and that is where win rates fall.`,
-    legend: legend([{ c: 'cp', i: 'truck', t: 'Competitor depot' }, { sw: '#e1f0e8', t: 'Open ground' }, { sw: 'rgb(150,156,168)', t: 'Contested' }]),
+    body: `Maya maps three competitors’ branches and how far each service area reaches. Counties no branch reaches are open ground. Counties two or more reach are contested, and that is where win rates fall.`,
+    legend: legend([{ c: 'cp', i: 'truck', t: 'Competitor branch' }, { sw: '#e1f0e8', t: 'Open ground' }, { sw: 'rgb(150,156,168)', t: 'Contested' }]),
     rec: 'Open with the white space and win the contested counties on speed.',
     cam: () => [1, cx0, cy0], fill: () => setFill('comp', { open: true }), layers_on: ['reach', 'comp'],
-    ov: () => `<div class="ov"><span class="k">Competitive intelligence</span><span class="big">${white.length} of ${D.counties.length}</span>counties have no competitor depot within ${M.reach_miles} miles. They hold <b>${pct(whiteShare)}</b> of the opportunity: open ground, with the rest contested.</div>` },
+    ov: () => `<div class="ov"><span class="k">Competitive intelligence</span><span class="big">${white.length} of ${D.counties.length}</span>counties have no competitor branch within ${M.reach_miles} miles. They hold <b>${pct(whiteShare)}</b> of the opportunity: open ground, with the rest contested.</div>` },
   { id: 'customer', group: 'Data', title: 'Customer', num: '03', eyebrow: 'Data · 03 Customer', maya: 'Maya, asking',
     q: 'Which accounts fit, and which are ready?', claim: 'One record per account, scored on fit and intent.',
     body: `Maya merges each account’s records into one profile and scores it. Fit comes from the firm, intent from its signals. ${tier(1)} accounts reach Tier 1 and get a named seller. The rest are nurtured.`,
@@ -464,12 +464,12 @@ const STEPS = [
     ov: () => `<div class="ov">${acctCard()}</div>`, after: () => { D.accounts.forEach(a => a._el.classList.remove('sel')); D.accounts[selected]._el.classList.add('sel'); } },
   { id: 'journey', group: 'Journey', title: 'Journey', num: '04', eyebrow: 'Journey · 04 Journey', maya: 'Maya, asking',
     q: 'Where do buyers stall in this market?', claim: 'Fix the stage that loses the most buyers.',
-    body: `Maya traces the buyer path from first touch to reorder. Win rates vary by county: the more competitors in reach, the lower it falls. The leak is at the quote.`,
+    body: `Maya traces the buyer path from first touch to renewal. Win rates vary by county: the more competitors in reach, the lower it falls. The leak is at the quote.`,
     legend: legend([{ sw: '#f2c79a', t: 'Lowest win rate' }]),
-    rec: 'Design for the stage that loses the most buyers, and give reorder the same care as the first sale.',
+    rec: 'Design for the stage that loses the most buyers, and give renewal the same care as the first contract.',
     cam: () => [1, cx0, cy0], fill: () => setFill('win'), layers_on: ['reach'],
     ov: () => `<div class="ov"><span class="k">Win rate by market</span><span class="big">${pct(winOpen)} vs ${pct(winHeavy)}</span>in open counties versus counties with two or more competitors in reach.</div>
-      <div class="ov bottom"><div class="ribbon"><div><span>Lead → MQL</span><b>31%</b></div><div><span>MQL → SQL</span><b>32%</b></div><div><span>SQL → Opp</span><b>50%</b></div><div class="leak"><span>Quote → Won</span><b>${pct(M.win)}</b></div><div><span>Reorder</span><b>61%</b></div></div></div>` },
+      <div class="ov bottom"><div class="ribbon"><div><span>Lead → MQL</span><b>31%</b></div><div><span>MQL → SQL</span><b>32%</b></div><div><span>SQL → Opp</span><b>50%</b></div><div class="leak"><span>Quote → Won</span><b>${pct(M.win)}</b></div><div><span>Renewal</span><b>61%</b></div></div></div>` },
   { id: 'touchpoints', group: 'Experience', title: 'Touchpoints', num: '05', eyebrow: 'Experience · 05 Touchpoints', maya: 'Maya, asking',
     q: 'What does each touchpoint say, and where does it run?', claim: 'Say the right thing in the right place.',
     body: 'Maya sets a media zone around each territory hub and gives it its own message. The account scores build the audience lists, so advertising reaches the accounts worth reaching.',

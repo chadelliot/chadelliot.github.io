@@ -33,7 +33,7 @@ MARKET = {
         "24045": ("Wicomico", .22, "west"), "24047": ("Worcester", .10, "west"), "24510": ("Baltimore City", .90, "metro"),
     },
     "territories": [
-        {"id": "metro", "name": "Metro corridor", "owner": "Rep A", "color": "#4a9e7a", "msg": "Speed and same-day delivery", "hub": "Baltimore",
+        {"id": "metro", "name": "Metro corridor", "owner": "Rep A", "color": "#4a9e7a", "msg": "Fast response, same-day service", "hub": "Baltimore",
          "cap": 520, "k": 40},
         {"id": "capital", "name": "Capital region", "owner": "Rep B", "color": "#3b6fb0", "msg": "One partner, fewer vendors", "hub": "Rockville",
          "cap": 900, "k": 80},
@@ -48,14 +48,14 @@ MARKET = {
         "Silver Spring": (-77.026, 38.991),
     },
     "pois": [  # market intelligence: kind, label, lon, lat, line
-        ("anchor", "Port of Baltimore", -76.575, 39.265, "Container and bulk volume feeds metro distribution demand."),
-        ("plane", "BWI Marshall", -76.668, 39.175, "Air freight and airport construction keep facilities demand steady."),
-        ("flask", "I-270 biotech corridor", -77.30, 39.20, "Lab and cleanroom build-outs drive specialty supply orders."),
-        ("truck", "Hagerstown logistics hub", -77.720, 39.620, "Warehouse growth along I-70 and I-81."),
+        ("anchor", "Port of Baltimore", -76.575, 39.265, "Terminals, cold storage and warehouses run heavy mechanical loads."),
+        ("plane", "BWI Marshall", -76.668, 39.175, "Airport and airline facilities need round-the-clock mechanical service."),
+        ("flask", "I-270 biotech corridor", -77.30, 39.20, "Labs and cleanrooms need precise, certified HVAC."),
+        ("truck", "Hagerstown logistics hub", -77.720, 39.620, "New warehouses along I-70 and I-81 mean new service contracts."),
         ("shield", "Pax River and APG", -76.43, 38.30, "Defense sites buy on long, procurement-led cycles."),
-        ("wheat", "Delmarva poultry and agriculture", -75.70, 38.55, "Plant operators buy repeat consumables, locally served."),
+        ("wheat", "Delmarva poultry and agriculture", -75.70, 38.55, "Poultry and food plants run refrigeration and need fast, local service."),
     ],
-    "competitors": [  # key, depots (city names)
+    "competitors": [  # key, branch cities
         ("A", ["Baltimore", "Hagerstown"]), ("B", ["Columbia", "Salisbury"]), ("C", ["Rockville", "Waldorf"]),
     ],
     "reach_miles": 22,
@@ -74,7 +74,7 @@ MARKET = {
         ("Prince George's Builders", "Commercial contracting", "Bowie", 82, 79, "expand"),
         ("Chesapeake Cold Storage", "Cold chain", "Aberdeen", 83, 58, None),
         ("Antietam Packaging", "Packaging", "Hagerstown", 78, 61, "hire"),
-        ("Delmarva Poultry Supply", "Food processing", "Salisbury", 74, 66, None),
+        ("Delmarva Poultry Foods", "Food processing", "Salisbury", 74, 66, None),
         ("Conowingo Metals", "Metals", "Elkton", 70, 52, None),
     ],
     "n_random_accounts": 130,
