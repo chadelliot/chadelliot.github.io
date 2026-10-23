@@ -55,6 +55,8 @@ const useIsDesktop = () => {
 };
 
 type Props = {
+  // Today = what needs action now; Leads = everyone, searchable.
+  mode?: "today" | "leads";
   rows: LeadRow[]; // already scoped to the viewer's book
   isLoading: boolean;
   session: ProposalSession;
@@ -69,12 +71,13 @@ type Props = {
   onRequestMore: () => void;
 };
 
-const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggle, historyVersion, onOpenMessage, onOpenEmail, onSaveOutcome, canRequestMore, isRequestingBatch, onRequestMore }: Props) => {
+const OutreachQueue = ({ mode = "today", rows, isLoading, session, followUpSupported, scopeToggle, historyVersion, onOpenMessage, onOpenEmail, onSaveOutcome, canRequestMore, isRequestingBatch, onRequestMore }: Props) => {
   // Filters, sort, search and the open lead all live in the URL, so a
   // reload, a trip to the company page and Back, or a shared link lands on
   // the same list, in the same place.
   const [params, setParams] = useSearchParams();
-  const filter: QueueFilter = isFilter(params.get("f")) ? (params.get("f") as QueueFilter) : "action";
+  const defaultFilter: QueueFilter = mode === "leads" ? "all" : "action";
+  const filter: QueueFilter = isFilter(params.get("f")) ? (params.get("f") as QueueFilter) : defaultFilter;
   const sort: QueueSort = isSort(params.get("sort")) ? (params.get("sort") as QueueSort) : "priority";
   const query = params.get("q") ?? "";
   const project = params.get("project") ?? "";
@@ -151,7 +154,7 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
     }
   }, [selected, isDesktop]);
 
-  const hasActiveFilters = filter !== "action" || Boolean(query) || Boolean(project);
+  const hasActiveFilters = filter !== defaultFilter || Boolean(query) || Boolean(project);
   const firstAction = useMemo(() => sortRows(rows.filter((r) => matchesFilter(r, "action")), "priority")[0] ?? null, [rows]);
   const nextScheduled = useMemo(() => sortRows(rows.filter((r) => r.urgency === "upcoming"), "priority")[0] ?? null, [rows]);
 
@@ -173,8 +176,8 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
         {/* Header: the one primary action lives top-right */}
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-[28px] font-semibold leading-none tracking-[-0.02em] text-rh-ink">Today</h1>
-            <p className="mt-2 text-[13px] text-rh-muted">{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</p>
+            <h1 className="font-display text-[28px] font-semibold leading-none tracking-[-0.02em] text-rh-ink">{mode === "leads" ? "Leads" : "Today"}</h1>
+            <p className="mt-2 text-[13px] text-rh-muted">{mode === "leads" ? `${rows.length} contact${rows.length === 1 ? "" : "s"} across your companies` : new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</p>
           </div>
           <div className="flex flex-wrap items-center gap-2.5">
             {scopeToggle ? (
@@ -184,7 +187,7 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
                 ))}
               </div>
             ) : null}
-            {firstAction ? (
+            {mode === "today" && firstAction ? (
               <button type="button" onClick={() => { patchParams({ f: "action", lead: firstAction.contact.id }); }} className={`group inline-flex h-10 items-center gap-2 rounded-lg bg-rh-teal px-4 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(20,99,77,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors hover:bg-rh-teal-ink ${FOCUS_RING}`}>
                 Start with {firstAction.contact.contact_name}
                 <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
@@ -194,7 +197,7 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
         </div>
 
         {/* Pulse: four numbers, one quiet card. They filter the list below. */}
-        <div className="mb-6 hidden grid-cols-4 divide-x divide-rh-line overflow-hidden rounded-2xl border border-rh-line bg-white sm:grid">
+        <div className={`mb-6 hidden grid-cols-4 divide-x divide-rh-line overflow-hidden rounded-2xl border border-rh-line bg-white ${mode === "today" ? "sm:grid" : ""}`}>
           {tiles.map((t) => (
             <button key={t.key} type="button" aria-pressed={filter === t.key} onClick={() => patchParams({ f: filter === t.key ? null : t.key })} className={`px-5 py-4 text-left transition-colors hover:bg-rh-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 ${filter === t.key ? "bg-rh-teal-soft/60" : ""}`}>
               <span className="flex items-center gap-1.5 text-[13px] text-rh-muted"><span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />{t.label}</span>
@@ -206,8 +209,8 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
         {/* One card: tabs, tools, rows */}
         <div className="overflow-hidden rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.03)]">
           <div role="group" aria-label="Filter leads" className="flex flex-nowrap items-center gap-4 overflow-x-auto border-b border-rh-line px-5">
-            {FILTERS.map((f) => (
-              <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => patchParams({ f: f.key === "action" ? null : f.key })} className={`relative shrink-0 py-3.5 text-[13px] font-medium transition-colors ${FOCUS_RING} rounded-sm ${filter === f.key ? "text-rh-ink" : "text-rh-muted hover:text-rh-ink"}`}>
+            {(mode === "leads" ? [FILTERS[FILTERS.length - 1], ...FILTERS.slice(0, -1)] : FILTERS).map((f) => (
+              <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => patchParams({ f: f.key === defaultFilter ? null : f.key })} className={`relative shrink-0 py-3.5 text-[13px] font-medium transition-colors ${FOCUS_RING} rounded-sm ${filter === f.key ? "text-rh-ink" : "text-rh-muted hover:text-rh-ink"}`}>
                 {f.label}<span className={`ml-1.5 tabular-nums ${filter === f.key ? "text-rh-teal" : "text-rh-faint"}`}>{filterCount(f.key)}</span>
                 {filter === f.key ? <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-rh-ink" aria-hidden="true" /> : null}
               </button>
@@ -250,6 +253,7 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
             </ul>
           ) : visible.length === 0 ? (
             <EmptyState
+              mode={mode}
               rowsTotal={rows.length}
               filter={filter}
               hasActiveFilters={hasActiveFilters}
@@ -347,6 +351,7 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
 };
 
 type EmptyProps = {
+  mode: "today" | "leads";
   rowsTotal: number; filter: QueueFilter; hasActiveFilters: boolean; nextScheduled: LeadRow | null;
   canRequestMore: boolean; isRequestingBatch: boolean; onRequestMore: () => void; onReset: () => void; onShowAll: () => void;
 };
@@ -354,7 +359,7 @@ type EmptyProps = {
 const PRIMARY_SM = `inline-flex h-9 items-center rounded-lg bg-rh-teal px-4 text-[13px] font-semibold text-white hover:bg-rh-teal-ink disabled:opacity-60 ${FOCUS_RING}`;
 const GHOST_SM = `inline-flex h-9 items-center rounded-lg border border-rh-line bg-white px-4 text-[13px] font-medium text-rh-ink hover:border-rh-line-strong ${FOCUS_RING}`;
 
-const EmptyState = ({ rowsTotal, filter, hasActiveFilters, nextScheduled, canRequestMore, isRequestingBatch, onRequestMore, onReset, onShowAll }: EmptyProps) => {
+const EmptyState = ({ mode, rowsTotal, filter, hasActiveFilters, nextScheduled, canRequestMore, isRequestingBatch, onRequestMore, onReset, onShowAll }: EmptyProps) => {
   if (rowsTotal === 0) {
     return (
       <div className="px-6 py-16 text-center">
@@ -365,7 +370,7 @@ const EmptyState = ({ rowsTotal, filter, hasActiveFilters, nextScheduled, canReq
       </div>
     );
   }
-  if (filter === "action" && !hasActiveFilters) {
+  if (filter === "action" && !hasActiveFilters && mode === "today") {
     return (
       <div className="px-6 py-16 text-center">
         <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-rh-teal-soft"><CheckCircle2 size={22} className="text-rh-teal" aria-hidden="true" /></span>

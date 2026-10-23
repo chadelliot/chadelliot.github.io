@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { Inbox, LayoutGrid, KanbanSquare, Users, LogOut, Menu, X, ArrowLeft, UserCircle, UserPlus } from "lucide-react";
+import { Building2, Contact, Inbox, LayoutGrid, KanbanSquare, Users, LogOut, Menu, X, ArrowLeft, UserCircle, UserPlus } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import revhubLogo from "@/assets/RH-Logo-Light.png";
 
-export type ProjectsSection = "queue" | "assignments" | "board" | "team" | "profile";
+export type ProjectsSection = "queue" | "leads" | "assignments" | "board" | "team" | "profile";
 
 type NavItem = {
   key: ProjectsSection;
@@ -13,21 +13,17 @@ type NavItem = {
   icon: typeof LayoutGrid;
 };
 
-// "Profile" is available to everyone - it's just editing your own name/
-// title, not owner-only data, so it lives in both lists rather than the
-// owner-only block below.
-const MEMBER_ITEMS: NavItem[] = [
+// Daily work first, in the order a rep actually uses it: what needs me today,
+// then everyone I could contact, then account-level views. "assignments" is
+// kept as the internal key for Companies so existing ?view=assignments links
+// keep working.
+const WORK_ITEMS: NavItem[] = [
   { key: "queue", label: "Today", icon: Inbox },
-  { key: "assignments", label: "Company view", icon: LayoutGrid },
-  { key: "profile", label: "Profile", icon: UserCircle },
+  { key: "leads", label: "Leads", icon: Contact },
+  { key: "assignments", label: "Companies", icon: Building2 },
 ];
-
-const OWNER_SHARED_ITEMS: NavItem[] = [
-  { key: "queue", label: "Today", icon: Inbox },
-  { key: "assignments", label: "Company view", icon: LayoutGrid },
-  { key: "profile", label: "Profile", icon: UserCircle },
-];
-const OWNER_ONLY_ITEMS: NavItem[] = [
+const ACCOUNT_ITEMS: NavItem[] = [{ key: "profile", label: "Profile", icon: UserCircle }];
+const ADMIN_ITEMS: NavItem[] = [
   { key: "board", label: "Company board", icon: KanbanSquare },
   { key: "team", label: "Team", icon: Users },
 ];
@@ -42,6 +38,8 @@ type ProjectsSidebarProps = {
   // modal wired up locally (CompanyDetailPage) can fall back to just
   // navigating back to /projects instead.
   onAddContact?: () => void;
+  // Overdue + due-today leads for the signed-in rep; shown on Today.
+  todayBadge?: number;
 };
 
 // Wraps the existing /projects pages as navigation destinations rather than
@@ -56,10 +54,37 @@ type ProjectsSidebarProps = {
 // dashboard references this was modeled on, and it makes the nav read as
 // a fixed piece of chrome rather than another content surface competing
 // for attention.
-const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, onSignOut, onAddContact }: ProjectsSidebarProps) => {
+const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, onSignOut, onAddContact, todayBadge = 0 }: ProjectsSidebarProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const NavList = ({ onNavigate }: { onNavigate?: () => void }) => (
+  const NavList = ({ onNavigate }: { onNavigate?: () => void }) => {
+    const NavGroup = ({ label, items }: { label: string; items: NavItem[] }) => (
+      <>
+        <p className="px-3 pb-1 pt-4 text-[11px] font-medium text-white/35 first:pt-0">{label}</p>
+        {items.map(({ key, label: itemLabel, icon: Icon }) => {
+          const active = activeSection === key;
+          const badge = key === "queue" ? todayBadge : 0;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => { onSectionChange(key); onNavigate?.(); }}
+              aria-current={active ? "page" : undefined}
+              className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5DCAA5] ${
+                active ? "bg-white/[0.07] text-white shadow-[inset_2px_0_0_#2FA37F]" : "text-white/55 hover:bg-white/[0.04] hover:text-white"
+              }`}
+            >
+              <Icon size={16} className={active ? "text-[#5DCAA5]" : ""} />
+              <span className="flex-1">{itemLabel}</span>
+              {badge > 0 ? (
+                <span className="min-w-[1.25rem] rounded-full bg-[#E5736B]/20 px-1.5 py-0.5 text-center text-[11px] font-semibold tabular-nums text-[#F4A29C]" aria-label={`${badge} overdue or due today`}>{badge}</span>
+              ) : null}
+            </button>
+          );
+        })}
+      </>
+    );
+    return (
     <div className="flex h-full flex-col">
       <div className="px-3 pb-6 pt-7">
         <img src={revhubLogo} alt="RevHub" className="h-6 w-auto" />
@@ -89,42 +114,10 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
         </div>
       ) : null}
 
-      <nav className="flex flex-1 flex-col gap-1 px-2">
-        <p className="px-2 pb-1 text-[11px] font-medium text-white/35">Workflow</p>
-        {(isOwner ? OWNER_SHARED_ITEMS : MEMBER_ITEMS).map(({ key, label, icon: Icon }) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => { onSectionChange(key); onNavigate?.(); }}
-            aria-current={activeSection === key ? "page" : undefined}
-            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5DCAA5] ${
-              activeSection === key ? "bg-white/[0.07] text-white shadow-[inset_2px_0_0_#2FA37F]" : "text-white/55 hover:bg-white/[0.04] hover:text-white"
-            }`}
-          >
-            <Icon size={16} className={activeSection === key ? "text-[#5DCAA5]" : ""} />
-            {label}
-          </button>
-        ))}
-
-        {isOwner ? (
-          <>
-            <p className="px-2 pb-1 pt-4 text-[11px] font-medium text-white/35">Owner only</p>
-            {OWNER_ONLY_ITEMS.map(({ key, label, icon: Icon }) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => { onSectionChange(key); onNavigate?.(); }}
-                aria-current={activeSection === key ? "page" : undefined}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5DCAA5] ${
-                  activeSection === key ? "bg-white/[0.07] text-white shadow-[inset_2px_0_0_#2FA37F]" : "text-white/55 hover:bg-white/[0.04] hover:text-white"
-                }`}
-              >
-                <Icon size={16} className={activeSection === key ? "text-[#5DCAA5]" : ""} />
-                {label}
-              </button>
-            ))}
-          </>
-        ) : null}
+      <nav aria-label="Outreach" className="flex flex-1 flex-col gap-1 px-2">
+        <NavGroup label="Work" items={WORK_ITEMS} />
+        <NavGroup label="Account" items={ACCOUNT_ITEMS} />
+        {isOwner ? <NavGroup label="Admin" items={ADMIN_ITEMS} /> : null}
       </nav>
 
       <div className="mt-auto border-t border-white/10 px-3 py-4">
@@ -139,7 +132,8 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
         </button>
       </div>
     </div>
-  );
+    );
+  };
 
   return (
     <>

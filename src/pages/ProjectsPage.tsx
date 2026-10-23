@@ -266,7 +266,7 @@ const ProjectsPage = () => {
   const [urlParams, setUrlParams] = useSearchParams();
   const [activeSection, setActiveSectionState] = useState<ProjectsSection>(() => {
     const v = urlParams.get("view");
-    return v === "assignments" || v === "board" || v === "team" || v === "profile" ? v : "queue";
+    return v === "leads" || v === "assignments" || v === "board" || v === "team" || v === "profile" ? v : "queue";
   });
   const setActiveSection = (section: ProjectsSection) => {
     setActiveSectionState(section);
@@ -479,6 +479,17 @@ const ProjectsPage = () => {
       }),
     [contacts, progress, companies, signalsByCompanyId, meetingBlocks, isOwner, queueScope, myAssignedCompanies, followUpSupported]
   );
+
+  // Overdue + due-today for the signed-in rep's own book, whatever scope the
+  // owner has picked in the queue; drives the badge on the Today nav item.
+  const todayBadge = useMemo(() => {
+    const own = buildLeadRows({
+      contacts, progress, companies, signalsByCompanyId, meetingBlocks,
+      companyIds: new Set(myAssignedCompanies.map((c) => c.id)),
+      followUpSupported, now: new Date(),
+    });
+    return own.filter((r) => r.urgency === "overdue" || r.urgency === "due_today").length;
+  }, [contacts, progress, companies, signalsByCompanyId, meetingBlocks, myAssignedCompanies, followUpSupported]);
 
   // A company only has to be "touched," not fully worked, before a rep can
   // ask for more - once at least one contact there has been reached out to
@@ -1724,8 +1735,10 @@ const ProjectsPage = () => {
     );
   })() : null;
 
-  const queueView = session ? (
+  const renderQueue = (mode: "today" | "leads") => session ? (
     <OutreachQueue
+      mode={mode}
+      key={mode}
       rows={queueRows}
       isLoading={isLoadingData}
       session={session}
@@ -1812,11 +1825,12 @@ const ProjectsPage = () => {
             memberName={currentTeamMember?.name}
             onSignOut={handleSignOut}
             onAddContact={() => setShowAddContact(true)}
+            todayBadge={todayBadge}
           />
           <main className="min-w-0 px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
           <div className="w-full">
-            {activeSection === "queue" ? (
-              queueView
+            {activeSection === "queue" || activeSection === "leads" ? (
+              renderQueue(activeSection === "leads" ? "leads" : "today")
             ) : activeSection === "profile" ? (
               <>
                 <div className="mb-8">
@@ -1830,7 +1844,7 @@ const ProjectsPage = () => {
             <div className="mb-8 flex flex-wrap items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
-                <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Your assignments.</h1>
+                <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">Companies.</h1>
                 {currentTeamMember ? (
                   isEditingName ? (
                     <div className="mt-1 flex items-center gap-2">
@@ -2134,15 +2148,16 @@ const ProjectsPage = () => {
           memberName={currentTeamMember?.name}
           onSignOut={handleSignOut}
           onAddContact={() => setShowAddContact(true)}
+          todayBadge={todayBadge}
         />
         <main className="min-w-0 px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
           <div className="w-full">
-            {activeSection === "queue" ? queueView : null}
-            {activeSection !== "queue" ? (
+            {activeSection === "queue" || activeSection === "leads" ? renderQueue(activeSection === "leads" ? "leads" : "today") : null}
+            {activeSection !== "queue" && activeSection !== "leads" ? (
             <div className="mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
               <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
-                {activeSection === "board" ? "Company board." : activeSection === "team" ? "Team & attribution." : activeSection === "profile" ? "Your profile." : "Your contact queue."}
+                {activeSection === "board" ? "Company board." : activeSection === "team" ? "Team & attribution." : activeSection === "profile" ? "Your profile." : "Companies."}
               </h1>
             </div>
             ) : null}

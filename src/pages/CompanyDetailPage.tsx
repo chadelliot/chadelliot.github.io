@@ -415,7 +415,7 @@ const CompanyDetailPage = () => {
       <ProjectsSidebar
         isOwner={isOwner}
         activeSection="assignments"
-        onSectionChange={() => navigate("/projects")}
+        onSectionChange={(section) => navigate(section === "queue" ? "/projects" : `/projects?view=${section}`)}
         memberName={currentTeamMember?.name}
         onSignOut={handleSignOut}
         onAddContact={() => navigate("/projects")}
