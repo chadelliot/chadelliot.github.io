@@ -1,17 +1,6 @@
-import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
-import { syncAug15Targets } from "@/lib/syncAug15Targets";
-
-const ProjectsDataSync = () => {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    if (pathname === "/projects" || pathname.startsWith("/projects/")) {
-      void syncAug15Targets();
-    }
-  }, [pathname]);
-
-  return null;
-};
+// Sheet imports now run server-side every 15 minutes via sync-project-leads.
+// Keep this component inert for compatibility with App.tsx; the retired August
+// snapshot must never overwrite current contact data when an owner signs in.
+const ProjectsDataSync = () => null;
 
 export default ProjectsDataSync;
