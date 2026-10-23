@@ -14,6 +14,25 @@ export default {
     },
     extend: {
       colors: {
+        // RevHub outreach app palette: neutral ink + one teal accent, with
+        // soft tints reserved for status. Used by src/components/outreach.
+        rh: {
+          ink: "#15171C",
+          body: "#3D4651",
+          muted: "#677280",
+          faint: "#A3ABB5",
+          line: "#ECEBE7",
+          "line-strong": "#DDDBD4",
+          canvas: "#F7F7F5",
+          teal: "#1F7F63",
+          "teal-bright": "#2FA37F",
+          "teal-soft": "#EAF4F0",
+          "teal-ink": "#14634D",
+          red: "#B0413A",
+          "red-soft": "#FBEFED",
+          amber: "#8F6410",
+          "amber-soft": "#FAF4E3",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

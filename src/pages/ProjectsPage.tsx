@@ -2,7 +2,7 @@ import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "re
 import { Link, useSearchParams } from "react-router-dom";
 import { UserPlus, Zap, Send, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck, Camera, Linkedin, FileText, CheckCircle2, AlertTriangle } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
 import CompanyInfoCard from "@/components/CompanyInfoCard";
 import OutreachQueue from "@/components/outreach/OutreachQueue";
@@ -1522,15 +1522,6 @@ const ProjectsPage = () => {
   // new contact to whoever's signed in (see handleAddContact).
   const addContactSlideout = (
     <Sheet open={showAddContact} onOpenChange={setShowAddContact}>
-      <SheetTrigger asChild>
-        <button
-          className="fixed right-0 top-1/2 -translate-y-1/2 z-[200] hidden md:flex items-center gap-1.5 px-3 py-4 rounded-l-lg border border-r-0 border-primary/40 bg-primary text-primary-foreground font-sans text-[11px] tracking-[0.1em] uppercase font-medium cursor-pointer shadow-lg hover:shadow-xl transition-shadow"
-          style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-        >
-          <UserPlus size={14} />
-          Add a Contact
-        </button>
-      </SheetTrigger>
 
       <SheetContent side="right" className="w-full sm:w-[440px] p-0 border-l border-border bg-background overflow-y-auto z-[201]">
         <div className="px-6 md:px-8 py-8">
@@ -1812,7 +1803,7 @@ const ProjectsPage = () => {
 
   if (!isOwner) {
     return (
-      <div className="min-h-screen bg-[#F6F5F2]">
+      <div className="min-h-screen bg-rh-canvas">
         <div>
           <ProjectsSidebar
             isOwner={false}
@@ -2134,7 +2125,7 @@ const ProjectsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#F6F5F2]">
+    <div className="min-h-screen bg-rh-canvas">
       <div>
         <ProjectsSidebar
           isOwner={isOwner}

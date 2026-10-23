@@ -63,7 +63,7 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
     <div className="flex h-full flex-col">
       <div className="px-3 pb-6 pt-7">
         <img src={revhubLogo} alt="RevHub" className="h-6 w-auto" />
-        <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/40">Outreach</p>
+        <p className="mt-1.5 text-[11px] font-medium text-white/40">Outreach</p>
       </div>
 
       {/* Navbar's site-wide nav is gone from /projects (it's a standalone
@@ -81,16 +81,16 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
           <button
             type="button"
             onClick={() => { onAddContact(); onNavigate?.(); }}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/12 px-3 py-2 text-[13px] font-medium text-white/80 transition-colors hover:border-white/25 hover:bg-white/[0.04] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5DCAA5]"
           >
-            <UserPlus size={16} />
+            <UserPlus size={15} />
             Add contact
           </button>
         </div>
       ) : null}
 
       <nav className="flex flex-1 flex-col gap-1 px-2">
-        <p className="px-2 pb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">Workflow</p>
+        <p className="px-2 pb-1 text-[11px] font-medium text-white/35">Workflow</p>
         {(isOwner ? OWNER_SHARED_ITEMS : MEMBER_ITEMS).map(({ key, label, icon: Icon }) => (
           <button
             key={key}
@@ -98,17 +98,17 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
             onClick={() => { onSectionChange(key); onNavigate?.(); }}
             aria-current={activeSection === key ? "page" : undefined}
             className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5DCAA5] ${
-              activeSection === key ? "bg-primary/20 text-[#5DCAA5]" : "text-white/70 hover:bg-white/5 hover:text-white"
+              activeSection === key ? "bg-white/[0.07] text-white shadow-[inset_2px_0_0_#2FA37F]" : "text-white/55 hover:bg-white/[0.04] hover:text-white"
             }`}
           >
-            <Icon size={16} />
+            <Icon size={16} className={activeSection === key ? "text-[#5DCAA5]" : ""} />
             {label}
           </button>
         ))}
 
         {isOwner ? (
           <>
-            <p className="px-2 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/30">Owner only</p>
+            <p className="px-2 pb-1 pt-4 text-[11px] font-medium text-white/35">Owner only</p>
             {OWNER_ONLY_ITEMS.map(({ key, label, icon: Icon }) => (
               <button
                 key={key}
@@ -116,10 +116,10 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
                 onClick={() => { onSectionChange(key); onNavigate?.(); }}
                 aria-current={activeSection === key ? "page" : undefined}
                 className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5DCAA5] ${
-                  activeSection === key ? "bg-primary/20 text-[#5DCAA5]" : "text-white/70 hover:bg-white/5 hover:text-white"
+                  activeSection === key ? "bg-white/[0.07] text-white shadow-[inset_2px_0_0_#2FA37F]" : "text-white/55 hover:bg-white/[0.04] hover:text-white"
                 }`}
               >
-                <Icon size={16} />
+                <Icon size={16} className={activeSection === key ? "text-[#5DCAA5]" : ""} />
                 {label}
               </button>
             ))}

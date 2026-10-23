@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { AlertTriangle, ArrowRight, Check, ChevronLeft, ChevronRight, Copy, ExternalLink, Info, Linkedin, Loader2, Mail, X } from "lucide-react";
+import { ArrowRight, Ban, Briefcase, CalendarCheck, CalendarClock, Check, ChevronLeft, ChevronRight, Copy, ExternalLink, FileText, History, Info, Linkedin, Loader2, Mail, MessageSquare, PenLine, Phone, Reply, Send, TriangleAlert, UserPlus, X, type LucideIcon } from "lucide-react";
 import {
   fetchContactActivity,
   formatWhyNow,
@@ -30,7 +30,7 @@ export type OutcomeInput = {
 
 export type OutcomeResult = { ok: boolean; error?: string; warning?: string; followUpSaved?: boolean };
 
-type ActionOption = { value: OutcomeAction; label: string; hint: string; followUpDays: number | null; nextAction: string };
+type ActionOption = { value: OutcomeAction; label: string; short: string; Icon: LucideIcon; hint: string; followUpDays: number | null; nextAction: string };
 
 // What each choice writes to the existing data model:
 //   linkedin_* -> contact_progress.status, email -> email_sequence_position,
@@ -38,13 +38,13 @@ type ActionOption = { value: OutcomeAction; label: string; hint: string; followU
 //   meeting -> status meeting_set (opens the existing meeting prompt),
 //   do_not_contact -> status do_not_contact.
 const ACTIONS: ActionOption[] = [
-  { value: "linkedin_connection", label: "Sent LinkedIn connection request", hint: "Stage → Connection sent", followUpDays: 3, nextAction: "Send intro message once they accept" },
-  { value: "linkedin_message", label: "Sent LinkedIn message", hint: "Stage → next LinkedIn step", followUpDays: 4, nextAction: "Follow up if no reply" },
-  { value: "email", label: "Sent email", hint: "Email progress +1 (max 3)", followUpDays: 4, nextAction: "Send next email in the sequence" },
-  { value: "replied", label: "They replied", hint: "Stage unchanged", followUpDays: 2, nextAction: "Reply and propose a time" },
-  { value: "other_contact", label: "Other contact (call, text, in person)", hint: "Stage unchanged", followUpDays: 3, nextAction: "Follow up" },
-  { value: "meeting", label: "Meeting booked", hint: "Stage → Meeting set", followUpDays: null, nextAction: "" },
-  { value: "do_not_contact", label: "Not interested / do not contact", hint: "Stage → Do not contact", followUpDays: null, nextAction: "" },
+  { value: "linkedin_connection", label: "Sent LinkedIn connection request", short: "Connection request", Icon: UserPlus, hint: "Stage → Connection sent", followUpDays: 3, nextAction: "Send intro message once they accept" },
+  { value: "linkedin_message", label: "Sent LinkedIn message", short: "LinkedIn message", Icon: MessageSquare, hint: "Stage → next LinkedIn step", followUpDays: 4, nextAction: "Follow up if no reply" },
+  { value: "email", label: "Sent email", short: "Email", Icon: Mail, hint: "Email progress +1 (max 3)", followUpDays: 4, nextAction: "Send next email in the sequence" },
+  { value: "replied", label: "They replied", short: "They replied", Icon: Reply, hint: "Stage unchanged", followUpDays: 2, nextAction: "Reply and propose a time" },
+  { value: "other_contact", label: "Other contact (call, text, in person)", short: "Call or other", Icon: Phone, hint: "Stage unchanged", followUpDays: 3, nextAction: "Follow up" },
+  { value: "meeting", label: "Meeting booked", short: "Meeting booked", Icon: CalendarCheck, hint: "Stage → Meeting set", followUpDays: null, nextAction: "" },
+  { value: "do_not_contact", label: "Not interested / do not contact", short: "Do not contact", Icon: Ban, hint: "Stage → Do not contact", followUpDays: null, nextAction: "" },
 ];
 
 const EVENT_LABELS: Record<string, { label: string; confirmed: boolean }> = {
@@ -70,9 +70,15 @@ const describeEvent = (e: ContactActivityEvent): { title: string; detail: string
   return { title: meta.label, detail, confirmed: meta.confirmed };
 };
 
-const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1";
-const BTN = `inline-flex min-h-9 items-center justify-center gap-1.5 rounded-md border border-[#D8D6CE] bg-white px-3 text-[13px] font-medium text-[#1F2933] transition-colors hover:border-primary hover:text-primary disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING}`;
-const BTN_PRIMARY = `inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 ${FOCUS_RING}`;
+const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright/70 focus-visible:ring-offset-1";
+const BTN = `inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border border-rh-line bg-white px-3 text-[13px] font-medium text-rh-ink transition-colors hover:border-rh-line-strong hover:bg-rh-canvas disabled:cursor-not-allowed disabled:opacity-40 ${FOCUS_RING}`;
+const ICON_BTN = `inline-flex h-8 w-8 items-center justify-center rounded-lg text-rh-muted transition-colors hover:bg-rh-canvas hover:text-rh-ink disabled:cursor-not-allowed disabled:opacity-30 ${FOCUS_RING}`;
+const BTN_PRIMARY = `inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-rh-teal px-4 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(20,99,77,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors hover:bg-rh-teal-ink disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none ${FOCUS_RING}`;
+const SECTION_H = "mb-3 flex items-center gap-2 text-[13px] font-semibold text-rh-ink";
+
+const SectionTitle = ({ id, Icon, children }: { id: string; Icon: LucideIcon; children: React.ReactNode }) => (
+  <h3 id={id} className={SECTION_H}><Icon size={14} className="text-rh-muted" aria-hidden="true" />{children}</h3>
+);
 
 type Props = {
   row: LeadRow;
@@ -137,47 +143,47 @@ const LeadPanel = ({ row, index, total, nextRow, isDesktop, session, followUpSup
       aria-modal={isDesktop ? undefined : true}
       aria-label={`Lead details: ${contact.contact_name ?? "contact"}`}
       className={isDesktop
-        ? "flex h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-xl border border-[#E4E2DA] bg-white shadow-[0_1px_2px_rgba(20,21,26,0.04),0_8px_24px_rgba(20,21,26,0.06)]"
+        ? "flex h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.04),0_12px_32px_rgba(21,23,28,0.06)]"
         : "fixed inset-0 z-[60] flex flex-col bg-white"}
     >
       {/* Header */}
-      <div className="flex items-start gap-3 border-b border-[#EEEDE7] px-5 py-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary" aria-hidden="true">
+      <div className="flex items-center gap-3 px-5 pb-4 pt-5">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rh-teal-soft text-sm font-semibold text-rh-teal-ink" aria-hidden="true">
           {getInitials(contact.contact_name ?? "")}
         </div>
         <div className="min-w-0 flex-1">
-          <h2 ref={headingRef} tabIndex={-1} className="truncate font-display text-lg font-extrabold leading-tight tracking-tight text-foreground outline-none">
+          <h2 ref={headingRef} tabIndex={-1} className="truncate font-display text-[17px] font-semibold leading-tight tracking-[-0.01em] text-rh-ink outline-none">
             {contact.contact_name}
           </h2>
-          <p className="truncate text-[13px] text-[#52606D]">{[contact.title, contact.company].filter(Boolean).join(" · ")}</p>
+          <p className="truncate text-[13px] text-rh-muted">{[contact.title, contact.company].filter(Boolean).join(" · ")}</p>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          <span className="mr-1 hidden text-xs tabular-nums text-[#52606D] sm:inline" aria-live="polite">{index + 1} of {total}</span>
-          <button type="button" onClick={onPrev ?? undefined} disabled={!onPrev} aria-label="Previous lead" className={`${BTN} h-9 w-9 px-0`}><ChevronLeft size={16} /></button>
-          <button type="button" onClick={onNext ?? undefined} disabled={!onNext} aria-label="Next lead" className={`${BTN} h-9 w-9 px-0`}><ChevronRight size={16} /></button>
-          <button type="button" onClick={onClose} aria-label="Close lead details" className={`${BTN} h-9 w-9 px-0`}><X size={16} /></button>
+        <div className="flex shrink-0 items-center">
+          <span className="mr-1 hidden text-xs tabular-nums text-rh-muted sm:inline" aria-live="polite">{index + 1} / {total}</span>
+          <button type="button" onClick={onPrev ?? undefined} disabled={!onPrev} aria-label="Previous lead" className={ICON_BTN}><ChevronLeft size={17} /></button>
+          <button type="button" onClick={onNext ?? undefined} disabled={!onNext} aria-label="Next lead" className={ICON_BTN}><ChevronRight size={17} /></button>
+          <button type="button" onClick={onClose} aria-label="Close lead details" className={ICON_BTN}><X size={17} /></button>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 py-5">
+      <div className="min-h-0 flex-1 space-y-7 overflow-y-auto px-5 pb-6">
         {/* Where this lead stands */}
-        <section aria-label="Status" className="rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <UrgencyChip row={row} />
-            <span className="text-[13px] font-medium text-foreground">{row.stageLabel}</span>
+        <section aria-label="Status">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <UrgencyChip row={row} showDetail />
+            <span className="text-[13px] text-rh-body">{row.stageLabel}</span>
           </div>
-          <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-3 text-[13px]">
-            <div>
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#52606D]">Last contact</dt>
-              <dd className="mt-0.5 text-foreground">
+          <dl className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-xl border border-rh-line bg-rh-line text-[13px]">
+            <div className="bg-white px-4 py-3">
+              <dt className="flex items-center gap-1.5 text-xs text-rh-muted"><History size={12} aria-hidden="true" />Last contact</dt>
+              <dd className="mt-1 font-medium text-rh-ink">
                 {row.lastTouchAt ? formatAgo(row.lastTouchAt) : "Never"}
-                {row.lastTouchAt && !row.lastTouchIsLogged ? <span className="block text-[11px] text-[#52606D]">last stage change</span> : null}
+                {row.lastTouchAt && !row.lastTouchIsLogged ? <span className="block text-xs font-normal text-rh-muted">last stage change</span> : null}
               </dd>
             </div>
-            <div>
-              <dt className="text-[11px] font-semibold uppercase tracking-[0.08em] text-[#52606D]">Next action</dt>
-              <dd className="mt-0.5 text-foreground">
-                {row.followUpAt ? <>{row.nextAction || "Follow up"} <span className="text-[#52606D]">· {formatShortDate(row.followUpAt)}</span></> : <span className="text-[#52606D]">{followUpSupported ? "None scheduled" : "Not tracked yet"}</span>}
+            <div className="bg-white px-4 py-3">
+              <dt className="flex items-center gap-1.5 text-xs text-rh-muted"><CalendarClock size={12} aria-hidden="true" />Next action</dt>
+              <dd className="mt-1 font-medium text-rh-ink">
+                {row.followUpAt ? <>{row.nextAction || "Follow up"}<span className="block text-xs font-normal text-rh-muted">{formatShortDate(row.followUpAt)}</span></> : <span className="font-normal text-rh-muted">{followUpSupported ? "None scheduled" : "Not tracked yet"}</span>}
               </dd>
             </div>
           </dl>
@@ -185,53 +191,57 @@ const LeadPanel = ({ row, index, total, nextRow, isDesktop, session, followUpSup
 
         {/* Context */}
         <section aria-labelledby="ctx-h">
-          <h3 id="ctx-h" className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#52606D]">Why this lead</h3>
-          <div className="space-y-2 text-[13px] leading-relaxed text-foreground">
+          <SectionTitle id="ctx-h" Icon={Briefcase}>Why this lead</SectionTitle>
+          <div className="space-y-2 text-[13px] leading-relaxed text-rh-body">
             <p>
-              <span className="font-semibold">Company: </span>
-              {company ? <Link to={`/projects/company/${company.id}`} className={`rounded text-primary underline-offset-2 hover:underline ${FOCUS_RING}`}>{company.name}</Link> : contact.company}
+              {company ? <Link to={`/projects/company/${company.id}`} className={`inline-flex items-center gap-1 rounded font-medium text-rh-teal underline-offset-2 hover:underline ${FOCUS_RING}`}>{company.name}<ExternalLink size={11} aria-hidden="true" /></Link> : <span className="font-medium text-rh-ink">{contact.company}</span>}
+              {row.project ? <span className="text-rh-muted"> · {row.project}{row.projectPostedDate ? `, posted ${formatShortDate(row.projectPostedDate)}` : ""}</span> : <span className="text-rh-muted"> · no open role on file</span>}
             </p>
-            {row.project ? <p><span className="font-semibold">Open role / project: </span>{row.project}{row.projectPostedDate ? <span className="text-[#52606D]"> · posted {formatShortDate(row.projectPostedDate)}</span> : null}</p> : <p className="text-[#52606D]">No open role on file for this company.</p>}
-            {contact.value_hypothesis ? <p><span className="font-semibold">Why it fits: </span>{contact.value_hypothesis}</p> : null}
-            {contact.outreach_angle ? <p><span className="font-semibold">Why now: </span>{formatWhyNow(contact.outreach_angle)}</p> : null}
+            {contact.value_hypothesis ? <p><span className="font-medium text-rh-ink">Fit. </span>{contact.value_hypothesis}</p> : null}
+            {contact.outreach_angle ? <p><span className="font-medium text-rh-ink">Why now. </span>{formatWhyNow(contact.outreach_angle)}</p> : null}
           </div>
         </section>
 
         {/* Contact methods */}
         <section aria-labelledby="contact-h">
-          <h3 id="contact-h" className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#52606D]">Reach out</h3>
+          <SectionTitle id="contact-h" Icon={Send}>Reach out</SectionTitle>
           <div className="flex flex-wrap gap-2">
             {contact.email ? (
               <>
-                <button type="button" className={BTN} onClick={() => { markAttempt("email draft"); onOpenEmail(contact); }}><Mail size={14} />Email drafts</button>
-                <button type="button" className={BTN} onClick={copyEmail} aria-live="polite">
-                  {copied ? <><Check size={14} />Copied</> : <><Copy size={14} />Copy {contact.email}</>}
+                <button type="button" className={BTN} onClick={() => { markAttempt("email draft"); onOpenEmail(contact); }}><Mail size={14} className="text-rh-muted" />Email drafts</button>
+                <button type="button" className={BTN} onClick={copyEmail} aria-live="polite" title={contact.email}>
+                  {copied ? <><Check size={14} className="text-rh-teal" />Copied</> : <><Copy size={14} className="text-rh-muted" />Copy email</>}
                 </button>
               </>
             ) : null}
             {hasLinkedIn ? (
               <a href={contact.linkedin_url ?? "#"} target="_blank" rel="noreferrer" onClick={() => markAttempt("LinkedIn profile")} className={BTN}>
-                <Linkedin size={14} />LinkedIn profile<ExternalLink size={12} aria-hidden="true" />
+                <Linkedin size={14} className="text-rh-muted" />LinkedIn<ExternalLink size={11} className="text-rh-faint" aria-hidden="true" />
               </a>
             ) : null}
-            {contact.linkedin_connect_message ? <button type="button" className={BTN} onClick={() => { markAttempt("connection note"); onOpenMessage(contact, "linkedin_connect_message", "1. Connection note"); }}>Connection note</button> : null}
-            {contact.intro_message ? <button type="button" className={BTN} onClick={() => { markAttempt("intro message"); onOpenMessage(contact, "intro_message", "2. After accepted"); }}>Intro message</button> : null}
-            {contact.follow_up_message ? <button type="button" className={BTN} onClick={() => { markAttempt("follow-up message"); onOpenMessage(contact, "follow_up_message", "3. If no response"); }}>Follow-up message</button> : null}
-            {!contact.email && !hasLinkedIn ? <p className="text-[13px] text-[#52606D]">No email or LinkedIn profile on file for this lead.</p> : null}
+            {!contact.email && !hasLinkedIn ? <p className="text-[13px] text-rh-muted">No email or LinkedIn profile on file for this lead.</p> : null}
           </div>
-          <p className="mt-2 flex items-start gap-1.5 text-xs text-[#52606D]">
+          {contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message ? (
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px]">
+              <span className="flex items-center gap-1.5 text-rh-muted"><FileText size={13} aria-hidden="true" />LinkedIn drafts</span>
+              {contact.linkedin_connect_message ? <button type="button" className={`rounded font-medium text-rh-teal hover:underline ${FOCUS_RING}`} onClick={() => { markAttempt("connection note"); onOpenMessage(contact, "linkedin_connect_message", "1. Connection note"); }}>Connection note</button> : null}
+              {contact.intro_message ? <button type="button" className={`rounded font-medium text-rh-teal hover:underline ${FOCUS_RING}`} onClick={() => { markAttempt("intro message"); onOpenMessage(contact, "intro_message", "2. After accepted"); }}>Intro</button> : null}
+              {contact.follow_up_message ? <button type="button" className={`rounded font-medium text-rh-teal hover:underline ${FOCUS_RING}`} onClick={() => { markAttempt("follow-up message"); onOpenMessage(contact, "follow_up_message", "3. If no response"); }}>Follow-up</button> : null}
+            </div>
+          ) : null}
+          <p className="mt-3 flex items-start gap-1.5 text-xs text-rh-muted">
             <Info size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
-            Opening or copying a draft never marks this lead as contacted. Log it below once it has actually been sent.
+            Opening or copying never marks a lead as contacted. Log it below once it’s sent.
           </p>
           {attempt ? (
-            <div role="status" className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5 text-[13px] text-[#92400E]">
+            <div role="status" className="mt-3 flex flex-wrap items-center justify-between gap-2 rounded-xl bg-rh-amber-soft px-3.5 py-2.5 text-[13px] text-rh-amber">
               <span>You opened the {attempt}. Did you send it?</span>
-              <button type="button" className="rounded font-semibold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary" onClick={() => { logRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); logRef.current?.querySelector<HTMLElement>("input[type=radio]")?.focus(); }}>Log the outcome</button>
+              <button type="button" className="rounded font-semibold underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright" onClick={() => { logRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }); logRef.current?.querySelector<HTMLElement>("input[type=radio]")?.focus(); }}>Log it</button>
             </div>
           ) : null}
         </section>
 
-        {/* Log outcome */}
+        {/* Log outcome: the focal area of the panel */}
         <OutcomeForm
           key={contact.id}
           formRef={logRef}
@@ -248,29 +258,29 @@ const LeadPanel = ({ row, index, total, nextRow, isDesktop, session, followUpSup
 
         {/* History */}
         <section aria-labelledby="hist-h">
-          <h3 id="hist-h" className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#52606D]">Activity</h3>
+          <SectionTitle id="hist-h" Icon={History}>Activity</SectionTitle>
           {history === "loading" ? (
             <div className="space-y-2" aria-busy="true" aria-label="Loading activity">
-              <div className="h-9 animate-pulse rounded-md bg-[#F1F0EC]" /><div className="h-9 animate-pulse rounded-md bg-[#F1F0EC]" />
+              <div className="h-9 animate-pulse rounded-lg bg-rh-line" /><div className="h-9 animate-pulse rounded-lg bg-rh-line" />
             </div>
           ) : history === null ? (
-            <p className="rounded-lg border border-dashed border-[#D8D6CE] p-3 text-[13px] text-[#52606D]">Activity history can’t be loaded for this account (the activity log may not be readable). New outcomes are still recorded.</p>
+            <p className="rounded-xl border border-dashed border-rh-line-strong p-3 text-[13px] text-rh-muted">Activity history can’t be loaded for this account (the activity log may not be readable). New outcomes are still recorded.</p>
           ) : history.length === 0 ? (
-            <p className="text-[13px] text-[#52606D]">Nothing recorded yet.</p>
+            <p className="text-[13px] text-rh-muted">Nothing recorded yet.</p>
           ) : (
-            <ol className="space-y-0">
+            <ol>
               {history.slice(0, 12).map((e, i) => {
                 const d = describeEvent(e);
                 return (
-                  <li key={e.id ?? i} className="flex gap-3 border-l border-[#E4E2DA] pb-3 pl-4 text-[13px] last:pb-0">
-                    <div className="-ml-[21px] mt-1.5 h-2 w-2 shrink-0 rounded-full" style={{ background: d.confirmed ? "#1F7F63" : "#B8B5A9" }} aria-hidden="true" />
+                  <li key={e.id ?? i} className="relative flex gap-3 pb-4 pl-5 text-[13px] last:pb-0 before:absolute before:left-[3px] before:top-3 before:h-full before:w-px before:bg-rh-line last:before:hidden">
+                    <span className={`absolute left-0 top-1.5 h-[7px] w-[7px] rounded-full ${d.confirmed ? "bg-rh-teal" : "border border-rh-faint bg-white"}`} aria-hidden="true" />
                     <div className="min-w-0">
-                      <p className="text-foreground">
+                      <p className="text-rh-ink">
                         <span className="font-medium">{d.title}</span>
-                        <span className="ml-2 text-[11px] text-[#52606D]">{d.confirmed ? "Confirmed" : "Attempt, not confirmed"}</span>
+                        <span className="ml-2 text-xs text-rh-muted">{d.confirmed ? "" : "attempt, not confirmed"}</span>
                       </p>
-                      {d.detail ? <p className="whitespace-pre-wrap break-words text-[#52606D]">{d.detail}</p> : null}
-                      {e.created_at ? <p className="text-[11px] text-[#5F6B7A]">{formatAgo(e.created_at)}</p> : null}
+                      {d.detail ? <p className="whitespace-pre-wrap break-words text-rh-muted">{d.detail}</p> : null}
+                      {e.created_at ? <p className="text-xs text-rh-faint">{formatAgo(e.created_at)}</p> : null}
                     </div>
                   </li>
                 );
@@ -344,19 +354,19 @@ const OutcomeForm = ({ row, nextRow, formRef, followUpSupported, onSaveOutcome, 
 
   if (done) {
     return (
-      <section aria-label="Outcome saved" className="rounded-lg border border-[#A7DFC9] bg-[#F0FBF6] p-4">
-        <p role="status" className="flex items-start gap-2 text-[13px] font-medium text-[#0F6E56]">
+      <section aria-label="Outcome saved" className="rounded-2xl border border-rh-teal-bright/30 bg-rh-teal-soft p-4">
+        <p role="status" className="flex items-start gap-2 text-[13px] font-medium text-rh-teal-ink">
           <Check size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
           <span>
             Saved{done.followUpAt ? `. Next follow-up ${formatShortDate(done.followUpAt)}.` : "."}
-            {done.result.warning ? <span className="mt-1 block font-normal text-[#92400E]">{done.result.warning}</span> : null}
+            {done.result.warning ? <span className="mt-1 block font-normal text-rh-amber">{done.result.warning}</span> : null}
           </span>
         </p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           {done.nextId ? (
-            <button ref={nextBtnRef} type="button" className={BTN_PRIMARY} onClick={() => onGoToLead(done.nextId!)}>Next lead<ArrowRight size={16} /></button>
+            <button ref={nextBtnRef} type="button" className={`${BTN_PRIMARY} h-10`} onClick={() => onGoToLead(done.nextId!)}>Next lead<ArrowRight size={16} /></button>
           ) : (
-            <p ref={undefined} className="text-[13px] text-[#0F6E56]">That was the last lead in this view.</p>
+            <p className="text-[13px] text-rh-teal-ink">That was the last lead in this view.</p>
           )}
           <button type="button" className={BTN} onClick={() => { setDone(null); setAction(null); setNote(""); setTouchedFollowUp(false); setFollowUpAt(""); setNextAction(""); }}>Log another</button>
         </div>
@@ -365,34 +375,36 @@ const OutcomeForm = ({ row, nextRow, formRef, followUpSupported, onSaveOutcome, 
   }
 
   return (
-    <form ref={formRef} onSubmit={submit} aria-labelledby="log-h" noValidate>
-      <h3 id="log-h" className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-[#52606D]">Log what happened</h3>
+    <form ref={formRef} onSubmit={submit} aria-labelledby="log-h" noValidate className="rounded-2xl border border-rh-line-strong bg-rh-canvas/60 p-4">
+      <SectionTitle id="log-h" Icon={PenLine}>Log what happened</SectionTitle>
       <fieldset disabled={saving} className="min-w-0">
         <legend className="sr-only">What happened</legend>
-        <div className="grid gap-1.5">
-          {ACTIONS.map((o) => (
-            <label key={o.value} className={`flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2 text-[13px] transition-colors focus-within:ring-2 focus-within:ring-primary ${action === o.value ? "border-primary bg-primary/[0.05]" : "border-[#E4E2DA] bg-white hover:border-[#B8B5A9]"}`}>
-              <input type="radio" name="outcome" value={o.value} checked={action === o.value} onChange={() => choose(o.value)} className="mt-0.5 h-4 w-4 accent-[#1F7F63]" />
-              <span className="min-w-0">
-                <span className="block font-medium text-foreground">{o.label}</span>
-                <span className="block text-xs text-[#52606D]">{o.hint}</span>
+        <div className="grid grid-cols-2 gap-2">
+          {ACTIONS.map((o, i) => (
+            <label key={o.value} title={o.label} className={`relative cursor-pointer ${i === ACTIONS.length - 1 ? "col-span-2" : ""}`}>
+              <input type="radio" name="outcome" value={o.value} checked={action === o.value} onChange={() => choose(o.value)} className="peer sr-only" />
+              <span className="flex min-h-[44px] items-center gap-2 rounded-xl border border-rh-line bg-white px-3 py-2 text-[13px] font-medium text-rh-body transition-colors hover:border-rh-line-strong peer-checked:border-rh-teal peer-checked:bg-rh-teal-soft peer-checked:text-rh-teal-ink peer-checked:[&>svg]:text-rh-teal peer-focus-visible:ring-2 peer-focus-visible:ring-rh-teal-bright/70">
+                <o.Icon size={15} className="shrink-0 text-rh-muted" aria-hidden="true" />
+                {o.short}
               </span>
             </label>
           ))}
         </div>
 
+        {selected ? <p className="mt-2 text-xs text-rh-muted" aria-live="polite">{selected.label}. {selected.hint}.</p> : null}
+
         {action ? (
           <div className="mt-4 space-y-4">
             <div>
-              <label htmlFor="outcome-note" className="mb-1 block text-xs font-semibold text-[#3E4C59]">Note <span className="font-normal text-[#52606D]">(optional)</span></label>
-              <textarea id="outcome-note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} className={`w-full rounded-md border border-[#D8D6CE] bg-white px-3 py-2 text-[13px] leading-relaxed ${FOCUS_RING}`} placeholder="What did they say? Anything to remember?" />
+              <label htmlFor="outcome-note" className="mb-1.5 block text-xs font-medium text-rh-body">Note <span className="font-normal text-rh-muted">(optional)</span></label>
+              <textarea id="outcome-note" value={note} onChange={(e) => setNote(e.target.value)} rows={3} maxLength={500} className={`w-full rounded-xl border border-rh-line bg-white px-3 py-2.5 text-[13px] leading-relaxed text-rh-ink placeholder:text-rh-muted hover:border-rh-line-strong ${FOCUS_RING}`} placeholder="What did they say? Anything to remember?" />
             </div>
 
             {showFollowUp ? (
               <div>
-                <p className="mb-1.5 text-xs font-semibold text-[#3E4C59]" id="fu-label">Next follow-up</p>
+                <p className="mb-1.5 text-xs font-medium text-rh-body" id="fu-label">Next follow-up</p>
                 {!followUpSupported ? (
-                  <p className="rounded-md border border-dashed border-[#D8D6CE] bg-[#FAFAF8] p-3 text-xs text-[#52606D]">
+                  <p className="rounded-xl border border-dashed border-rh-line-strong bg-white p-3 text-xs text-rh-muted">
                     Follow-up dates can’t be saved yet. They need a one-time database update (<code>add_follow_up_fields.sql</code>). Your outcome and any stage change will still be recorded.
                   </p>
                 ) : (
@@ -401,21 +413,21 @@ const OutcomeForm = ({ row, nextRow, formRef, followUpSupported, onSaveOutcome, 
                       {presets.map((p) => {
                         const value = addDaysYmd(new Date(), p.days);
                         return (
-                          <button key={p.label} type="button" aria-pressed={followUpAt === value} onClick={() => { setFollowUpAt(value); setTouchedFollowUp(true); }} className={`${BTN} ${followUpAt === value ? "!border-primary !bg-primary/10 !text-primary" : ""}`}>{p.label}</button>
+                          <button key={p.label} type="button" aria-pressed={followUpAt === value} onClick={() => { setFollowUpAt(value); setTouchedFollowUp(true); }} className={`${BTN} h-8 px-2.5 ${followUpAt === value ? "!border-rh-teal !bg-rh-teal-soft !text-rh-teal-ink" : ""}`}>{p.label}</button>
                         );
                       })}
-                      <button type="button" aria-pressed={followUpAt === ""} onClick={() => { setFollowUpAt(""); setNextAction(""); setTouchedFollowUp(true); }} className={`${BTN} ${followUpAt === "" ? "!border-primary !bg-primary/10 !text-primary" : ""}`}>No follow-up</button>
+                      <button type="button" aria-pressed={followUpAt === ""} onClick={() => { setFollowUpAt(""); setNextAction(""); setTouchedFollowUp(true); }} className={`${BTN} h-8 px-2.5 ${followUpAt === "" ? "!border-rh-teal !bg-rh-teal-soft !text-rh-teal-ink" : ""}`}>None</button>
                     </div>
                     {followUpAt !== "" ? (
-                      <div className="grid gap-3 sm:grid-cols-[10rem_1fr]">
+                      <div className="grid gap-3 sm:grid-cols-[9.5rem_1fr]">
                         <div>
-                          <label htmlFor="fu-date" className="mb-1 block text-xs text-[#52606D]">Date</label>
-                          <input id="fu-date" type="date" min={today} value={followUpAt} onChange={(e) => { setFollowUpAt(e.target.value); setTouchedFollowUp(true); }} aria-invalid={Boolean(pastDate)} aria-describedby={pastDate ? "fu-err" : undefined} className={`h-10 w-full rounded-md border bg-white px-2 text-[13px] ${pastDate ? "border-[#B91C1C]" : "border-[#D8D6CE]"} ${FOCUS_RING}`} />
-                          {pastDate ? <p id="fu-err" className="mt-1 text-xs text-[#B91C1C]">Pick today or a later date.</p> : null}
+                          <label htmlFor="fu-date" className="mb-1 block text-xs text-rh-muted">Date</label>
+                          <input id="fu-date" type="date" min={today} value={followUpAt} onChange={(e) => { setFollowUpAt(e.target.value); setTouchedFollowUp(true); }} aria-invalid={Boolean(pastDate)} aria-describedby={pastDate ? "fu-err" : undefined} className={`h-10 w-full rounded-lg border bg-white px-2 text-[13px] text-rh-ink ${pastDate ? "border-rh-red" : "border-rh-line"} ${FOCUS_RING}`} />
+                          {pastDate ? <p id="fu-err" className="mt-1 text-xs text-rh-red">Pick today or a later date.</p> : null}
                         </div>
                         <div>
-                          <label htmlFor="fu-action" className="mb-1 block text-xs text-[#52606D]">What to do</label>
-                          <input id="fu-action" type="text" value={nextAction} onChange={(e) => setNextAction(e.target.value)} maxLength={140} aria-invalid={tooLong} className={`h-10 w-full rounded-md border border-[#D8D6CE] bg-white px-3 text-[13px] ${FOCUS_RING}`} placeholder="e.g. Send follow-up email" />
+                          <label htmlFor="fu-action" className="mb-1 block text-xs text-rh-muted">What to do</label>
+                          <input id="fu-action" type="text" value={nextAction} onChange={(e) => setNextAction(e.target.value)} maxLength={140} aria-invalid={tooLong} className={`h-10 w-full rounded-lg border border-rh-line bg-white px-3 text-[13px] text-rh-ink placeholder:text-rh-muted ${FOCUS_RING}`} placeholder="e.g. Send follow-up email" />
                         </div>
                       </div>
                     ) : null}
@@ -425,15 +437,15 @@ const OutcomeForm = ({ row, nextRow, formRef, followUpSupported, onSaveOutcome, 
             ) : null}
 
             {action === "do_not_contact" ? (
-              <p className="flex items-start gap-2 rounded-md bg-[#FEF2F2] p-3 text-xs text-[#991B1B]"><AlertTriangle size={14} className="mt-0.5 shrink-0" aria-hidden="true" />This removes {row.contact.contact_name} from the action queue. You can revert the stage later from the company page.</p>
+              <p className="flex items-start gap-2 rounded-xl bg-rh-red-soft p-3 text-xs text-rh-red"><TriangleAlert size={14} className="mt-0.5 shrink-0" aria-hidden="true" />This removes {row.contact.contact_name} from the action queue. You can revert the stage later from the company page.</p>
             ) : null}
             {action === "meeting" ? (
-              <p className="rounded-md bg-primary/[0.06] p-3 text-xs text-[#0F6E56]">Next you’ll be asked for the meeting date.</p>
+              <p className="rounded-xl bg-rh-teal-soft p-3 text-xs text-rh-teal-ink">Next you’ll be asked for the meeting date.</p>
             ) : null}
 
             {error ? (
-              <div role="alert" className="flex items-start gap-2 rounded-md border border-[#FECACA] bg-[#FEF2F2] p-3 text-[13px] text-[#991B1B]">
-                <AlertTriangle size={15} className="mt-0.5 shrink-0" aria-hidden="true" /><span>{error}</span>
+              <div role="alert" className="flex items-start gap-2 rounded-xl bg-rh-red-soft p-3 text-[13px] text-rh-red">
+                <TriangleAlert size={15} className="mt-0.5 shrink-0" aria-hidden="true" /><span>{error}</span>
               </div>
             ) : null}
 
@@ -442,7 +454,7 @@ const OutcomeForm = ({ row, nextRow, formRef, followUpSupported, onSaveOutcome, 
             </button>
           </div>
         ) : (
-          <p className="mt-2 text-xs text-[#52606D]">Choose what happened to record it and set the next step.</p>
+          <p className="mt-3 text-xs text-rh-muted">Choose what happened to record it and set the next step.</p>
         )}
       </fieldset>
     </form>

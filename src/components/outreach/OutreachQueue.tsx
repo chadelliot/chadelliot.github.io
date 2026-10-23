@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, CheckCircle2, ChevronRight, Search, X } from "lucide-react";
+import { ArrowRight, CheckCircle2, ChevronRight, Inbox, Linkedin, Mail, Search, X } from "lucide-react";
 import type { ProposalSession } from "@/lib/companyStatus";
 import type { ProjectContact } from "@/lib/projectContacts";
 import {
@@ -38,7 +38,8 @@ const SORTS: { key: QueueSort; label: string }[] = [
 const isFilter = (v: string | null): v is QueueFilter => FILTERS.some((f) => f.key === v);
 const isSort = (v: string | null): v is QueueSort => SORTS.some((s) => s.key === v);
 
-const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1";
+const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright/70 focus-visible:ring-offset-1";
+const SELECT = `h-9 min-w-0 rounded-lg border border-rh-line bg-white px-2.5 text-[13px] text-rh-body hover:border-rh-line-strong ${FOCUS_RING}`;
 
 const useIsDesktop = () => {
   const query = "(min-width: 1280px)";
@@ -154,99 +155,96 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
   const firstAction = useMemo(() => sortRows(rows.filter((r) => matchesFilter(r, "action")), "priority")[0] ?? null, [rows]);
   const nextScheduled = useMemo(() => sortRows(rows.filter((r) => r.urgency === "upcoming"), "priority")[0] ?? null, [rows]);
 
-  const tiles: { key: QueueFilter; label: string; value: number; tone: string }[] = [
-    { key: "overdue", label: "Overdue", value: counts.overdue, tone: "text-[#991B1B]" },
-    { key: "due_today", label: "Due today", value: counts.due_today, tone: "text-[#92400E]" },
-    { key: "first_contact", label: "First contact", value: counts.first_contact, tone: "text-[#0F6E56]" },
-    { key: "stale", label: "No reply yet", value: counts.stale, tone: "text-[#7A5A12]" },
+  const tiles: { key: QueueFilter; label: string; value: number; dot: string; tone: string }[] = [
+    { key: "overdue", label: "Overdue", value: counts.overdue, dot: "bg-rh-red", tone: "text-rh-red" },
+    { key: "due_today", label: "Due today", value: counts.due_today, dot: "bg-[#C99A2E]", tone: "text-rh-amber" },
+    { key: "first_contact", label: "First contact", value: counts.first_contact, dot: "bg-rh-teal-bright", tone: "text-rh-teal-ink" },
+    { key: "stale", label: "No reply yet", value: counts.stale, dot: "bg-rh-faint", tone: "text-rh-body" },
   ];
 
   const filterCount = (key: QueueFilter): number =>
     key === "all" ? rows.length : key === "action" ? counts.overdue + counts.due_today + counts.first_contact + counts.stale : counts[key as keyof typeof counts] ?? 0;
 
+  const initials = (name?: string | null) => (name ?? "").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("");
+
   return (
-    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_26rem] xl:items-start xl:gap-5">
+    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-start xl:gap-6">
       <div className="min-w-0">
-        {/* Header + next action */}
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        {/* Header: the one primary action lives top-right */}
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h1 className="font-display text-2xl font-extrabold tracking-tight text-foreground">Today</h1>
-            <p className="mt-0.5 text-sm text-[#52606D]">
-              {new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}
-            </p>
+            <h1 className="font-display text-[28px] font-semibold leading-none tracking-[-0.02em] text-rh-ink">Today</h1>
+            <p className="mt-2 text-[13px] text-rh-muted">{new Date().toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })}</p>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             {scopeToggle ? (
-              <div role="group" aria-label="Whose leads" className="inline-flex rounded-md border border-[#D8D6CE] bg-white p-0.5">
+              <div role="group" aria-label="Whose leads" className="inline-flex rounded-lg bg-[#EEEDE8] p-0.5">
                 {(["mine", "all"] as const).map((v) => (
-                  <button key={v} type="button" aria-pressed={scopeToggle.value === v} onClick={() => scopeToggle.onChange(v)} className={`rounded px-3 py-1.5 text-[13px] font-medium ${FOCUS_RING} ${scopeToggle.value === v ? "bg-primary text-primary-foreground" : "text-[#3E4C59] hover:bg-[#F5F4F0]"}`}>{v === "mine" ? "My leads" : "Everyone"}</button>
+                  <button key={v} type="button" aria-pressed={scopeToggle.value === v} onClick={() => scopeToggle.onChange(v)} className={`rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors ${FOCUS_RING} ${scopeToggle.value === v ? "bg-white text-rh-ink shadow-sm" : "text-rh-muted hover:text-rh-ink"}`}>{v === "mine" ? "My leads" : "Everyone"}</button>
                 ))}
               </div>
             ) : null}
             {firstAction ? (
-              <button type="button" onClick={() => { patchParams({ f: "action", lead: firstAction.contact.id }); }} className={`inline-flex min-h-10 items-center gap-2 rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:opacity-90 ${FOCUS_RING}`}>
-                Start with {firstAction.contact.contact_name}<ArrowRight size={16} aria-hidden="true" />
+              <button type="button" onClick={() => { patchParams({ f: "action", lead: firstAction.contact.id }); }} className={`group inline-flex h-10 items-center gap-2 rounded-lg bg-rh-teal px-4 text-[13px] font-semibold text-white shadow-[0_1px_2px_rgba(20,99,77,0.35),inset_0_1px_0_rgba(255,255,255,0.12)] transition-colors hover:bg-rh-teal-ink ${FOCUS_RING}`}>
+                Start with {firstAction.contact.contact_name}
+                <ArrowRight size={15} className="transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
               </button>
             ) : null}
           </div>
         </div>
 
-        {/* Summary tiles double as filters. Secondary to the list below. */}
-        <div className="mb-5 hidden grid-cols-4 gap-2.5 sm:grid">
+        {/* Pulse: four numbers, one quiet card. They filter the list below. */}
+        <div className="mb-6 hidden grid-cols-4 divide-x divide-rh-line overflow-hidden rounded-2xl border border-rh-line bg-white sm:grid">
           {tiles.map((t) => (
-            <button key={t.key} type="button" aria-pressed={filter === t.key} onClick={() => patchParams({ f: filter === t.key ? null : t.key })} className={`rounded-lg border bg-white px-4 py-3 text-left transition-colors hover:border-primary/50 ${FOCUS_RING} ${filter === t.key ? "border-primary ring-1 ring-primary" : "border-[#E4E2DA]"}`}>
-              <span className={`block text-2xl font-semibold tabular-nums ${t.value ? t.tone : "text-[#66727F]"}`}>{t.value}</span>
-              <span className="text-[13px] text-[#52606D]">{t.label}</span>
+            <button key={t.key} type="button" aria-pressed={filter === t.key} onClick={() => patchParams({ f: filter === t.key ? null : t.key })} className={`px-5 py-4 text-left transition-colors hover:bg-rh-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 ${filter === t.key ? "bg-rh-teal-soft/60" : ""}`}>
+              <span className="flex items-center gap-1.5 text-[13px] text-rh-muted"><span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />{t.label}</span>
+              <span className={`mt-1.5 block text-[26px] font-semibold leading-none tracking-tight tabular-nums ${t.value ? "text-rh-ink" : "text-rh-faint"}`}>{t.value}</span>
             </button>
           ))}
         </div>
 
-        {/* Toolbar */}
-        <div className="mb-3 space-y-3">
-          <div className="flex flex-wrap items-center gap-2">
+        {/* One card: tabs, tools, rows */}
+        <div className="overflow-hidden rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.03)]">
+          <div role="group" aria-label="Filter leads" className="flex flex-nowrap items-center gap-4 overflow-x-auto border-b border-rh-line px-5">
+            {FILTERS.map((f) => (
+              <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => patchParams({ f: f.key === "action" ? null : f.key })} className={`relative shrink-0 py-3.5 text-[13px] font-medium transition-colors ${FOCUS_RING} rounded-sm ${filter === f.key ? "text-rh-ink" : "text-rh-muted hover:text-rh-ink"}`}>
+                {f.label}<span className={`ml-1.5 tabular-nums ${filter === f.key ? "text-rh-teal" : "text-rh-faint"}`}>{filterCount(f.key)}</span>
+                {filter === f.key ? <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-rh-ink" aria-hidden="true" /> : null}
+              </button>
+            ))}
+            {hasActiveFilters ? (
+              <button type="button" onClick={() => patchParams({ f: null, q: null, project: null })} className={`ml-auto inline-flex shrink-0 items-center gap-1 py-3.5 text-[13px] font-medium text-rh-teal hover:underline ${FOCUS_RING} rounded-sm`}><X size={13} aria-hidden="true" />Reset</button>
+            ) : null}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 border-b border-rh-line bg-rh-canvas/50 px-5 py-3">
             <div className="relative basis-full sm:min-w-[10rem] sm:flex-1 sm:basis-0">
               <label htmlFor="lead-search" className="sr-only">Search leads</label>
-              <Search size={15} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#5F6B7A]" aria-hidden="true" />
-              <input ref={searchRef} id="lead-search" type="search" value={query} onChange={(e) => patchParams({ q: e.target.value })} placeholder="Search name, company, role…  ( / )" className={`h-10 w-full rounded-md border border-[#D8D6CE] bg-white pl-9 pr-3 text-sm ${FOCUS_RING}`} />
+              <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-rh-muted" aria-hidden="true" />
+              <input ref={searchRef} id="lead-search" type="search" value={query} onChange={(e) => patchParams({ q: e.target.value })} placeholder="Search name, company or role" className={`h-9 w-full rounded-lg border border-rh-line bg-white pl-9 pr-8 text-[13px] text-rh-ink placeholder:text-rh-muted hover:border-rh-line-strong ${FOCUS_RING}`} />
+              <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-rh-line px-1 text-[10px] text-rh-muted sm:block">/</kbd>
             </div>
             {projects.length > 0 ? (
               <>
                 <label htmlFor="lead-project" className="sr-only">Filter by open role</label>
-                <select id="lead-project" value={project} onChange={(e) => patchParams({ project: e.target.value })} className={`h-10 min-w-0 flex-1 rounded-md sm:max-w-[11rem] sm:flex-none border border-[#D8D6CE] bg-white px-2.5 text-sm ${FOCUS_RING}`}>
+                <select id="lead-project" value={project} onChange={(e) => patchParams({ project: e.target.value })} className={`${SELECT} flex-1 sm:max-w-[11rem] sm:flex-none`}>
                   <option value="">All projects</option>
                   {projects.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </>
             ) : null}
             <label htmlFor="lead-sort" className="sr-only">Sort</label>
-            <select id="lead-sort" value={sort} onChange={(e) => patchParams({ sort: e.target.value === "priority" ? null : e.target.value })} className={`h-10 min-w-0 flex-1 rounded-md border border-[#D8D6CE] bg-white px-2.5 text-sm sm:flex-none ${FOCUS_RING}`}>
+            <select id="lead-sort" value={sort} onChange={(e) => patchParams({ sort: e.target.value === "priority" ? null : e.target.value })} className={`${SELECT} flex-1 sm:flex-none`}>
               {SORTS.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
             </select>
-          </div>
-          <div role="group" aria-label="Filter leads" className="-mx-4 flex flex-nowrap gap-1.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
-            {FILTERS.map((f) => (
-              <button key={f.key} type="button" aria-pressed={filter === f.key} onClick={() => patchParams({ f: f.key === "action" ? null : f.key })} className={`inline-flex min-h-8 shrink-0 items-center gap-1.5 rounded-full border px-3 text-[13px] font-medium ${FOCUS_RING} ${filter === f.key ? "border-primary bg-primary text-primary-foreground" : "border-[#D8D6CE] bg-white text-[#3E4C59] hover:border-primary/60"}`}>
-                {f.label}<span className={`tabular-nums ${filter === f.key ? "text-primary-foreground/80" : "text-[#5F6B7A]"}`}>{filterCount(f.key)}</span>
-              </button>
-            ))}
-            {hasActiveFilters ? (
-              <button type="button" onClick={() => patchParams({ f: null, q: null, project: null })} className={`inline-flex min-h-8 items-center gap-1 rounded-full px-2.5 text-[13px] font-medium text-primary hover:underline ${FOCUS_RING}`}><X size={13} aria-hidden="true" />Reset</button>
-            ) : null}
-          </div>
-        </div>
-
-        {/* List */}
-        <div className="overflow-hidden rounded-xl border border-[#E4E2DA] bg-white shadow-[0_1px_2px_rgba(20,21,26,0.04)]">
-          <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,1.2fr)_8.5rem_1.5rem] gap-4 border-b border-[#EEEDE7] bg-[#FAFAF8] px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.08em] text-[#52606D] md:grid" aria-hidden="true">
-            <span>Lead · project</span><span>Stage · last contact</span><span>Next</span><span />
           </div>
 
           {isLoading ? (
             <ul aria-busy="true" aria-label="Loading leads">
               {[0, 1, 2, 3, 4].map((i) => (
-                <li key={i} className="flex items-center gap-4 border-b border-[#F1F0EC] px-4 py-4 last:border-0">
-                  <div className="h-9 w-9 animate-pulse rounded-full bg-[#F1F0EC]" />
-                  <div className="flex-1 space-y-2"><div className="h-3.5 w-1/3 animate-pulse rounded bg-[#F1F0EC]" /><div className="h-3 w-1/2 animate-pulse rounded bg-[#F1F0EC]" /></div>
+                <li key={i} className="flex items-center gap-4 border-b border-rh-line px-5 py-4 last:border-0">
+                  <div className="h-9 w-9 animate-pulse rounded-full bg-rh-line" />
+                  <div className="flex-1 space-y-2"><div className="h-3.5 w-1/3 animate-pulse rounded bg-rh-line" /><div className="h-3 w-1/2 animate-pulse rounded bg-rh-line" /></div>
                 </li>
               ))}
             </ul>
@@ -267,32 +265,43 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
               {visible.map((r) => {
                 const isSel = selected?.contact.id === r.contact.id;
                 const c = r.contact;
+                const hasLinkedIn = Boolean(c.linkedin_url && c.linkedin_url.includes("/in/"));
                 return (
-                  <li key={c.id} className={`border-b border-[#F1F0EC] last:border-0 ${isSel ? "bg-primary/[0.06]" : "hover:bg-[#FAFAF8]"}`}>
+                  <li key={c.id} className="border-b border-rh-line last:border-0">
                     <button
                       id={`lead-row-${c.id}`}
                       type="button"
                       onClick={() => openLead(c.id)}
                       aria-current={isSel ? "true" : undefined}
                       aria-label={`${c.contact_name}, ${c.company}. ${URGENCY_LABEL[r.urgency]}. ${r.stageLabel}.`}
-                      className={`grid w-full gap-x-4 gap-y-1.5 px-4 py-3 text-left md:grid-cols-[minmax(0,1.6fr)_minmax(0,1.2fr)_8.5rem_1.5rem] md:items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary ${isSel ? "shadow-[inset_3px_0_0_hsl(var(--primary))]" : ""}`}
+                      className={`group relative grid w-full gap-x-4 gap-y-2 px-5 py-3.5 text-left transition-colors md:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)_8.5rem_1rem] md:items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 ${isSel ? "bg-rh-teal-soft/50" : "hover:bg-rh-canvas/70"}`}
                     >
-                      <span className="min-w-0">
-                        <span className="block truncate text-sm font-semibold text-foreground">{c.contact_name}</span>
-                        <span className="line-clamp-2 text-[13px] text-[#52606D]">{[c.title, c.company].filter(Boolean).join(" · ")}</span>
-                        <span className="mt-0.5 block truncate text-xs text-[#3E4C59]">{r.project ? `Role: ${r.project}` : <span className="text-[#66727F]">No open role</span>}</span>
+                      {isSel ? <span className="absolute inset-y-0 left-0 w-0.5 bg-rh-teal" aria-hidden="true" /> : null}
+                      <span className="flex min-w-0 items-center gap-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-rh-canvas text-xs font-semibold text-rh-body ring-1 ring-inset ring-rh-line" aria-hidden="true">{initials(c.contact_name)}</span>
+                        <span className="min-w-0">
+                          <span className="flex items-center gap-2">
+                            <span className="truncate text-sm font-medium text-rh-ink">{c.contact_name}</span>
+                            <span className="flex shrink-0 items-center gap-1 text-rh-faint" aria-hidden="true">
+                              {hasLinkedIn ? <Linkedin size={12} /> : null}
+                              {c.email ? <Mail size={12} /> : null}
+                            </span>
+                          </span>
+                          <span className="block truncate text-[13px] text-rh-muted">{[c.title, c.company].filter(Boolean).join(" · ")}</span>
+                          {r.project ? <span className="block truncate text-xs text-rh-faint">{r.project}</span> : null}
+                        </span>
                       </span>
-                      <span className="min-w-0">
-                        <span className="line-clamp-2 text-[13px] text-[#3E4C59]">{r.stageLabel}</span>
-                        <span className="block truncate text-xs text-[#5F6B7A]">{r.lastTouchAt ? `${formatAgo(r.lastTouchAt)}${r.lastTouchIsLogged ? "" : " (stage change)"}` : "No contact yet"}</span>
+                      <span className="min-w-0 pl-12 md:pl-0">
+                        <span className="line-clamp-2 text-[13px] text-rh-body">{r.stageLabel}</span>
+                        <span className="block truncate text-xs text-rh-muted">{r.lastTouchAt ? `${formatAgo(r.lastTouchAt)}${r.lastTouchIsLogged ? "" : " · stage change"}` : "No contact yet"}</span>
                       </span>
-                      <span className="flex min-w-0 flex-col items-start gap-1">
+                      <span className="flex min-w-0 flex-col items-start gap-0.5 pl-12 md:pl-0">
                         <UrgencyChip row={r} showDetail />
                         {r.urgency === "overdue" || r.urgency === "upcoming" || r.urgency === "stale" ? (
-                          <span className="max-w-full truncate text-xs text-[#52606D]">{r.urgency === "upcoming" ? formatShortDate(r.followUpAt) : r.urgency === "stale" ? formatDueLabel(r) : r.nextAction ?? ""}</span>
+                          <span className="max-w-full truncate pl-0.5 text-xs text-rh-muted">{r.urgency === "upcoming" ? formatShortDate(r.followUpAt) : r.urgency === "stale" ? formatDueLabel(r) : r.nextAction ?? ""}</span>
                         ) : null}
                       </span>
-                      <ChevronRight size={16} className="hidden text-[#66727F] md:block" aria-hidden="true" />
+                      <ChevronRight size={16} className={`hidden text-rh-faint transition-opacity md:block ${isSel ? "opacity-100" : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"}`} aria-hidden="true" />
                     </button>
                   </li>
                 );
@@ -300,8 +309,8 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
             </ul>
           )}
         </div>
-        <p className="mt-3 hidden text-xs text-[#5F6B7A] md:block">
-          Keyboard: <kbd className="rounded border border-[#D8D6CE] bg-white px-1">j</kbd> / <kbd className="rounded border border-[#D8D6CE] bg-white px-1">k</kbd> next / previous lead · <kbd className="rounded border border-[#D8D6CE] bg-white px-1">/</kbd> search · <kbd className="rounded border border-[#D8D6CE] bg-white px-1">Esc</kbd> close panel
+        <p className="mt-3 hidden text-xs text-rh-muted md:block">
+          <kbd className="rounded border border-rh-line bg-white px-1">j</kbd> <kbd className="rounded border border-rh-line bg-white px-1">k</kbd> move · <kbd className="rounded border border-rh-line bg-white px-1">/</kbd> search · <kbd className="rounded border border-rh-line bg-white px-1">Esc</kbd> close
         </p>
         <p className="sr-only" aria-live="polite">{visible.length} lead{visible.length === 1 ? "" : "s"} shown</p>
       </div>
@@ -328,8 +337,9 @@ const OutreachQueue = ({ rows, isLoading, session, followUpSupported, scopeToggl
           />
         </div>
       ) : isDesktop ? (
-        <aside className="sticky top-4 hidden h-48 items-center justify-center rounded-xl border border-dashed border-[#D8D6CE] p-6 text-center text-sm text-[#5F6B7A] xl:flex">
-          Select a lead to see its context, reach out, and log what happened.
+        <aside className="sticky top-4 hidden h-56 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-rh-line-strong p-6 text-center text-[13px] text-rh-muted xl:flex">
+          <Inbox size={20} className="text-rh-faint" aria-hidden="true" />
+          Select a lead to see context, reach out,<br />and log what happened.
         </aside>
       ) : null}
     </div>
@@ -341,36 +351,40 @@ type EmptyProps = {
   canRequestMore: boolean; isRequestingBatch: boolean; onRequestMore: () => void; onReset: () => void; onShowAll: () => void;
 };
 
+const PRIMARY_SM = `inline-flex h-9 items-center rounded-lg bg-rh-teal px-4 text-[13px] font-semibold text-white hover:bg-rh-teal-ink disabled:opacity-60 ${FOCUS_RING}`;
+const GHOST_SM = `inline-flex h-9 items-center rounded-lg border border-rh-line bg-white px-4 text-[13px] font-medium text-rh-ink hover:border-rh-line-strong ${FOCUS_RING}`;
+
 const EmptyState = ({ rowsTotal, filter, hasActiveFilters, nextScheduled, canRequestMore, isRequestingBatch, onRequestMore, onReset, onShowAll }: EmptyProps) => {
   if (rowsTotal === 0) {
     return (
-      <div className="px-6 py-14 text-center">
-        <p className="font-display text-lg font-extrabold text-foreground">No leads assigned yet</p>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-[#52606D]">Companies assigned to you will show up here with their contacts.</p>
-        {canRequestMore ? <button type="button" onClick={onRequestMore} disabled={isRequestingBatch} className={`mt-4 inline-flex min-h-10 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 ${FOCUS_RING}`}>{isRequestingBatch ? "Requesting…" : "Request companies"}</button> : null}
+      <div className="px-6 py-16 text-center">
+        <Inbox size={24} className="mx-auto text-rh-faint" aria-hidden="true" />
+        <p className="mt-3 text-[15px] font-semibold text-rh-ink">No leads assigned yet</p>
+        <p className="mx-auto mt-1 max-w-sm text-[13px] text-rh-muted">Companies assigned to you will show up here with their contacts.</p>
+        {canRequestMore ? <button type="button" onClick={onRequestMore} disabled={isRequestingBatch} className={`${PRIMARY_SM} mt-5`}>{isRequestingBatch ? "Requesting…" : "Request companies"}</button> : null}
       </div>
     );
   }
   if (filter === "action" && !hasActiveFilters) {
     return (
-      <div className="px-6 py-14 text-center">
-        <CheckCircle2 size={28} className="mx-auto text-primary" aria-hidden="true" />
-        <p className="mt-3 font-display text-lg font-extrabold text-foreground">You’re caught up</p>
-        <p className="mx-auto mt-1 max-w-sm text-sm text-[#52606D]">
+      <div className="px-6 py-16 text-center">
+        <span className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-rh-teal-soft"><CheckCircle2 size={22} className="text-rh-teal" aria-hidden="true" /></span>
+        <p className="mt-3 text-[15px] font-semibold text-rh-ink">You’re caught up</p>
+        <p className="mx-auto mt-1 max-w-sm text-[13px] text-rh-muted">
           {nextScheduled ? `Next follow-up: ${nextScheduled.contact.contact_name}, ${formatShortDate(nextScheduled.followUpAt)}.` : "Nothing needs action right now."}
         </p>
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
-          {canRequestMore ? <button type="button" onClick={onRequestMore} disabled={isRequestingBatch} className={`inline-flex min-h-10 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground disabled:opacity-60 ${FOCUS_RING}`}>{isRequestingBatch ? "Requesting…" : "Request more companies"}</button> : null}
-          <button type="button" onClick={onShowAll} className={`inline-flex min-h-10 items-center rounded-md border border-[#D8D6CE] bg-white px-4 text-sm font-medium text-[#1F2933] hover:border-primary ${FOCUS_RING}`}>View all leads</button>
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
+          {canRequestMore ? <button type="button" onClick={onRequestMore} disabled={isRequestingBatch} className={PRIMARY_SM}>{isRequestingBatch ? "Requesting…" : "Request more companies"}</button> : null}
+          <button type="button" onClick={onShowAll} className={GHOST_SM}>View all leads</button>
         </div>
       </div>
     );
   }
   return (
-    <div className="px-6 py-12 text-center">
-      <p className="font-display text-base font-extrabold text-foreground">No leads match</p>
-      <p className="mt-1 text-sm text-[#52606D]">Try a different filter or search term.</p>
-      {hasActiveFilters ? <button type="button" onClick={onReset} className={`mt-3 inline-flex min-h-9 items-center rounded-md border border-[#D8D6CE] bg-white px-3 text-sm font-medium hover:border-primary ${FOCUS_RING}`}>Reset filters</button> : null}
+    <div className="px-6 py-14 text-center">
+      <p className="text-[15px] font-semibold text-rh-ink">No leads match</p>
+      <p className="mt-1 text-[13px] text-rh-muted">Try a different filter or search term.</p>
+      {hasActiveFilters ? <button type="button" onClick={onReset} className={`${GHOST_SM} mt-4`}>Reset filters</button> : null}
     </div>
   );
 };
