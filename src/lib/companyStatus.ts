@@ -1,3 +1,4 @@
+import { proposalProfileHeaders, PROPOSAL_SESSION_STORAGE_KEY } from "./proposalDatabase";
 // Reads/writes the real, cloud-backed company status field in Supabase.
 // This replaces what would otherwise be another localStorage-only flag —
 // status now survives across devices and browsers, same as your login.
@@ -23,7 +24,7 @@ export type ProposalSession = {
   user: { id: string; email?: string };
 };
 
-const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
+const SESSION_STORAGE_KEY = PROPOSAL_SESSION_STORAGE_KEY;
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 
@@ -155,6 +156,7 @@ export const setOwnPassword = async (session: ProposalSession, password: string)
 };
 
 const authHeaders = (session: ProposalSession) => ({
+  ...proposalProfileHeaders,
   apikey: DB_PUBLIC || "",
   Authorization: `Bearer ${session.access_token}`,
   "Content-Type": "application/json",
