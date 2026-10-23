@@ -1,6 +1,7 @@
+import { proposalProfileHeaders, PROPOSAL_SESSION_STORAGE_KEY } from "./lib/proposalDatabase";
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
-const SESSION_STORAGE_KEY = "aboutchad_proposal_directory_session_v1";
+const SESSION_STORAGE_KEY = PROPOSAL_SESSION_STORAGE_KEY;
 const OUTREACH_STATUS_KEY = "aboutchad_proposal_outreach_status_v2";
 
 const CONTACT_EMAILS: Record<string, string> = {
@@ -174,6 +175,7 @@ const setLocalStatus = (key: string, value: boolean) => {
 };
 
 const statusHeaders = (session: { access_token: string }) => ({
+  ...proposalProfileHeaders,
   ["api" + "key"]: DB_PUBLIC || "",
   "Content-Type": "application/json",
   ["Authori" + "zation"]: `Bearer ${session.access_token}`,

@@ -37,6 +37,8 @@ const CSV_SOURCE = getArg("csv");
 
 const SUPABASE_URL = process.env.SUPABASE_URL?.replace(/\/$/, "");
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const DB_SCHEMA = process.env.PROPOSAL_DB_SCHEMA || "public";
+if (!["public", "aboutchad"].includes(DB_SCHEMA)) throw new Error("Unsupported proposal database schema");
 
 if (!CSV_SOURCE) {
   console.error("Usage: node scripts/sync-marketing-signals.mjs --csv <url-or-path> [--dry-run]");
@@ -116,6 +118,8 @@ const supabaseFetch = async (path, options = {}) => {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...options,
     headers: {
+      "Accept-Profile": DB_SCHEMA,
+      "Content-Profile": DB_SCHEMA,
       apikey: SERVICE_KEY,
       Authorization: `Bearer ${SERVICE_KEY}`,
       "Content-Type": "application/json",

@@ -43,6 +43,8 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 const GOOGLE_CLIENT_ID = Deno.env.get("GOOGLE_CLIENT_ID") ?? "";
 const GOOGLE_CLIENT_SECRET = Deno.env.get("GOOGLE_CLIENT_SECRET") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const PROPOSAL_DB_SCHEMA = Deno.env.get("PROPOSAL_DB_SCHEMA") ?? "public";
+if (!["public", "aboutchad"].includes(PROPOSAL_DB_SCHEMA)) throw new Error("Unsupported proposal database schema");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 // Where Google redirects back to itself - must exactly match what's
 // registered in Google Cloud Console AND what the frontend uses to build
@@ -65,6 +67,8 @@ const db = async (path: string, init?: RequestInit) => {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...init,
     headers: {
+      "Accept-Profile": PROPOSAL_DB_SCHEMA,
+      "Content-Profile": PROPOSAL_DB_SCHEMA,
       apikey: SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`,
       "Content-Type": "application/json",

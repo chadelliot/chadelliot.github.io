@@ -1,3 +1,4 @@
+import { proposalProfileHeaders } from "./proposalDatabase";
 import { getStoredProposalSession, refreshProposalSessionIfNeeded, type ProposalSession } from "./companyStatus";
 import { fetchTeamMembers } from "./projectContacts";
 
@@ -52,6 +53,7 @@ const normalizedLinkedIn = (value = "") =>
   value.trim().toLowerCase().replace(/[?#].*$/, "").replace(/\/+$/, "");
 
 const authHeaders = (session: ProposalSession) => ({
+  ...proposalProfileHeaders,
   apikey: DB_PUBLIC || "",
   Authorization: `Bearer ${session.access_token}`,
   "Content-Type": "application/json",

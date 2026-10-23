@@ -1,3 +1,4 @@
+import { proposalProfileHeaders } from "./proposalDatabase";
 // Reads/writes RevHub project contacts and their progress in Supabase.
 // Shares the same login session as the /company directory (one Supabase
 // project, two separate sets of tables).
@@ -304,7 +305,8 @@ export type ClosedDeal = {
 const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.replace(/\/$/, "");
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 
-const authHeaders = (session: ProposalSession) => ({
+const authHeaders = (session: ProposalSession, dataApi = true) => ({
+  ...(dataApi ? proposalProfileHeaders : {}),
   apikey: DB_PUBLIC || "",
   Authorization: `Bearer ${session.access_token}`,
   "Content-Type": "application/json",
@@ -574,7 +576,7 @@ export const fetchResumeSignedUrl = async (session: ProposalSession, resumePath:
   if (!DB_URL) return null;
   const response = await fetch(`${DB_URL}/storage/v1/object/sign/resumes/${resumePath}`, {
     method: "POST",
-    headers: { ...authHeaders(session) },
+    headers: { ...authHeaders(session, false) },
     body: JSON.stringify({ expiresIn: 300 }),
   });
   if (!response.ok) return null;
@@ -1067,7 +1069,7 @@ const callRepProfileAI = async (session: ProposalSession, body: Record<string, u
   try {
     const response = await fetch(`${DB_URL}/functions/v1/rep-profile-ai`, {
       method: "POST",
-      headers: { ...authHeaders(session) },
+      headers: { ...authHeaders(session, false) },
       body: JSON.stringify(body),
     });
     if (!response.ok) return null;
@@ -1129,7 +1131,7 @@ export const disconnectGoogleCalendar = async (session: ProposalSession, teamMem
   if (!DB_URL) return false;
   const response = await fetch(`${DB_URL}/functions/v1/google-calendar`, {
     method: "POST",
-    headers: { ...authHeaders(session) },
+    headers: { ...authHeaders(session, false) },
     body: JSON.stringify({ action: "disconnect", repId: teamMemberId }),
   });
   if (!response.ok) return false;
