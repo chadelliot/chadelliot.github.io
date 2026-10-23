@@ -174,6 +174,17 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 .dot.r{background:var(--sig-r);}
 .status{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--muted);}
 .seg-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--rule);}
+
+/* My Approach dropdown */
+.nav-dd{position:relative;}
+.nav-dd>a::after{content:'▾';margin-left:6px;font-size:9px;}
+.nav-dd-menu{position:absolute;top:100%;left:-16px;padding-top:18px;min-width:250px;list-style:none;opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;z-index:200;}
+.nav-dd:hover .nav-dd-menu,.nav-dd:focus-within .nav-dd-menu{opacity:1;visibility:visible;transform:none;}
+.nav-dd-menu li{background:#fff;border:1px solid #e8e8e8;}
+.nav-dd-menu li:first-child{border-radius:6px 6px 0 0;}.nav-dd-menu li:last-child{border-radius:0 0 6px 6px;border-top:none;}
+.nav-dd-menu a{display:block;padding:12px 16px;}
+.nav-dd-menu small{display:block;margin-top:3px;font-size:10px;font-weight:500;letter-spacing:0;text-transform:none;color:#888;}
+.nav-dd-menu a.active small{color:#4a9e7a;}
 </style>
 </head>
 <body>
@@ -182,7 +193,12 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   <div class="site-logo">About <em>Chad</em></div>
   <ul class="nav-links">
     <li><a href="/">About</a></li>
-    <li><a href="/approach">My Approach</a></li>
+    <li class="nav-dd"><a href="/approach/">My Approach</a>
+      <ul class="nav-dd-menu">
+        <li><a href="/approach/">Growth Engine<small>A signal-based marketing system</small></a></li>
+        <li><a href="/gtm-strategy/">GTM Strategy<small>One market, built end to end</small></a></li>
+      </ul>
+    </li>
     <li><a href="/career">Career</a></li>
     <li><a href="/skills">Skills</a></li>
     <li><a href="/commercial-strategy" class="active">Work Samples</a></li>
