@@ -55,6 +55,20 @@ export type ContactProgress = {
   // ordered number rather than named statuses, kept deliberately separate
   // from `status` above - see add_email_sequence_fields.sql for why.
   email_sequence_position?: number;
+  // Task fields from add_follow_up_fields.sql. Absent until that migration
+  // has been run - see probeFollowUpSupport().
+  follow_up_at?: string | null; // YYYY-MM-DD
+  next_action?: string | null;
+  last_contacted_at?: string | null;
+  last_channel?: "linkedin" | "email" | "phone" | "other" | null;
+};
+
+export type ContactActivityEvent = {
+  id?: string;
+  contact_id: string;
+  event_type: string;
+  event_detail?: string | null;
+  created_at?: string | null;
 };
 
 export type TeamMember = {
@@ -679,7 +693,7 @@ export const updateSignalOutreachModel = async (
 export const updateContactProgress = async (
   session: ProposalSession,
   contactId: string,
-  updates: Partial<Pick<ContactProgress, "status" | "assigned_to" | "email_sequence_position">>,
+  updates: Partial<Pick<ContactProgress, "status" | "assigned_to" | "email_sequence_position" | "follow_up_at" | "next_action" | "last_contacted_at" | "last_channel">>,
   updatedByTeamMemberId?: string | null
 ): Promise<ContactProgress | null> => {
   if (!DB_URL) return null;
@@ -706,6 +720,60 @@ export const logContactActivity = async (
     headers: authHeaders(session),
     body: JSON.stringify({ contact_id: contactId, event_type: eventType, event_detail: eventDetail, actor: actorTeamMemberId ?? null }),
   });
+};
+
+// Same as logContactActivity but reports whether the row was actually
+// written, for places that tell the user "recorded".
+export const recordContactActivity = async (
+  session: ProposalSession,
+  contactId: string,
+  eventType: string,
+  eventDetail?: string,
+  actorTeamMemberId?: string | null
+): Promise<boolean> => {
+  if (!DB_URL) return false;
+  try {
+    const response = await fetch(`${DB_URL}/rest/v1/contact_activity`, {
+      method: "POST",
+      headers: authHeaders(session),
+      body: JSON.stringify({ contact_id: contactId, event_type: eventType, event_detail: eventDetail, actor: actorTeamMemberId ?? null }),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
+// True only if contact_progress really has the follow-up columns (i.e. the
+// add_follow_up_fields.sql migration has been run). Probed rather than
+// assumed, so the UI never offers a save that the database would reject.
+export const probeFollowUpSupport = async (session: ProposalSession): Promise<boolean> => {
+  if (!DB_URL) return false;
+  try {
+    const response = await fetch(`${DB_URL}/rest/v1/contact_progress?select=follow_up_at,next_action,last_contacted_at,last_channel&limit=1`, {
+      headers: authHeaders(session),
+    });
+    return response.ok;
+  } catch {
+    return false;
+  }
+};
+
+// Returns null (not []) when the log can't be read, so the UI can say so
+// instead of implying there's no history. The log is written by
+// logContactActivity; read access depends on the table's RLS policy.
+export const fetchContactActivity = async (session: ProposalSession, contactId: string): Promise<ContactActivityEvent[] | null> => {
+  if (!DB_URL) return null;
+  try {
+    const response = await fetch(`${DB_URL}/rest/v1/contact_activity?select=*&contact_id=eq.${encodeURIComponent(contactId)}`, {
+      headers: authHeaders(session),
+    });
+    if (!response.ok) return null;
+    const rows = (await response.json()) as ContactActivityEvent[];
+    return rows.sort((a, b) => (b.created_at ?? "").localeCompare(a.created_at ?? ""));
+  } catch {
+    return null;
+  }
 };
 
 const MEETING_SAFE_COLUMNS = "id,contact_id,company_id,set_by,meeting_date,confirmed,notes,created_at";

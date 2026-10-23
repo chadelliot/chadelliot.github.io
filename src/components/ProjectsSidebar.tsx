@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { LayoutGrid, KanbanSquare, Users, LogOut, Menu, X, ArrowLeft, UserCircle, UserPlus } from "lucide-react";
+import { Inbox, LayoutGrid, KanbanSquare, Users, LogOut, Menu, X, ArrowLeft, UserCircle, UserPlus } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import revhubLogo from "@/assets/RH-Logo-Light.png";
 
-export type ProjectsSection = "assignments" | "board" | "team" | "profile";
+export type ProjectsSection = "queue" | "assignments" | "board" | "team" | "profile";
 
 type NavItem = {
   key: ProjectsSection;
@@ -17,12 +17,14 @@ type NavItem = {
 // title, not owner-only data, so it lives in both lists rather than the
 // owner-only block below.
 const MEMBER_ITEMS: NavItem[] = [
-  { key: "assignments", label: "My assignments", icon: LayoutGrid },
+  { key: "queue", label: "Today", icon: Inbox },
+  { key: "assignments", label: "Company view", icon: LayoutGrid },
   { key: "profile", label: "Profile", icon: UserCircle },
 ];
 
 const OWNER_SHARED_ITEMS: NavItem[] = [
-  { key: "assignments", label: "My assignments", icon: LayoutGrid },
+  { key: "queue", label: "Today", icon: Inbox },
+  { key: "assignments", label: "Company view", icon: LayoutGrid },
   { key: "profile", label: "Profile", icon: UserCircle },
 ];
 const OWNER_ONLY_ITEMS: NavItem[] = [
@@ -94,7 +96,8 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
             key={key}
             type="button"
             onClick={() => { onSectionChange(key); onNavigate?.(); }}
-            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
+            aria-current={activeSection === key ? "page" : undefined}
+            className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5DCAA5] ${
               activeSection === key ? "bg-primary/20 text-[#5DCAA5]" : "text-white/70 hover:bg-white/5 hover:text-white"
             }`}
           >
@@ -111,7 +114,8 @@ const ProjectsSidebar = ({ isOwner, activeSection, onSectionChange, memberName, 
                 key={key}
                 type="button"
                 onClick={() => { onSectionChange(key); onNavigate?.(); }}
-                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
+                aria-current={activeSection === key ? "page" : undefined}
+                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5DCAA5] ${
                   activeSection === key ? "bg-primary/20 text-[#5DCAA5]" : "text-white/70 hover:bg-white/5 hover:text-white"
                 }`}
               >

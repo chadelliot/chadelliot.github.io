@@ -422,7 +422,15 @@ const CompanyDetailPage = () => {
       />
       <main className="px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
         <div className="mx-auto w-full max-w-7xl">
-          <Link to="/projects" className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline">← Back to RevHub</Link>
+          <Link
+            to="/projects"
+            onClick={(e) => {
+              // Came from the queue (or anywhere in /projects)? Go back so the
+              // list's filters, search and open lead are exactly as left.
+              if (window.history.state?.idx > 0) { e.preventDefault(); navigate(-1); }
+            }}
+            className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
+          >← Back to RevHub</Link>
 
           {isLoadingData ? <p className="mt-6 text-sm text-muted-foreground">Loading company…</p> : null}
 

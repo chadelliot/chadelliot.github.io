@@ -1,10 +1,13 @@
 import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { UserPlus, Zap, Send, CalendarClock, Trophy, XCircle, BarChart3, Info, Mail, UserMinus, UserCheck, Camera, Linkedin, FileText, CheckCircle2, AlertTriangle } from "lucide-react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import CompanyBoard from "@/components/CompanyBoard";
 import CompanyInfoCard from "@/components/CompanyInfoCard";
+import OutreachQueue from "@/components/outreach/OutreachQueue";
+import type { OutcomeInput, OutcomeResult } from "@/components/outreach/LeadPanel";
+import { buildLeadRows } from "@/lib/outreachQueue";
 import ProjectsSidebar, { type ProjectsSection } from "@/components/ProjectsSidebar";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import { signInToProposalDirectory, clearStoredProposalSession, hydrateSessionFromUrlFragment, setOwnPassword } from "@/lib/companyStatus";
@@ -27,6 +30,8 @@ import {
   updateTeamMemberRole,
   updateContactProgress,
   logContactActivity,
+  recordContactActivity,
+  probeFollowUpSupport,
   getContactTier,
   buildLinkedInSearchUrl,
   assignNextCompanyBatch,
@@ -255,7 +260,21 @@ const ProjectsPage = () => {
   const [meetingPrompt, setMeetingPrompt] = useState<ProjectContact | null>(null);
   const [meetingDate, setMeetingDate] = useState("");
   const [meetingNotes, setMeetingNotes] = useState("");
-  const [activeSection, setActiveSection] = useState<ProjectsSection>("assignments");
+  // The section lives in the URL (?view=) so Back from a company page, a
+  // reload or a shared link lands on the same screen. The queue is the
+  // default landing view.
+  const [urlParams, setUrlParams] = useSearchParams();
+  const [activeSection, setActiveSectionState] = useState<ProjectsSection>(() => {
+    const v = urlParams.get("view");
+    return v === "assignments" || v === "board" || v === "team" || v === "profile" ? v : "queue";
+  });
+  const setActiveSection = (section: ProjectsSection) => {
+    setActiveSectionState(section);
+    setUrlParams(section === "queue" ? {} : { view: section }, { replace: false });
+  };
+  const [followUpSupported, setFollowUpSupported] = useState(false);
+  const [queueScope, setQueueScope] = useState<"mine" | "all">("mine");
+  const [historyVersion, setHistoryVersion] = useState(0);
   const [dealCompany, setDealCompany] = useState("");
   const [dealCreditedTo, setDealCreditedTo] = useState("");
   const [dealDate, setDealDate] = useState("");
@@ -338,6 +357,11 @@ const ProjectsPage = () => {
       setSignalList(signalListRows);
       setIsLoadingData(false);
     });
+  }, [session]);
+
+  useEffect(() => {
+    if (!session) return;
+    probeFollowUpSupport(session).then(setFollowUpSupported);
   }, [session]);
 
   const currentTeamMember = useMemo(() => (session ? findCurrentTeamMember(session, teamMembers) : null), [session, teamMembers]);
@@ -437,6 +461,23 @@ const ProjectsPage = () => {
   const stalledCountMine = useMemo(
     () => myAssignedCompanies.filter((c) => companyInsightsAll[c.id]?.stalled).length,
     [myAssignedCompanies, companyInsightsAll]
+  );
+
+  // One flat, ranked list of leads for the Today queue. Members always see
+  // their own book; an owner can widen it to everyone's.
+  const queueRows = useMemo(
+    () =>
+      buildLeadRows({
+        contacts,
+        progress,
+        companies,
+        signalsByCompanyId,
+        meetingBlocks,
+        companyIds: isOwner && queueScope === "all" ? undefined : new Set(myAssignedCompanies.map((c) => c.id)),
+        followUpSupported,
+        now: new Date(),
+      }),
+    [contacts, progress, companies, signalsByCompanyId, meetingBlocks, isOwner, queueScope, myAssignedCompanies, followUpSupported]
   );
 
   // A company only has to be "touched," not fully worked, before a rep can
@@ -1086,6 +1127,69 @@ const ProjectsPage = () => {
     }
   };
 
+  // Logs a confirmed outreach outcome from the lead panel. Unlike the
+  // optimistic handlers above this waits for the database: the panel only
+  // shows "Saved" once the write has actually succeeded, and keeps the form
+  // (with an error) when it hasn't.
+  const handleSaveOutcome = async (contact: ProjectContact, input: OutcomeInput): Promise<OutcomeResult> => {
+    if (!session) return { ok: false, error: "You’re signed out. Sign in again to save." };
+    const current = progress[contact.id];
+    const status: ContactStatus = current?.status ?? "not_contacted";
+    const rank = STATUS_ORDER[status];
+    const updates: Parameters<typeof updateContactProgress>[2] = {};
+    let newStatus: ContactStatus | null = null;
+    let channel: "linkedin" | "email" | "phone" | "other" = "other";
+    let newEmailPosition: number | null = null;
+
+    switch (input.action) {
+      case "linkedin_connection": channel = "linkedin"; if (rank < STATUS_ORDER.connection_sent) newStatus = "connection_sent"; break;
+      case "linkedin_message":
+        channel = "linkedin";
+        if (rank < STATUS_ORDER.introduction_sent) newStatus = "introduction_sent";
+        else if (rank === STATUS_ORDER.introduction_sent) newStatus = "follow_up_sent";
+        break;
+      case "email": channel = "email"; newEmailPosition = Math.min(3, (current?.email_sequence_position ?? 0) + 1); break;
+      case "replied": channel = current?.last_channel ?? "other"; break;
+      case "other_contact": channel = "other"; break;
+      case "meeting": newStatus = "meeting_set"; channel = current?.last_channel ?? "other"; break;
+      case "do_not_contact": newStatus = "do_not_contact"; channel = current?.last_channel ?? "other"; break;
+    }
+    if (newStatus) updates.status = newStatus;
+    if (newEmailPosition !== null) updates.email_sequence_position = newEmailPosition;
+    if (followUpSupported) {
+      const closing = input.action === "meeting" || input.action === "do_not_contact";
+      updates.last_contacted_at = new Date().toISOString();
+      updates.last_channel = channel;
+      updates.follow_up_at = closing ? null : input.followUpAt;
+      updates.next_action = closing || !input.followUpAt ? null : input.nextAction || null;
+    }
+
+    if (Object.keys(updates).length > 0) {
+      const saved = await updateContactProgress(session, contact.id, updates, currentTeamMember?.id);
+      if (!saved) return { ok: false, error: "Couldn’t save to the database, so nothing was changed. Check your connection and try again." };
+      setProgress((c) => ({ ...c, [contact.id]: saved }));
+    }
+
+    let warning: string | undefined;
+    const recorded = await recordContactActivity(session, contact.id, "outcome_logged", JSON.stringify({ action: input.action, note: input.note, followUpAt: input.followUpAt }), currentTeamMember?.id);
+    if (!recorded && (input.note || Object.keys(updates).length === 0)) warning = "Saved, but the note couldn’t be added to the activity log.";
+    if (newStatus) logContactActivity(session, contact.id, "status_changed", newStatus, currentTeamMember?.id);
+    if (newEmailPosition !== null) logContactActivity(session, contact.id, "email_sequence_changed", String(newEmailPosition), currentTeamMember?.id);
+
+    if (newStatus && ENGAGED_STATUS_VALUES.includes(newStatus)) handleAdvanceEngagement(contact.company_id);
+    if (newStatus === "meeting_set") {
+      setMeetingPrompt(contact);
+      setMeetingDate("");
+      setMeetingNotes("");
+      const [freshCompanies, freshBlocks, freshMeetings] = await Promise.all([fetchCompanies(session), fetchMeetingBlocks(session), fetchMeetings(session)]);
+      setCompanies(freshCompanies);
+      setMeetingBlocks(freshBlocks);
+      setMeetings(freshMeetings);
+    }
+    setHistoryVersion((v) => v + 1);
+    return { ok: true, warning };
+  };
+
   const handleAssign = async (contact: ProjectContact, assignedTo: string) => {
     if (!session) return;
     const value = assignedTo || null;
@@ -1629,6 +1733,23 @@ const ProjectsPage = () => {
     );
   })() : null;
 
+  const queueView = session ? (
+    <OutreachQueue
+      rows={queueRows}
+      isLoading={isLoadingData}
+      session={session}
+      followUpSupported={followUpSupported}
+      scopeToggle={isOwner ? { value: queueScope, onChange: setQueueScope } : undefined}
+      historyVersion={historyVersion}
+      onOpenMessage={handleOpenMessage}
+      onOpenEmail={setEmailPopupContact}
+      onSaveOutcome={handleSaveOutcome}
+      canRequestMore={!isOwner && canRequestMoreCompanies}
+      isRequestingBatch={isRequestingBatch}
+      onRequestMore={handleRequestMoreCompanies}
+    />
+  ) : null;
+
   if (!IS_DB_READY) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background px-6 py-16">
@@ -1703,7 +1824,9 @@ const ProjectsPage = () => {
           />
           <main className="min-w-0 px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
           <div className="w-full">
-            {activeSection === "profile" ? (
+            {activeSection === "queue" ? (
+              queueView
+            ) : activeSection === "profile" ? (
               <>
                 <div className="mb-8">
                   <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
@@ -2023,12 +2146,15 @@ const ProjectsPage = () => {
         />
         <main className="min-w-0 px-6 pb-20 pt-8 md:ml-56 md:px-10 md:pt-10">
           <div className="w-full">
+            {activeSection === "queue" ? queueView : null}
+            {activeSection !== "queue" ? (
             <div className="mb-8">
               <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach</p>
               <h1 className="mt-1 font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">
                 {activeSection === "board" ? "Company board." : activeSection === "team" ? "Team & attribution." : activeSection === "profile" ? "Your profile." : "Your contact queue."}
               </h1>
             </div>
+            ) : null}
 
           {activeSection === "profile" ? renderProfileSection() : null}
 
