@@ -6,6 +6,7 @@ import {
   fetchContactActivity,
   formatWhyNow,
   getInitials,
+  isContactProfileCurrent,
   type ContactActivityEvent,
   type ProjectContact,
 } from "@/lib/projectContacts";
@@ -111,6 +112,7 @@ const ACTIVITY_PREVIEW = 2;
 
 const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, session, followUpSupported, backToCompany, onClose, onPrev, onNext, onGoToLead, onOpenMessage, onOpenEmail, onCopyLinkedInDraft, onSaveOutcome, historyVersion }: Props) => {
   const { contact, company } = row;
+  const profileHeld = contact.do_not_contact || contact.needs_research || !isContactProfileCurrent(contact);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const logRef = useRef<HTMLFormElement>(null);
   const [attempt, setAttempt] = useState<string | null>(null);
@@ -214,6 +216,12 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
       </div>
 
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 pb-6">
+        <div role="note" className={`rounded-xl border p-3 text-[13px] ${profileHeld ? "border-amber-300 bg-amber-50 text-amber-900" : "border-rh-line bg-rh-canvas text-rh-body"}`}>
+          <p className="font-semibold">{profileHeld ? "Outreach held — profile review required" : "Employer and role checked"}</p>
+          <p>{contact.profile_validation_note || "This person's current employer and role have not been verified. A job posting or sheet import does not count as a profile check."}</p>
+          {contact.profile_verified_at ? <p>Checked {formatShortDate(contact.profile_verified_at)} · Recheck after 30 days.</p> : null}
+          {contact.profile_verification_source ? <a className="underline" href={contact.profile_verification_source} target="_blank" rel="noreferrer">Verification source</a> : null}
+        </div>
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <UrgencyChip row={row} showDetail />
           <span className="text-[13px] text-rh-body">{row.stageLabel}</span>
@@ -222,7 +230,7 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
         {/* Reach out comes first: it's what you're here to do. */}
         <section aria-labelledby="contact-h">
           <SectionTitle id="contact-h" Icon={Send}>Reach out</SectionTitle>
-          <div className="flex flex-wrap gap-2">
+          <fieldset disabled={profileHeld} className="flex flex-wrap gap-2 disabled:opacity-50">
             {hasLinkedIn ? (
               <button type="button" onClick={copyAndOpenLinkedIn} className={`${BTN} border-rh-teal/40 bg-rh-teal-soft/50 text-rh-teal-ink hover:border-rh-teal hover:bg-rh-teal-soft`}>
                 <Linkedin size={14} />{draft ? `Copy ${draft.label} & open LinkedIn` : "Open LinkedIn profile"}<ExternalLink size={11} className="opacity-60" aria-hidden="true" />
@@ -237,7 +245,7 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
               </>
             ) : null}
             {!contact.email && !hasLinkedIn ? <p className="text-[13px] text-rh-muted">No email or LinkedIn profile on file for this lead.</p> : null}
-          </div>
+          </fieldset>
           {linkedInNote !== null || (attempt && attempt !== "email draft") ? (
             <p role="status" className="mt-2.5 flex items-start gap-1.5 text-[13px] text-rh-teal-ink">
               <Check size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -245,12 +253,12 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
             </p>
           ) : null}
           {contact.linkedin_connect_message || contact.intro_message || contact.follow_up_message ? (
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px]">
+            <fieldset disabled={profileHeld} className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px] disabled:opacity-50">
               <span className="flex items-center gap-1.5 text-rh-muted"><FileText size={13} aria-hidden="true" />Edit drafts</span>
               {contact.linkedin_connect_message ? <button type="button" className={`rounded font-medium text-rh-teal hover:underline ${FOCUS_RING}`} onClick={() => { markAttempt("connection note"); onOpenMessage(contact, "linkedin_connect_message", "1. Connection note"); }}>Connection note</button> : null}
               {contact.intro_message ? <button type="button" className={`rounded font-medium text-rh-teal hover:underline ${FOCUS_RING}`} onClick={() => { markAttempt("intro message"); onOpenMessage(contact, "intro_message", "2. After accepted"); }}>Intro</button> : null}
               {contact.follow_up_message ? <button type="button" className={`rounded font-medium text-rh-teal hover:underline ${FOCUS_RING}`} onClick={() => { markAttempt("follow-up message"); onOpenMessage(contact, "follow_up_message", "3. If no response"); }}>Follow-up</button> : null}
-            </div>
+            </fieldset>
           ) : null}
           <p className="mt-3 flex items-start gap-1.5 text-xs text-rh-muted">
             <Info size={13} className="mt-0.5 shrink-0" aria-hidden="true" />
@@ -271,6 +279,7 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
           nextRow={nextRow}
           followUpSupported={followUpSupported}
           onSaveOutcome={async (input) => {
+            if (profileHeld && input.action !== "do_not_contact") return { ok: false, error: "Verify this person's current employer and role before outreach." };
             const result = await onSaveOutcome(contact, input);
             if (result.ok) { setAttempt(null); setSavedLocal((v) => v + 1); }
             return result;

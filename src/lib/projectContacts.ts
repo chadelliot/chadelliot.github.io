@@ -32,6 +32,10 @@ export type ProjectContact = {
   follow_up_message?: string | null;
   needs_research: boolean;
   do_not_contact: boolean;
+  profile_validation_status?: "unverified" | "current" | "role_changed" | "departed" | "retired" | "needs_review" | "not_a_contact";
+  profile_verified_at?: string | null;
+  profile_verification_source?: string | null;
+  profile_validation_note?: string | null;
   // Email outreach thread - separate from the LinkedIn connect/intro/
   // follow-up messages above. Populated from the email_* columns on the
   // RevHub-Marketing tab. email_assumption_notice is non-empty when the
@@ -1281,11 +1285,21 @@ export const hasOutreachContent = (contact: ProjectContact) =>
       contact.email_intro_message
   );
 
-export const getContactTier = (contact: ProjectContact): ContactTier => {
+export const getContactTier = (contact: ProjectContact, now = Date.now()): ContactTier => {
+  if (contact.needs_research || !isContactProfileCurrent(contact, now)) return "research";
   const reachable = Boolean(contact.email) || hasRealLinkedInProfile(contact);
   if (!reachable) return "research";
   if (!hasOutreachContent(contact)) return "no_content";
   return contact.email ? "email" : "linkedin";
+};
+
+// Independent of job-posting age and sheet import time.
+export const isContactProfileCurrent = (contact: ProjectContact, now = Date.now()): boolean => {
+  const checked = Date.parse(contact.profile_verified_at || "");
+  return contact.profile_validation_status === "current"
+    && Boolean(contact.profile_verification_source)
+    && Number.isFinite(checked) && checked <= now + 5 * 60_000
+    && checked >= now - 30 * 86_400_000;
 };
 
 // Builds a ready-to-click LinkedIn people-search URL with the contact's name

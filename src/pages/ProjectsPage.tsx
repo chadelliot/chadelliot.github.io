@@ -36,6 +36,7 @@ import {
   recordContactActivity,
   probeFollowUpSupport,
   getContactTier,
+  isContactProfileCurrent,
   buildLinkedInSearchUrl,
   assignNextCompanyBatch,
   advanceCompanyToEngaged,
@@ -1151,6 +1152,7 @@ const ProjectsPage = () => {
   // shows "Saved" once the write has actually succeeded, and keeps the form
   // (with an error) when it hasn't.
   const handleSaveOutcome = async (contact: ProjectContact, input: OutcomeInput): Promise<OutcomeResult> => {
+    if (input.action !== "do_not_contact" && (contact.do_not_contact || contact.needs_research || !isContactProfileCurrent(contact))) return { ok: false, error: "Employer and role verification is required before outreach." };
     if (!session) return { ok: false, error: "You’re signed out. Sign in again to save." };
     const current = progress[contact.id];
     const status: ContactStatus = current?.status ?? "not_contacted";
@@ -1787,6 +1789,7 @@ const ProjectsPage = () => {
   // Copies the LinkedIn draft that fits this lead's stage, personalized the same
   // way as the message editor. Never changes status; the rep logs it separately.
   const handleCopyLinkedInDraft = async (contact: ProjectContact): Promise<string | null> => {
+    if (contact.do_not_contact || contact.needs_research || !isContactProfileCurrent(contact)) return null;
     const status = progress[contact.id]?.status ?? "not_contacted";
     const pick = suggestedLinkedInDraft(status, contact);
     if (!pick) return null;

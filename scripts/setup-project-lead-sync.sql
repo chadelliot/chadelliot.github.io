@@ -44,6 +44,12 @@ begin
           regexp_replace(lower(linkedin_url), '/+$', '') = regexp_replace(lower(item->>'linkedin_url'), '/+$', '')))
       order by do_not_contact, created_at, id limit 1;
     contact_uuid := existing.id;
+    -- A sheet sync is not a fresh employment check. Never roll back a title
+    -- correction backed by a dated profile review to older scraped source text.
+    if contact_uuid is not null and existing.profile_validation_status in ('current','role_changed','departed','retired')
+       and existing.profile_verified_at is not null then
+      item := item - 'title';
+    end if;
     -- Company renames/acquisitions can leave two names in the workbook.
     -- Keep the existing canonical company and the person's outreach history.
     if contact_uuid is not null and existing.company_id is not null then
