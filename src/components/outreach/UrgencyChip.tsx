@@ -15,10 +15,14 @@ const STYLE: Record<Urgency, { cls: string; Icon: typeof Clock }> = {
   closed: { cls: "text-rh-muted", Icon: Lock },
 };
 
-export const UrgencyChip = ({ row, showDetail = false }: { row: LeadRow; showDetail?: boolean }) => {
-  const { cls, Icon } = STYLE[row.urgency];
+export const UrgencyChip = ({ row, showDetail = false }: { row: LeadRow; showDetail?: boolean }) => (
+  <UrgencyBadge urgency={row.urgency} text={row.urgency === "overdue" && showDetail ? formatDueLabel(row) : undefined} />
+);
+
+export const UrgencyBadge = ({ urgency, text: override }: { urgency: Urgency; text?: string }) => {
+  const { cls, Icon } = STYLE[urgency];
   const tinted = cls.includes("bg-");
-  const text = row.urgency === "overdue" && showDetail ? formatDueLabel(row) : URGENCY_LABEL[row.urgency];
+  const text = override ?? URGENCY_LABEL[urgency];
   return (
     <span className={`inline-flex items-center gap-1.5 whitespace-nowrap text-xs font-medium ${tinted ? "rounded-md px-2 py-1" : ""} ${cls}`}>
       <Icon size={12} strokeWidth={2.25} aria-hidden="true" />

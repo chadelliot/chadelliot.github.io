@@ -75,14 +75,14 @@ const CompanyInfoCard = ({ company, research, signals, contactCount, engagedCoun
   const showStagePill = company.company_stage !== "new_signal";
 
   return (
-    <div className="border-b border-[#EEEDE7] bg-white px-4 py-4">
+    <div className="border-b border-rh-line bg-white px-4 py-4">
       <div className="flex items-start gap-3">
         {showLogo ? (
           <img
             src={getClearbitLogoUrl(logoDomain as string)}
             alt=""
             onError={() => setLogoFailed(true)}
-            className="h-11 w-11 shrink-0 rounded-xl border border-[#EEEDE7] bg-white object-contain p-1.5"
+            className="h-11 w-11 shrink-0 rounded-xl border border-rh-line bg-white object-contain p-1.5"
           />
         ) : (
           <div

@@ -56,7 +56,12 @@ export type LeadRow = {
   days: number;
   project: string | null;
   projectPostedDate: string | null;
+  // Most recently contacted *other* person at the same company, if any. Used
+  // to warn before a second person at one company gets cold outreach.
+  sibling: SiblingTouch | null;
 };
+
+export type SiblingTouch = { id: string; name: string; stageLabel: string; lastTouchAt: string | null };
 
 export const toYmd = (d: Date): string => {
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -163,7 +168,23 @@ export const buildLeadRows = ({ contacts, progress, companies, signalsByCompanyI
       days,
       project: signal?.role_title ?? null,
       projectPostedDate: signal?.posted_date ?? null,
+      sibling: null,
     });
+  }
+
+  // Second pass: who else at each company has already been contacted?
+  const byCompany = new Map<string, LeadRow[]>();
+  for (const r of rows) {
+    const id = r.contact.company_id as string;
+    (byCompany.get(id) ?? byCompany.set(id, []).get(id)!).push(r);
+  }
+  for (const group of byCompany.values()) {
+    for (const r of group) {
+      const touched = group
+        .filter((o) => o !== r && o.contacted && o.status !== "do_not_contact")
+        .sort((a, b) => (b.lastTouchAt ?? "").localeCompare(a.lastTouchAt ?? ""))[0];
+      if (touched) r.sibling = { id: touched.contact.id, name: touched.contact.contact_name ?? "Someone", stageLabel: touched.stageLabel, lastTouchAt: touched.lastTouchAt };
+    }
   }
   return rows;
 };
@@ -241,4 +262,79 @@ export const formatAgo = (iso: string | null | undefined, now: Date = new Date()
   if (d === 0) return "Today";
   if (d === 1) return "Yesterday";
   return `${d} days ago`;
+};
+
+// ---- Company grouping (one row per company, contacts nested) ----
+
+export type CompanyFilter = "all" | "action" | "new" | "engaged" | "meeting" | "closed" | "stalled";
+export type CompanySort = "priority" | "name" | "last_touch" | "contacts";
+
+export type CompanyGroup = {
+  company: Company;
+  rows: LeadRow[];
+  contacted: number;
+  topUrgency: Urgency;
+  topDays: number;
+  lastTouchAt: string | null;
+  nextDue: string | null;
+  project: string | null;
+  stalled: boolean;
+};
+
+export const groupByCompany = (rows: LeadRow[], stalledIds: Set<string>): CompanyGroup[] => {
+  const map = new Map<string, LeadRow[]>();
+  for (const r of rows) {
+    if (!r.company) continue;
+    (map.get(r.company.id) ?? map.set(r.company.id, []).get(r.company.id)!).push(r);
+  }
+  const groups: CompanyGroup[] = [];
+  for (const list of map.values()) {
+    const sorted = sortRows(list, "priority");
+    const top = sorted[0];
+    const live = list.filter((r) => r.urgency !== "closed");
+    const nextDue = live.map((r) => r.followUpAt).filter((d): d is string => Boolean(d)).sort()[0] ?? null;
+    groups.push({
+      company: top.company as Company,
+      rows: sorted,
+      contacted: list.filter((r) => r.contacted).length,
+      topUrgency: top.urgency,
+      topDays: top.days,
+      lastTouchAt: list.map((r) => r.lastTouchAt).filter((d): d is string => Boolean(d)).sort().pop() ?? null,
+      nextDue,
+      project: list.find((r) => r.project)?.project ?? null,
+      stalled: stalledIds.has(top.company!.id),
+    });
+  }
+  return groups;
+};
+
+export const matchesCompanyFilter = (g: CompanyGroup, filter: CompanyFilter): boolean => {
+  switch (filter) {
+    case "all": return true;
+    case "action": return ACTION_URGENCIES.includes(g.topUrgency);
+    case "new": return g.company.company_stage === "new_signal";
+    case "engaged": return g.company.company_stage === "opportunities_engaged";
+    case "meeting": return g.company.company_stage === "meeting_scheduled";
+    case "closed": return g.company.company_stage === "closed_won" || g.company.company_stage === "closed_lost";
+    case "stalled": return g.stalled;
+  }
+};
+
+export const matchesCompanySearch = (g: CompanyGroup, query: string): boolean => {
+  const q = query.trim().toLowerCase();
+  if (!q) return true;
+  return g.company.name.toLowerCase().includes(q) || (g.project ?? "").toLowerCase().includes(q) || g.rows.some((r) => matchesSearch(r, q));
+};
+
+export const sortGroups = (groups: CompanyGroup[], sort: CompanySort): CompanyGroup[] => {
+  const copy = [...groups];
+  const byName = (a: CompanyGroup, b: CompanyGroup) => a.company.name.localeCompare(b.company.name);
+  if (sort === "name") return copy.sort(byName);
+  if (sort === "contacts") return copy.sort((a, b) => b.rows.length - a.rows.length || byName(a, b));
+  if (sort === "last_touch") return copy.sort((a, b) => (a.lastTouchAt ?? "").localeCompare(b.lastTouchAt ?? "") || byName(a, b));
+  return copy.sort((a, b) => {
+    if (a.topUrgency !== b.topUrgency) return URGENCY_RANK[a.topUrgency] - URGENCY_RANK[b.topUrgency];
+    if ((a.topUrgency === "overdue" || a.topUrgency === "stale") && a.topDays !== b.topDays) return b.topDays - a.topDays;
+    return byName(a, b);
+  });
 };

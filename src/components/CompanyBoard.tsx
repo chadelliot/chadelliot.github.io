@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Zap, Send, CalendarClock, Trophy, XCircle, AlertTriangle } from "lucide-react";
+import { AlertTriangle, ChevronRight, Search } from "lucide-react";
 import {
   COMPANY_STAGE_LABELS,
   OUTREACH_MODEL_LABELS,
-  OUTREACH_MODEL_BADGE_CLASS,
   OUTREACH_MODEL_DESCRIPTIONS,
   getCompanyDomain,
   getClearbitLogoUrl,
@@ -22,40 +21,15 @@ import {
 // (no initials chip here; the company name text is already the primary
 // label on these rows, so a failed logo just means no image rather than
 // swapping to another element).
-const CompanyLogo = ({ domain }: { domain: string | null }) => {
+const CompanyLogo = ({ domain, name }: { domain: string | null; name: string }) => {
   const [failed, setFailed] = useState(false);
-  if (!domain || failed) return null;
-  return <img src={getClearbitLogoUrl(domain)} alt="" onError={() => setFailed(true)} className="h-8 w-8 shrink-0 rounded-lg border border-[#EEEDE7] bg-white object-contain p-1" />;
+  if (!domain || failed) {
+    return <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-xs font-semibold text-rh-body ring-1 ring-inset ring-rh-line-strong" aria-hidden="true">{name.split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join("")}</span>;
+  }
+  return <img src={getClearbitLogoUrl(domain)} alt="" onError={() => setFailed(true)} className="h-9 w-9 shrink-0 rounded-lg border border-rh-line bg-white object-contain p-1" />;
 };
 
 const STAGE_ORDER: CompanyStage[] = ["new_signal", "opportunities_engaged", "meeting_scheduled", "closed_won", "closed_lost"];
-
-// Same stage colors/icons as the "Company penetration" tiles on the main
-// /projects dashboard (see STAGE_CHART_COLORS/STAGE_TINT_BG/STAGE_ICON in
-// ProjectsPage.tsx) - reused deliberately rather than invented fresh, so
-// this board reads as the same product instead of a second color language
-// for the same five stages.
-const STAGE_CHART_COLORS: Record<CompanyStage, string> = {
-  new_signal: "#94A3B8",
-  opportunities_engaged: "#1D4ED8",
-  meeting_scheduled: "#2FA37F",
-  closed_won: "#15803D",
-  closed_lost: "#B91C1C",
-};
-const STAGE_TINT_BG: Record<CompanyStage, string> = {
-  new_signal: "#94A3B822",
-  opportunities_engaged: "#1D4ED822",
-  meeting_scheduled: "#2FA37F22",
-  closed_won: "#15803D22",
-  closed_lost: "#B91C1C22",
-};
-const STAGE_ICON: Record<CompanyStage, typeof Zap> = {
-  new_signal: Zap,
-  opportunities_engaged: Send,
-  meeting_scheduled: CalendarClock,
-  closed_won: Trophy,
-  closed_lost: XCircle,
-};
 
 // Chad's own complaint about the old column layout: with 300 opportunities,
 // New Opportunity was an endless, alphabetical scroll with nothing to tell
@@ -165,99 +139,52 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
   const remaining = sortedCompanies.length - visibleCompanies.length;
   const hasActiveFilter = stageFilter !== "all" || repFilter !== "all" || priorityFilter !== "all" || stalledOnly || Boolean(search);
 
+  const FOCUS = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright/70 focus-visible:ring-offset-1";
+  const SELECT = `h-9 min-w-0 rounded-lg border border-rh-line bg-white px-2.5 text-[13px] text-rh-body hover:border-rh-line-strong ${FOCUS}`;
+  const STAGE_DOT: Record<CompanyStage, string> = { new_signal: "bg-rh-faint", opportunities_engaged: "bg-rh-teal-bright", meeting_scheduled: "bg-[#5B8DEF]", closed_won: "bg-rh-teal", closed_lost: "bg-rh-red" };
+  const tabs: { key: string; label: string; count: number; active: boolean; onClick: () => void }[] = [
+    { key: "all", label: "All", count: companies.length, active: stageFilter === "all" && !stalledOnly, onClick: () => { setStageFilter("all"); setStalledOnly(false); } },
+    ...STAGE_ORDER.slice(0, 3).map((stage) => ({ key: stage, label: COMPANY_STAGE_LABELS[stage], count: stageCounts[stage], active: stageFilter === stage && !stalledOnly, onClick: () => { setStalledOnly(false); setStageFilter(stage); } })),
+    { key: "stalled", label: "Stalled", count: stalledCount, active: stalledOnly, onClick: () => { setStageFilter("all"); setStalledOnly(true); } },
+    ...STAGE_ORDER.slice(3).map((stage) => ({ key: stage, label: COMPANY_STAGE_LABELS[stage], count: stageCounts[stage], active: stageFilter === stage && !stalledOnly, onClick: () => { setStalledOnly(false); setStageFilter(stage); } })),
+  ];
+
   return (
-    <div>
-      <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-        {STAGE_ORDER.slice(0, 3).map((stage) => {
-          const isActive = stageFilter === stage;
-          const Icon = STAGE_ICON[stage];
-          return (
-            <button
-              key={stage}
-              type="button"
-              onClick={() => setStageFilter(isActive ? "all" : stage)}
-              className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${isActive ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
-            >
-              <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG[stage] }}>
-                <Icon size={16} style={{ color: STAGE_CHART_COLORS[stage] }} />
-              </div>
-              <p className={`text-2xl font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>{stageCounts[stage]}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
-            </button>
-          );
-        })}
-
-        {/* Stalled tracked as its own primary metric, right after Meeting
-            Scheduled - a company can be stalled in either new_signal or
-            meeting_scheduled (see companyInsights), so this cuts across
-            stages rather than being one more stage itself. Clicking it
-            filters the list below to just the stalled ones. */}
-        <button
-          type="button"
-          onClick={() => setStalledOnly((v) => !v)}
-          className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${stalledOnly ? "border-[#B91C1C] bg-[#FEF2F2]" : "border-[#EEEDE7] bg-white hover:border-[#B91C1C]/40"}`}
-        >
-          <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg bg-[#B91C1C22]">
-            <AlertTriangle size={16} className="text-[#B91C1C]" />
-          </div>
-          <p className={`text-2xl font-semibold ${stalledOnly ? "text-[#B91C1C]" : "text-foreground"}`}>{stalledCount}</p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">Stalled</p>
-        </button>
-
-        {STAGE_ORDER.slice(3).map((stage) => {
-          const isActive = stageFilter === stage;
-          const Icon = STAGE_ICON[stage];
-          return (
-            <button
-              key={stage}
-              type="button"
-              onClick={() => setStageFilter(isActive ? "all" : stage)}
-              className={`rounded-2xl border p-4 text-left shadow-sm transition-all hover:shadow-md ${isActive ? "border-primary bg-primary/5" : "border-[#EEEDE7] bg-white hover:border-primary/40"}`}
-            >
-              <div className="mb-2.5 flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: STAGE_TINT_BG[stage] }}>
-                <Icon size={16} style={{ color: STAGE_CHART_COLORS[stage] }} />
-              </div>
-              <p className={`text-2xl font-semibold ${isActive ? "text-primary" : "text-foreground"}`}>{stageCounts[stage]}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">{COMPANY_STAGE_LABELS[stage]}</p>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <p className="mr-auto text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">
-          {stalledOnly ? `Stalled (${sortedCompanies.length})` : stageFilter === "all" ? `All companies (${sortedCompanies.length})` : `${COMPANY_STAGE_LABELS[stageFilter]} (${sortedCompanies.length})`}
-        </p>
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search companies…"
-          className="h-9 w-56 max-w-full rounded-lg border border-[#CBD5E1] bg-white px-3 text-sm outline-none focus:border-primary"
-        />
-        <select value={repFilter} onChange={(e) => setRepFilter(e.target.value)} className="h-9 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">
-          <option value="all">All reps</option>
-          {teamMembersWithLogin.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
-        </select>
-        <select value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className="h-9 rounded-lg border border-[#CBD5E1] bg-white px-2 text-sm font-semibold text-[#334155] outline-none focus:border-primary">
-          <option value="all">All priorities</option>
-          <option value="A">A</option>
-          <option value="A/B">A/B</option>
-          <option value="B">B</option>
-          <option value="C">C</option>
-        </select>
-        {hasActiveFilter ? (
-          <button
-            type="button"
-            onClick={() => { setSearch(""); setRepFilter("all"); setPriorityFilter("all"); setStageFilter("all"); setStalledOnly(false); }}
-            className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
-          >
-            Clear
+    <div className="overflow-hidden rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.03)]">
+      <div role="group" aria-label="Filter companies" className="flex flex-nowrap items-center gap-4 overflow-x-auto border-b border-rh-line px-5">
+        {tabs.map((t) => (
+          <button key={t.key} type="button" aria-pressed={t.active} onClick={t.onClick} className={`relative shrink-0 rounded-sm py-3.5 text-[13px] font-medium transition-colors ${FOCUS} ${t.active ? "text-rh-ink" : "text-rh-muted hover:text-rh-ink"}`}>
+            {t.label}<span className={`ml-1.5 tabular-nums ${t.active ? "text-rh-teal" : "text-rh-faint"}`}>{t.count}</span>
+            {t.active ? <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-rh-ink" aria-hidden="true" /> : null}
           </button>
+        ))}
+        {hasActiveFilter ? (
+          <button type="button" onClick={() => { setSearch(""); setRepFilter("all"); setPriorityFilter("all"); setStageFilter("all"); setStalledOnly(false); }} className={`ml-auto shrink-0 rounded-sm py-3.5 text-[13px] font-medium text-rh-teal hover:underline ${FOCUS}`}>Reset</button>
         ) : null}
       </div>
 
-      <div className="grid gap-2">
+      <div className="flex flex-wrap items-center gap-2 border-b border-rh-line bg-rh-canvas/50 px-5 py-3">
+        <div className="relative basis-full sm:min-w-[10rem] sm:flex-1 sm:basis-0">
+          <label htmlFor="board-search" className="sr-only">Search companies</label>
+          <Search size={14} className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-rh-muted" aria-hidden="true" />
+          <input id="board-search" type="search" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search companies" className={`h-9 w-full rounded-lg border border-rh-line bg-white pl-9 pr-3 text-[13px] text-rh-ink placeholder:text-rh-muted hover:border-rh-line-strong ${FOCUS}`} />
+        </div>
+        <label htmlFor="board-rep" className="sr-only">Rep</label>
+        <select id="board-rep" value={repFilter} onChange={(e) => setRepFilter(e.target.value)} className={`${SELECT} flex-1 sm:flex-none`}>
+          <option value="all">All reps</option>
+          {teamMembersWithLogin.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
+        </select>
+        <label htmlFor="board-priority" className="sr-only">Priority</label>
+        <select id="board-priority" value={priorityFilter} onChange={(e) => setPriorityFilter(e.target.value)} className={`${SELECT} flex-1 sm:flex-none`}>
+          <option value="all">All priorities</option>
+          <option value="A">Priority A</option>
+          <option value="A/B">Priority A/B</option>
+          <option value="B">Priority B</option>
+          <option value="C">Priority C</option>
+        </select>
+      </div>
+
+      <ul>
         {visibleCompanies.map((company) => {
           const rep = company.assigned_rep ? repById[company.assigned_rep] : null;
           const insight = companyInsights[company.id];
@@ -265,63 +192,54 @@ const CompanyBoard = ({ companies, contacts, progress, signalsByCompanyId, teamM
           const topSignal = companySignals[0];
           const engagedPct = insight && insight.total > 0 ? Math.round((insight.engaged / insight.total) * 100) : 0;
           return (
-            <Link
-              key={company.id}
-              to={`/projects/company/${company.id}`}
-              className="flex items-center gap-3 rounded-xl border border-[#EEEDE7] bg-white px-4 py-3 text-sm shadow-sm transition-shadow hover:shadow-md"
-            >
-              <CompanyLogo domain={getCompanyDomain(contactsByCompanyId[company.id] ?? [])} />
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="truncate font-semibold text-foreground">{company.name}</p>
-                  <span
-                    className="rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.06em]"
-                    style={{ backgroundColor: STAGE_TINT_BG[company.company_stage], color: STAGE_CHART_COLORS[company.company_stage] }}
-                  >
-                    {COMPANY_STAGE_LABELS[company.company_stage]}
-                  </span>
-                  {insight?.stalled ? (
-                    <span className="rounded-full bg-[#FEF2F2] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.06em] text-[#B91C1C]">Stalled</span>
-                  ) : null}
-                </div>
-                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">
-                  <span className="flex items-center gap-1.5 normal-case tracking-normal">
-                    <span className="flex h-1.5 w-14 overflow-hidden rounded-full bg-[#E2E8F0]">
-                      <span className="block h-full rounded-full bg-primary" style={{ width: `${engagedPct}%` }} />
+            <li key={company.id} className="border-b border-rh-line last:border-0">
+              <Link to={`/projects/company/${company.id}`} className={`group grid items-center gap-x-4 gap-y-2 px-5 py-3.5 transition-colors hover:bg-rh-canvas/70 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1.2fr)_9rem_1rem] ${FOCUS}`}>
+                <span className="flex min-w-0 items-center gap-3">
+                  <CompanyLogo domain={getCompanyDomain(contactsByCompanyId[company.id] ?? [])} name={company.name} />
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-semibold text-rh-ink">{company.name}</span>
+                    <span className="flex flex-wrap items-center gap-x-2 text-[13px] text-rh-muted">
+                      <span className="flex items-center gap-1.5"><span className={`h-1.5 w-1.5 rounded-full ${STAGE_DOT[company.company_stage]}`} aria-hidden="true" />{COMPANY_STAGE_LABELS[company.company_stage]}</span>
+                      {insight?.stalled ? <span className="inline-flex items-center gap-1 text-rh-amber"><AlertTriangle size={11} aria-hidden="true" />Stalled</span> : null}
                     </span>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{insight?.engaged ?? 0}/{insight?.total ?? 0} engaged</span>
                   </span>
-                  {insight?.priority ? <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-1.5 py-0.5">Priority {insight.priority}</span> : null}
-                  {companySignals.length > 0 ? <span className="rounded-full border border-[#FDE68A] bg-[#FFFBEB] px-1.5 py-0.5 text-[#92400E]">{companySignals.length} signal{companySignals.length === 1 ? "" : "s"}</span> : null}
-                  {topSignal?.outreach_model ? (
-                    <span title={OUTREACH_MODEL_DESCRIPTIONS[topSignal.outreach_model]} className={`cursor-help rounded-full border px-1.5 py-0.5 ${OUTREACH_MODEL_BADGE_CLASS[topSignal.outreach_model]}`}>{OUTREACH_MODEL_LABELS[topSignal.outreach_model]}</span>
-                  ) : null}
-                </div>
-                {company.company_stage === "closed_lost" && company.closed_lost_reason ? (
-                  <p className="mt-1 truncate text-[11px] text-[#B91C1C]">{company.closed_lost_reason}</p>
-                ) : null}
-              </div>
-              <div className="shrink-0">
-                {rep ? (
-                  <span className="rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground">{rep.name}</span>
-                ) : (
-                  <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-muted-foreground/70">Unassigned</span>
-                )}
-              </div>
-            </Link>
+                </span>
+                <span className="min-w-0">
+                  <span className="flex items-center gap-2 text-[13px] text-rh-body">
+                    <span className="flex h-1 w-14 overflow-hidden rounded-full bg-rh-line" aria-hidden="true"><span className="block h-full rounded-full bg-rh-teal-bright" style={{ width: `${engagedPct}%` }} /></span>
+                    {insight?.engaged ?? 0} of {insight?.total ?? 0} engaged
+                  </span>
+                  <span className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs text-rh-muted">
+                    {insight?.priority ? <span>Priority {insight.priority}</span> : null}
+                    {companySignals.length > 0 ? <span>{companySignals.length} open role{companySignals.length === 1 ? "" : "s"}</span> : null}
+                    {topSignal?.outreach_model ? <span title={OUTREACH_MODEL_DESCRIPTIONS[topSignal.outreach_model]} className="cursor-help">{OUTREACH_MODEL_LABELS[topSignal.outreach_model]}</span> : null}
+                  </span>
+                  {company.company_stage === "closed_lost" && company.closed_lost_reason ? <span className="mt-0.5 block truncate text-xs text-rh-red">{company.closed_lost_reason}</span> : null}
+                </span>
+                <span className="flex items-center gap-2 text-[13px]">
+                  {rep ? (
+                    <>
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-rh-canvas text-[10px] font-semibold text-rh-body ring-1 ring-inset ring-rh-line" aria-hidden="true">{rep.name.split(/\s+/).slice(0, 2).map((w) => w[0]).join("")}</span>
+                      <span className="truncate text-rh-body">{rep.name}</span>
+                    </>
+                  ) : (
+                    <span className="text-rh-muted">Unassigned</span>
+                  )}
+                </span>
+                <ChevronRight size={16} className="hidden text-rh-faint opacity-0 transition-opacity group-hover:opacity-100 md:block" aria-hidden="true" />
+              </Link>
+            </li>
           );
         })}
-        {sortedCompanies.length === 0 ? <p className="text-sm text-muted-foreground">No companies match these filters.</p> : null}
-      </div>
+      </ul>
+      {sortedCompanies.length === 0 ? <p className="px-6 py-14 text-center text-[13px] text-rh-muted">No companies match these filters.</p> : null}
 
       {remaining > 0 ? (
-        <button
-          type="button"
-          onClick={() => setVisibleCount((v) => v + BOARD_PAGE_SIZE)}
-          className="mt-3 w-full rounded-lg border border-[#CBD5E1] bg-white py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
-        >
-          Show {Math.min(BOARD_PAGE_SIZE, remaining)} more ({remaining} left)
-        </button>
+        <div className="border-t border-rh-line px-5 py-3 text-center">
+          <button type="button" onClick={() => setVisibleCount((v) => v + BOARD_PAGE_SIZE)} className={`rounded-lg px-3 py-1.5 text-[13px] font-medium text-rh-teal hover:underline ${FOCUS}`}>
+            Show {Math.min(BOARD_PAGE_SIZE, remaining)} more · {remaining} remaining
+          </button>
+        </div>
       ) : null}
     </div>
   );

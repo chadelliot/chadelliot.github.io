@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLeadRows, countByUrgency, sortRows, daysBetween } from "@/lib/outreachQueue";
+import { buildLeadRows, countByUrgency, sortRows, daysBetween, groupByCompany, matchesCompanyFilter } from "@/lib/outreachQueue";
 import type { Company, ProjectContact, ContactProgress } from "@/lib/projectContacts";
 
 const now = new Date(2026, 9, 23, 10, 0, 0); // local Oct 23 2026
@@ -61,5 +61,22 @@ describe("outreach queue", () => {
 
   it("counts calendar days across month ends", () => {
     expect(daysBetween("2026-10-30", "2026-11-02")).toBe(3);
+  });
+
+  it("flags a second contact at a company already being worked", () => {
+    const rows = build([mk("a"), mk("b")], { a: { status: "connection_sent", updated_at: iso(3) }, b: {} });
+    const b = rows.find((r) => r.contact.id === "b")!;
+    expect(b.sibling?.name).toBe("a");
+    expect(rows.find((r) => r.contact.id === "a")!.sibling).toBeNull();
+  });
+
+  it("groups contacts by company and takes the most urgent state", () => {
+    const rows = build([mk("a"), mk("b")], { a: {}, b: { status: "connection_sent", follow_up_at: "2026-10-20" } });
+    const [g] = groupByCompany(rows, new Set());
+    expect(g.rows).toHaveLength(2);
+    expect(g.contacted).toBe(1);
+    expect(g.topUrgency).toBe("overdue");
+    expect(matchesCompanyFilter(g, "action")).toBe(true);
+    expect(matchesCompanyFilter(g, "meeting")).toBe(false);
   });
 });

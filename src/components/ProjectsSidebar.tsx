@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { Link } from "react-router-dom";
-import { Building2, Contact, Inbox, LayoutGrid, KanbanSquare, Users, LogOut, Menu, X, ArrowLeft, UserCircle, UserPlus } from "lucide-react";
+import { Building2, Inbox, LayoutGrid, KanbanSquare, Users, LogOut, Menu, X, ArrowLeft, UserCircle, UserPlus } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import revhubLogo from "@/assets/RH-Logo-Light.png";
 
-export type ProjectsSection = "queue" | "leads" | "assignments" | "board" | "team" | "profile";
+export type ProjectsSection = "queue" | "leads" | "assignments" | "classic" | "board" | "team" | "profile";
 
 type NavItem = {
   key: ProjectsSection;
@@ -13,13 +13,12 @@ type NavItem = {
   icon: typeof LayoutGrid;
 };
 
-// Daily work first, in the order a rep actually uses it: what needs me today,
-// then everyone I could contact, then account-level views. "assignments" is
+// Daily work first: what needs me today, then every company with all of its
+// contacts in one place (so nobody is contacted twice by accident). "assignments" is
 // kept as the internal key for Companies so existing ?view=assignments links
 // keep working.
 const WORK_ITEMS: NavItem[] = [
   { key: "queue", label: "Today", icon: Inbox },
-  { key: "leads", label: "Leads", icon: Contact },
   { key: "assignments", label: "Companies", icon: Building2 },
 ];
 const ACCOUNT_ITEMS: NavItem[] = [{ key: "profile", label: "Profile", icon: UserCircle }];

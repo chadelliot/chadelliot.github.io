@@ -11,6 +11,7 @@ import {
 import type { ProposalSession } from "@/lib/companyStatus";
 import { addDaysYmd, formatAgo, formatShortDate, toYmd, type LeadRow } from "@/lib/outreachQueue";
 import { UrgencyChip } from "./UrgencyChip";
+import { Users } from "lucide-react";
 
 export type OutcomeAction =
   | "linkedin_connection"
@@ -82,6 +83,7 @@ const SectionTitle = ({ id, Icon, children }: { id: string; Icon: LucideIcon; ch
 
 type Props = {
   row: LeadRow;
+  siblings: LeadRow[];
   index: number;
   total: number;
   nextRow: LeadRow | null;
@@ -99,7 +101,7 @@ type Props = {
   historyVersion: number;
 };
 
-const LeadPanel = ({ row, index, total, nextRow, isDesktop, session, followUpSupported, onClose, onPrev, onNext, onGoToLead, onOpenMessage, onOpenEmail, onSaveOutcome, historyVersion }: Props) => {
+const LeadPanel = ({ row, siblings, index, total, nextRow, isDesktop, session, followUpSupported, onClose, onPrev, onNext, onGoToLead, onOpenMessage, onOpenEmail, onSaveOutcome, historyVersion }: Props) => {
   const { contact, company } = row;
   const headingRef = useRef<HTMLHeadingElement>(null);
   const logRef = useRef<HTMLFormElement>(null);
@@ -188,6 +190,32 @@ const LeadPanel = ({ row, index, total, nextRow, isDesktop, session, followUpSup
             </div>
           </dl>
         </section>
+
+        {/* Already working this company? Say so before anyone reaches out twice. */}
+        {siblings.length > 0 ? (
+          <section aria-labelledby="co-h">
+            {row.sibling && !row.contacted ? (
+              <div role="note" className="mb-3 flex items-start gap-2 rounded-xl bg-rh-amber-soft px-3.5 py-2.5 text-[13px] text-rh-amber">
+                <Users size={15} className="mt-0.5 shrink-0" aria-hidden="true" />
+                <span><span className="font-semibold">{row.sibling.name}</span> at {contact.company} is already in progress ({row.sibling.stageLabel}{row.sibling.lastTouchAt ? `, ${formatAgo(row.sibling.lastTouchAt).toLowerCase()}` : ""}). Check before reaching out to {contact.contact_name?.split(" ")[0] ?? "this person"}.</span>
+              </div>
+            ) : null}
+            <SectionTitle id="co-h" Icon={Users}>Others at {contact.company}</SectionTitle>
+            <ul className="divide-y divide-rh-line overflow-hidden rounded-xl border border-rh-line">
+              {siblings.map((o) => (
+                <li key={o.contact.id}>
+                  <button type="button" onClick={() => onGoToLead(o.contact.id)} className={`flex w-full items-center justify-between gap-3 bg-white px-3.5 py-2.5 text-left text-[13px] hover:bg-rh-canvas ${FOCUS_RING}`}>
+                    <span className="min-w-0">
+                      <span className="block truncate font-medium text-rh-ink">{o.contact.contact_name}</span>
+                      <span className="block truncate text-xs text-rh-muted">{o.stageLabel}</span>
+                    </span>
+                    <UrgencyChip row={o} />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ) : null}
 
         {/* Context */}
         <section aria-labelledby="ctx-h">

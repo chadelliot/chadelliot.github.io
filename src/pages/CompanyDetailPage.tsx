@@ -73,12 +73,12 @@ const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
 
 const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
-  not_contacted: "border-[#E2E8F0] bg-[#F8FAFC] text-[#64748B]",
-  connection_sent: "border-[#DDD6FE] bg-[#F5F3FF] text-[#6D28D9]",
-  introduction_sent: "border-[#BFDBFE] bg-[#EFF6FF] text-[#1D4ED8]",
-  follow_up_sent: "border-[#FDE68A] bg-[#FFFBEB] text-[#B45309]",
-  meeting_set: "border-primary/30 bg-primary/5 text-primary",
-  do_not_contact: "border-[#FECACA] bg-[#FEF2F2] text-[#B91C1C]",
+  not_contacted: "bg-rh-canvas text-rh-muted",
+  connection_sent: "bg-rh-teal-soft text-rh-teal-ink",
+  introduction_sent: "bg-rh-teal-soft text-rh-teal-ink",
+  follow_up_sent: "bg-rh-amber-soft text-rh-amber",
+  meeting_set: "bg-[#EAF0FD] text-[#2F55B0]",
+  do_not_contact: "bg-rh-red-soft text-rh-red",
 };
 
 
@@ -342,7 +342,7 @@ const CompanyDetailPage = () => {
       contact.follow_up_message;
 
     return (
-      <div key={contact.id} className={`overflow-hidden rounded-lg border bg-white ${isMeetingContact ? "border-primary/40" : "border-[#E2E8F0]"}`}>
+      <div key={contact.id} className={`overflow-hidden rounded-lg border bg-white ${isMeetingContact ? "border-primary/40" : "border-rh-line"}`}>
         <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2.5">
           <div className="flex items-center gap-3">
             <div
@@ -358,7 +358,7 @@ const CompanyDetailPage = () => {
                     type="button"
                     onClick={() => setEmailPopupContact(contact)}
                     title="Email outreach"
-                    className="flex items-center gap-1 rounded-full border border-[#CBD5E1] bg-white px-1.5 py-0.5 text-[#1D4ED8] hover:border-primary hover:text-primary"
+                    className="flex items-center gap-1 rounded-full border border-rh-line-strong bg-white px-1.5 py-0.5 text-[#1D4ED8] hover:border-primary hover:text-primary"
                   >
                     <Mail size={12} />
                     <span className="flex items-center gap-0.5">
@@ -370,23 +370,23 @@ const CompanyDetailPage = () => {
                 ) : null}
                 <p className="text-sm font-semibold text-foreground">
                   {contact.contact_name}
-                  {isPrimary ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">Primary contact</span> : null}
-                  {isMeetingContact ? <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-primary">📅 Meeting contact</span> : null}
+                  {isPrimary ? <span className="ml-2 text-xs font-medium text-primary">Primary contact</span> : null}
+                  {isMeetingContact ? <span className="ml-2 text-xs font-medium text-primary">📅 Meeting contact</span> : null}
                 </p>
               </div>
               <p className="text-xs text-muted-foreground">{contact.title}{contact.email ? ` · ${contact.email}` : ""}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.06em] ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span>
+            <span className={`rounded-md px-2 py-1 text-xs font-medium ${STATUS_PILL_CLASS[status]}`}>{STATUS_LABELS[status]}</span>
             <span className="text-xs text-muted-foreground">{teamMembers.find((m) => m.id === contactProgress?.assigned_to)?.name ?? "Unassigned"}</span>
           </div>
         </div>
         {hasAnyButton ? (
-          <div className="flex flex-wrap items-center gap-2 border-t border-[#EEEDE7] bg-[#FAFAF8] px-3 py-2">
-            {contact.linkedin_connect_message && showConnectionNote ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
-            {contact.intro_message && showAfterAccepted ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
-            {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+          <div className="flex flex-wrap items-center gap-2 border-t border-rh-line bg-rh-canvas px-3 py-2">
+            {contact.linkedin_connect_message && showConnectionNote ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
+            {contact.intro_message && showAfterAccepted ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
+            {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
           </div>
         ) : null}
       </div>
@@ -395,9 +395,9 @@ const CompanyDetailPage = () => {
 
   if (!IS_DB_READY) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#F6F5F2] px-6 py-16">
+      <div className="flex min-h-screen items-center justify-center bg-rh-canvas px-6 py-16">
         <section className="mx-auto w-full max-w-xl rounded-[2rem] border border-border bg-background p-7 shadow-sm md:p-9">
-          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground">Login is not configured.</h1>
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-foreground">Login is not configured.</h1>
         </section>
       </div>
     );
@@ -411,7 +411,7 @@ const CompanyDetailPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F5F2]">
+    <div className="min-h-screen bg-rh-canvas">
       <ProjectsSidebar
         isOwner={isOwner}
         activeSection="assignments"
@@ -429,14 +429,14 @@ const CompanyDetailPage = () => {
               // list's filters, search and open lead are exactly as left.
               if (window.history.state?.idx > 0) { e.preventDefault(); navigate(-1); }
             }}
-            className="text-xs font-semibold uppercase tracking-[0.08em] text-primary hover:underline"
+            className="text-[13px] font-medium text-primary hover:underline"
           >← Back to RevHub</Link>
 
           {isLoadingData ? <p className="mt-6 text-sm text-muted-foreground">Loading company…</p> : null}
 
           {!isLoadingData && !company ? (
             <div className="mt-6">
-              <h1 className="font-display text-2xl font-extrabold tracking-tight text-foreground">Company not found.</h1>
+              <h1 className="font-display text-2xl font-semibold tracking-tight text-foreground">Company not found.</h1>
               <p className="mt-2 text-sm text-muted-foreground">It may have been merged or removed. Head back to the board to find it.</p>
             </div>
           ) : null}
@@ -445,15 +445,15 @@ const CompanyDetailPage = () => {
             <>
               <div className="mb-4 mt-4 flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-primary">RevHub outreach · Company</p>
-                  <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground md:text-4xl">{company.name}</h1>
+                  <p className="mb-2 text-xs font-medium text-primary">RevHub outreach · Company</p>
+                  <h1 className="font-display text-[28px] font-semibold leading-tight tracking-[-0.02em] text-rh-ink">{company.name}</h1>
                   <div className="mt-3 flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">Assigned to:</span>
+                    <span className="text-[13px] font-medium text-muted-foreground">Assigned to:</span>
                     {canManage ? (
                       <select
                         value={company.assigned_rep ?? ""}
                         onChange={(e) => handleReassignRep(e.target.value)}
-                        className="h-8 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary"
+                        className="h-8 rounded-lg border border-rh-line bg-white px-2 text-xs font-semibold text-rh-body outline-none focus:border-primary"
                       >
                         <option value="">Unassigned</option>
                         {teamMembersWithLogin.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
@@ -469,17 +469,17 @@ const CompanyDetailPage = () => {
                 {canManage ? (
                   <div className="flex flex-wrap items-center gap-2">
                     {company.company_stage !== "new_signal" ? (
-                      <button type="button" onClick={() => handleSetStage("new_signal")} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary">
+                      <button type="button" onClick={() => handleSetStage("new_signal")} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary">
                         Reopen outreach
                       </button>
                     ) : null}
                     {company.company_stage === "new_signal" ? (
-                      <button type="button" onClick={() => handleSetStage("opportunities_engaged")} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary">
+                      <button type="button" onClick={() => handleSetStage("opportunities_engaged")} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary">
                         Mark Opportunities Engaged
                       </button>
                     ) : null}
                     {company.company_stage !== "closed_won" ? (
-                      <button type="button" onClick={() => handleSetStage("closed_won")} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary">
+                      <button type="button" onClick={() => handleSetStage("closed_won")} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary">
                         Mark Closed Won
                       </button>
                     ) : null}
@@ -490,7 +490,7 @@ const CompanyDetailPage = () => {
                           const reason = window.prompt("Optional: why was this closed lost?") ?? "";
                           handleSetStage("closed_lost", reason);
                         }}
-                        className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                        className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary"
                       >
                         Mark Closed Lost
                       </button>
@@ -515,7 +515,7 @@ const CompanyDetailPage = () => {
 
                   {companyMeeting ? (
                     <div className="rounded-lg border border-primary/30 bg-primary/5 px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-primary">Meeting scheduled</p>
+                      <p className="text-xs font-medium text-primary">Meeting scheduled</p>
                       <p className="mt-1 text-sm text-foreground">
                         {meetingContact?.contact_name ?? "Unknown contact"}{meetingContact?.title ? `, ${meetingContact.title}` : ""}
                         {companyMeeting.meeting_date ? ` · ${companyMeeting.meeting_date}` : ""}
@@ -527,7 +527,7 @@ const CompanyDetailPage = () => {
 
                   {company.company_stage === "closed_won" ? (
                     <div className="rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] px-4 py-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.1em] text-[#15803D]">Closed deal</p>
+                      <p className="text-xs font-medium text-[#15803D]">Closed deal</p>
                       {companyClosedDeal ? (
                         <p className="mt-1 text-sm text-foreground">
                           Signed {companyClosedDeal.contract_signed_date} · credited to {teamMembers.find((t) => t.id === companyClosedDeal.credited_to)?.name ?? "unassigned"}
@@ -541,23 +541,23 @@ const CompanyDetailPage = () => {
                               <form onSubmit={handleSaveClosedDeal} className="mt-3 grid gap-2 md:grid-cols-[1fr_1fr_2fr_auto] md:items-end">
                                 <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
                                   Credit to
-                                  <select value={dealCreditedTo} onChange={(e) => setDealCreditedTo(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary">
+                                  <select value={dealCreditedTo} onChange={(e) => setDealCreditedTo(e.target.value)} className="h-9 rounded-lg border border-rh-line bg-white px-2 text-sm outline-none focus:border-primary">
                                     <option value="">Unassigned</option>
                                     {teamMembersWithLogin.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}
                                   </select>
                                 </label>
                                 <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
                                   Contract signed
-                                  <input type="date" value={dealDate} onChange={(e) => setDealDate(e.target.value)} required className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
+                                  <input type="date" value={dealDate} onChange={(e) => setDealDate(e.target.value)} required className="h-9 rounded-lg border border-rh-line bg-white px-2 text-sm outline-none focus:border-primary" />
                                 </label>
                                 <label className="grid gap-1 text-xs font-semibold text-muted-foreground">
                                   Notes
-                                  <input type="text" value={dealNotes} onChange={(e) => setDealNotes(e.target.value)} className="h-9 rounded-md border border-[#CBD5E1] bg-white px-2 text-sm outline-none focus:border-primary" />
+                                  <input type="text" value={dealNotes} onChange={(e) => setDealNotes(e.target.value)} className="h-9 rounded-lg border border-rh-line bg-white px-2 text-sm outline-none focus:border-primary" />
                                 </label>
-                                <button type="submit" className="h-9 rounded-md bg-primary px-4 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Save</button>
+                                <button type="submit" className="h-9 rounded-md bg-primary px-4 text-[13px] font-medium text-primary-foreground">Save</button>
                               </form>
                             ) : (
-                              <button type="button" onClick={() => setShowLogDeal(true)} className="mt-2 rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">
+                              <button type="button" onClick={() => setShowLogDeal(true)} className="mt-2 rounded-lg bg-rh-teal px-4 py-2 text-[13px] font-semibold text-white hover:bg-rh-teal-ink">
                                 Log closed deal
                               </button>
                             )
@@ -567,8 +567,8 @@ const CompanyDetailPage = () => {
                     </div>
                   ) : null}
 
-                  <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm md:p-5">
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Contacts ({companyContacts.length})</p>
+                  <div className="rounded-2xl border border-rh-line bg-white p-4 shadow-sm md:p-5">
+                    <p className="mb-3 text-xs font-medium text-muted-foreground">Contacts ({companyContacts.length})</p>
                     <p className="mb-3 text-xs text-muted-foreground">Click the mail icon to work an email sequence, or a message-stage button to open, edit, and copy a LinkedIn message.</p>
                     <div className="grid gap-2">
                       {primaryContact ? (
@@ -577,19 +577,19 @@ const CompanyDetailPage = () => {
                             <div>
                               <span className="text-sm font-semibold text-foreground">{primaryContact.contact_name}</span>
                               <span className="ml-2 text-xs text-muted-foreground">{primaryContact.title}</span>
-                              <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">Needs research</span>
+                              <span className="ml-2 text-xs font-medium text-[#92400E]">Needs research</span>
                             </div>
-                            <a href={buildLinkedInSearchUrl(primaryContact.contact_name, primaryContact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
+                            <a href={buildLinkedInSearchUrl(primaryContact.contact_name, primaryContact.company)} target="_blank" rel="noreferrer" className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">Search LinkedIn</a>
                           </div>
                         ) : getContactTier(primaryContact) === "no_content" ? (
                           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
                             <div>
                               <span className="text-sm font-semibold text-foreground">{primaryContact.contact_name}</span>
                               <span className="ml-2 text-xs text-muted-foreground">{primaryContact.title}</span>
-                              <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">No message drafted</span>
+                              <span className="ml-2 text-xs font-medium text-[#92400E]">No message drafted</span>
                             </div>
                             {primaryContact.linkedin_url ? (
-                              <a href={primaryContact.linkedin_url} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">View LinkedIn</a>
+                              <a href={primaryContact.linkedin_url} target="_blank" rel="noreferrer" className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">View LinkedIn</a>
                             ) : null}
                           </div>
                         ) : (
@@ -604,7 +604,7 @@ const CompanyDetailPage = () => {
                           type="button"
                           onClick={() => setShowAllContacts((v) => !v)}
                           style={{ backgroundColor: "#2c96731a" }}
-                          className="flex items-center justify-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                          className="flex items-center justify-center gap-1.5 rounded-lg border border-rh-line px-3 py-2 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary"
                         >
                           {showAllContacts ? "Hide" : "Show"} {otherContacts.length} other contact{otherContacts.length === 1 ? "" : "s"} {showAllContacts ? "▲" : "▼"}
                         </button>
@@ -617,19 +617,19 @@ const CompanyDetailPage = () => {
                                 <div>
                                   <span className="text-sm font-semibold text-foreground">{contact.contact_name}</span>
                                   <span className="ml-2 text-xs text-muted-foreground">{contact.title}</span>
-                                  <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">Needs research</span>
+                                  <span className="ml-2 text-xs font-medium text-[#92400E]">Needs research</span>
                                 </div>
-                                <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">Search LinkedIn</a>
+                                <a href={buildLinkedInSearchUrl(contact.contact_name, contact.company)} target="_blank" rel="noreferrer" className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">Search LinkedIn</a>
                               </div>
                             ) : getContactTier(contact) === "no_content" ? (
                               <div key={contact.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#FDE68A] bg-[#FFFBEB] px-3 py-2.5">
                                 <div>
                                   <span className="text-sm font-semibold text-foreground">{contact.contact_name}</span>
                                   <span className="ml-2 text-xs text-muted-foreground">{contact.title}</span>
-                                  <span className="ml-2 text-[10px] font-bold uppercase tracking-[0.06em] text-[#92400E]">No message drafted</span>
+                                  <span className="ml-2 text-xs font-medium text-[#92400E]">No message drafted</span>
                                 </div>
                                 {contact.linkedin_url ? (
-                                  <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary">View LinkedIn</a>
+                                  <a href={contact.linkedin_url} target="_blank" rel="noreferrer" className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">View LinkedIn</a>
                                 ) : null}
                               </div>
                             ) : (
@@ -640,20 +640,20 @@ const CompanyDetailPage = () => {
                     </div>
                   </div>
 
-                  <div className="rounded-lg border border-[#E2E8F0] bg-white">
+                  <div className="rounded-lg border border-rh-line bg-white">
                     <button
                       type="button"
                       onClick={() => setShowOpportunityIntelligence((v) => !v)}
                       className="flex w-full items-center justify-between px-4 py-3 text-left"
                     >
-                      <span className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Opportunity intelligence</span>
+                      <span className="text-xs font-medium text-primary">Opportunity intelligence</span>
                       <span className="text-xs font-semibold text-muted-foreground">{showOpportunityIntelligence ? "Hide ▲" : "Show ▼"}</span>
                     </button>
                     {showOpportunityIntelligence ? (
-                      <div className="border-t border-[#E2E8F0] px-4 py-4">
+                      <div className="border-t border-rh-line px-4 py-4">
                         {companyResearch.valueHypothesis || companyResearch.outreachAngle ? (
-                          <div className="mb-4 rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] p-4">
-                            <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Why this fits RevHub</p>
+                          <div className="mb-4 rounded-lg border border-rh-line bg-rh-canvas p-4">
+                            <p className="mb-1.5 text-xs font-medium text-primary">Why this fits RevHub</p>
                             {companyResearch.valueHypothesis ? (
                               <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{companyResearch.valueHypothesis}</p>
                             ) : null}
@@ -672,7 +672,7 @@ const CompanyDetailPage = () => {
                           return (
                             <div className="grid gap-4">
                               <div>
-                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Canonical lead type</p>
+                                <p className="mb-1 text-xs font-medium text-muted-foreground">Canonical lead type</p>
                                 <p className="flex items-center gap-2 text-sm font-semibold text-foreground">
                                   {canonicalType ? <span className="h-2 w-2 rounded-full" style={{ backgroundColor: OWNER_LEAD_TYPE_DOT_COLOR[canonicalType] }} /> : null}
                                   {canonicalType ?? "Not yet classified"}
@@ -682,11 +682,11 @@ const CompanyDetailPage = () => {
                                 ) : null}
                               </div>
                               <div>
-                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Lead origin</p>
+                                <p className="mb-1 text-xs font-medium text-muted-foreground">Lead origin</p>
                                 <p className="text-sm font-semibold text-foreground">{leadOrigin ?? "—"}</p>
                               </div>
                               <div>
-                                <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">Related signals</p>
+                                <p className="mb-1 text-xs font-medium text-muted-foreground">Related signals</p>
                                 <p className="text-sm text-foreground">{ownerFields?.signal_count ?? 0} total</p>
                                 {otherTypes.length > 0 ? (
                                   <ul className="mt-1 list-inside list-disc text-sm text-muted-foreground">
@@ -703,7 +703,7 @@ const CompanyDetailPage = () => {
                 </div>
 
                 <div className="grid gap-6">
-                  <div className="overflow-hidden rounded-2xl border border-[#EEEDE7] bg-white shadow-sm">
+                  <div className="overflow-hidden rounded-2xl border border-rh-line bg-white shadow-sm">
                     <CompanyInfoCard
                       company={company}
                       research={companyResearch}
@@ -718,19 +718,19 @@ const CompanyDetailPage = () => {
                   </div>
 
                   {companySignals.length > 0 ? (
-                    <div className="rounded-2xl border border-[#EEEDE7] bg-white p-4 shadow-sm md:p-5">
+                    <div className="rounded-2xl border border-rh-line bg-white p-4 shadow-sm md:p-5">
                       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground">Hiring signals ({companySignals.length})</p>
+                        <p className="text-xs font-medium text-muted-foreground">Hiring signals ({companySignals.length})</p>
                         <button
                           type="button"
                           onClick={() => setShowOutreachModelHelp((v) => !v)}
-                          className="text-[11px] font-semibold uppercase tracking-[0.06em] text-primary hover:underline"
+                          className="text-[13px] font-medium text-primary hover:underline"
                         >
                           {showOutreachModelHelp ? "Hide" : "What do these models mean?"}
                         </button>
                       </div>
                       {showOutreachModelHelp ? (
-                        <div className="mb-3 grid gap-2 rounded-lg border border-[#E2E8F0] bg-[#FAFAF8] p-3">
+                        <div className="mb-3 grid gap-2 rounded-lg border border-rh-line bg-rh-canvas p-3">
                           {(Object.keys(OUTREACH_MODEL_LABELS) as OutreachModel[]).map((m) => (
                             <p key={m} className="text-xs text-foreground">
                               <span className={`mr-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${OUTREACH_MODEL_BADGE_CLASS[m]}`}>{OUTREACH_MODEL_LABELS[m]}</span>
@@ -741,7 +741,7 @@ const CompanyDetailPage = () => {
                       ) : null}
                       <div className="grid gap-2">
                         {companySignals.map((signal) => (
-                          <div key={signal.id} className="rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] px-3 py-2 text-sm">
+                          <div key={signal.id} className="rounded-lg border border-rh-line bg-rh-canvas px-3 py-2 text-sm">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                               <div>
                                 <span className="font-semibold text-foreground">{signal.role_title ?? "Open role"}</span>
@@ -752,7 +752,7 @@ const CompanyDetailPage = () => {
                                 <select
                                   value={signal.outreach_model ?? ""}
                                   onChange={(e) => handleSetOutreachModel(signal.id, e.target.value as OutreachModel | "")}
-                                  className="h-8 rounded-md border border-[#CBD5E1] bg-white px-2 text-xs font-semibold text-[#334155] outline-none focus:border-primary"
+                                  className="h-8 rounded-lg border border-rh-line bg-white px-2 text-xs font-semibold text-rh-body outline-none focus:border-primary"
                                 >
                                   <option value="">No model set</option>
                                   {(Object.keys(OUTREACH_MODEL_LABELS) as OutreachModel[]).map((m) => <option key={m} value={m}>{OUTREACH_MODEL_LABELS[m]}</option>)}
@@ -791,8 +791,8 @@ const CompanyDetailPage = () => {
             <div className="w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">Email outreach</p>
-                  <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{contact.contact_name} · {contact.company}</h2>
+                  <p className="text-xs font-medium text-primary">Email outreach</p>
+                  <h2 className="mt-1 font-display text-xl font-semibold tracking-tight text-foreground">{contact.contact_name} · {contact.company}</h2>
                   <p className="mt-1 text-sm text-muted-foreground">{contact.email}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-1 pt-1">
@@ -813,22 +813,22 @@ const CompanyDetailPage = () => {
                 <button
                   type="button"
                   onClick={() => handleCopySchedulingLink(contact.id)}
-                  className="mt-4 rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                  className="mt-4 rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary"
                 >
                   {copyFeedback[`${contact.id}-schedule_link`] ?? "📅 Copy scheduling link"}
                 </button>
               ) : null}
 
               {contact.email_subject ? (
-                <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-[#EEEDE7] bg-[#FAFAF8] px-3 py-2.5">
+                <div className="mt-4 flex items-center justify-between gap-3 rounded-lg border border-rh-line bg-rh-canvas px-3 py-2.5">
                   <div className="min-w-0">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">Subject line</p>
+                    <p className="text-xs font-medium text-muted-foreground">Subject line</p>
                     <p className="truncate text-sm font-semibold text-foreground">{contact.email_subject}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => handleCopyEmailField(contact, "email_subject", contact.email_subject ?? "", "Copy subject")}
-                    className="shrink-0 rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                    className="shrink-0 rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary"
                   >
                     {copyFeedback[`${contact.id}-email_subject`] ?? "Copy subject"}
                   </button>
@@ -836,7 +836,7 @@ const CompanyDetailPage = () => {
               ) : null}
 
               {!EMAIL_SEQUENCE_STAGES.some((stage) => contact[stage.field]) ? (
-                <div className="mt-4 rounded-lg border border-dashed border-[#CBD5E1] bg-[#FAFAF8] p-4 text-sm text-muted-foreground">
+                <div className="mt-4 rounded-lg border border-dashed border-rh-line-strong bg-rh-canvas p-4 text-sm text-muted-foreground">
                   No draft email content is on file for this contact yet (no intro or follow-up messages were generated for them). Add them manually via the message editor, or flag this contact for a research/drafting pass.
                 </div>
               ) : null}
@@ -849,34 +849,34 @@ const CompanyDetailPage = () => {
                   const text = personalizeMessage(rawText, personalization);
                   const isSent = emailPosition >= stage.position;
                   return (
-                    <div key={stage.position} className={`rounded-lg border p-3.5 ${isSent ? "border-[#EEEDE7] bg-[#FAFAF8]" : "border-[#EEEDE7] bg-white"}`}>
+                    <div key={stage.position} className={`rounded-lg border p-3.5 ${isSent ? "border-rh-line bg-rh-canvas" : "border-rh-line bg-white"}`}>
                       <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-primary">{stage.position}. {stage.label}</p>
+                        <p className="text-xs font-medium text-primary">{stage.position}. {stage.label}</p>
                         <div className="flex flex-wrap items-center gap-2">
                           <button
                             type="button"
                             onClick={() => handleSendEmail(contact, stage.field, text)}
-                            className="rounded-md border border-primary bg-primary px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary-foreground hover:opacity-90"
+                            className="rounded-lg bg-rh-teal px-3 py-1.5 text-[13px] font-semibold text-white hover:bg-rh-teal-ink hover:opacity-90"
                           >
                             Send
                           </button>
                           <button
                             type="button"
                             onClick={() => handleCopyEmailField(contact, stage.field, text, "Copy")}
-                            className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                            className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary"
                           >
                             {copyFeedback[`${contact.id}-${stage.field}`] ?? "Copy"}
                           </button>
                           <button
                             type="button"
                             onClick={() => handleSetEmailPosition(contact, isSent ? stage.position - 1 : stage.position)}
-                            className="rounded-md border border-[#CBD5E1] bg-white px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[#334155] hover:border-primary hover:text-primary"
+                            className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary"
                           >
                             {isSent ? "Undo (mark not sent)" : "Mark as sent"}
                           </button>
                         </div>
                       </div>
-                      {isSent ? <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-primary">✓ Marked sent</p> : null}
+                      {isSent ? <p className="mb-2 text-[13px] font-medium text-primary">✓ Marked sent</p> : null}
                       <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{text}</p>
                     </div>
                   );
@@ -884,7 +884,7 @@ const CompanyDetailPage = () => {
               </div>
 
               <div className="mt-5 flex justify-end">
-                <button type="button" onClick={() => setEmailPopupContact(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Close</button>
+                <button type="button" onClick={() => setEmailPopupContact(null)} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink">Close</button>
               </div>
             </div>
           </div>
@@ -894,13 +894,13 @@ const CompanyDetailPage = () => {
       {messageEditor ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-2xl rounded-2xl border border-border bg-background p-6 shadow-lg md:p-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary">{messageEditor.label}</p>
-            <h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-foreground">{messageEditor.contact.contact_name} · {messageEditor.contact.company}</h2>
+            <p className="text-xs font-medium text-primary">{messageEditor.label}</p>
+            <h2 className="mt-1 font-display text-xl font-semibold tracking-tight text-foreground">{messageEditor.contact.contact_name} · {messageEditor.contact.company}</h2>
             <p className="mt-2 text-sm text-muted-foreground">Feel free to edit this before copying — it's just a starting point.</p>
 
             {messageEditor.contact.value_hypothesis || messageEditor.contact.outreach_angle ? (
               <div className="mt-4 rounded-lg border border-primary/20 bg-primary/[0.04] p-4">
-                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Context for this message</p>
+                <p className="mb-1.5 text-xs font-medium text-primary">Context for this message</p>
                 {messageEditor.contact.value_hypothesis ? (
                   <p className="text-sm text-foreground"><span className="font-semibold text-primary">Why it fits: </span>{messageEditor.contact.value_hypothesis}</p>
                 ) : null}
@@ -927,7 +927,7 @@ const CompanyDetailPage = () => {
                   type="button"
                   onClick={handleDraftAILineForEditor}
                   disabled={isDraftingAILine}
-                  className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary disabled:opacity-50"
+                  className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary disabled:opacity-50"
                 >
                   {isDraftingAILine ? "Drafting…" : "✨ AI-personalize"}
                 </button>
@@ -936,13 +936,13 @@ const CompanyDetailPage = () => {
                 <button
                   type="button"
                   onClick={() => handleCopySchedulingLink(messageEditor.contact.id)}
-                  className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155] hover:border-primary hover:text-primary"
+                  className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary"
                 >
                   {copyFeedback[`${messageEditor.contact.id}-schedule_link`] ?? "📅 Copy scheduling link"}
                 </button>
               ) : null}
-              <button type="button" onClick={() => setMessageEditor(null)} className="rounded-full border border-[#CBD5E1] bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-[#334155]">Cancel</button>
-              <button type="button" onClick={handleCopyFromEditor} className="rounded-full border border-primary bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-[0.08em] text-primary-foreground">Copy</button>
+              <button type="button" onClick={() => setMessageEditor(null)} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink">Cancel</button>
+              <button type="button" onClick={handleCopyFromEditor} className="rounded-lg bg-rh-teal px-4 py-2 text-[13px] font-semibold text-white hover:bg-rh-teal-ink">Copy</button>
             </div>
           </div>
         </div>
