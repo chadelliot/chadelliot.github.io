@@ -1,0 +1,164 @@
+[
+  {
+    "company": "Air Partner",
+    "name": "Mark Briffa",
+    "status": "departed",
+    "title": "Former Chief Sales Officer, Wheels Up",
+    "suppress": true,
+    "url": "https://www.sec.gov/Archives/edgar/data/1819516/000162828026057181/ex-101xsettlementagreement.htm",
+    "note": "Employment termination effective 2026-09-01; removed from Air Partner/Wheels Up outreach."
+  },
+  {
+    "company": "Crown Holdings",
+    "name": "Thomas Kelly",
+    "status": "retired",
+    "title": "Former Senior Vice President and Chief Financial Officer",
+    "suppress": true,
+    "url": "https://www.crowncork.com/news/crown-holdings-inc-announces-retirement-thomas-kelly-its-chief-financial-officer-and",
+    "note": "Retired in early 2022; Kevin Clothier succeeded him as CFO effective 2022-01-01."
+  },
+  {
+    "company": "Crown Holdings",
+    "name": "Gerard Gifford",
+    "status": "retired",
+    "title": "Former Executive Vice President and Chief Administrative Officer",
+    "suppress": true,
+    "url": "https://www.crowncork.com/sites/default/files/2026-03/2025%20Annual%20Report.pdf",
+    "note": "Company annual report states retirement in early 2026; COO role already ended July 2025."
+  },
+  {
+    "company": "Fastenal",
+    "name": "Daniel L. Florness",
+    "status": "role_changed",
+    "title": "Strategic Advisor to the Chief Executive Officer",
+    "suppress": true,
+    "url": "https://www.sec.gov/Archives/edgar/data/815556/000081555625000123/ex_99112222025ceo.htm",
+    "note": "Stepped out of CEO and board roles 2026-07-16; advisory role continues through early 2028. Not labeled fully retired; removed from CEO outreach."
+  },
+  {
+    "company": "Fastenal",
+    "name": "Jeff Watts",
+    "status": "role_changed",
+    "title": "President and Chief Executive Officer",
+    "suppress": true,
+    "url": "https://www.sec.gov/Archives/edgar/data/815556/000081555625000123/ex_99112222025ceo.htm",
+    "note": "Outdated alias of canonical Jeffery M. Watts record; canonical direct-profile contact retained."
+  },
+  {
+    "company": "Fastenal",
+    "name": "Jeffery M. Watts",
+    "status": "current",
+    "title": "President and Chief Executive Officer",
+    "suppress": false,
+    "url": "https://blueprint.fastenal.com/lessons-learned-on-leadership.html",
+    "note": "Company August 27, 2026 article confirms current president and CEO following July transition."
+  },
+  {
+    "company": "Alta Equipment Group",
+    "name": "Craig Brubaker",
+    "status": "role_changed",
+    "title": "Chief Operating Officer, Material Handling Segment",
+    "suppress": false,
+    "url": "https://d18rn0p25nwr6d.cloudfront.net/CIK-0001759824/3c093be1-8e44-4718-a298-57c6e688a9b0.pdf",
+    "note": "2025-12-31 agreement changes scope to Material Handling segment COO; not group executive officer. Canonical direct LinkedIn corroborates current employer."
+  },
+  {
+    "company": "AAA Cooper Transportation",
+    "name": "Charlie Prickett",
+    "status": "current",
+    "title": "President and Chief Executive Officer",
+    "suppress": false,
+    "url": "https://aaacooper.com/About",
+    "note": "Current official company About page confirms president and CEO; historical COO text removed."
+  },
+  {
+    "company": "AAA Cooper Transportation",
+    "name": "Reid Dove",
+    "status": "current",
+    "title": "Chairman",
+    "suppress": false,
+    "url": "https://aaacooper.com/About",
+    "note": "Official company page confirms current chairman; former CEO status does not mean retired from board."
+  },
+  {
+    "company": "FleetPride",
+    "name": "Grant LaBarbera",
+    "title": "Chief Growth Officer",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.fleetpride.com/executive-team/",
+    "note": "Current official executive-team page confirms employer and role."
+  },
+  {
+    "company": "FleetPride",
+    "name": "Mike Keller",
+    "title": "SVP, Category Management",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.fleetpride.com/executive-team/",
+    "note": "Current official executive-team page confirms employer and role."
+  },
+  {
+    "company": "FleetPride",
+    "name": "Ismael Villarreal",
+    "title": "SVP, Supply Chain",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.fleetpride.com/executive-team/",
+    "note": "Current official executive-team page confirms employer and role."
+  },
+  {
+    "company": "Kuehne+Nagel",
+    "name": "Michael Aldwell",
+    "title": "Executive Vice President Sea Logistics",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.kuehne-nagel.com/company/corporate-governance/management-board-evp-sea-logistics-michael-aldwell",
+    "note": "Current official management-board biography confirms employer and role."
+  },
+  {
+    "company": "Kuehne+Nagel",
+    "name": "Yngve Ruud",
+    "title": "Executive Vice President Air Logistics",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.kuehne-nagel.com/company/corporate-governance/management-board-evp-air-logistics-yngve-ruud",
+    "note": "Current official management-board biography confirms employer and role."
+  },
+  {
+    "company": "Kuehne+Nagel",
+    "name": "Eduardo Razuck",
+    "title": "Executive Vice President Contract Logistics",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.kuehne-nagel.com/company/corporate-governance/management-board-evp-contract-logistics-eduardo-razuck",
+    "note": "Current official management-board biography confirms employer and role."
+  },
+  {
+    "company": "Vestis",
+    "name": "Jim Barber",
+    "title": "President and Chief Executive Officer",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.vestis.com/leadership",
+    "note": "Current official leadership page confirms employer and role."
+  },
+  {
+    "company": "Vestis",
+    "name": "Bill Seward",
+    "title": "Executive Vice President and Chief Operating Officer",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.vestis.com/leadership",
+    "note": "Current official leadership page confirms employer and role."
+  },
+  {
+    "company": "Vestis",
+    "name": "Steve Cochran",
+    "title": "Executive Vice President, Chief Commercial & Supply Chain Officer",
+    "status": "current",
+    "suppress": false,
+    "url": "https://www.vestis.com/leadership",
+    "note": "Current official leadership page confirms employer and role."
+  }
+]

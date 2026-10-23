@@ -5,7 +5,8 @@ import type { Company, ProjectContact, ContactProgress } from "@/lib/projectCont
 const now = new Date(2026, 9, 23, 10, 0, 0); // local Oct 23 2026
 const company: Company = { id: "c1", name: "Acme", normalized_name: "acme", company_stage: "new_signal" };
 const mk = (id: string, extra: Partial<ProjectContact> = {}): ProjectContact => ({
-  id, company: "Acme", company_id: "c1", contact_name: id, email: `${id}@acme.test`, needs_research: false, do_not_contact: false, ...extra,
+  id, company: "Acme", company_id: "c1", contact_name: id, email: `${id}@acme.test`, needs_research: false, do_not_contact: false,
+  profile_validation_status: "current", profile_verified_at: now.toISOString(), profile_verification_source: "https://example.com/team", ...extra,
 });
 const iso = (daysAgo: number) => new Date(now.getTime() - daysAgo * 86400000).toISOString();
 const build = (contacts: ProjectContact[], progress: Record<string, Partial<ContactProgress>>, followUpSupported = true) =>

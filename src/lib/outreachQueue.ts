@@ -7,6 +7,7 @@ import {
   STALE_NEW_OPPORTUNITY_DAYS,
   formatWhyNow,
   getContactTier,
+  isContactProfileCurrent,
   PRIORITY_ORDER,
   STATUS_LABELS,
   type Company,
@@ -40,7 +41,7 @@ const URGENCY_RANK: Record<Urgency, number> = {
   overdue: 0, due_today: 1, first_contact: 2, stale: 3, upcoming: 4, waiting: 5, needs_research: 6, closed: 7,
 };
 
-export type QueueFilter = "action" | "overdue" | "due_today" | "first_contact" | "stale" | "upcoming" | "closed" | "all";
+export type QueueFilter = "action" | "overdue" | "due_today" | "first_contact" | "stale" | "upcoming" | "closed" | "needs_research" | "all";
 export type QueueSort = "priority" | "name" | "company" | "last_touch";
 
 export type LeadRow = {
@@ -143,12 +144,15 @@ export const buildLeadRows = ({ contacts, progress, companies, signalsByCompanyI
     let days = 0;
     if (contact.do_not_contact || status === "do_not_contact" || status === "meeting_set" || meetingBlocks[contact.id]?.is_blocked) {
       urgency = "closed";
+    } else if (contact.needs_research || !isContactProfileCurrent(contact, now.getTime())) {
+      // Holds take precedence over overdue follow-ups and prior outreach.
+      urgency = "needs_research";
     } else if (followUpAt) {
       const delta = daysBetween(followUpAt, today);
       days = delta;
       urgency = delta > 0 ? "overdue" : delta === 0 ? "due_today" : "upcoming";
     } else if (!contacted) {
-      urgency = getContactTier(contact) === "research" ? "needs_research" : "first_contact";
+      urgency = getContactTier(contact, now.getTime()) === "research" ? "needs_research" : "first_contact";
     } else if (sinceTouch !== null && sinceTouch >= REPLY_WAIT_DAYS) {
       urgency = "stale";
       days = sinceTouch;
@@ -250,7 +254,7 @@ export const formatDueLabel = (row: LeadRow): string => {
     case "stale": return `Quiet for ${row.days} days`;
     case "waiting": return row.days === 0 ? "Touched today" : `Touched ${row.days}d ago`;
     case "first_contact": return "Not yet contacted";
-    case "needs_research": return "No contact method";
+    case "needs_research": return "Profile verification required";
     default: return "";
   }
 };

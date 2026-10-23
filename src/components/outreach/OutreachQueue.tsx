@@ -40,6 +40,7 @@ const LEAD_FILTERS: { key: QueueFilter; label: string }[] = [
   { key: "stale", label: "No reply yet" },
   { key: "upcoming", label: "Scheduled" },
   { key: "closed", label: "Closed" },
+  { key: "needs_research", label: "Verification holds" },
   { key: "all", label: "All" },
 ];
 const COMPANY_FILTERS: { key: CompanyFilter; label: string }[] = [
@@ -315,6 +316,12 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
             </>
           }
         />
+
+        {rows.some((r) => r.urgency === "needs_research") ? (
+          <p role="note" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900">
+            {rows.filter((r) => r.urgency === "needs_research").length} contacts are held for employer and role verification. They are excluded from Needs action, including overdue follow-ups.
+          </p>
+        ) : null}
 
         {/* Pulse: four numbers, one quiet card. They filter the list below. */}
         <div className="mb-6 hidden grid-cols-4 divide-x divide-rh-line overflow-hidden rounded-2xl border border-rh-line bg-white sm:grid">
