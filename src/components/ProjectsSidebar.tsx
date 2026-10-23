@@ -23,7 +23,7 @@ const WORK_ITEMS: NavItem[] = [
 ];
 const ACCOUNT_ITEMS: NavItem[] = [{ key: "profile", label: "Profile", icon: UserCircle }];
 const ADMIN_ITEMS: NavItem[] = [
-  { key: "board", label: "Company board", icon: KanbanSquare },
+  { key: "board", label: "Lead assignment", icon: KanbanSquare },
   { key: "team", label: "Team", icon: Users },
 ];
 

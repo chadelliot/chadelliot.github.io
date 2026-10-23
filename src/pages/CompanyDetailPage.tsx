@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { Mail } from "lucide-react";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import CompanyInfoCard from "@/components/CompanyInfoCard";
 import ProjectsSidebar from "@/components/ProjectsSidebar";
 import { useProposalSession } from "@/hooks/useProposalSession";
@@ -205,6 +206,12 @@ const CompanyDetailPage = () => {
   const primaryContact = useMemo(() => getPrimaryContact(companyContacts), [companyContacts]);
   const otherContacts = useMemo(() => companyContacts.filter((c) => c.id !== primaryContact?.id), [companyContacts, primaryContact]);
   const companyResearch = useMemo(() => getCompanyResearchSummary(companyContacts), [companyContacts]);
+
+  // Stage changes that are hard to undo or wipe data go through a confirmation
+  // dialog so they can't be triggered by a stray click.
+  const [confirmStage, setConfirmStage] = useState<{ stage: CompanyStage; title: string; body: string; action: string; askReason?: boolean } | null>(null);
+  const [confirmReason, setConfirmReason] = useState("");
+  const [isConfirming, setIsConfirming] = useState(false);
 
   const handleSetStage = async (stage: CompanyStage, closedLostReason?: string) => {
     if (!session || !company) return;
@@ -469,7 +476,7 @@ const CompanyDetailPage = () => {
                 {canManage ? (
                   <div className="flex flex-wrap items-center gap-2">
                     {company.company_stage !== "new_signal" ? (
-                      <button type="button" onClick={() => handleSetStage("new_signal")} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary">
+                      <button type="button" onClick={() => setConfirmStage({ stage: "new_signal", title: "Reopen outreach?", body: "This moves the company back to New Opportunity and clears its meeting, closed-deal records and closed-lost reason. It can’t be undone.", action: "Reopen outreach" })} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary">
                         Reopen outreach
                       </button>
                     ) : null}
@@ -479,17 +486,14 @@ const CompanyDetailPage = () => {
                       </button>
                     ) : null}
                     {company.company_stage !== "closed_won" ? (
-                      <button type="button" onClick={() => handleSetStage("closed_won")} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary">
+                      <button type="button" onClick={() => setConfirmStage({ stage: "closed_won", title: `Mark ${company.name} as Closed Won?`, body: "This takes the company out of active outreach. You can reopen it later, but that clears its meeting and deal records.", action: "Mark Closed Won" })} className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary">
                         Mark Closed Won
                       </button>
                     ) : null}
                     {company.company_stage !== "closed_lost" ? (
                       <button
                         type="button"
-                        onClick={() => {
-                          const reason = window.prompt("Optional: why was this closed lost?") ?? "";
-                          handleSetStage("closed_lost", reason);
-                        }}
+                        onClick={() => { setConfirmReason(""); setConfirmStage({ stage: "closed_lost", title: `Mark ${company.name} as Closed Lost?`, body: "This takes the company out of active outreach. You can reopen it later, but that clears its closed-lost reason.", action: "Mark Closed Lost", askReason: true }); }}
                         className="rounded-lg border border-rh-line bg-white px-4 py-2 text-[13px] font-medium text-rh-ink hover:border-primary hover:text-primary"
                       >
                         Mark Closed Lost
@@ -947,6 +951,38 @@ const CompanyDetailPage = () => {
           </div>
         </div>
       ) : null}
+
+      <AlertDialog open={Boolean(confirmStage)} onOpenChange={(open) => { if (!open && !isConfirming) setConfirmStage(null); }}>
+        <AlertDialogContent className="rounded-2xl border-rh-line bg-white">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="font-display text-lg font-semibold text-rh-ink">{confirmStage?.title}</AlertDialogTitle>
+            <AlertDialogDescription className="text-[13px] leading-relaxed text-rh-muted">{confirmStage?.body}</AlertDialogDescription>
+          </AlertDialogHeader>
+          {confirmStage?.askReason ? (
+            <label className="grid gap-1.5 text-[13px] font-medium text-rh-ink">
+              Why was it lost? <span className="font-normal text-rh-muted">(optional)</span>
+              <input type="text" value={confirmReason} onChange={(e) => setConfirmReason(e.target.value)} maxLength={200} className="h-10 rounded-lg border border-rh-line bg-white px-3 text-[13px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright/70" />
+            </label>
+          ) : null}
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isConfirming} className="mt-0 rounded-lg border-rh-line text-[13px] font-medium">Cancel</AlertDialogCancel>
+            <button
+              type="button"
+              disabled={isConfirming}
+              onClick={async () => {
+                if (!confirmStage) return;
+                setIsConfirming(true);
+                await handleSetStage(confirmStage.stage, confirmStage.askReason ? confirmReason : undefined);
+                setIsConfirming(false);
+                setConfirmStage(null);
+              }}
+              className="rounded-lg bg-rh-teal px-4 py-2 text-[13px] font-semibold text-white hover:bg-rh-teal-ink disabled:opacity-60"
+            >
+              {isConfirming ? "Saving…" : confirmStage?.action}
+            </button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

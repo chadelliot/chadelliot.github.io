@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { ArrowRight, Building2, CheckCircle2, ChevronDown, ChevronRight, Inbox, Linkedin, Mail, Search, Users, X } from "lucide-react";
+import { ArrowRight, Building2, Info, CheckCircle2, ChevronDown, ChevronRight, Inbox, Linkedin, Mail, Search, Users, X } from "lucide-react";
 import type { ProposalSession } from "@/lib/companyStatus";
-import { COMPANY_STAGE_LABELS, type ProjectContact } from "@/lib/projectContacts";
+import { COMPANY_STAGE_LABELS, type CompanySignal, type ProjectContact } from "@/lib/projectContacts";
 import {
+  LEAD_TIER_ORDER,
+  LEAD_TIER_SHORT,
+  STALLED_EXPLAINER,
   URGENCY_LABEL,
   countByUrgency,
   formatAgo,
@@ -20,9 +23,11 @@ import {
   type CompanyGroup,
   type CompanySort,
   type LeadRow,
+  type LeadTier,
   type QueueFilter,
   type QueueSort,
 } from "@/lib/outreachQueue";
+import CompanyPanel from "./CompanyPanel";
 import LeadPanel, { type OutcomeInput, type OutcomeResult } from "./LeadPanel";
 import { UrgencyBadge, UrgencyChip } from "./UrgencyChip";
 import PageHeader from "./PageHeader";
@@ -83,7 +88,12 @@ type Props = {
   // flat Contacts toggle) so nobody gets contacted twice by accident.
   mode: "today" | "companies";
   rows: LeadRow[]; // already scoped to the viewer's book
-  stalledIds: Set<string>;
+  // companyId -> why it's stalled (empty for companies that aren't).
+  stalledReasons: Record<string, string>;
+  signalsByCompanyId: Record<string, CompanySignal[]>;
+  repNameById: Record<string, string>;
+  // Owner-only: companyId -> which of the three plays this is. Absent for members.
+  tierByCompanyId?: Record<string, LeadTier>;
   isLoading: boolean;
   session: ProposalSession;
   followUpSupported: boolean;
@@ -91,13 +101,14 @@ type Props = {
   historyVersion: number;
   onOpenMessage: (contact: ProjectContact, field: "linkedin_connect_message" | "intro_message" | "follow_up_message", label: string) => void;
   onOpenEmail: (contact: ProjectContact) => void;
+  onCopyLinkedInDraft: (contact: ProjectContact) => Promise<string | null>;
   onSaveOutcome: (contact: ProjectContact, input: OutcomeInput) => Promise<OutcomeResult>;
   canRequestMore: boolean;
   isRequestingBatch: boolean;
   onRequestMore: () => void;
 };
 
-const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSupported, scopeToggle, historyVersion, onOpenMessage, onOpenEmail, onSaveOutcome, canRequestMore, isRequestingBatch, onRequestMore }: Props) => {
+const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repNameById, tierByCompanyId, isLoading, session, followUpSupported, scopeToggle, historyVersion, onOpenMessage, onOpenEmail, onCopyLinkedInDraft, onSaveOutcome, canRequestMore, isRequestingBatch, onRequestMore }: Props) => {
   // Everything that defines "where I am" lives in the URL, so a reload, a trip
   // to the company page and Back, or a shared link lands in the same place.
   const [params, setParams] = useSearchParams();
@@ -110,6 +121,10 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
   const query = params.get("q") ?? "";
   const project = params.get("project") ?? "";
   const leadId = params.get("lead");
+  const companyId = params.get("company");
+  const tierParam = params.get("tier");
+  const tier: LeadTier | "" = LEAD_TIER_ORDER.includes(tierParam as LeadTier) ? (tierParam as LeadTier) : "";
+  const stalledIds = useMemo(() => new Set(Object.keys(stalledReasons)), [stalledReasons]);
   const isDesktop = useIsDesktop();
   const [limit, setLimit] = useState(PAGE_SIZE);
   const [opened, setOpened] = useState<Set<string>>(new Set());
@@ -128,7 +143,15 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
 
   const counts = useMemo(() => countByUrgency(rows), [rows]);
   const projects = useMemo(() => [...new Set(rows.map((r) => r.project).filter((p): p is string => Boolean(p)))].sort(), [rows]);
-  const scopedRows = useMemo(() => (project ? rows.filter((r) => r.project === project) : rows), [rows, project]);
+  const scopedRows = useMemo(
+    () => rows.filter((r) => (!project || r.project === project) && (!tier || (r.company && tierByCompanyId?.[r.company.id] === tier))),
+    [rows, project, tier, tierByCompanyId]
+  );
+  const tierCounts = useMemo(() => {
+    const c: Record<LeadTier, Set<string>> = { flexible: new Set(), fulltime: new Set(), cold: new Set() };
+    if (tierByCompanyId) for (const r of rows) { const t = r.company ? tierByCompanyId[r.company.id] : undefined; if (t) c[t].add(r.company!.id); }
+    return { flexible: c.flexible.size, fulltime: c.fulltime.size, cold: c.cold.size };
+  }, [rows, tierByCompanyId]);
 
   // ---- lead-level list (Today, or Companies → Contacts) ----
   const visibleLeads = useMemo(
@@ -156,6 +179,7 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
   const allById = useMemo(() => new Map(rows.map((r) => [r.contact.id, r])), [rows]);
   const selected = leadId ? allById.get(leadId) ?? null : null;
   const selectedCompanyId = selected?.company?.id ?? null;
+  const selectedGroup = companyId ? allGroups.find((g) => g.company.id === companyId) ?? null : null;
   const isOpen = (id: string) => opened.has(id) || id === selectedCompanyId;
   const toggleOpen = (id: string) => setOpened((cur) => { const n = new Set(cur); if (n.has(id)) n.delete(id); else n.add(id); return n; });
 
@@ -173,19 +197,27 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
 
   // Opening/closing a lead must not reset the visible page size, so these
   // touch only the `lead` param.
-  const setLeadParam = useCallback((id: string | null) => {
+  const setParam = useCallback((patch: Record<string, string | null>) => {
     setParams((current) => {
       const next = new URLSearchParams(current);
-      if (id) next.set("lead", id); else next.delete("lead");
+      for (const [k, v] of Object.entries(patch)) { if (v) next.set(k, v); else next.delete(k); }
       return next;
     }, { replace: true });
   }, [setParams]);
-  const openLead = useCallback((id: string) => setLeadParam(id), [setLeadParam]);
+  // In the grouped view, opening a lead remembers which company panel it came
+  // from so the lead panel can offer a way back.
+  const openLead = useCallback((id: string) => {
+    const r = allById.get(id);
+    setParam(grouped && r?.company ? { lead: id, company: r.company.id } : { lead: id });
+  }, [allById, grouped, setParam]);
+  const setLeadParam = useCallback((id: string | null) => setParam({ lead: id }), [setParam]);
   const closeLead = useCallback(() => {
     const id = leadId;
-    setLeadParam(null);
+    setParam({ lead: null, company: null });
     if (id) window.setTimeout(() => document.getElementById(`lead-row-${id}`)?.focus(), 0);
-  }, [leadId, setLeadParam]);
+  }, [leadId, setParam]);
+  const openCompany = useCallback((id: string) => setParam({ company: id, lead: null }), [setParam]);
+  const closeCompany = useCallback(() => setParam({ company: null }), [setParam]);
 
   const moveSelection = useCallback((delta: number) => {
     if (!navRows.length) return;
@@ -202,7 +234,7 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
       const el = e.target as HTMLElement | null;
       const typing = el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "Escape" && leadId && !document.querySelector(".fixed.inset-0.z-50, [role=dialog][data-state=open]")) { closeLead(); return; }
+      if (e.key === "Escape" && (leadId || companyId) && !document.querySelector(".fixed.inset-0.z-50, [role=dialog][data-state=open], [data-radix-popper-content-wrapper]")) { if (leadId) closeLead(); else closeCompany(); return; }
       if (typing) return;
       if (e.key === "/") { e.preventDefault(); searchRef.current?.focus(); }
       else if (e.key === "j") { e.preventDefault(); moveSelection(1); }
@@ -210,31 +242,31 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [leadId, closeLead, moveSelection]);
+  }, [leadId, companyId, closeLead, closeCompany, moveSelection]);
 
   useEffect(() => {
-    if (selected && !isDesktop) {
+    if ((selected || selectedGroup) && !isDesktop) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => { document.body.style.overflow = prev; };
     }
-  }, [selected, isDesktop]);
+  }, [selected, selectedGroup, isDesktop]);
 
   const defaultFilterKey = grouped ? "all" : defaultLeadFilter;
   const activeFilterKey = grouped ? companyFilter : leadFilter;
-  const hasActiveFilters = activeFilterKey !== defaultFilterKey || Boolean(query) || Boolean(project);
-  const resetAll = () => patchParams({ f: null, q: null, project: null });
+  const hasActiveFilters = activeFilterKey !== defaultFilterKey || Boolean(query) || Boolean(project) || Boolean(tier);
+  const resetAll = () => patchParams({ f: null, q: null, project: null, tier: null });
   const firstAction = useMemo(() => sortRows(rows.filter((r) => matchesFilter(r, "action")), "priority")[0] ?? null, [rows]);
   const nextScheduled = useMemo(() => sortRows(rows.filter((r) => r.urgency === "upcoming"), "priority")[0] ?? null, [rows]);
   const resultCount = grouped ? visibleGroups.length : visibleLeads.length;
 
-  type Tile = { key: string; label: string; value: number; dot: string };
+  type Tile = { key: string; label: string; value: number; dot: string; title?: string };
   const tiles: Tile[] = grouped
     ? [
         { key: "new", label: COMPANY_STAGE_LABELS.new_signal, value: stageCounts.new, dot: "bg-rh-faint" },
         { key: "engaged", label: COMPANY_STAGE_LABELS.opportunities_engaged, value: stageCounts.engaged, dot: "bg-rh-teal-bright" },
         { key: "meeting", label: COMPANY_STAGE_LABELS.meeting_scheduled, value: stageCounts.meeting, dot: "bg-[#5B8DEF]" },
-        { key: "stalled", label: "Stalled", value: stageCounts.stalled, dot: "bg-[#C99A2E]" },
+        { key: "stalled", label: "Stalled", value: stageCounts.stalled, dot: "bg-[#C99A2E]", title: STALLED_EXPLAINER },
       ]
     : [
         { key: "overdue", label: "Overdue", value: counts.overdue, dot: "bg-rh-red" },
@@ -287,7 +319,7 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
         {/* Pulse: four numbers, one quiet card. They filter the list below. */}
         <div className="mb-6 hidden grid-cols-4 divide-x divide-rh-line overflow-hidden rounded-2xl border border-rh-line bg-white sm:grid">
           {tiles.map((t) => (
-            <button key={t.key} type="button" aria-pressed={activeFilterKey === t.key} onClick={() => patchParams({ f: activeFilterKey === t.key ? null : t.key })} className={`px-5 py-4 text-left transition-colors hover:bg-rh-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 ${activeFilterKey === t.key ? "bg-rh-teal-soft/60" : ""}`}>
+            <button key={t.key} type="button" title={t.title} aria-pressed={activeFilterKey === t.key} onClick={() => patchParams({ f: activeFilterKey === t.key ? null : t.key })} className={`px-5 py-4 text-left transition-colors hover:bg-rh-canvas focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 ${activeFilterKey === t.key ? "bg-rh-teal-soft/60" : ""}`}>
               <span className="flex items-center gap-1.5 text-[13px] text-rh-muted"><span className={`h-1.5 w-1.5 rounded-full ${t.dot}`} aria-hidden="true" />{t.label}</span>
               <span className={`mt-1.5 block text-[26px] font-semibold leading-none tracking-tight tabular-nums ${t.value ? "text-rh-ink" : "text-rh-faint"}`}>{t.value}</span>
             </button>
@@ -327,11 +359,19 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
                 })}
               </div>
             ) : null}
-            {projects.length > 0 ? (
+            {tierByCompanyId ? (
+              <>
+                <label htmlFor="lead-tier" className="sr-only">Project type</label>
+                <select id="lead-tier" value={tier} onChange={(e) => patchParams({ tier: e.target.value })} className={`${SELECT} flex-1 sm:max-w-[13rem] sm:flex-none`}>
+                  <option value="">All project types</option>
+                  {LEAD_TIER_ORDER.map((t) => <option key={t} value={t}>{LEAD_TIER_SHORT[t]} ({tierCounts[t]})</option>)}
+                </select>
+              </>
+            ) : projects.length > 0 ? (
               <>
                 <label htmlFor="lead-project" className="sr-only">Filter by open role</label>
                 <select id="lead-project" value={project} onChange={(e) => patchParams({ project: e.target.value })} className={`${SELECT} flex-1 sm:max-w-[11rem] sm:flex-none`}>
-                  <option value="">All projects</option>
+                  <option value="">All roles</option>
                   {projects.map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
               </>
@@ -341,6 +381,10 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
               {sorts.map((s) => <option key={s.key} value={s.key}>{s.label}</option>)}
             </select>
           </div>
+
+          {grouped && companyFilter === "stalled" ? (
+            <p className="flex items-start gap-2 border-b border-rh-line bg-rh-amber-soft/60 px-5 py-2.5 text-xs text-rh-amber"><Info size={13} className="mt-0.5 shrink-0" aria-hidden="true" />{STALLED_EXPLAINER}</p>
+          ) : null}
 
           {isLoading ? (
             <ul aria-busy="true" aria-label="Loading">
@@ -370,7 +414,7 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
             <>
               <ul>
                 {visibleGroups.slice(0, limit).map((g) => (
-                  <CompanyGroupItem key={g.company.id} g={g} open={isOpen(g.company.id)} onToggle={() => toggleOpen(g.company.id)} selectedId={selected?.contact.id ?? null} onOpenLead={openLead} />
+                  <CompanyGroupItem key={g.company.id} g={g} open={isOpen(g.company.id)} selected={companyId === g.company.id && !selected} stalledReason={stalledReasons[g.company.id] ?? null} onToggle={() => toggleOpen(g.company.id)} onSelect={() => openCompany(g.company.id)} selectedId={selected?.contact.id ?? null} onOpenLead={openLead} />
                 ))}
               </ul>
               {visibleGroups.length > limit ? (
@@ -402,32 +446,50 @@ const OutreachQueue = ({ mode, rows, stalledIds, isLoading, session, followUpSup
         <p className="sr-only" aria-live="polite">{resultCount} {grouped ? "companies" : "leads"} shown</p>
       </div>
 
-      {/* Detail panel: docked on wide screens, full-screen dialog on narrow ones. */}
+      {/* Detail panel: docked on wide screens, full-screen dialog on narrow ones.
+          A lead wins over a company; a lead opened from a company panel keeps a
+          way back to it. */}
       {selected ? (
         <div className={isDesktop ? "sticky top-4 hidden xl:block" : undefined}>
           <LeadPanel
             row={selected}
             siblings={siblings}
+            tier={selected.company && tierByCompanyId ? tierByCompanyId[selected.company.id] ?? null : null}
             index={selectedIndex >= 0 ? selectedIndex : lastIndexRef.current}
             total={Math.max(navRows.length, 1)}
             nextRow={nextRow}
             isDesktop={isDesktop}
             session={session}
             followUpSupported={followUpSupported}
+            backToCompany={selectedGroup && selected.company?.id === selectedGroup.company.id ? { name: selectedGroup.company.name, onBack: () => setLeadParam(null) } : null}
             onClose={closeLead}
             onPrev={selectedIndex > 0 ? () => moveSelection(-1) : null}
             onNext={selectedIndex >= 0 && selectedIndex < navRows.length - 1 ? () => moveSelection(1) : null}
             onGoToLead={(id) => { openLead(id); document.getElementById(`lead-row-${id}`)?.scrollIntoView({ block: "nearest" }); }}
             onOpenMessage={onOpenMessage}
             onOpenEmail={onOpenEmail}
+            onCopyLinkedInDraft={onCopyLinkedInDraft}
             onSaveOutcome={onSaveOutcome}
             historyVersion={historyVersion}
+          />
+        </div>
+      ) : selectedGroup ? (
+        <div className={isDesktop ? "sticky top-4 hidden xl:block" : undefined}>
+          <CompanyPanel
+            group={selectedGroup}
+            signals={signalsByCompanyId[selectedGroup.company.id] ?? []}
+            tier={tierByCompanyId?.[selectedGroup.company.id] ?? null}
+            repName={selectedGroup.company.assigned_rep ? repNameById[selectedGroup.company.assigned_rep] ?? null : null}
+            stalledReason={stalledReasons[selectedGroup.company.id] ?? null}
+            isDesktop={isDesktop}
+            onClose={closeCompany}
+            onOpenLead={openLead}
           />
         </div>
       ) : isDesktop ? (
         <aside className="sticky top-4 hidden h-56 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-rh-line-strong p-6 text-center text-[13px] text-rh-muted xl:flex">
           <Inbox size={20} className="text-rh-faint" aria-hidden="true" />
-          Select a lead to see context, reach out,<br />and log what happened.
+          {grouped ? <>Select a company for the big picture,<br />or a contact to reach out.</> : <>Select a lead to see context, reach out,<br />and log what happened.</>}
         </aside>
       ) : null}
     </div>
@@ -487,35 +549,41 @@ const STAGE_DOT: Record<string, string> = {
   new_signal: "bg-rh-faint", opportunities_engaged: "bg-rh-teal-bright", meeting_scheduled: "bg-[#5B8DEF]", closed_won: "bg-rh-teal", closed_lost: "bg-rh-red",
 };
 
-// A company: one summary row; expands to its contacts so you can see everyone
-// at a glance before reaching out to anyone.
-const CompanyGroupItem = ({ g, open, onToggle, selectedId, onOpenLead }: { g: CompanyGroup; open: boolean; onToggle: () => void; selectedId: string | null; onOpenLead: (id: string) => void }) => {
+// A company: one summary row. Clicking it opens the company panel; the chevron
+// expands its contacts in place.
+const CompanyGroupItem = ({ g, open, selected, stalledReason, onToggle, onSelect, selectedId, onOpenLead }: { g: CompanyGroup; open: boolean; selected: boolean; stalledReason: string | null; onToggle: () => void; onSelect: () => void; selectedId: string | null; onOpenLead: (id: string) => void }) => {
   const stage = g.company.company_stage;
   return (
     <li className="border-b border-rh-line last:border-0">
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-expanded={open}
-        className={`group grid w-full gap-x-4 gap-y-2 px-5 py-3.5 text-left transition-colors hover:bg-rh-canvas/70 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)_8.5rem_1rem] md:items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 ${open ? "bg-rh-canvas/50" : ""}`}
-      >
-        <span className="flex min-w-0 items-center gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-xs font-semibold text-rh-body ring-1 ring-inset ring-rh-line-strong" aria-hidden="true">{initials(g.company.name)}</span>
-          <span className="min-w-0">
-            <span className="block truncate text-sm font-semibold text-rh-ink">{g.company.name}</span>
-            <span className="block truncate text-[13px] text-rh-muted">{g.rows.length} contact{g.rows.length === 1 ? "" : "s"}{g.project ? ` · ${g.project}` : ""}</span>
+      <div className={`relative flex items-stretch transition-colors ${selected ? "bg-rh-teal-soft/50" : open ? "bg-rh-canvas/50 hover:bg-rh-canvas/70" : "hover:bg-rh-canvas/70"}`}>
+        {selected ? <span className="absolute inset-y-0 left-0 w-0.5 bg-rh-teal" aria-hidden="true" /> : null}
+        <button
+          type="button"
+          id={`company-row-${g.company.id}`}
+          onClick={onSelect}
+          aria-current={selected ? "true" : undefined}
+          className="grid min-w-0 flex-1 gap-x-4 gap-y-2 py-3.5 pl-5 pr-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)_8.5rem]"
+        >
+          <span className="flex min-w-0 items-center gap-3">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-xs font-semibold text-rh-body ring-1 ring-inset ring-rh-line-strong" aria-hidden="true">{initials(g.company.name)}</span>
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-rh-ink">{g.company.name}</span>
+              <span className="block truncate text-[13px] text-rh-muted">{g.rows.length} contact{g.rows.length === 1 ? "" : "s"}{g.project ? ` · ${g.project}` : ""}</span>
+            </span>
           </span>
-        </span>
-        <span className="min-w-0 pl-12 md:pl-0">
-          <span className="flex items-center gap-1.5 text-[13px] text-rh-body"><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STAGE_DOT[stage] ?? "bg-rh-faint"}`} aria-hidden="true" />{COMPANY_STAGE_LABELS[stage]}{g.stalled ? <span className="text-rh-amber"> · stalled</span> : null}</span>
-          <span className="block truncate text-xs text-rh-muted">{g.contacted} of {g.rows.length} contacted{g.lastTouchAt ? ` · last ${formatAgo(g.lastTouchAt).toLowerCase()}` : ""}</span>
-        </span>
-        <span className="flex min-w-0 flex-col items-start gap-0.5 pl-12 md:pl-0">
-          <UrgencyBadge urgency={g.topUrgency} text={g.topUrgency === "overdue" ? `${g.topDays} day${g.topDays === 1 ? "" : "s"} overdue` : undefined} />
-          {g.nextDue && g.topUrgency !== "overdue" ? <span className="pl-0.5 text-xs text-rh-muted">Next {formatShortDate(g.nextDue)}</span> : null}
-        </span>
-        <ChevronDown size={16} className={`hidden text-rh-faint transition-transform md:block ${open ? "rotate-180" : ""}`} aria-hidden="true" />
-      </button>
+          <span className="min-w-0 pl-12 md:pl-0">
+            <span className="flex items-center gap-1.5 text-[13px] text-rh-body"><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STAGE_DOT[stage] ?? "bg-rh-faint"}`} aria-hidden="true" />{COMPANY_STAGE_LABELS[stage]}{g.stalled ? <span className="text-rh-amber" title={stalledReason ?? STALLED_EXPLAINER}> · stalled</span> : null}</span>
+            <span className="block truncate text-xs text-rh-muted">{g.contacted} of {g.rows.length} contacted{g.lastTouchAt ? ` · last ${formatAgo(g.lastTouchAt).toLowerCase()}` : ""}</span>
+          </span>
+          <span className="flex min-w-0 flex-col items-start gap-0.5 pl-12 md:pl-0">
+            <UrgencyBadge urgency={g.topUrgency} text={g.topUrgency === "overdue" ? `${g.topDays} day${g.topDays === 1 ? "" : "s"} overdue` : undefined} />
+            {g.nextDue && g.topUrgency !== "overdue" ? <span className="pl-0.5 text-xs text-rh-muted">Next {formatShortDate(g.nextDue)}</span> : null}
+          </span>
+        </button>
+        <button type="button" onClick={onToggle} aria-expanded={open} aria-label={`${open ? "Hide" : "Show"} ${g.rows.length} contact${g.rows.length === 1 ? "" : "s"} at ${g.company.name}`} className="flex w-12 shrink-0 items-center justify-center text-rh-faint hover:text-rh-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70">
+          <ChevronDown size={16} className={`transition-transform ${open ? "rotate-180" : ""}`} aria-hidden="true" />
+        </button>
+      </div>
       {open ? (
         <ul className="border-t border-rh-line bg-rh-canvas/40">
           {g.rows.map((r) => (

@@ -3,6 +3,9 @@
 // no React so the ranking rules can be unit tested.
 
 import {
+  STALE_MEETING_DAYS,
+  STALE_NEW_OPPORTUNITY_DAYS,
+  formatWhyNow,
   getContactTier,
   PRIORITY_ORDER,
   STATUS_LABELS,
@@ -11,6 +14,7 @@ import {
   type ContactMeetingBlock,
   type ContactProgress,
   type ContactStatus,
+  type OwnerLeadType,
   type ProjectContact,
 } from "./projectContacts";
 
@@ -338,3 +342,60 @@ export const sortGroups = (groups: CompanyGroup[], sort: CompanySort): CompanyGr
     return byName(a, b);
   });
 };
+
+// ---- Project tiers (what kind of opportunity this is) ----
+// Owner-only data: the three plays are "not hiring at all" (cold), "hiring a
+// full-time role" (pitch fractional instead), and "flexible/fractional role"
+// (pitch an agency partner). Members have no lead-type data, so every helper
+// here tolerates a missing type.
+export type LeadTier = "cold" | "fulltime" | "flexible";
+
+export const LEAD_TIER_LABEL: Record<LeadTier, string> = {
+  cold: "Not hiring · cold outreach",
+  fulltime: "Full-time role · pitch fractional",
+  flexible: "Fractional / flexible role · pitch agency",
+};
+export const LEAD_TIER_SHORT: Record<LeadTier, string> = {
+  cold: "Cold outreach",
+  fulltime: "Full-time hire",
+  flexible: "Fractional work",
+};
+export const LEAD_TIER_ORDER: LeadTier[] = ["flexible", "fulltime", "cold"];
+
+export const leadTierOf = (type: OwnerLeadType | null | undefined): LeadTier | null => {
+  if (!type) return null;
+  if (type === "Cold Outreach") return "cold";
+  if (type === "Full-Time Hiring Signal") return "fulltime";
+  return "flexible";
+};
+
+// "Why we're reaching out", as one statement. The data keeps "why it fits" and
+// "why now" separately, but they often say the same thing, so merge them and
+// drop whichever is already contained in the other.
+export const whyStatement = (contact: ProjectContact): string | null => {
+  const fit = (contact.value_hypothesis ?? "").trim();
+  const now = contact.outreach_angle ? formatWhyNow(contact.outreach_angle).trim() : "";
+  if (fit && now) {
+    const f = fit.toLowerCase().replace(/[.\s]+$/, "");
+    const n = now.toLowerCase().replace(/[.\s]+$/, "");
+    if (f.includes(n)) return fit;
+    if (n.includes(f)) return now;
+    return `${fit.replace(/\s+$/, "")}${/[.!?]$/.test(fit) ? "" : "."} ${now}`;
+  }
+  return fit || now || null;
+};
+
+// Which pre-written LinkedIn message fits where this lead is right now.
+export type LinkedInDraftField = "linkedin_connect_message" | "intro_message" | "follow_up_message";
+export const suggestedLinkedInDraft = (status: ContactStatus, contact: ProjectContact): { field: LinkedInDraftField; label: string } | null => {
+  const order: { field: LinkedInDraftField; label: string; max: number }[] = [
+    { field: "linkedin_connect_message", label: "connection note", max: 0 },
+    { field: "intro_message", label: "intro message", max: 1 },
+    { field: "follow_up_message", label: "follow-up message", max: 99 },
+  ];
+  const rank = status === "not_contacted" ? 0 : status === "connection_sent" ? 1 : 2;
+  const pick = order.find((o) => rank <= o.max && contact[o.field]) ?? order.slice().reverse().find((o) => contact[o.field]);
+  return pick ? { field: pick.field, label: pick.label } : null;
+};
+
+export const STALLED_EXPLAINER = `Stalled means an opportunity is going cold: a new opportunity nobody has contacted ${STALE_NEW_OPPORTUNITY_DAYS}+ days after its role was posted, or a meeting set ${STALE_MEETING_DAYS}+ days ago with no update.`;

@@ -9,7 +9,7 @@ import OutreachQueue from "@/components/outreach/OutreachQueue";
 import PageHeader from "@/components/outreach/PageHeader";
 import TeamSection from "@/components/outreach/TeamSection";
 import type { OutcomeInput, OutcomeResult } from "@/components/outreach/LeadPanel";
-import { buildLeadRows } from "@/lib/outreachQueue";
+import { buildLeadRows, leadTierOf, suggestedLinkedInDraft, type LeadTier } from "@/lib/outreachQueue";
 import ProjectsSidebar, { type ProjectsSection } from "@/components/ProjectsSidebar";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import { signInToProposalDirectory, clearStoredProposalSession, hydrateSessionFromUrlFragment, setOwnPassword } from "@/lib/companyStatus";
@@ -21,6 +21,7 @@ import {
   fetchMeetings,
   fetchClosedDeals,
   fetchCompanies,
+  updateCompanyAssignedRep,
   fetchMeetingBlocks,
   fetchCompanySignalsList,
   createMeeting,
@@ -60,6 +61,7 @@ import {
   computeCompanyInsights,
   formatWhyNow,
   getInitials,
+  daysAgo,
   fetchOwnerCompanyLeadFields,
   OWNER_LEAD_TYPE_FILTER_ORDER,
   OWNER_LEAD_TYPE_BADGE_CLASS,
@@ -1741,13 +1743,73 @@ const ProjectsPage = () => {
     );
   })() : null;
 
-  const stalledIds = useMemo(() => new Set(companies.filter((c) => companyInsightsAll[c.id]?.stalled).map((c) => c.id)), [companies, companyInsightsAll]);
+  // Why each stalled company is stalled, in words (same rules as
+  // computeCompanyInsights).
+  const stalledReasons = useMemo(() => {
+    const out: Record<string, string> = {};
+    for (const c of companies) {
+      if (!companyInsightsAll[c.id]?.stalled) continue;
+      if (c.company_stage === "meeting_scheduled") {
+        const age = daysAgo(c.meeting_date);
+        out[c.id] = `A meeting was set ${age ?? "several"} days ago and nothing has been logged since.`;
+      } else {
+        const oldest = Math.max(...(signalsByCompanyId[c.id] ?? []).map((s) => daysAgo(s.posted_date) ?? 0), 0);
+        out[c.id] = `Nobody here has been contacted, and the role was posted ${oldest} days ago.`;
+      }
+    }
+    return out;
+  }, [companies, companyInsightsAll, signalsByCompanyId]);
+
+  // Assigns (or unassigns) a whole company. Waits for the database and reports
+  // whether it really saved, so the UI never shows a hand-off that didn't happen.
+  const handleAssignCompany = async (companyId: string, repId: string | null): Promise<boolean> => {
+    if (!session) return false;
+    const updated = await updateCompanyAssignedRep(session, companyId, repId);
+    if (!updated) return false;
+    setCompanies((current) => current.map((c) => (c.id === updated.id ? { ...c, assigned_rep: updated.assigned_rep ?? null } : c)));
+    return true;
+  };
+
+  const repNameById = useMemo(() => Object.fromEntries(teamMembers.map((m) => [m.id, m.name])), [teamMembers]);
+
+  // Owner-only: which of the three plays each company is (cold / full-time
+  // role / fractional-or-flexible role). Members never receive lead-type data.
+  const tierByCompanyId = useMemo(() => {
+    if (!isOwner) return undefined;
+    const out: Record<string, LeadTier> = {};
+    for (const [id, f] of Object.entries(ownerCompanyFields)) {
+      const t = leadTierOf(f.canonical_lead_type);
+      if (t) out[id] = t;
+    }
+    return out;
+  }, [isOwner, ownerCompanyFields]);
+
+  // Copies the LinkedIn draft that fits this lead's stage, personalized the same
+  // way as the message editor. Never changes status; the rep logs it separately.
+  const handleCopyLinkedInDraft = async (contact: ProjectContact): Promise<string | null> => {
+    const status = progress[contact.id]?.status ?? "not_contacted";
+    const pick = suggestedLinkedInDraft(status, contact);
+    if (!pick) return null;
+    const personalization = pick.field === "intro_message" ? getPersonalizationLine(currentTeamMember, contact) : null;
+    const text = personalizeMessage(contact[pick.field], personalization);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      return null;
+    }
+    if (session) logContactActivity(session, contact.id, "message_copied", pick.field, currentTeamMember?.id);
+    return pick.label;
+  };
 
   const renderQueue = (mode: "today" | "companies") => session ? (
     <OutreachQueue
       mode={mode}
       key={mode}
-      stalledIds={stalledIds}
+      stalledReasons={stalledReasons}
+      signalsByCompanyId={signalsByCompanyId}
+      repNameById={repNameById}
+      tierByCompanyId={tierByCompanyId}
+      onCopyLinkedInDraft={handleCopyLinkedInDraft}
       rows={queueRows}
       isLoading={isLoadingData}
       session={session}
@@ -2164,15 +2226,15 @@ const ProjectsPage = () => {
             {activeSection === "assignments" ? renderQueue("companies") : null}
             {activeSection !== "queue" && activeSection !== "assignments" ? (
               <PageHeader
-                title={activeSection === "board" ? "Company board" : activeSection === "team" ? "Team" : activeSection === "profile" ? "Profile" : "Classic company view"}
-                subtitle={activeSection === "board" ? `${companies.length} companies · assign reps and track every stage` : activeSection === "team" ? "Roles, pipeline by person, meetings and closed deals" : activeSection === "profile" ? "How you appear in outreach" : "The previous layout, kept for reference"}
+                title={activeSection === "board" ? "Lead assignment" : activeSection === "team" ? "Team" : activeSection === "profile" ? "Profile" : "Classic company view"}
+                subtitle={activeSection === "board" ? "Hand companies to reps. The ones closest to going cold come first." : activeSection === "team" ? "Roles, pipeline by person, meetings and closed deals" : activeSection === "profile" ? "How you appear in outreach" : "The previous layout, kept for reference"}
               />
             ) : null}
 
           {activeSection === "profile" ? renderProfileSection() : null}
 
           {activeSection === "board" ? (
-            <CompanyBoard companies={companies} contacts={contacts} progress={progress} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} teamMembersWithLogin={teamMembersWithLogin} />
+            <CompanyBoard companies={companies} contacts={contacts} progress={progress} signalsByCompanyId={signalsByCompanyId} teamMembers={teamMembers} teamMembersWithLogin={teamMembersWithLogin} tierByCompanyId={tierByCompanyId} onAssign={handleAssignCompany} />
           ) : null}
 
           {activeSection === "team" ? (

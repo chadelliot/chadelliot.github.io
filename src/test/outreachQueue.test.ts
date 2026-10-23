@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildLeadRows, countByUrgency, sortRows, daysBetween, groupByCompany, matchesCompanyFilter } from "@/lib/outreachQueue";
+import { buildLeadRows, countByUrgency, sortRows, daysBetween, groupByCompany, matchesCompanyFilter, whyStatement, suggestedLinkedInDraft, leadTierOf } from "@/lib/outreachQueue";
 import type { Company, ProjectContact, ContactProgress } from "@/lib/projectContacts";
 
 const now = new Date(2026, 9, 23, 10, 0, 0); // local Oct 23 2026
@@ -78,5 +78,28 @@ describe("outreach queue", () => {
     expect(g.topUrgency).toBe("overdue");
     expect(matchesCompanyFilter(g, "action")).toBe(true);
     expect(matchesCompanyFilter(g, "meeting")).toBe(false);
+  });
+
+  it("merges fit and why-now into one statement without repeating itself", () => {
+    expect(whyStatement(mk("a", { value_hypothesis: "Fits well.", outreach_angle: "Role posted recently." }))).toBe("Fits well. Role posted recently.");
+    expect(whyStatement(mk("a", { value_hypothesis: "Role posted recently", outreach_angle: "Role posted recently." }))).toBe("Role posted recently");
+    expect(whyStatement(mk("a", { value_hypothesis: "Only fit." }))).toBe("Only fit.");
+    expect(whyStatement(mk("a"))).toBeNull();
+  });
+
+  it("picks the LinkedIn draft that matches the stage", () => {
+    const c = mk("a", { linkedin_connect_message: "c", intro_message: "i", follow_up_message: "f" });
+    expect(suggestedLinkedInDraft("not_contacted", c)?.field).toBe("linkedin_connect_message");
+    expect(suggestedLinkedInDraft("connection_sent", c)?.field).toBe("intro_message");
+    expect(suggestedLinkedInDraft("introduction_sent", c)?.field).toBe("follow_up_message");
+    expect(suggestedLinkedInDraft("not_contacted", mk("b"))).toBeNull();
+  });
+
+  it("maps lead types onto the three project plays", () => {
+    expect(leadTierOf("Cold Outreach")).toBe("cold");
+    expect(leadTierOf("Full-Time Hiring Signal")).toBe("fulltime");
+    expect(leadTierOf("Fractional Opportunity")).toBe("flexible");
+    expect(leadTierOf("Interim Opportunity")).toBe("flexible");
+    expect(leadTierOf(undefined)).toBeNull();
   });
 });
