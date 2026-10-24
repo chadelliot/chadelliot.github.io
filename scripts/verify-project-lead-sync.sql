@@ -12,6 +12,15 @@ begin
   if actual_id <> probe_id or (second_report->>'created_contacts')::int <> 0 then raise exception 'Duplicate import'; end if;
   if not exists(select 1 from project_contacts where id=probe_id and do_not_contact and needs_research and email='probe@example.invalid' and title='Updated Title') then raise exception 'Lost suppression or contact data'; end if;
   if not exists(select 1 from contact_progress where contact_id=probe_id and status='connection_sent') then raise exception 'Lost outreach history'; end if;
+  update project_contacts set profile_validation_status='current',profile_verified_at=now(),
+    profile_verification_source='https://example.invalid/leadership',
+    title='Verified Role',intro_message='Reviewed introduction',outreach_angle='Reviewed angle'
+    where id=probe_id;
+  perform public.sync_project_leads('[{"company":"__sync_pipeline_probe__","contact_name":"Pipeline Probe","title":"Stale Role","intro_message":"Stale introduction","outreach_angle":"Stale angle"}]','[]');
+  if not exists(select 1 from project_contacts where id=probe_id and title='Verified Role'
+    and intro_message='Reviewed introduction' and outreach_angle='Reviewed angle') then
+    raise exception 'Lost reviewed title or outreach copy';
+  end if;
 end $$;
-select 'PASS: identity, suppression, blank-field preservation and outreach history' result;
+select 'PASS: identity, suppression, blank fields, history and reviewed outreach copy' result;
 rollback;
