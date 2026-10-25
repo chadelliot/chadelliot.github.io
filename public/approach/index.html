@@ -1253,9 +1253,9 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 }
 
 /* ═══ Intro: what the work delivers, before the example story ═══ */
-.intro{display:none;flex:1;overflow-y:auto;padding:48px 48px 80px;}
+.intro{display:none;flex:1;overflow-y:auto;padding:48px 48px 120px;}
 body.intro-on .intro{display:block;}
-body.intro-on :is(.rail,.stage-area,.nav-buttons,.progress-bar,.next-bubble){display:none !important;}
+body.intro-on :is(.stage-area,.next-bubble){display:none !important;}
 .intro-in{max-width:900px;margin:0 auto;animation:fadeIn .5s ease;}
 .intro-title{font-size:44px;font-weight:800;letter-spacing:-1.2px;line-height:1.08;color:var(--ink);margin-bottom:16px;}
 .intro-title em{font-style:italic;color:var(--green);}
@@ -1923,7 +1923,6 @@ const sections = [
 
 // Build rail
 const rail = document.getElementById('rail');
-const back = document.createElement('button'); back.className = 'rail-back'; back.textContent = '← Overview'; back.onclick = () => { try { history.pushState(null, '', location.pathname + location.search); } catch (e) {} showIntro(); }; rail.appendChild(back);
 STAGES.forEach((s, i) => {
   const sec = sections.find(s => s.start === i);
   if (sec) {
@@ -1951,6 +1950,7 @@ STAGES.forEach((s, i) => {
 // Build TAM map — SVG street grid + account dots
 function goTo(n, opts) {
   opts = opts || {};
+  document.body.classList.toggle('intro-on', !!opts.intro);
   document.getElementById('stage-' + current).classList.remove('active');
   document.getElementById('rail-' + current).classList.remove('active');
   if (current < n) document.getElementById('rail-' + current).classList.add('done');
@@ -1969,7 +1969,7 @@ function goTo(n, opts) {
     else if (i === current) rc.classList.add('active');
   });
 
-  document.getElementById('btnBack').disabled = current === 0;
+  document.getElementById('btnBack').disabled = current === 0 && !!opts.intro;
   // Last chapter: button loops back to start
   if (current === STAGES.length - 1) {
     document.getElementById('btnNext').textContent = '↩ Start Over';
@@ -1992,17 +1992,18 @@ function goTo(n, opts) {
 }
 // Chapter from the URL fragment; unknown or empty fragments open the summary
 const stageFromHash = () => STAGES.findIndex(x => x.slug === decodeURIComponent(location.hash.slice(1)));
-const showIntro = () => { document.body.classList.add('intro-on'); document.title = 'Growth Engine — Chad Parker'; };
-function startStory() { document.body.classList.remove('intro-on'); goTo(0); }
+const showIntro = () => { goTo(0, { noHistory: true, intro: true }); document.title = 'Growth Engine — Chad Parker'; };
+function startStory() { goTo(0); }
 window.addEventListener('popstate', () => {
   const n = stageFromHash();
   if (n < 0) { showIntro(); return; }
-  document.body.classList.remove('intro-on');
-  if (n !== current) goTo(n, { noHistory: true }); else goTo(n, { noHistory: true });
+  goTo(n, { noHistory: true });
 });
 document.getElementById('introGo').addEventListener('click', startStory);
 
 function navigate(dir) {
+  if (document.body.classList.contains('intro-on')) { if (dir > 0) startStory(); return; }
+  if (current === 0 && dir < 0) { try { history.pushState(null, '', location.pathname + location.search); } catch (e) {} showIntro(); return; }
   // On last stage, Next loops back to chapter 1
   if (current === STAGES.length - 1 && dir > 0) {
     goTo(0);

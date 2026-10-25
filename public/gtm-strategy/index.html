@@ -456,12 +456,9 @@ const LEG = {
 };
 const legend = items => `<div class="legend">${items.map(i => i.sw ? `<span><i class="sw" style="background:${i.sw}"></i>${i.t}</span>` : `<span class="${i.c}"><svg viewBox="0 0 24 24"><use href="#i-${i.i}"/></svg>${i.t}</span>`).join('')}</div>`;
 const STEPS = [
-  { id: 'offer', group: 'The case', title: 'What it does', eyebrow: 'Go-to-market strategy · What it delivers', noMaya: true, panel: 'offer',
-    q: 'Enter a market. Win it. Repeat it.', claim: 'One plan that sales and marketing run together.',
-    body: 'For companies entering a market or growing share in one. Map where demand is open, run one plan across sales and marketing, and fund what returns most.',
-    cta: ['See an example: one market →', 'strategy'],
-    cam: () => [1, cx0, cy0], fill: () => setFill('base'), layers_on: [] },
   { id: 'strategy', group: 'The case', title: 'The strategy', eyebrow: 'The case · Go-to-market strategy', maya: 'Maya’s plan',
+    intro: { eyebrow: 'Go-to-market strategy · What it delivers', noMaya: true, panel: 'offer', layers: null, q: 'Enter a market. Win it. Repeat it.', claim: 'One plan that sales and marketing run together.',
+      body: 'For companies entering a market or growing share in one. Map where demand is open, run one plan across sales and marketing, and fund what returns most.', cta: 'See an example: one market →' },
     q: 'Build the go-to-market strategy for one market, then run it again.',
     body: 'Maya Chen is VP of Marketing at Meridian Mechanical, a commercial HVAC and mechanical services contractor. She builds the strategy for one market, Maryland, from three layers of evidence, then ties them into one motion that sales and marketing run together.',
     layers: [['Data', 'Who the buyer is, county by county, and who else is selling here.'], ['Journey', 'How buyers decide in this market, and where they stall.'], ['Experience', 'Every touchpoint and signal, fed back in to sharpen the next move.']],
@@ -580,28 +577,32 @@ GROUPS.forEach(g => {
 
 /* ── go ── */
 let cur = -1;
+let introOn = true;
+const reveal = () => { introOn = false; go(0); };
 function go(n) {
-  n = Math.max(0, Math.min(STEPS.length - 1, n)); const s = STEPS[n]; const prev = cur; cur = n;
+  n = Math.max(0, Math.min(STEPS.length - 1, n)); const isIntro = n === 0 && introOn; if (n > 0) introOn = false; const s = isIntro ? { ...STEPS[0], ...STEPS[0].intro } : STEPS[n]; const prev = cur; cur = n;
   STEPS.forEach((_, i) => { const r = $('#r' + i); r.classList.toggle('active', i === n); r.classList.toggle('done', i < n); });
   $('#progress').style.width = ((n + 1) / STEPS.length * 100) + '%';
   $('#counter').textContent = s.num ? `Step ${s.num} of ${STEPS.filter(x => x.num).length}` : s.group === 'The case' ? 'The case' : s.title;
-  $('#back').disabled = n === 0; const nx = $('#next'); nx.textContent = n === STEPS.length - 1 ? '↩ Start over' : 'Next →';
-  $('#text').innerHTML = `<div class="eyebrow">${s.eyebrow}</div>${s.noMaya ? '' : `<div class="maya"><i>M</i>${s.maya}</div>`}<h1 class="q">${s.q}</h1>${s.claim ? `<p class="claim">${s.claim}</p>` : ''}<p class="body">${s.body}</p>${s.layers ? `<div class="layers">${s.layers.map(l => `<div class="layer-card"><b>${l[0]}</b><span>${l[1]}</span></div>`).join('')}</div>` : ''}${s.legend || ''}${s.side ? `<div class="side">${s.side()}</div>` : ''}${s.link ? `<a class="xlink" href="${s.link[0]}">${s.link[1]}<small>Opens Growth Engine, a separate illustrative case</small></a>` : ''}${s.cta ? `<button class="btn btn-next cta" id="cta">${s.cta[0]}</button>` : `<div class="rec"><b>Recommendation</b><span>${s.rec}</span></div>`}`;
-  if (s.cta) $('#cta').onclick = () => go(STEPS.findIndex(x => x.id === s.cta[1]));
+  $('#back').disabled = isIntro; const nx = $('#next'); nx.textContent = n === STEPS.length - 1 ? '↩ Start over' : 'Next →';
+  $('#text').innerHTML = `<div class="eyebrow">${s.eyebrow}</div>${s.noMaya ? '' : `<div class="maya"><i>M</i>${s.maya}</div>`}<h1 class="q">${s.q}</h1>${s.claim ? `<p class="claim">${s.claim}</p>` : ''}<p class="body">${s.body}</p>${s.layers ? `<div class="layers">${s.layers.map(l => `<div class="layer-card"><b>${l[0]}</b><span>${l[1]}</span></div>`).join('')}</div>` : ''}${s.legend || ''}${s.side ? `<div class="side">${s.side()}</div>` : ''}${s.link ? `<a class="xlink" href="${s.link[0]}">${s.link[1]}<small>Opens Growth Engine, a separate illustrative case</small></a>` : ''}${s.cta ? `<button class="btn btn-next cta" id="cta">${s.cta}</button>` : `<div class="rec"><b>Recommendation</b><span>${s.rec}</span></div>`}`;
+  if (s.cta) $('#cta').onclick = reveal;
   $('#text').scrollTop = 0;
   if (window.innerWidth < 768) window.scrollTo(0, 0);
   const panel = $('#panel'); panel.classList.toggle('on', !!s.panel); panel.innerHTML = s.panel ? PANELS[s.panel]() : '';
-  svg.style.visibility = s.panel ? 'hidden' : 'visible'; $('#mapwrap').classList.toggle('haspanel', !!s.panel); $('#mapwrap').classList.toggle('offer', s.id === 'offer'); $('#mapwrap').classList.toggle('nocorner', s.id === 'build' || s.id === 'offer');
+  svg.style.visibility = s.panel ? 'hidden' : 'visible'; $('#mapwrap').classList.toggle('haspanel', !!s.panel); $('#mapwrap').classList.toggle('offer', isIntro); $('#mapwrap').classList.toggle('nocorner', s.id === 'build' || isIntro);
   $('#ov').innerHTML = s.panel ? '' : s.ov();
   s.fill(); showLayers(s.layers_on); const [k, fx, fy] = s.cam(); setCam(k, fx, fy, prev < 0 ? 1 : 1000);
   if (s.after) s.after();
-  try { history.replaceState(null, '', n ? '#' + s.id : location.pathname + location.search); } catch (e) {}
+  try { history.replaceState(null, '', isIntro ? location.pathname + location.search : '#' + s.id); } catch (e) {}
 }
-$('#next').onclick = () => go(cur === STEPS.length - 1 ? 0 : cur + 1);
-$('#back').onclick = () => go(cur - 1);
-document.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(cur + 1); if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(cur - 1); });
-{ const h = STEPS.findIndex(x => x.id === location.hash.slice(1)); go(h > 0 ? h : 0); }
-window.addEventListener('hashchange', () => { const h = STEPS.findIndex(x => x.id === location.hash.slice(1)); if (h >= 0 && h !== cur) go(h); });
+const stepNext = () => { if (cur === 0 && introOn) return reveal(); if (cur === STEPS.length - 1) { introOn = true; return go(0); } go(cur + 1); };
+const stepBack = () => { if (cur === 1) { go(0); return; } if (cur === 0 && !introOn) { introOn = true; go(0); return; } go(cur - 1); };
+$('#next').onclick = stepNext;
+$('#back').onclick = stepBack;
+document.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowDown') stepNext(); if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') stepBack(); });
+{ const h = STEPS.findIndex(x => x.id === location.hash.slice(1)); if (h >= 0) introOn = false; go(h > 0 ? h : 0); }
+window.addEventListener('hashchange', () => { const h = STEPS.findIndex(x => x.id === location.hash.slice(1)); if (h >= 0 && (h !== cur || introOn)) { introOn = false; go(h); } });
 </script>
 </body>
 </html>
