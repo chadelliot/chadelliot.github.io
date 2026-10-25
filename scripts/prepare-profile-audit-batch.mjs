@@ -14,16 +14,16 @@ const records=rows.slice(offset,offset+size).map(row=>{
   if (['current','role_changed','retired','departed'].includes(row.action) && !/^https:\/\//.test(row.evidence_url||'')) throw new Error(`Source evidence required for ${row.id}`);
   if (row.release && row.action!=='current') throw new Error(`Only a reviewed current role can be released: ${row.id}`);
   if (row.action==='current' && !row.current_title) throw new Error(`Missing verified title: ${row.id}`);
-  for (const key of ['intro_message','outreach_angle','linkedin_connect_message','follow_up_message']) {
+  for (const key of ['intro_message','outreach_angle','linkedin_connect_message','follow_up_message','email_intro_message']) {
     if (row[key] !== undefined && (typeof row[key] !== 'string' || !row[key].trim())) throw new Error(`Invalid corrected ${key}: ${row.id}`);
   }
-  return {id:row.id,company:row.company,name:row.name||null,action:row.action,current_title:row.current_title||null,evidence_url:row.evidence_url||null,note:row.note,release:row.release,intro_message:row.intro_message||null,outreach_angle:row.outreach_angle||null,linkedin_connect_message:row.linkedin_connect_message||null,follow_up_message:row.follow_up_message||null};
+  return {id:row.id,company:row.company,name:row.name||null,action:row.action,current_title:row.current_title||null,evidence_url:row.evidence_url||null,note:row.note,release:row.release,intro_message:row.intro_message||null,outreach_angle:row.outreach_angle||null,linkedin_connect_message:row.linkedin_connect_message||null,follow_up_message:row.follow_up_message||null,email_intro_message:row.email_intro_message||null};
 });
 if (!records.length) throw new Error('Empty batch');
 const literal=JSON.stringify(records).replace(/'/g,"''");
 process.stdout.write(`with evidence as (
   select * from jsonb_to_recordset('${literal}'::jsonb)
-  as e(id uuid,company text,name text,action text,current_title text,evidence_url text,note text,release boolean,intro_message text,outreach_angle text,linkedin_connect_message text,follow_up_message text)
+  as e(id uuid,company text,name text,action text,current_title text,evidence_url text,note text,release boolean,intro_message text,outreach_angle text,linkedin_connect_message text,follow_up_message text,email_intro_message text)
 ), changed as (
   update public.project_contacts p set
     title=case when e.action in ('current','role_changed') then coalesce(e.current_title,p.title) else p.title end,
@@ -31,6 +31,7 @@ process.stdout.write(`with evidence as (
     outreach_angle=coalesce(e.outreach_angle,p.outreach_angle),
     linkedin_connect_message=coalesce(e.linkedin_connect_message,p.linkedin_connect_message),
     follow_up_message=coalesce(e.follow_up_message,p.follow_up_message),
+    email_intro_message=coalesce(e.email_intro_message,p.email_intro_message),
     profile_validation_status=e.action,
     profile_verified_at=now(),profile_verification_source=e.evidence_url,
     profile_validation_note='2026-10-24 audit: '||e.note,
