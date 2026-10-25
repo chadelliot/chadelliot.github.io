@@ -203,6 +203,10 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
   .panel{position:static;}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s !important;animation-delay:0s !important;transition-duration:.01s !important;transition-delay:0s !important;}}
+.xlink{display:block;margin:2px 0 16px;font-size:12px;font-weight:600;color:var(--green);text-decoration:none;line-height:1.4;}
+.xlink:hover{text-decoration:underline;}
+.xlink:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:2px;}
+.xlink small{display:block;margin-top:2px;font-size:10px;font-weight:500;color:var(--muted);}
 </style>
 </head>
 <body>
@@ -233,8 +237,8 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
     <li class="nav-dd">
       <a href="/approach/" class="active">My Approach</a>
       <ul class="nav-dd-menu">
-        <li><a href="/approach/">Growth Engine<small>A signal-based marketing system</small></a></li>
-        <li><a href="/gtm-strategy/" class="active">GTM Strategy<small>One market, built end to end</small></a></li>
+        <li><a href="/approach/">Growth Engine<small>How marketing generates and converts demand</small></a></li>
+        <li><a href="/gtm-strategy/" class="active">GTM Strategy<small>How to enter and win a market</small></a></li>
       </ul>
     </li>
     <li><a href="/career">Career</a></li>
@@ -466,6 +470,7 @@ const STEPS = [
     q: 'Where do buyers stall in this market?', claim: 'Fix the stage that loses the most buyers.',
     body: `Maya traces the buyer path from first touch to renewal. Win rates vary by county: the more competitors in reach, the lower it falls. The leak is at the quote.`,
     legend: legend([{ sw: '#f2c79a', t: 'Lowest win rate' }]),
+    link: ['/approach/#prospect-funnel', 'See the funnel diagnosis and modeled lift →'],
     rec: 'Design for the stage that loses the most buyers, and give renewal the same care as the first contract.',
     cam: () => [1, cx0, cy0], fill: () => setFill('win'), layers_on: ['reach'],
     ov: () => `<div class="ov"><span class="k">Win rate by market</span><span class="big">${pct(winOpen)} vs ${pct(winHeavy)}</span>in open counties versus counties with two or more competitors in reach.</div>
@@ -474,6 +479,7 @@ const STEPS = [
     q: 'What does each touchpoint say, and where does it run?', claim: 'Say the right thing in the right place.',
     body: 'Maya sets a media zone around each territory hub and gives it its own message. The account scores build the audience lists, so advertising reaches the accounts worth reaching.',
     legend: legend([{ c: 'mk', i: 'mega', t: 'Geo-targeted advertising' }]),
+    link: ['/approach/#market-messaging', 'See how the audience becomes a campaign →'],
     rec: 'Personalize the few touchpoints that carry the most pipeline before redesigning the rest.',
     cam: () => [1, cx0, cy0], fill: () => setFill('terrSoft'), layers_on: ['zones'],
     ov: () => `<div class="ov"><span class="k">Audience by zone</span>${D.territories.map(t => `<div style="margin-top:6px"><b>${t.name}</b><br><span style="font-size:11px">${t.msg} · ${reach(t.id)} Tier 1 and 2 accounts</span></div>`).join('')}</div>` },
@@ -481,6 +487,7 @@ const STEPS = [
     q: 'What are buyers telling us, and when?', claim: 'Turn every touchpoint into a signal someone acts on.',
     body: 'An account leaves a trail: funding, a new executive, an expansion permit, a competitor evaluation. Maya reads them on one timeline and routes each to the right owner.',
     legend: legend([{ c: 'sg', i: 'bolt', t: 'Buying signal' }, { c: 'cp', i: 'alert', t: 'Risk signal' }]),
+    link: ['/approach/#signal-intelligence', 'Explore the signal-triggered marketing plays →'],
     rec: 'Agree the handful of signals that matter, who acts on each, and by when.',
     cam: () => [1, cx0, cy0], fill: () => setFill('terrSoft'), layers_on: ['sig', 'accts'],
     side: () => `<span class="k" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Today’s signals · hover to zoom</span><div class="feed">${sigAccts.map((a, i) => `<button data-i="${i}"><svg viewBox="0 0 24 24"><use href="#i-${SIG[a.sig][0]}"/></svg><span><b>${a.name}</b> · ${SIG[a.sig][1]}<em>${a.city} → ${OWNER_OF(a).owner}: ${SIG[a.sig][2]}</em></span></button>`).join('')}</div>`,
@@ -553,7 +560,7 @@ function go(n) {
   $('#progress').style.width = ((n + 1) / STEPS.length * 100) + '%';
   $('#counter').textContent = s.num ? `Step ${s.num} of ${STEPS.filter(x => x.num).length}` : s.group === 'The case' ? 'The case' : s.title;
   $('#back').disabled = n === 0; const nx = $('#next'); nx.textContent = n === STEPS.length - 1 ? '↩ Start over' : 'Next →';
-  $('#text').innerHTML = `<div class="eyebrow">${s.eyebrow}</div><div class="maya"><i>M</i>${s.maya}</div><h1 class="q">${s.q}</h1>${s.claim ? `<p class="claim">${s.claim}</p>` : ''}<p class="body">${s.body}</p>${s.layers ? `<div class="layers">${s.layers.map(l => `<div class="layer-card"><b>${l[0]}</b><span>${l[1]}</span></div>`).join('')}</div>` : ''}${s.legend || ''}${s.side ? `<div class="side">${s.side()}</div>` : ''}<div class="rec"><b>Recommendation</b><span>${s.rec}</span></div>`;
+  $('#text').innerHTML = `<div class="eyebrow">${s.eyebrow}</div><div class="maya"><i>M</i>${s.maya}</div><h1 class="q">${s.q}</h1>${s.claim ? `<p class="claim">${s.claim}</p>` : ''}<p class="body">${s.body}</p>${s.layers ? `<div class="layers">${s.layers.map(l => `<div class="layer-card"><b>${l[0]}</b><span>${l[1]}</span></div>`).join('')}</div>` : ''}${s.legend || ''}${s.side ? `<div class="side">${s.side()}</div>` : ''}${s.link ? `<a class="xlink" href="${s.link[0]}">${s.link[1]}<small>Opens Growth Engine, a separate illustrative case</small></a>` : ''}<div class="rec"><b>Recommendation</b><span>${s.rec}</span></div>`;
   $('#text').scrollTop = 0;
   if (window.innerWidth < 768) window.scrollTo(0, 0);
   const panel = $('#panel'); panel.classList.toggle('on', !!s.panel); panel.innerHTML = s.panel ? PANELS[s.panel]() : '';
@@ -561,11 +568,13 @@ function go(n) {
   $('#ov').innerHTML = s.panel ? '' : s.ov();
   s.fill(); showLayers(s.layers_on); const [k, fx, fy] = s.cam(); setCam(k, fx, fy, prev < 0 ? 1 : 1000);
   if (s.after) s.after();
+  try { history.replaceState(null, '', n ? '#' + s.id : location.pathname + location.search); } catch (e) {}
 }
 $('#next').onclick = () => go(cur === STEPS.length - 1 ? 0 : cur + 1);
 $('#back').onclick = () => go(cur - 1);
 document.addEventListener('keydown', e => { if (e.key === 'ArrowRight' || e.key === 'ArrowDown') go(cur + 1); if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') go(cur - 1); });
-go(0);
+{ const h = STEPS.findIndex(x => x.id === location.hash.slice(1)); go(h > 0 ? h : 0); }
+window.addEventListener('hashchange', () => { const h = STEPS.findIndex(x => x.id === location.hash.slice(1)); if (h >= 0 && h !== cur) go(h); });
 </script>
 </body>
 </html>
