@@ -177,7 +177,13 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
 .fit ul{list-style:none;display:grid;gap:5px;}
 .fit li{font-size:12px;color:var(--body);padding-left:13px;position:relative;}
 .fit li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:800;}
+.q em{font-style:italic;color:var(--green);}
+.gq{margin:0 0 12px;}
+.gq b{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+.gq div{display:flex;flex-wrap:wrap;gap:6px;}
+.gq span{font-size:11px;font-weight:700;color:var(--ink);border:1px solid var(--rule);border-radius:12px;padding:4px 10px;background:#fff;}
 .iv{padding:10px 12px;}
+.iv-tile{cursor:default;}
 @media (max-height:760px){.iv-tile span{display:none;}}
 .iv-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
 .iv-tg{display:inline-flex;border:1px solid var(--rule);border-radius:16px;overflow:hidden;}
@@ -185,7 +191,7 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
 .iv-tg button.on{background:var(--ink);color:#fff;}
 .iv-cap{font-size:10.5px;color:var(--muted);}
 .iv-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
-.iv-tile{text-align:left;border:1px solid var(--rule);border-radius:8px;background:#fff;padding:10px 12px;cursor:pointer;font-family:inherit;transition:border-color .25s,background .25s;}
+.iv-tile{text-align:left;border:1px solid var(--rule);border-radius:8px;background:#fff;padding:10px 12px;font-family:inherit;}
 .iv-tile b{display:block;font-size:26px;font-weight:800;letter-spacing:-.8px;color:var(--green);line-height:1.05;}
 .iv-tile i{display:block;font-style:normal;font-size:12px;font-weight:800;color:var(--ink);margin-top:3px;}
 .iv-tile span{display:block;font-size:10.5px;color:var(--body);line-height:1.35;margin-top:1px;}
@@ -464,9 +470,9 @@ const LEG = {
 const legend = items => `<div class="legend">${items.map(i => i.sw ? `<span><i class="sw" style="background:${i.sw}"></i>${i.t}</span>` : `<span class="${i.c}"><svg viewBox="0 0 24 24"><use href="#i-${i.i}"/></svg>${i.t}</span>`).join('')}</div>`;
 const STEPS = [
   { id: 'strategy', group: 'The case', title: 'The strategy', eyebrow: 'The case · Go-to-market strategy', maya: 'Maya’s plan',
-    intro: { eyebrow: 'Go-to-market strategy · What it delivers', noMaya: true, panel: null, layers: null, q: 'Enter a market. Win it. Repeat it.', claim: 'One plan that sales and marketing run together.',
-      body: 'For companies entering a market or growing share in one. Map where demand is open, run one plan across sales and marketing, and fund what returns most.',
-      side: () => `<div class="fit"><b>This is for you if</b><ul><li>You are entering or defending a market</li><li>Sales and marketing run separate plans</li><li>Budget is spread evenly, not by return</li></ul></div>`,
+    intro: { eyebrow: 'Go-to-market strategy · What it delivers', noMaya: true, panel: null, layers: null, q: 'Enter a market. Win it. <em>Repeat it.</em>', claim: 'One plan that sales and marketing run together.',
+      body: 'A go-to-market strategy is how a company takes an offer to a market and wins it. This one runs as a single plan for sales and marketing: shared targets, territories with named owners and one funnel, with spend that follows return.',
+      side: () => `<div class="gq"><b>It settles five questions</b><div>${['Where to compete', 'Who to target', 'What to say', 'How to sell', 'What to fund'].map(x => `<span>${x}</span>`).join('')}</div></div><div class="fit"><b>This is for you if</b><ul><li>You are entering or defending a market</li><li>Sales and marketing run separate plans</li><li>Budget is spread evenly, not by return</li></ul></div>`,
       ov: () => '', after: introAfter, cta: 'See an example: one market →' },
     q: 'Build the go-to-market strategy for one market, then run it again.',
     body: 'Maya Chen is VP of Marketing at Meridian Mechanical, a commercial HVAC and mechanical services contractor. She builds the strategy for one market, Maryland, from three layers of evidence, then ties them into one motion that sales and marketing run together.',
@@ -583,42 +589,19 @@ GROUPS.forEach(g => {
 
 /* ── go ── */
 let cur = -1;
-/* ── intro scene: three results on the map, one market or all of them ── */
-const INTRO_PH = ['demand', 'plan', 'return'], K_ALL = D.repeat.reduce((a, r) => a + r.score, 0) / D.repeat[0].score;
-let introTimer = null, introPhase = 'demand', introScope = 'one';
-const stopTour = () => { clearInterval(introTimer); introTimer = null; };
-function renderIntroOv() {
-  const all = introScope === 'all', k = all ? K_ALL : 1, dp = D.money.pipe_opt - D.money.pipe_equal;
-  const tiles = [[fm(M.total_opp_m * k), 'Know where to compete', all ? 'Open opportunity, all markets' : 'Opportunity mapped by county'], [String(D.territories.length * (all ? D.repeat.length : 1)), 'Run one plan', 'Territories, one owner each'], ['+$' + Math.round(dp * k) + 'K', 'Fund the return', 'More pipeline, same budget']];
-  const cap = all ? `${D.repeat.length} markets, each scaled by its market score · about ${Math.round(M.accounts * k)} accounts · ${fm(M.budget * k / 1000)} a quarter` : `${M.name} · ${M.accounts} accounts · $${M.budget}K a quarter`;
-  $('#ov').innerHTML = `<div class="ov bottom iv"><div class="iv-top"><div class="iv-tg" role="group" aria-label="Scope">${[['one', 'One market'], ['all', D.repeat.length + ' markets']].map(x => `<button data-s="${x[0]}" aria-pressed="${introScope === x[0]}" class="${introScope === x[0] ? 'on' : ''}">${x[1]}</button>`).join('')}</div><span class="iv-cap">${cap}</span></div><div class="iv-tiles">${tiles.map((x, i) => `<button class="iv-tile" data-p="${INTRO_PH[i]}" aria-pressed="false"><b>${x[0]}</b><i>${x[1]}</i><span>${x[2]}</span></button>`).join('')}</div></div>`;
-  document.querySelectorAll('.iv-tg button').forEach(b => b.onclick = () => { stopTour(); introScope = b.dataset.s; renderIntroOv(); applyScope(); });
-  document.querySelectorAll('.iv-tile').forEach(b => b.onclick = () => { stopTour(); if (introScope === 'one') setPhase(b.dataset.p); });
-  markPhase();
-}
-function markPhase() { document.querySelectorAll('.iv-tile').forEach(b => { const on = introScope === 'one' && b.dataset.p === introPhase; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
-function setPhase(p) {
-  introPhase = p; markPhase();
-  if (p === 'demand') { setFill('opp', { hl: top4.map(c => c.name) }); showLayers(['corr', 'poi']); setCam(1.45, ...hub('Rockville').map((v, i) => i ? v + 80 : v + 40), REDUCED ? 0 : 1400); }
-  if (p === 'plan') { setFill('terr'); showLayers(['hubs']); setCam(1, cx0, cy0 + 85, 1400); }
-  if (p === 'return') { setFill('terrSoft'); showLayers(['fund']); setCam(1, cx0, cy0 + 85, 1400);
-    D.territories.forEach(t => { bub[t.id].c.style.r = (12 + t.equal * .34) + 'px'; bub[t.id].tx.textContent = '$' + t.equal + 'K'; });
-    setTimeout(() => D.territories.forEach(t => { bub[t.id].c.style.r = (12 + t.opt * .34) + 'px'; bub[t.id].tx.textContent = '$' + t.opt + 'K'; }), REDUCED ? 0 : 900); }
-}
-function applyScope() {
-  const all = introScope === 'all', panel = $('#panel');
-  panel.classList.toggle('on', all); panel.style.paddingBottom = all ? '150px' : ''; panel.innerHTML = all ? PANELS.repeat() : '';
-  svg.style.visibility = all ? 'hidden' : 'visible'; $('#mapwrap').classList.toggle('haspanel', all);
-  if (!all) setPhase(introPhase);
-}
+/* ── intro scene: the same playbook across five markets ── */
+const K_ALL = D.repeat.reduce((a, r) => a + r.score, 0) / D.repeat[0].score;   // each market scaled by its score vs Maryland's
 function introAfter() {
-  stopTour(); introScope = 'one'; introPhase = 'demand'; renderIntroOv(); applyScope();
-  if (!REDUCED) introTimer = setInterval(() => setPhase(INTRO_PH[(INTRO_PH.indexOf(introPhase) + 1) % INTRO_PH.length]), 4600);
+  const k = K_ALL, dp = D.money.pipe_opt - D.money.pipe_equal, n = D.repeat.length;
+  const tiles = [[fm(M.total_opp_m * k), 'Know where to compete', 'Open opportunity, all markets'], [String(D.territories.length * n), 'Run one plan', 'Territories, one owner each'], ['+$' + Math.round(dp * k) + 'K', 'Fund the return', 'More pipeline, same budget']];
+  $('#ov').innerHTML = `<div class="ov bottom iv"><div class="iv-top"><span class="iv-cap">${n} markets, the Maryland playbook scaled by each market’s score · about ${Math.round(M.accounts * k)} accounts · ${fm(M.budget * k / 1000)} a quarter</span></div><div class="iv-tiles">${tiles.map(x => `<div class="iv-tile"><b>${x[0]}</b><i>${x[1]}</i><span>${x[2]}</span></div>`).join('')}</div></div>`;
+  const panel = $('#panel'); panel.classList.add('on'); panel.style.paddingBottom = '150px'; panel.innerHTML = PANELS.repeat();
+  svg.style.visibility = 'hidden'; $('#mapwrap').classList.add('haspanel');
 }
 let introOn = true;
 const reveal = () => { introOn = false; go(0); };
 function go(n) {
-  stopTour(); $('#panel').style.paddingBottom = '';
+  $('#panel').style.paddingBottom = '';
   n = Math.max(0, Math.min(STEPS.length - 1, n)); const isIntro = n === 0 && introOn; if (n > 0) introOn = false; const s = isIntro ? { ...STEPS[0], ...STEPS[0].intro } : STEPS[n]; const prev = cur; cur = n;
   STEPS.forEach((_, i) => { const r = $('#r' + i); r.classList.toggle('active', i === n); r.classList.toggle('done', i < n); });
   $('#progress').style.width = ((n + 1) / STEPS.length * 100) + '%';
