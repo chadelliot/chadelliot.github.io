@@ -177,7 +177,13 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
 .fit ul{list-style:none;display:grid;gap:5px;}
 .fit li{font-size:12px;color:var(--body);padding-left:13px;position:relative;}
 .fit li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:800;}
+.q em{font-style:italic;color:var(--green);}
+.gq{margin:0 0 12px;}
+.gq b{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:6px;}
+.gq div{display:flex;flex-wrap:wrap;gap:6px;}
+.gq span{font-size:11px;font-weight:700;color:var(--ink);border:1px solid var(--rule);border-radius:12px;padding:4px 10px;background:#fff;}
 .iv{padding:10px 12px;}
+.iv-tile{cursor:default;}
 @media (max-height:760px){.iv-tile span{display:none;}}
 .iv-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;flex-wrap:wrap;}
 .iv-tg{display:inline-flex;border:1px solid var(--rule);border-radius:16px;overflow:hidden;}
@@ -185,7 +191,7 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
 .iv-tg button.on{background:var(--ink);color:#fff;}
 .iv-cap{font-size:10.5px;color:var(--muted);}
 .iv-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;}
-.iv-tile{text-align:left;border:1px solid var(--rule);border-radius:8px;background:#fff;padding:10px 12px;cursor:pointer;font-family:inherit;transition:border-color .25s,background .25s;}
+.iv-tile{text-align:left;border:1px solid var(--rule);border-radius:8px;background:#fff;padding:10px 12px;font-family:inherit;}
 .iv-tile b{display:block;font-size:26px;font-weight:800;letter-spacing:-.8px;color:var(--green);line-height:1.05;}
 .iv-tile i{display:block;font-style:normal;font-size:12px;font-weight:800;color:var(--ink);margin-top:3px;}
 .iv-tile span{display:block;font-size:10.5px;color:var(--body);line-height:1.35;margin-top:1px;}
@@ -464,9 +470,9 @@ const LEG = {
 const legend = items => `<div class="legend">${items.map(i => i.sw ? `<span><i class="sw" style="background:${i.sw}"></i>${i.t}</span>` : `<span class="${i.c}"><svg viewBox="0 0 24 24"><use href="#i-${i.i}"/></svg>${i.t}</span>`).join('')}</div>`;
 const STEPS = [
   { id: 'strategy', group: 'The case', title: 'The strategy', eyebrow: 'The case · Go-to-market strategy', maya: 'Maya’s plan',
-    intro: { eyebrow: 'Go-to-market strategy · What it delivers', noMaya: true, panel: null, layers: null, q: 'Enter a market. Win it. Repeat it.', claim: 'One plan that sales and marketing run together.',
-      body: 'For companies entering a market or growing share in one. Map where demand is open, run one plan across sales and marketing, and fund what returns most.',
-      side: () => `<div class="fit"><b>This is for you if</b><ul><li>You are entering or defending a market</li><li>Sales and marketing run separate plans</li><li>Budget is spread evenly, not by return</li></ul></div>`,
+    intro: { eyebrow: 'Go-to-market strategy · What it delivers', noMaya: true, panel: null, layers: null, q: 'Enter a market. Win it. <em>Repeat it.</em>', claim: 'One plan that sales and marketing run together.',
+      body: 'A go-to-market strategy is how a company takes an offer to a market and wins it. This one runs as a single plan for sales and marketing: shared targets, territories with named owners and one funnel, with spend that follows return.',
+      side: () => `<div class="gq"><b>It settles seven questions</b><div>${['Where to compete', 'Who to target', 'How to win', 'What to offer', 'How to sell', 'What to fund', 'How to keep it'].map(x => `<span>${x}</span>`).join('')}</div></div><div class="fit"><b>This is for you if</b><ul><li>You are entering or defending a market</li><li>Sales and marketing run separate plans</li><li>Budget is spread evenly, not by return</li></ul></div>`,
       ov: () => '', after: introAfter, cta: 'See an example: one market →' },
     q: 'Build the go-to-market strategy for one market, then run it again.',
     body: 'Maya Chen is VP of Marketing at Meridian Mechanical, a commercial HVAC and mechanical services contractor. She builds the strategy for one market, Maryland, from three layers of evidence, then ties them into one motion that sales and marketing run together.',
@@ -488,6 +494,14 @@ const STEPS = [
     rec: 'Open with the white space and win the contested counties on speed.',
     cam: () => [1, cx0, cy0], fill: () => setFill('comp', { open: true }), layers_on: ['reach', 'comp'],
     ov: () => `<div class="ov"><span class="k">Competitive intelligence</span><span class="big">${white.length} of ${D.counties.length}</span>counties have no competitor branch within ${M.reach_miles} miles. They hold <b>${pct(whiteShare)}</b> of the opportunity: open ground, with the rest contested.</div>` },
+  { id: 'position', group: 'Data', title: 'Position', num: '0', eyebrow: 'Data · 00 Position', maya: 'Maya, asking',
+    q: 'How do we win where they are strong?', claim: 'Position against what buyers compare.',
+    body: 'Maya lines up the rivals and where each reaches. In open counties she leads with availability. Where one rival is in reach she leads with speed, and where two or more are she proves total cost, not price alone.',
+    legend: legend([{ c: 'cp', i: 'truck', t: 'Competitor branch' }, { sw: '#e1f0e8', t: 'Open ground' }, { sw: 'rgb(150,156,168)', t: 'Contested' }]),
+    side: () => `<span class="k" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Where to lead with what</span><table class="tb"><tr><th>Battleground</th><th>Lead with</th></tr><tr><td>Open ground</td><td>Availability</td></tr><tr><td>One rival in reach</td><td>Speed of response</td></tr><tr><td>Two or more</td><td>Total cost of service</td></tr></table>`,
+    rec: 'Pick one claim per battleground and back it with a number.',
+    cam: () => [1, cx0, cy0], fill: () => setFill('comp', { open: true }), layers_on: ['reach', 'comp'],
+    ov: () => { const g = n => D.counties.filter(c => n === 0 ? c.comp.length === 0 : n === 1 ? c.comp.length === 1 : c.comp.length >= 2); return `<div class="ov"><span class="k">Win rate by battleground</span><ul>${[['Open ground', 0], ['One rival', 1], ['Two or more', 2]].map(r => `<li><span>${r[0]} · ${g(r[1]).length} counties</span><b>${pct(wavg(g(r[1])))}</b></li>`).join('')}</ul></div>`; } },
   { id: 'customer', group: 'Data', title: 'Customer', num: '03', eyebrow: 'Data · 03 Customer', maya: 'Maya, asking',
     q: 'Which accounts fit, and which are ready?', claim: 'One record per account, scored on fit and intent.',
     body: `Maya merges each account’s records into one profile and scores it. Fit comes from the firm, intent from its signals. ${tier(1)} accounts reach Tier 1 and get a named seller. The rest are nurtured.`,
@@ -504,6 +518,14 @@ const STEPS = [
     cam: () => [1, cx0, cy0], fill: () => setFill('win'), layers_on: ['reach'],
     ov: () => `<div class="ov"><span class="k">Win rate by market</span><span class="big">${pct(winOpen)} vs ${pct(winHeavy)}</span>in open counties versus counties with two or more competitors in reach.</div>
       <div class="ov bottom"><div class="ribbon"><div><span>Lead → MQL</span><b>31%</b></div><div><span>MQL → SQL</span><b>32%</b></div><div><span>SQL → Opp</span><b>50%</b></div><div class="leak"><span>Quote → Won</span><b>${pct(M.win)}</b></div><div><span>Renewal</span><b>61%</b></div></div></div>` },
+  { id: 'retain', group: 'Journey', title: 'Retain and expand', num: '0', eyebrow: 'Journey · 00 Retain and expand', maya: 'Maya, asking',
+    q: 'What happens after the first contract?', claim: 'Keep what you win, then grow it.',
+    body: 'Renewal is 61%, well below the first win. Maya treats the installed base as a market of its own: every renewal gets an owner, and every account that buys one service gets a next offer.',
+    legend: legend([{ sw: '#2f7a5a', t: 'Tier 1' }, { sw: '#8dc4ab', t: 'Tier 2' }, { sw: '#c9d0cd', t: 'Tier 3' }]),
+    side: () => `<span class="k" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Who owns the base</span><table class="tb"><tr><th>Tier</th><th>Accts</th><th>Renewal and next offer</th></tr><tr><td>1</td><td>${tier(1)}</td><td>Named seller; multi-site review</td></tr><tr><td>2</td><td>${tier(2)}</td><td>Quarterly check-in; second service</td></tr><tr><td>3</td><td>${tier(3)}</td><td>Automated reminder</td></tr></table>`,
+    rec: 'Give every renewal an owner and every single-service account a next offer.',
+    cam: () => [1, cx0, cy0], fill: () => setFill('base'), layers_on: ['accts'],
+    ov: () => `<div class="ov"><span class="k">Renewal today</span><span class="big">61%</span>Holding an account costs a conversation. Winning one costs a sales cycle.</div>` },
   { id: 'touchpoints', group: 'Experience', title: 'Touchpoints', num: '05', eyebrow: 'Experience · 05 Touchpoints', maya: 'Maya, asking',
     q: 'What does each touchpoint say, and where does it run?', claim: 'Say the right thing in the right place.',
     body: 'Maya sets a media zone around each territory hub and gives it its own message. The account scores build the audience lists, so advertising reaches the accounts worth reaching.',
@@ -522,13 +544,21 @@ const STEPS = [
     side: () => `<span class="k" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Today’s signals · hover to zoom</span><div class="feed">${sigAccts.map((a, i) => `<button data-i="${i}"><svg viewBox="0 0 24 24"><use href="#i-${SIG[a.sig][0]}"/></svg><span><b>${a.name}</b> · ${SIG[a.sig][1]}<em>${a.city} → ${OWNER_OF(a).owner}: ${SIG[a.sig][2]}</em></span></button>`).join('')}</div>`,
     ov: () => `<div class="ov"><span class="k">This week</span><span class="big">${sigAccts.length}</span>buying and risk signals across ${D.territories.length} territories, each routed to an owner.</div>`,
     after: () => document.querySelectorAll('.feed button').forEach(b => { const a = sigAccts[+b.dataset.i]; b.onmouseenter = () => { b.classList.add('on'); setCam(1.7, a.x, a.y, 600); }; b.onmouseleave = () => { b.classList.remove('on'); setCam(1, cx0, cy0, 600); }; }) },
+  { id: 'offer', group: 'Strategy', title: 'Offer', num: '0', eyebrow: 'Strategy · 00 Offer', maya: 'Maya, asking',
+    q: 'What do we sell, and on what terms?', claim: 'Package by tier, protect the price.',
+    body: 'Buyers compare packages, not rates. Maya builds three, one per tier, and sets a discount floor that needs approval to cross, so sellers negotiate terms instead of price.',
+    legend: legend([{ sw: '#2f7a5a', t: 'Tier 1' }, { sw: '#8dc4ab', t: 'Tier 2' }, { sw: '#c9d0cd', t: 'Tier 3' }]),
+    side: () => `<span class="k" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Packages</span><table class="tb"><tr><th>Tier</th><th>Package</th><th>Terms</th></tr><tr><td>1 · ${tier(1)}</td><td>Multi-site agreement</td><td>3 years, volume tiers</td></tr><tr><td>2 · ${tier(2)}</td><td>Standard service plan</td><td>1 year, fixed rate</td></tr><tr><td>3 · ${tier(3)}</td><td>Pay per call</td><td>No term</td></tr></table>`,
+    rec: 'Set the price floor once, and let sellers trade on terms.',
+    cam: () => [1, cx0, cy0], fill: () => setFill('base'), layers_on: ['accts'],
+    ov: () => `<div class="ov"><span class="k">Discount floor</span><span class="big">Approval</span>needed to go below the package rate.</div>` },
   { id: 'motion', group: 'Strategy', title: 'Motion', num: '07', eyebrow: 'Strategy · 07 Motion', maya: 'Maya, asking',
     q: 'How do sales and marketing run this together?', claim: 'One plan, one scoreboard, one owner per territory.',
-    body: 'The three layers meet here. Maya splits the map into three territories with a named owner each, shared stages and one scoreboard, so handoffs are designed rather than negotiated.',
+    body: 'The three layers meet here. Maya splits the map into three territories with a named owner each, shared stages and one scoreboard, so handoffs are designed rather than negotiated. She also sizes the load: 76 accounts is too many for one seller, and the sparse West and Shore suits a local partner.',
     legend: legend(D.territories.map(t => ({ sw: t.color, t: t.name }))),
     rec: 'Replace two plans with one: a shared target, shared stages and a named owner for every territory.',
     cam: () => [1, cx0, cy0], fill: () => setFill('terr'), layers_on: ['hubs'],
-    side: () => `<span class="k" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Shared scoreboard · win rate vs 38% target</span><table class="tb"><tr><th>Territory</th><th>Accts</th><th>Today</th></tr>${D.territories.map(t => `<tr><td><i style="background:${t.color}"></i>${t.owner} · ${t.name}</td><td>${t.accts}</td><td>${pct(t.win)}</td></tr>`).join('')}</table>`,
+    side: () => `<span class="k" style="font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--muted)">Shared scoreboard · win rate vs 38% target</span><table class="tb"><tr><th>Territory</th><th>Accts</th><th>Today</th><th>Coverage</th></tr>${D.territories.map(t => `<tr><td><i style="background:${t.color}"></i>${t.owner} · ${t.name}</td><td>${t.accts}</td><td>${pct(t.win)}</td><td>${t.accts > 60 ? '2 sellers' : t.accts < 30 ? 'Partner-led' : '1 seller'}</td></tr>`).join('')}</table>`,
     ov: () => `<div class="ov"><span class="k">One plan</span>${M.accounts} target accounts in three territories, one named owner each.</div>` },
   { id: 'fund', group: 'Strategy', title: 'Fund', num: '08', eyebrow: 'Strategy · 08 Fund', maya: 'Maya, asking',
     q: 'Where should the next dollar go?', claim: 'Fund the steepest curve.',
@@ -566,6 +596,7 @@ const STEPS = [
     rec: 'Start with the map. It shows what to build first.',
     cam: () => [1, cx0, cy0], fill: () => setFill('base'), layers_on: [] },
 ];
+{ let n = 0; STEPS.forEach(s => { if (s.num) { s.num = String(++n).padStart(2, '0'); s.eyebrow = s.eyebrow.replace(/\d\d /, s.num + ' '); } }); }
 const GROUPS = ['The case', 'Data', 'Journey', 'Experience', 'Strategy'];
 
 /* ── panels that replace the map ── */
@@ -583,42 +614,19 @@ GROUPS.forEach(g => {
 
 /* ── go ── */
 let cur = -1;
-/* ── intro scene: three results on the map, one market or all of them ── */
-const INTRO_PH = ['demand', 'plan', 'return'], K_ALL = D.repeat.reduce((a, r) => a + r.score, 0) / D.repeat[0].score;
-let introTimer = null, introPhase = 'demand', introScope = 'one';
-const stopTour = () => { clearInterval(introTimer); introTimer = null; };
-function renderIntroOv() {
-  const all = introScope === 'all', k = all ? K_ALL : 1, dp = D.money.pipe_opt - D.money.pipe_equal;
-  const tiles = [[fm(M.total_opp_m * k), 'Know where to compete', all ? 'Open opportunity, all markets' : 'Opportunity mapped by county'], [String(D.territories.length * (all ? D.repeat.length : 1)), 'Run one plan', 'Territories, one owner each'], ['+$' + Math.round(dp * k) + 'K', 'Fund the return', 'More pipeline, same budget']];
-  const cap = all ? `${D.repeat.length} markets, each scaled by its market score · about ${Math.round(M.accounts * k)} accounts · ${fm(M.budget * k / 1000)} a quarter` : `${M.name} · ${M.accounts} accounts · $${M.budget}K a quarter`;
-  $('#ov').innerHTML = `<div class="ov bottom iv"><div class="iv-top"><div class="iv-tg" role="group" aria-label="Scope">${[['one', 'One market'], ['all', D.repeat.length + ' markets']].map(x => `<button data-s="${x[0]}" aria-pressed="${introScope === x[0]}" class="${introScope === x[0] ? 'on' : ''}">${x[1]}</button>`).join('')}</div><span class="iv-cap">${cap}</span></div><div class="iv-tiles">${tiles.map((x, i) => `<button class="iv-tile" data-p="${INTRO_PH[i]}" aria-pressed="false"><b>${x[0]}</b><i>${x[1]}</i><span>${x[2]}</span></button>`).join('')}</div></div>`;
-  document.querySelectorAll('.iv-tg button').forEach(b => b.onclick = () => { stopTour(); introScope = b.dataset.s; renderIntroOv(); applyScope(); });
-  document.querySelectorAll('.iv-tile').forEach(b => b.onclick = () => { stopTour(); if (introScope === 'one') setPhase(b.dataset.p); });
-  markPhase();
-}
-function markPhase() { document.querySelectorAll('.iv-tile').forEach(b => { const on = introScope === 'one' && b.dataset.p === introPhase; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); }); }
-function setPhase(p) {
-  introPhase = p; markPhase();
-  if (p === 'demand') { setFill('opp', { hl: top4.map(c => c.name) }); showLayers(['corr', 'poi']); setCam(1.45, ...hub('Rockville').map((v, i) => i ? v + 80 : v + 40), REDUCED ? 0 : 1400); }
-  if (p === 'plan') { setFill('terr'); showLayers(['hubs']); setCam(1, cx0, cy0 + 85, 1400); }
-  if (p === 'return') { setFill('terrSoft'); showLayers(['fund']); setCam(1, cx0, cy0 + 85, 1400);
-    D.territories.forEach(t => { bub[t.id].c.style.r = (12 + t.equal * .34) + 'px'; bub[t.id].tx.textContent = '$' + t.equal + 'K'; });
-    setTimeout(() => D.territories.forEach(t => { bub[t.id].c.style.r = (12 + t.opt * .34) + 'px'; bub[t.id].tx.textContent = '$' + t.opt + 'K'; }), REDUCED ? 0 : 900); }
-}
-function applyScope() {
-  const all = introScope === 'all', panel = $('#panel');
-  panel.classList.toggle('on', all); panel.style.paddingBottom = all ? '150px' : ''; panel.innerHTML = all ? PANELS.repeat() : '';
-  svg.style.visibility = all ? 'hidden' : 'visible'; $('#mapwrap').classList.toggle('haspanel', all);
-  if (!all) setPhase(introPhase);
-}
+/* ── intro scene: the same playbook across five markets ── */
+const K_ALL = D.repeat.reduce((a, r) => a + r.score, 0) / D.repeat[0].score;   // each market scaled by its score vs Maryland's
 function introAfter() {
-  stopTour(); introScope = 'one'; introPhase = 'demand'; renderIntroOv(); applyScope();
-  if (!REDUCED) introTimer = setInterval(() => setPhase(INTRO_PH[(INTRO_PH.indexOf(introPhase) + 1) % INTRO_PH.length]), 4600);
+  const k = K_ALL, dp = D.money.pipe_opt - D.money.pipe_equal, n = D.repeat.length;
+  const tiles = [[fm(M.total_opp_m * k), 'Know where to compete', 'Open opportunity, all markets'], [String(D.territories.length * n), 'Run one plan', 'Territories, one owner each'], ['+$' + Math.round(dp * k) + 'K', 'Fund the return', 'More pipeline, same budget']];
+  $('#ov').innerHTML = `<div class="ov bottom iv"><div class="iv-top"><span class="iv-cap">${n} markets, the Maryland playbook scaled by each market’s score · about ${Math.round(M.accounts * k)} accounts · ${fm(M.budget * k / 1000)} a quarter</span></div><div class="iv-tiles">${tiles.map(x => `<div class="iv-tile"><b>${x[0]}</b><i>${x[1]}</i><span>${x[2]}</span></div>`).join('')}</div></div>`;
+  const panel = $('#panel'); panel.classList.add('on'); panel.style.paddingBottom = '150px'; panel.innerHTML = PANELS.repeat();
+  svg.style.visibility = 'hidden'; $('#mapwrap').classList.add('haspanel');
 }
 let introOn = true;
 const reveal = () => { introOn = false; go(0); };
 function go(n) {
-  stopTour(); $('#panel').style.paddingBottom = '';
+  $('#panel').style.paddingBottom = '';
   n = Math.max(0, Math.min(STEPS.length - 1, n)); const isIntro = n === 0 && introOn; if (n > 0) introOn = false; const s = isIntro ? { ...STEPS[0], ...STEPS[0].intro } : STEPS[n]; const prev = cur; cur = n;
   STEPS.forEach((_, i) => { const r = $('#r' + i); r.classList.toggle('active', i === n); r.classList.toggle('done', i < n); });
   $('#progress').style.width = ((n + 1) / STEPS.length * 100) + '%';
