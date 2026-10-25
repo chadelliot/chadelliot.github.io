@@ -1251,9 +1251,38 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
   .def3{grid-template-columns:1fr;}
   .hm-ticks span{font-size:9px;}
 }
+
+/* ═══ Intro: what the work delivers, before the example story ═══ */
+.intro{display:none;flex:1;overflow-y:auto;padding:48px 48px 80px;}
+body.intro-on .intro{display:block;}
+body.intro-on :is(.rail,.stage-area,.nav-buttons,.progress-bar,.next-bubble){display:none !important;}
+.intro-in{max-width:900px;margin:0 auto;animation:fadeIn .5s ease;}
+.intro-title{font-size:44px;font-weight:800;letter-spacing:-1.2px;line-height:1.08;color:var(--ink);margin-bottom:16px;}
+.intro-title em{font-style:italic;color:var(--green);}
+.intro-lede{font-size:16px;line-height:1.65;color:var(--body);max-width:700px;margin-bottom:30px;}
+.intro .case-grid{max-width:none;margin:8px 0 26px;}
+.intro .case-card{padding:18px 20px;}
+.intro .cc-h{font-size:16px;}
+.intro .cc-b{font-size:13px;line-height:1.55;}
+.intro-fit{border:1px solid var(--rule);background:var(--surface);border-radius:6px;padding:18px 22px;margin-bottom:28px;}
+.intro-fit ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:8px 28px;margin-top:6px;}
+.intro-fit li{font-size:13px;line-height:1.5;color:var(--body);padding-left:14px;position:relative;}
+.intro-fit li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:800;}
+.intro-go{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
+.intro-go .btn{padding:14px 26px;font-size:12px;}
+.intro-go span{font-size:12px;color:var(--muted);}
+.rail-back{background:none;border:none;font:600 10px 'Inter',sans-serif;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);text-align:left;padding:0 10px 12px;cursor:pointer;}
+.rail-back:hover,.rail-back:focus-visible{color:var(--green);}
+@media (max-width:767px){
+  .intro{padding:22px 16px 40px;}
+  .intro-title{font-size:30px;}
+  .intro-lede{font-size:14.5px;}
+  .intro-fit ul{grid-template-columns:1fr;}
+  .intro-go .btn{width:100%;}
+}
 </style>
 </head>
-<body>
+<body class="intro-on">
 
 <!-- SITE NAV -->
 <nav class="site-nav">
@@ -1279,6 +1308,24 @@ html,body{height:100%;overflow:hidden;font-family:'Inter',-apple-system,sans-ser
 
   <!-- LEFT RAIL -->
   <aside class="rail" id="rail"></aside>
+
+  <!-- INTRO: what the work delivers -->
+  <section class="intro" id="intro" aria-label="What the Growth Engine delivers">
+    <div class="intro-in">
+      <div class="stage-eyebrow">Growth Engine · How marketing drives revenue</div>
+      <h1 class="intro-title">Find the growth. Win the buyer.<br><em>Prove the return.</em></h1>
+      <p class="intro-lede">A marketing system for B2B companies that sell to buying committees. It finds where growth is, says the right thing to each buyer, and moves spend toward what earns qualified pipeline and revenue.</p>
+      <div class="section-label">What it delivers</div>
+      <div class="case-grid">
+        <div class="case-card"><div class="cc-k">Find</div><div class="cc-h">Market-specific growth</div><div class="cc-b">Segments and markets ranked by revenue opportunity and by what marketing can actually reach, so budget goes where it pays.</div></div>
+        <div class="case-card"><div class="cc-k">Say</div><div class="cc-h">Personalized messaging</div><div class="cc-b">A message, proof asset and campaign for each segment and buying committee, instead of one pitch for everyone.</div></div>
+        <div class="case-card"><div class="cc-k">Prove</div><div class="cc-h">Revenue you can defend</div><div class="cc-b">Signal-triggered campaigns, quote-stage support and a scoreboard that ties spend to pipeline and revenue, not clicks.</div></div>
+      </div>
+      <div class="intro-fit"><div class="section-label" style="margin-bottom:6px">This is for you if</div>
+        <ul><li>Sales cycles are long and several people sign off.</li><li>Pipeline looks healthy, but win rates or late-stage deals stall.</li><li>Marketing reports leads and clicks while leadership asks about revenue.</li><li>Every buyer gets the same message.</li></ul></div>
+      <div class="intro-go"><button class="btn btn-next" id="introGo">See an example story →</button><span>Brightwell Gases, an illustrative case in ten short chapters.</span></div>
+    </div>
+  </section>
 
   <!-- STAGE AREA -->
   <main class="stage-area" id="stageArea">
@@ -1876,6 +1923,7 @@ const sections = [
 
 // Build rail
 const rail = document.getElementById('rail');
+const back = document.createElement('button'); back.className = 'rail-back'; back.textContent = '← Overview'; back.onclick = () => { try { history.pushState(null, '', location.pathname + location.search); } catch (e) {} showIntro(); }; rail.appendChild(back);
 STAGES.forEach((s, i) => {
   const sec = sections.find(s => s.start === i);
   if (sec) {
@@ -1936,15 +1984,23 @@ function goTo(n, opts) {
   updateNextBubble();
   document.title = (current === 0 ? 'Growth Engine' : STAGES[current].label + ' · Growth Engine') + ' — Chad Parker';
   if (!opts.noHistory) {
-    const want = current === 0 ? location.pathname + location.search : '#' + STAGES[current].slug;
-    const have = location.hash.slice(1) === (current === 0 ? '' : STAGES[current].slug);
+    const want = '#' + STAGES[current].slug;
+    const have = location.hash.slice(1) === STAGES[current].slug;
     try { if (!have) (opts.replace ? history.replaceState : history.pushState).call(history, null, '', want); } catch (e) {}
   }
   if (typeof playStage === 'function') playStage(current);
 }
 // Chapter from the URL fragment; unknown or empty fragments open the summary
-const stageFromHash = () => { const i = STAGES.findIndex(x => x.slug === decodeURIComponent(location.hash.slice(1))); return i < 0 ? 0 : i; };
-window.addEventListener('popstate', () => { const n = stageFromHash(); if (n !== current) goTo(n, { noHistory: true }); });
+const stageFromHash = () => STAGES.findIndex(x => x.slug === decodeURIComponent(location.hash.slice(1)));
+const showIntro = () => { document.body.classList.add('intro-on'); document.title = 'Growth Engine — Chad Parker'; };
+function startStory() { document.body.classList.remove('intro-on'); goTo(0); }
+window.addEventListener('popstate', () => {
+  const n = stageFromHash();
+  if (n < 0) { showIntro(); return; }
+  document.body.classList.remove('intro-on');
+  if (n !== current) goTo(n, { noHistory: true }); else goTo(n, { noHistory: true });
+});
+document.getElementById('introGo').addEventListener('click', startStory);
 
 function navigate(dir) {
   // On last stage, Next loops back to chapter 1
@@ -2313,7 +2369,7 @@ document.querySelectorAll('.tc-row,.mm,.tactic,.case-card,.seg-card,.alloc-seg,.
 })();
 
 // Open the chapter named in the URL (deep link, refresh, or history entry)
-{ const n = stageFromHash(); if (n > 0) goTo(n, { replace: true }); }
+{ const n = stageFromHash(); if (n >= 0) { document.body.classList.remove('intro-on'); goTo(n, { replace: true }); } }
 </script>
 </body>
 </html>

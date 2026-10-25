@@ -169,6 +169,22 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
 .bd-ask span{font-size:14px;font-weight:600;line-height:1.45;}
 .bd-ask a{flex-shrink:0;background:#fff;color:var(--ink);text-decoration:none;font-size:12px;font-weight:700;padding:11px 18px;border-radius:5px;}
 .bd-ask a:hover{background:var(--green);color:#fff;}
+.bd-step ul{list-style:none;display:grid;gap:7px;margin-top:6px;}
+.bd-step li{font-size:12px;line-height:1.5;color:var(--body);padding-left:13px;position:relative;}
+.bd-step li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:800;}
+.of{display:grid;gap:12px;align-content:center;height:100%;max-width:520px;margin:0 auto;}
+.of-k{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.of-row,.of-fit{border:1px solid var(--rule);border-radius:8px;padding:16px 18px;opacity:0;animation:txtIn .6s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i) * .2s + .1s);}
+.of-row{display:grid;grid-template-columns:128px 1fr;gap:16px;align-items:center;}
+.of-n{font-size:34px;font-weight:800;letter-spacing:-1.2px;color:var(--green);line-height:1;}
+.of-row b{display:block;font-size:15px;font-weight:800;color:var(--ink);margin-bottom:2px;}
+.of-row span{font-size:12px;color:var(--body);line-height:1.45;}
+.of-fit{background:var(--surface);}
+.of-fit b{display:block;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;}
+.of-fit ul{list-style:none;display:grid;gap:5px;}
+.of-fit li{font-size:12px;color:var(--body);padding-left:13px;position:relative;}
+.of-fit li::before{content:'›';position:absolute;left:0;color:var(--green);font-weight:800;}
+.cta{display:inline-block;align-self:flex-start;margin:2px 0 14px;padding:11px 20px;font-size:11px;}
 
 /* ── controls ── */
 .nav-buttons{position:fixed;bottom:0;right:0;width:calc(100% - 220px);background:#fff;border-top:1px solid var(--rule);padding:16px 40px;display:flex;align-items:center;justify-content:space-between;z-index:90;}
@@ -197,9 +213,11 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
   .ov{max-width:62%;padding:9px 10px;font-size:11px;}.ov .big{font-size:20px;}
   .ov.bottom{max-width:none;}
   .ribbon div{padding:5px;}.ribbon b{font-size:12px;}
+  .of{height:auto;}.of-row{grid-template-columns:96px 1fr;}.of-n{font-size:28px;}
   .rp{grid-template-columns:1fr 1fr;height:auto;}.bd{grid-template-columns:1fr;}
   .bd-ask{flex-direction:column;align-items:flex-start;}
   .gx-map.haspanel{height:auto;}
+  .gx-map.offer{order:1;}
   .panel{position:static;}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s !important;animation-delay:0s !important;transition-duration:.01s !important;transition-delay:0s !important;}}
@@ -427,7 +445,7 @@ const acctCard = () => {
   <div style="font-size:11px;margin-top:4px">${nextAction(a)}</div>`;
 };
 const pick = i => {
-  if (cur !== 3) return;
+  if (STEPS[cur].id !== 'customer') return;
   D.accounts.forEach(a => a._el.classList.remove('sel')); selected = i; D.accounts[i]._el.classList.add('sel');
   $('#ov').innerHTML = `<div class="ov">${acctCard()}</div>`;
 };
@@ -438,6 +456,11 @@ const LEG = {
 };
 const legend = items => `<div class="legend">${items.map(i => i.sw ? `<span><i class="sw" style="background:${i.sw}"></i>${i.t}</span>` : `<span class="${i.c}"><svg viewBox="0 0 24 24"><use href="#i-${i.i}"/></svg>${i.t}</span>`).join('')}</div>`;
 const STEPS = [
+  { id: 'offer', group: 'The case', title: 'What it does', eyebrow: 'Go-to-market strategy · What it delivers', noMaya: true, panel: 'offer',
+    q: 'Enter a market. Win it. Repeat it.', claim: 'One plan that sales and marketing run together.',
+    body: 'For companies entering a market or growing share in one. Map where demand is open, run one plan across sales and marketing, and fund what returns most.',
+    cta: ['See an example: one market →', 'strategy'],
+    cam: () => [1, cx0, cy0], fill: () => setFill('base'), layers_on: [] },
   { id: 'strategy', group: 'The case', title: 'The strategy', eyebrow: 'The case · Go-to-market strategy', maya: 'Maya’s plan',
     q: 'Build the go-to-market strategy for one market, then run it again.',
     body: 'Maya Chen is VP of Marketing at Meridian Mechanical, a commercial HVAC and mechanical services contractor. She builds the strategy for one market, Maryland, from three layers of evidence, then ties them into one motion that sales and marketing run together.',
@@ -514,7 +537,7 @@ const STEPS = [
       D.territories.forEach(t => { const s = m === 'opt' ? t.opt : t.equal; bub[t.id].c.style.r = (12 + s * .34) + 'px'; bub[t.id].tx.textContent = '$' + s + 'K'; });
       $('#fundTb').innerHTML = `<table class="tb"><tr><th>Territory</th><th>Budget</th><th>Next $1</th></tr>${D.territories.map(t => `<tr><td><i style="background:${t.color}"></i>${t.name}</td><td>$${m === 'opt' ? t.opt : t.equal}K</td><td>$${(m === 'opt' ? t.marg_opt : t.marg_equal).toFixed(2)}</td></tr>`).join('')}</table>
       <div style="margin-top:8px;font-size:11px">Pipeline <b>$${(m === 'opt' ? po : pe)}K</b> · revenue <b>$${(m === 'opt' ? ro : re)}K</b>${m === 'opt' ? ` <span style="color:var(--green);font-weight:700">+$${po - pe}K pipeline, same budget</span>` : ''}</div>`; };
-      draw('equal'); setTimeout(() => cur === 8 && draw('opt'), 1400);
+      draw('equal'); setTimeout(() => STEPS[cur].id === 'fund' && draw('opt'), 1400);
       document.querySelectorAll('#tgl button').forEach(b => b.onclick = () => draw(b.dataset.m)); } },
   { id: 'prove', group: 'Strategy', title: 'Prove', num: '09', eyebrow: 'Strategy · 09 Prove', maya: 'Maya, asking',
     q: 'How do we know it is working?', claim: 'Report one number, with the range behind it.',
@@ -541,6 +564,9 @@ const GROUPS = ['The case', 'Data', 'Journey', 'Experience', 'Strategy'];
 
 /* ── panels that replace the map ── */
 const PANELS = {
+  offer: () => { const dp = D.money.pipe_opt - D.money.pipe_equal;
+    const rows = [[fm(M.total_opp_m), 'Know where to compete', 'Demand and open ground, mapped by county'], [String(D.territories.length), 'Run one plan', 'Territories, one owner and one scoreboard each'], ['+$' + dp + 'K', 'Fund the return', 'More pipeline from the same budget']];
+    return `<div class="of"><div class="of-k">What it delivers · figures from the Maryland example</div>${rows.map((r, i) => `<div class="of-row" style="--i:${i}"><div class="of-n">${r[0]}</div><div><b>${r[1]}</b><span>${r[2]}</span></div></div>`).join('')}<div class="of-fit" style="--i:3"><b>This is for you if</b><ul><li>You are entering or defending a market</li><li>Sales and marketing run separate plans</li><li>Budget is spread evenly, not by return</li></ul></div></div>`; },
   repeat: () => `<div class="rp">${D.repeat.map((r, i) => `<div class="rp-card ${i === 0 ? 'me' : r.name === 'Virginia' ? 'next' : ''}" style="--i:${i}"><span class="tag">${i === 0 ? 'Proven' : r.name === 'Virginia' ? 'Next' : 'Later'}</span><svg viewBox="0 0 ${r.w} ${r.h}" aria-label="${r.name}"><path d="${r.d}"/></svg><h4>${r.name}</h4><div class="sc">${r.score}</div><div class="nt">${r.note}</div><div class="mini"><div>Opp<i style="--w:${r.parts[0]}%"></i></div><div>Open<i style="--w:${r.parts[1]}%"></i></div><div>Signal<i style="--w:${r.parts[2]}%"></i></div></div></div>`).join('')}</div>`,
   build: () => `<div class="bd">${[['01 · Map', 'Profile the market and the customer, trace the real journey, and audit every touchpoint and signal.'], ['02 · Align', 'Turn what we found into one motion for sales and marketing: shared stages, plays, owners and scoreboard.'], ['03 · Build', 'Put it into the systems: the customer record, the routing, the touchpoints and the reporting.'], ['04 · Run', 'Operate it with you, read the results against finance, and move money and effort to what is working.']].map((s, i) => `<div class="bd-step" style="--i:${i}"><b>${s[0].split(' · ')[0]}</b><h4>${s[0].split(' · ')[1]}</h4><p>${s[1]}</p></div>`).join('')}<div class="bd-ask"><span>Start with the map. It takes one market and shows which layer to build first.</span><a href="/contact">Discuss a market →</a></div></div>`,
 };
@@ -560,11 +586,12 @@ function go(n) {
   $('#progress').style.width = ((n + 1) / STEPS.length * 100) + '%';
   $('#counter').textContent = s.num ? `Step ${s.num} of ${STEPS.filter(x => x.num).length}` : s.group === 'The case' ? 'The case' : s.title;
   $('#back').disabled = n === 0; const nx = $('#next'); nx.textContent = n === STEPS.length - 1 ? '↩ Start over' : 'Next →';
-  $('#text').innerHTML = `<div class="eyebrow">${s.eyebrow}</div><div class="maya"><i>M</i>${s.maya}</div><h1 class="q">${s.q}</h1>${s.claim ? `<p class="claim">${s.claim}</p>` : ''}<p class="body">${s.body}</p>${s.layers ? `<div class="layers">${s.layers.map(l => `<div class="layer-card"><b>${l[0]}</b><span>${l[1]}</span></div>`).join('')}</div>` : ''}${s.legend || ''}${s.side ? `<div class="side">${s.side()}</div>` : ''}${s.link ? `<a class="xlink" href="${s.link[0]}">${s.link[1]}<small>Opens Growth Engine, a separate illustrative case</small></a>` : ''}<div class="rec"><b>Recommendation</b><span>${s.rec}</span></div>`;
+  $('#text').innerHTML = `<div class="eyebrow">${s.eyebrow}</div>${s.noMaya ? '' : `<div class="maya"><i>M</i>${s.maya}</div>`}<h1 class="q">${s.q}</h1>${s.claim ? `<p class="claim">${s.claim}</p>` : ''}<p class="body">${s.body}</p>${s.layers ? `<div class="layers">${s.layers.map(l => `<div class="layer-card"><b>${l[0]}</b><span>${l[1]}</span></div>`).join('')}</div>` : ''}${s.legend || ''}${s.side ? `<div class="side">${s.side()}</div>` : ''}${s.link ? `<a class="xlink" href="${s.link[0]}">${s.link[1]}<small>Opens Growth Engine, a separate illustrative case</small></a>` : ''}${s.cta ? `<button class="btn btn-next cta" id="cta">${s.cta[0]}</button>` : `<div class="rec"><b>Recommendation</b><span>${s.rec}</span></div>`}`;
+  if (s.cta) $('#cta').onclick = () => go(STEPS.findIndex(x => x.id === s.cta[1]));
   $('#text').scrollTop = 0;
   if (window.innerWidth < 768) window.scrollTo(0, 0);
   const panel = $('#panel'); panel.classList.toggle('on', !!s.panel); panel.innerHTML = s.panel ? PANELS[s.panel]() : '';
-  svg.style.visibility = s.panel ? 'hidden' : 'visible'; $('#mapwrap').classList.toggle('haspanel', !!s.panel); $('#mapwrap').classList.toggle('nocorner', s.id === 'build');
+  svg.style.visibility = s.panel ? 'hidden' : 'visible'; $('#mapwrap').classList.toggle('haspanel', !!s.panel); $('#mapwrap').classList.toggle('offer', s.id === 'offer'); $('#mapwrap').classList.toggle('nocorner', s.id === 'build' || s.id === 'offer');
   $('#ov').innerHTML = s.panel ? '' : s.ov();
   s.fill(); showLayers(s.layers_on); const [k, fx, fy] = s.cam(); setCam(k, fx, fy, prev < 0 ? 1 : 1000);
   if (s.after) s.after();
