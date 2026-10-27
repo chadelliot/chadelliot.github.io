@@ -69,6 +69,9 @@ const BookCallPage = () => {
       company.trim() ? "Company: " + company.trim() : "",
       topic.trim() ? "Discussion: " + topic.trim() : "",
       notes.trim() ? "Notes: " + notes.trim() : "",
+      "Attendee time zone: " + visitorZone,
+      "Attendee time: " + meetingDateTime(selected, visitorZone),
+      "Chad Eastern time: " + meetingDateTime(selected, HOST_TIME_ZONE),
       "Scheduled via AboutChad.com",
     ].filter(Boolean).join("\n");
     try {
