@@ -7,6 +7,7 @@ const footerLinks = [
   { label: "Career", href: "/career" },
   { label: "Skills", href: "/skills" },
   { label: "Contact", href: "/contact" },
+  { label: "Book a Call", href: "/book" },
 ];
 
 const Footer = () => (
