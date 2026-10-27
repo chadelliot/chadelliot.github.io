@@ -40,9 +40,9 @@ assert.match(times.meetingClock(twoEastern, times.HOST_TIME_ZONE), /2:00\s*PM\s*
 assert.match(times.meetingClock(twoEastern, "America/Chicago"), /1:00\s*PM\s*CDT/i);
 for (const file of ["BookCallPage.tsx", "SchedulePage.tsx"]) {
   const page = readFileSync(new URL("../src/pages/" + file, import.meta.url), "utf8");
-  assert.match(page, /meetingDay\(iso, HOST_TIME_ZONE\)/, file + ": day grouping must be Eastern");
+  assert.match(page, /meetingDay\((?:iso|slot), HOST_TIME_ZONE\)/, file + ": day grouping must be Eastern");
   assert.match(page, /meetingClock\(iso, HOST_TIME_ZONE\)/, file + ": primary slot text must be Eastern");
-  assert.doesNotMatch(page, /<span[^>]*>\{meetingClock\(iso, visitorZone\)\}<\/span>/, file + ": local time must not be primary");
+  assert.ok(page.indexOf("meetingClock(iso, HOST_TIME_ZONE)") < page.indexOf("meetingClock(iso, visitorZone)"), file + ": Eastern must appear before local equivalence");
 }
 console.log("Passed: Texas 2 PM click means 2 PM Eastern; local zone comparison is secondary.");
 console.log("Passed: Eastern / Mountain, DST, Arizona, and cross-date time zone cases.");
