@@ -90,36 +90,64 @@ const getAccessToken = async (refreshToken: string): Promise<string | null> => {
   return data.access_token ?? null;
 };
 
-// Business hours are intentionally fixed (9-5, weekdays, 30-min slots,
-// 10 business days out) rather than configurable per rep - a simple,
-// predictable default that's easy to explain, with room to make it
-// per-rep configurable later if that turns out to matter.
+// Public scheduling uses 9 a.m. to 5 p.m. Eastern, not 9 a.m. UTC.
+// Convert each local slot to UTC per date to correctly handle DST.
+const TIME_ZONE = "America/New_York";
+const MEETING_MINUTES = 30;
+const BUFFER_MINUTES = 15;
+const formatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit",
+  hour: "2-digit", minute: "2-digit", hourCycle: "h23",
+});
+const easternParts = (date: Date) => {
+  const vals = Object.fromEntries(formatter.formatToParts(date).map(({ type, value }) => [type, Number(value)]));
+  return { year: vals.year, month: vals.month, day: vals.day, hour: vals.hour, minute: vals.minute };
+};
+const easternDateToUtc = (y: number, m: number, d: number, h: number, min: number): Date => {
+  const tentative = Date.UTC(y, m - 1, d, h, min);
+  const p = easternParts(new Date(tentative));
+  const apparent = Date.UTC(p.year, p.month - 1, p.day, p.hour, p.minute);
+  return new Date(tentative - (apparent - tentative));
+};
 const generateCandidateSlots = (): { start: Date; end: Date }[] => {
   const slots: { start: Date; end: Date }[] = [];
-  const now = new Date();
-  let daysAdded = 0;
-  let cursor = new Date(now);
-  cursor.setUTCHours(0, 0, 0, 0);
-  cursor.setUTCDate(cursor.getUTCDate() + 1); // start tomorrow, never same-day
-
-  while (daysAdded < 10) {
-    const day = cursor.getUTCDay(); // 0 Sun, 6 Sat
-    if (day !== 0 && day !== 6) {
+  const now = Date.now();
+  const today = easternParts(new Date(now));
+  const day = new Date(Date.UTC(today.year, today.month - 1, today.day + 1));
+  let weekdays = 0;
+  while (weekdays < 10) {
+    if (day.getUTCDay() !== 0 && day.getUTCDay() !== 6) {
       for (let hour = 9; hour < 17; hour++) {
         for (const minute of [0, 30]) {
-          const start = new Date(cursor);
-          start.setUTCHours(hour, minute, 0, 0);
-          const end = new Date(start.getTime() + 30 * 60 * 1000);
-          slots.push({ start, end });
+          const start = easternDateToUtc(day.getUTCFullYear(), day.getUTCMonth() + 1, day.getUTCDate(), hour, minute);
+          if (start.getTime() < now + 12 * 60 * 60 * 1000) continue;
+          slots.push({ start, end: new Date(start.getTime() + MEETING_MINUTES * 60000) });
         }
       }
-      daysAdded += 1;
+      weekdays++;
     }
-    cursor = new Date(cursor);
-    cursor.setUTCDate(cursor.getUTCDate() + 1);
+    day.setUTCDate(day.getUTCDate() + 1);
   }
   return slots;
 };
+type BusyWindow = { start: string; end: string };
+const calendarBusy = async (accessToken: string, timeMin: string, timeMax: string): Promise<BusyWindow[] | null> => {
+  const response = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
+    body: JSON.stringify({ timeMin, timeMax, items: [{ id: "primary" }] }),
+  });
+  if (!response.ok) return null;
+  const data = (await response.json()) as { calendars?: { primary?: { busy?: BusyWindow[]; errors?: unknown[] } } };
+  if (!data.calendars?.primary || data.calendars.primary.errors?.length) return null;
+  return data.calendars.primary.busy ?? [];
+};
+const slotIsFree = (slot: { start: Date; end: Date }, busy: BusyWindow[]): boolean =>
+  !busy.some((b) => {
+    const before = new Date(b.start).getTime() - BUFFER_MINUTES * 60000;
+    const after = new Date(b.end).getTime() + BUFFER_MINUTES * 60000;
+    return slot.start.getTime() < after && slot.end.getTime() > before;
+  });
 
 Deno.serve(async (req) => {
   const url = new URL(req.url);
@@ -171,10 +199,30 @@ Deno.serve(async (req) => {
     const payload = await req.json();
 
     if (payload.action === "disconnect") {
-      await db(`team_members?id=eq.${payload.repId}`, {
+      // A public visitor must not be allowed to disconnect a rep's calendar.
+      const bearer = req.headers.get("authorization")?.match(/^Bearer\s+(.+)$/i)?.[1];
+      if (!bearer) return new Response(JSON.stringify({ error: "Authentication required." }), {
+        status: 401, headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+      const whoResponse = await fetch(SUPABASE_URL + "/auth/v1/user", {
+        headers: { Authorization: "Bearer " + bearer, apikey: SUPABASE_SERVICE_ROLE_KEY },
+      });
+      if (!whoResponse.ok) return new Response(JSON.stringify({ error: "Invalid session." }), {
+        status: 401, headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+      const who = (await whoResponse.json()) as { email?: string };
+      const memberResponse = await db("team_members?id=eq." + encodeURIComponent(payload.repId ?? "") + "&select=email");
+      const [member] = (await memberResponse.json()) as { email?: string }[];
+      if (!who.email || !member?.email || who.email.toLowerCase() !== member.email.toLowerCase()) {
+        return new Response(JSON.stringify({ error: "Not authorized to disconnect this calendar." }), {
+          status: 403, headers: { ...corsHeaders, "content-type": "application/json" },
+        });
+      }
+      const result = await db("team_members?id=eq." + encodeURIComponent(payload.repId), {
         method: "PATCH",
         body: JSON.stringify({ google_refresh_token: null, google_calendar_connected: false, google_calendar_email: null }),
       });
+      if (!result.ok) throw new Error("Failed to disconnect calendar.");
       return new Response(JSON.stringify({ success: true }), { headers: { ...corsHeaders, "content-type": "application/json" } });
     }
 
@@ -197,26 +245,11 @@ Deno.serve(async (req) => {
       const candidates = generateCandidateSlots();
       const timeMin = candidates[0].start.toISOString();
       const timeMax = candidates[candidates.length - 1].end.toISOString();
-      const freeBusyResponse = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
-        body: JSON.stringify({ timeMin, timeMax, items: [{ id: "primary" }] }),
+      const busy = await calendarBusy(accessToken, timeMin, timeMax);
+      if (!busy) return new Response(JSON.stringify({ error: "Couldn't read calendar availability." }), {
+        status: 502, headers: { ...corsHeaders, "content-type": "application/json" },
       });
-      if (!freeBusyResponse.ok) {
-        return new Response(JSON.stringify({ error: "Couldn't read calendar availability." }), {
-          status: 502,
-          headers: { ...corsHeaders, "content-type": "application/json" },
-        });
-      }
-      const freeBusy = (await freeBusyResponse.json()) as { calendars?: { primary?: { busy?: { start: string; end: string }[] } } };
-      const busy = freeBusy.calendars?.primary?.busy ?? [];
-      const openSlots = candidates.filter((slot) => {
-        return !busy.some((b) => {
-          const busyStart = new Date(b.start).getTime();
-          const busyEnd = new Date(b.end).getTime();
-          return slot.start.getTime() < busyEnd && slot.end.getTime() > busyStart;
-        });
-      });
+      const openSlots = candidates.filter((slot) => slotIsFree(slot, busy));
       return new Response(JSON.stringify({ repName: rep.name, slots: openSlots.slice(0, 40).map((s) => s.start.toISOString()) }), {
         headers: { ...corsHeaders, "content-type": "application/json" },
       });
@@ -241,19 +274,40 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "content-type": "application/json" },
         });
       }
+      // Only offer server-generated slots. Recheck Google just before creating the event.
       const start = new Date(startIso);
-      const end = new Date(start.getTime() + 30 * 60 * 1000);
+      const validName = typeof contactName === "string" ? contactName.trim() : "";
+      const validEmail = typeof contactEmail === "string" ? contactEmail.trim() : "";
+      if (!Number.isFinite(start.getTime()) || !validName || validName.length > 100 ||
+          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(validEmail) || validEmail.length > 255 ||
+          (notes && (typeof notes !== "string" || notes.length > 1200))) {
+        return new Response(JSON.stringify({ error: "Please enter valid booking details." }), {
+          status: 400, headers: { ...corsHeaders, "content-type": "application/json" },
+        });
+      }
+      const selectedSlot = generateCandidateSlots().find((slot) => slot.start.getTime() === start.getTime());
+      if (!selectedSlot) return new Response(JSON.stringify({ error: "This time is outside the booking window." }), {
+        status: 400, headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+      const end = selectedSlot.end;
+      const freshBusy = await calendarBusy(accessToken, start.toISOString(), end.toISOString());
+      if (!freshBusy) return new Response(JSON.stringify({ error: "Couldn't verify current availability." }), {
+        status: 502, headers: { ...corsHeaders, "content-type": "application/json" },
+      });
+      if (!slotIsFree(selectedSlot, freshBusy)) return new Response(JSON.stringify({ error: "That time was just taken. Choose another." }), {
+        status: 409, headers: { ...corsHeaders, "content-type": "application/json" },
+      });
       const eventResponse = await fetch(
         "https://www.googleapis.com/calendar/v3/calendars/primary/events?conferenceDataVersion=1&sendUpdates=all",
         {
           method: "POST",
           headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
           body: JSON.stringify({
-            summary: `${rep.name ?? "RevHub"} <> ${contactName}`,
-            description: notes || "Booked via RevHub Outreach.",
+            summary: `Introductory Conversation: ${rep.name ?? "Chad"} & ${validName}`,
+            description: (notes || "Booked via About Chad scheduling.").slice(0, 1200),
             start: { dateTime: start.toISOString() },
             end: { dateTime: end.toISOString() },
-            attendees: [{ email: contactEmail }, ...(rep.email ? [{ email: rep.email }] : [])],
+            attendees: [{ email: validEmail }, ...(rep.email && rep.email !== validEmail ? [{ email: rep.email }] : [])],
             conferenceData: { createRequest: { requestId: crypto.randomUUID() } },
           }),
         }
