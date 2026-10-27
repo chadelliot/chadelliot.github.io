@@ -238,6 +238,11 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
 .xlink:hover{text-decoration:underline;}
 .xlink:focus-visible{outline:2px solid var(--green);outline-offset:3px;border-radius:2px;}
 .xlink small{display:block;margin-top:2px;font-size:10px;font-weight:500;color:var(--muted);}
+
+/* About Chad booking CTA is available on desktop and mobile. */
+.gtm-book-cta{font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:1px;background:var(--green);color:#fff;padding:11px 16px;border-radius:5px;margin-left:20px;white-space:nowrap;transition:filter .15s;}
+.gtm-book-cta:hover,.gtm-book-cta:focus-visible{filter:brightness(.9);color:#fff;}
+@media(max-width:767px){.gtm-book-cta{font-size:10px;padding:9px 12px;margin-left:auto;}}
 </style>
 </head>
 <body>
@@ -274,8 +279,15 @@ table.tb td i{display:inline-block;width:8px;height:8px;border-radius:50%;margin
     </li>
     <li><a href="/career">Career</a></li>
     <li><a href="/skills">Skills</a></li>
-    <li><a href="/contact">Contact</a></li>
+    <li class="nav-dd">
+      <a href="/contact">Contact</a>
+      <ul class="nav-dd-menu">
+        <li><a href="/book">Book a Call<small>Choose a 30-minute conversation</small></a></li>
+        <li><a href="/contact">Send a Message<small>Reach out by email</small></a></li>
+      </ul>
+    </li>
   </ul>
+  <a class="gtm-book-cta" href="/book">Let's Talk</a>
 </nav>
 
 <div class="progress-bar"><div class="progress-fill" id="progress" style="width:8%"></div></div>
