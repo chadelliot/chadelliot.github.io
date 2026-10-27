@@ -18,7 +18,14 @@ const navItems: NavItem[] = [
   },
   { label: "Career", href: "/career" },
   { label: "Skills", href: "/skills" },
-  { label: "Contact", href: "/contact" },
+  {
+    label: "Contact",
+    href: "/contact",
+    children: [
+      { label: "Book a Call", href: "/book", description: "Find a time to talk" },
+      { label: "Send a Message", href: "/contact", description: "Get in touch by email" },
+    ],
+  },
 ];
 
 const isApproachPath = (pathname: string) =>
@@ -52,7 +59,7 @@ const Navbar = () => {
                 <a
                   href={item.href}
                   className={`no-underline text-[11px] font-medium tracking-[0.15em] uppercase transition-colors ${
-                    isApproachPath(location.pathname) ? "text-primary" : "text-muted-foreground hover:text-primary"
+                    (item.label === "Contact" ? (location.pathname.startsWith("/contact") || location.pathname.startsWith("/book")) : isApproachPath(location.pathname)) ? "text-primary" : "text-muted-foreground hover:text-primary"
                   }`}
                   style={{ fontSize: "11px" }}
                 >

@@ -9,6 +9,7 @@ import ApproachPage from "./pages/ApproachPage";
 import CareerPage from "./pages/CareerPage";
 import SkillsPage from "./pages/SkillsPage";
 import ContactPage from "./pages/ContactPage";
+import BookCallPage from "./pages/BookCallPage";
 import CompanyDirectoryPageV9 from "./pages/CompanyDirectoryPageV9";
 import ProjectsPage from "./pages/ProjectsPage";
 import CompanyDetailPage from "./pages/CompanyDetailPage";
@@ -63,6 +64,7 @@ const App = () => (
           <Route path="/career" element={<CareerPage />} />
           <Route path="/skills" element={<SkillsPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/book" element={<BookCallPage />} />
           <Route path="/company" element={<CompanyDirectoryPageV9 />} />
           <Route path="/projects" element={<ProjectsPage />} />
           <Route path="/projects/company/:id" element={<CompanyDetailPage />} />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Send, Linkedin, MapPin, Mail, CheckCircle } from "lucide-react";
+import { Send, Linkedin, MapPin, Mail, CheckCircle, CalendarDays, ArrowRight } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
@@ -143,6 +143,12 @@ const ContactPage = () => {
 
           {/* Sidebar */}
           <div className="space-y-8">
+            <a href="/book" className="block rounded-lg border border-primary/30 bg-primary/[0.06] p-6 no-underline transition-colors hover:border-primary hover:bg-primary/[0.10]">
+              <div className="mb-3 flex items-center gap-2 text-primary"><CalendarDays size={17} /><span className="text-[11px] font-bold uppercase tracking-[0.12em]">Book a Call</span></div>
+              <h3 className="font-display text-[20px] font-extrabold text-foreground">Let’s talk through it.</h3>
+              <p className="mt-2 text-[13px] leading-7 text-muted-foreground">Choose a 30-minute time on my calendar. Google Meet details are included.</p>
+              <span className="mt-5 inline-flex items-center gap-2 text-[12px] font-semibold text-primary">See available times <ArrowRight size={14} /></span>
+            </a>
             {/* Location */}
             <div className="p-6 rounded-lg border border-border bg-card">
               <h3 className="font-display text-[15px] font-bold text-foreground mb-3 flex items-center gap-2">
