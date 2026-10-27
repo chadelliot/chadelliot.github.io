@@ -1,0 +1,36 @@
+name: Validate booking integration
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Build source dataset
+        run: node scripts/build-aug15-target-source.mjs
+      - name: Verify site
+        run: npm run build
+        env:
+          VITE_PROPOSAL_DB_URL: ${{ vars.VITE_PROPOSAL_DB_URL }}
+          VITE_PROPOSAL_DB_PUBLIC: ${{ vars.VITE_PROPOSAL_DB_PUBLIC }}
+          VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+      - name: Check TypeScript
+        run: npx tsc --noEmit -p tsconfig.app.json
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check calendar function syntax
+        run: deno check supabase/functions/google-calendar/index.ts
