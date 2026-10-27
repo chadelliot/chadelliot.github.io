@@ -1,18 +1,14 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Clock3, Mail, Video } from "lucide-react";
+import { ArrowLeft, ArrowRight, CalendarDays, CheckCircle2, Clock3, Video, Globe2 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { bookSlot, fetchAvailableSlots } from "@/lib/projectContacts";
+import { getBrowserTimeZone, HOST_TIME_ZONE, meetingClock, meetingDay, meetingDateTime, TIME_ZONE_OPTIONS, timeZoneLabel } from "@/lib/bookingTimeZones";
 
 // This public team-member ID identifies Chad's already connected Audaption
 // Google Calendar. It is not an OAuth credential or a secret.
 const CHAD_REP_ID = "6bcb92db-2e21-4be9-8fd8-dceb085d4970";
-
-const dayLabel = (iso: string) =>
-  new Date(iso).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" });
-const timeLabel = (iso: string) =>
-  new Date(iso).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
 
 const BookCallPage = () => {
   const [slots, setSlots] = useState<string[]>([]);
@@ -28,7 +24,12 @@ const BookCallPage = () => {
   const [bookError, setBookError] = useState("");
   const [booked, setBooked] = useState(false);
   const [eventUrl, setEventUrl] = useState("");
-  const browserZone = Intl.DateTimeFormat().resolvedOptions().timeZone || "your local time";
+  const [meetLink, setMeetLink] = useState("");
+  const [meetStatus, setMeetStatus] = useState<"ready" | "pending" | "failed">("pending");
+  const [visitorZone, setVisitorZone] = useState(getBrowserTimeZone);
+  const zoneOptions = TIME_ZONE_OPTIONS.some((item) => item.value === visitorZone)
+    ? TIME_ZONE_OPTIONS
+    : [{ value: visitorZone, label: "Detected: " + timeZoneLabel(visitorZone) }, ...TIME_ZONE_OPTIONS];
 
   const loadSlots = async () => {
     setLoading(true);
@@ -53,11 +54,11 @@ const BookCallPage = () => {
   const days = useMemo(() => {
     const grouped = new Map<string, string[]>();
     slots.forEach((slot) => {
-      const key = dayLabel(slot);
+      const key = meetingDay(slot, visitorZone);
       grouped.set(key, [...(grouped.get(key) || []), slot]);
     });
     return Array.from(grouped.entries());
-  }, [slots]);
+  }, [slots, visitorZone]);
 
   const handleConfirm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -74,6 +75,8 @@ const BookCallPage = () => {
       const result = await bookSlot(CHAD_REP_ID, selected, name.trim(), email.trim(), details);
       if (result.success) {
         setEventUrl(result.eventLink || "");
+        setMeetLink(result.meetLink || "");
+        setMeetStatus(result.meetStatus || "pending");
         setBooked(true);
       } else {
         setBookError(result.error || "That time is no longer available. Please choose another.");
@@ -108,7 +111,7 @@ const BookCallPage = () => {
             <div className="mt-9 space-y-4 border-t border-border pt-8 text-[13px] text-foreground">
               <div className="flex items-center gap-3"><Clock3 size={17} className="text-primary" /> 30-minute introductory conversation</div>
               <div className="flex items-center gap-3"><Video size={17} className="text-primary" /> Google Meet link included in the invitation</div>
-              <div className="flex items-center gap-3"><CalendarDays size={17} className="text-primary" /> Times displayed in {browserZone}</div>
+              <div className="flex items-center gap-3"><Globe2 size={17} className="text-primary" /> Your local time and my Eastern Time are shown side by side.</div>
             </div>
             <p className="mt-9 text-[12px] leading-[1.8] text-muted-foreground">
               Prefer email? <a href="mailto:cparker@audaption.com" className="font-semibold text-primary">cparker@audaption.com</a>
@@ -121,10 +124,20 @@ const BookCallPage = () => {
                 <span className="mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10"><CheckCircle2 size={32} className="text-primary" /></span>
                 <h2 className="font-display text-[27px] font-extrabold text-foreground">You're booked.</h2>
                 <p className="mt-3 max-w-sm text-[14px] leading-7 text-muted-foreground">
-                  A calendar invitation with the meeting details has been sent to {email}.
+                  Your booking is on my Audaption calendar. Google Calendar will send the invitation to {email}.
                 </p>
-                <p className="mt-4 text-[13px] font-semibold text-foreground">{dayLabel(selected)} at {timeLabel(selected)}</p>
-                {eventUrl ? <a href={eventUrl} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 font-semibold text-primary">View calendar event <ArrowRight size={15} /></a> : null}
+                <div className="mt-5 space-y-2 text-[13px] leading-6 text-foreground">
+                  <p><strong>Your time ({timeZoneLabel(visitorZone)}):</strong> {meetingDateTime(selected, visitorZone)}</p>
+                  <p><strong>My time (Eastern):</strong> {meetingDateTime(selected, HOST_TIME_ZONE)}</p>
+                </div>
+                {meetStatus === "ready" && meetLink ? (
+                  <a href={meetLink} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground no-underline hover:opacity-90"><Video size={17} /> Join Google Meet <ArrowRight size={15} /></a>
+                ) : meetStatus === "failed" ? (
+                  <p className="mt-6 max-w-sm text-[12px] leading-6 text-red-700">The calendar event was created, but Google could not generate its Meet link. Please email me to coordinate video access.</p>
+                ) : (
+                  <p className="mt-6 max-w-sm text-[12px] leading-6 text-muted-foreground">Google Meet is still preparing your room. Check the calendar event for the video link shortly.</p>
+                )}
+                {eventUrl ? <a href={eventUrl} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 font-semibold text-primary">View calendar invitation <ArrowRight size={15} /></a> : null}
                 <Link to="/" className="mt-8 text-[12px] text-muted-foreground hover:text-primary">Return to About Chad</Link>
               </div>
             ) : (
@@ -135,6 +148,14 @@ const BookCallPage = () => {
                     <h2 className="mt-2 font-display text-[23px] font-extrabold text-foreground">Find a time that works.</h2>
                   </div>
                   <span className="rounded-full border border-border px-3 py-1 text-[11px] text-muted-foreground">30 min</span>
+                </div>
+
+                <div className="mt-6 rounded-lg border border-border bg-background p-4">
+                  <label htmlFor="visitor-time-zone" className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-foreground"><Globe2 size={16} className="text-primary" /> Display times in your time zone</label>
+                  <select id="visitor-time-zone" value={visitorZone} onChange={(event) => { setVisitorZone(event.target.value); setSelected(""); setBookError(""); }} className="w-full rounded-md border border-border bg-card px-3 py-3 text-[13px] text-foreground outline-none focus:border-primary">
+                    {zoneOptions.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}
+                  </select>
+                  <p className="mt-2 text-[11px] leading-5 text-muted-foreground">Automatically detected. Change it if you're traveling. My availability is based on Eastern Time, and each meeting includes the equivalent in both zones.</p>
                 </div>
 
                 {loading ? <p className="py-12 text-center text-[13px] text-muted-foreground" role="status">Checking live availability…</p> : null}
@@ -160,8 +181,10 @@ const BookCallPage = () => {
                         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                           {times.map((iso) => (
                             <button key={iso} type="button" onClick={() => { setSelected(iso); setBookError(""); }}
-                              className="rounded-md border border-border bg-background px-2 py-3 text-[12px] font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
-                              {timeLabel(iso)}
+                              aria-label={meetingDateTime(iso, visitorZone) + " your time, " + meetingDateTime(iso, HOST_TIME_ZONE) + " Eastern Time"}
+                              className="flex flex-col items-center justify-center gap-1 rounded-md border border-border bg-background px-1 py-3 text-[11px] font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
+                              <span>{meetingClock(iso, visitorZone)}</span>
+                              {visitorZone !== HOST_TIME_ZONE && <span className="text-[9px] font-normal text-muted-foreground">ET: {meetingClock(iso, HOST_TIME_ZONE)}</span>}
                             </button>
                           ))}
                         </div>
@@ -175,7 +198,8 @@ const BookCallPage = () => {
                     <div className="flex items-center justify-between rounded-lg border border-primary/25 bg-primary/[0.05] px-4 py-3">
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">Selected time</p>
-                        <p className="mt-1 text-[13px] font-bold text-foreground">{dayLabel(selected)} at {timeLabel(selected)}</p>
+                        <p className="mt-1 text-[13px] font-bold text-foreground">You ({timeZoneLabel(visitorZone)}): {meetingDateTime(selected, visitorZone)}</p>
+                        <p className="mt-1 text-[12px] text-muted-foreground">Chad (Eastern): {meetingDateTime(selected, HOST_TIME_ZONE)}</p>
                       </div>
                       <button type="button" onClick={() => { setSelected(""); setBookError(""); void loadSlots(); }} className="text-[11px] font-semibold text-primary hover:underline">Change</button>
                     </div>
@@ -206,7 +230,7 @@ const BookCallPage = () => {
                       {saving ? "Confirming…" : "Confirm Meeting"} <ArrowRight size={15} />
                     </button>
                     <p className="text-center text-[11px] leading-6 text-muted-foreground">
-                      Your details are used to send the calendar invitation and prepare for our conversation.
+                      We will meet at the same instant regardless of time zone. Your invitation will show the time in your Google Calendar settings.
                     </p>
                   </form>
                 ) : null}
