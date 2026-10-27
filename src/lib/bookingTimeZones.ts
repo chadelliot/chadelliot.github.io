@@ -33,7 +33,7 @@ export function getBrowserTimeZone(): string {
 }
 export function timeZoneLabel(zone: string): string {
   return TIME_ZONE_OPTIONS.find((x) => x.value === zone)?.label ??
-    zone.replaceAll("_", " ").replaceAll("/", " / ");
+    zone.replace(/_/g, " ").replace(/\//g, " / ");
 }
 export function meetingDay(iso: string, zone: string): string {
   return new Intl.DateTimeFormat("en-US", {
