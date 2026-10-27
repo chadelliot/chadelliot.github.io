@@ -69,7 +69,7 @@ const SchedulePage = () => {
   };
 
   const grouped = slots.reduce<Record<string, string[]>>((acc, iso) => {
-    const day = meetingDay(iso, visitorZone);
+    const day = meetingDay(iso, HOST_TIME_ZONE);
     (acc[day] ??= []).push(iso);
     return acc;
   }, {});
@@ -85,8 +85,8 @@ const SchedulePage = () => {
             <h1 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-foreground">You're all set.</h1>
             <p className="mt-3 text-sm text-muted-foreground">Google Calendar will send an invitation to {contactEmail}.</p>
             {selectedSlot && <div className="mt-4 space-y-1 text-[13px]">
-              <p><strong>Your time:</strong> {meetingDateTime(selectedSlot, visitorZone)} ({timeZoneLabel(visitorZone)})</p>
-              <p><strong>Host Eastern Time:</strong> {meetingDateTime(selectedSlot, HOST_TIME_ZONE)}</p>
+              <p className="font-bold"><strong>Booked Eastern Time:</strong> {meetingDateTime(selectedSlot, HOST_TIME_ZONE)}</p>
+              {visitorZone !== HOST_TIME_ZONE && <p><strong>Local equivalent ({timeZoneLabel(visitorZone)}):</strong> {meetingDateTime(selectedSlot, visitorZone)}</p>}
             </div>}
             {meetStatus === "ready" && meetLink ? (
               <a href={meetLink} target="_blank" rel="noopener noreferrer" className="mt-5 inline-block rounded-lg bg-primary px-5 py-3 text-sm font-bold text-primary-foreground no-underline">Join Google Meet</a>
@@ -100,10 +100,10 @@ const SchedulePage = () => {
         ) : (
           <>
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-primary">Book a call{repName ? " with " + repName : ""}</p>
-            <h1 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-foreground">Pick a time that works.</h1>
-            <p className="mt-3 text-xs leading-6 text-muted-foreground">The host offers 30-minute weekday appointments in Eastern Time. Your time zone is shown with the Eastern equivalent.</p>
-            <label className="mt-6 block text-xs font-semibold text-foreground" htmlFor="rep-timezone">Your time zone</label>
-            <select id="rep-timezone" value={visitorZone} onChange={(e) => { setVisitorZone(e.target.value); setSelectedSlot(null); }}
+            <h1 className="mt-2 font-display text-2xl font-extrabold tracking-tight text-foreground">Choose an Eastern Time (ET) slot.</h1>
+            <p className="mt-3 text-xs leading-6 text-muted-foreground">All appointment slots are shown in Eastern Time (ET), regardless of your location. Your local equivalent appears underneath.</p>
+            <label className="mt-6 block text-xs font-semibold text-foreground" htmlFor="rep-timezone">Compare to your local time (optional)</label>
+            <select id="rep-timezone" value={visitorZone} onChange={(e) => setVisitorZone(e.target.value)}
               className="mt-2 w-full rounded-lg border border-border bg-background px-3 py-3 text-sm text-foreground">
               {options.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}
             </select>
@@ -121,8 +121,8 @@ const SchedulePage = () => {
                       {daySlots.map((iso) => (
                         <button key={iso} type="button" onClick={() => setSelectedSlot(iso)}
                           className="rounded-lg border border-[#CBD5E1] bg-white px-3 py-2 text-xs font-semibold text-[#334155] hover:border-primary hover:text-primary">
-                          <span className="block">{meetingClock(iso, visitorZone)}</span>
-                          {visitorZone !== HOST_TIME_ZONE && <span className="mt-1 block text-[10px] font-normal text-muted-foreground">ET: {meetingClock(iso, HOST_TIME_ZONE)}</span>}
+                          <span className="block">{meetingClock(iso, HOST_TIME_ZONE)}</span>
+                          {visitorZone !== HOST_TIME_ZONE && <span className="mt-1 block text-[10px] font-normal text-muted-foreground">Local: {meetingClock(iso, visitorZone)}</span>}
                         </button>
                       ))}
                     </div>
@@ -133,8 +133,8 @@ const SchedulePage = () => {
             {selectedSlot && (
               <div className="mt-6 grid gap-4">
                 <div className="rounded-lg border border-primary/20 bg-primary/[0.05] p-3 text-sm">
-                  <p><strong>Your time:</strong> {meetingDateTime(selectedSlot, visitorZone)}</p>
-                  <p className="mt-2"><strong>Host Eastern Time:</strong> {meetingDateTime(selectedSlot, HOST_TIME_ZONE)}</p>
+                  <p className="font-bold"><strong>Booking Eastern Time:</strong> {meetingDateTime(selectedSlot, HOST_TIME_ZONE)}</p>
+                  {visitorZone !== HOST_TIME_ZONE && <p className="mt-2"><strong>Your local equivalent:</strong> {meetingDateTime(selectedSlot, visitorZone)}</p>}
                   <button type="button" onClick={() => setSelectedSlot(null)} className="mt-3 text-xs font-semibold uppercase text-primary hover:underline">Change</button>
                 </div>
                 <label className="grid gap-1.5 text-sm font-semibold text-foreground">
