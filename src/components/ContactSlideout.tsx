@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { Send, Linkedin, MapPin, Mail } from "lucide-react";
+import { Send, Linkedin, MapPin, Mail, CalendarDays, ArrowRight } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
 
@@ -133,6 +133,11 @@ const ContactSlideout = () => {
               </p>
             </div>
 
+            <a href="/book" className="mb-7 flex items-center gap-3 rounded-lg border border-primary/25 bg-primary/[0.06] px-4 py-4 no-underline transition-colors hover:border-primary">
+              <CalendarDays size={18} className="shrink-0 text-primary" />
+              <span className="flex-1"><strong className="block text-[13px] text-foreground">Book a Call</strong><span className="mt-1 block text-[11px] text-muted-foreground">30-minute introductory conversation</span></span>
+              <ArrowRight size={16} className="text-primary" />
+            </a>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input type="text" name="website" tabIndex={-1} autoComplete="off" style={{ position: "absolute", left: "-9999px", opacity: 0 }} />
               <input type="hidden" name="_loaded" value={loadTime} />
