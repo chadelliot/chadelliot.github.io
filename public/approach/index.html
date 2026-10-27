@@ -1280,6 +1280,10 @@ body.intro-on :is(.stage-area,.next-bubble){display:none !important;}
   .intro-fit ul{grid-template-columns:1fr;}
   .intro-go .btn{width:100%;}
 }
+
+.growth-book-cta{font-size:11px;font-weight:700;text-decoration:none;text-transform:uppercase;letter-spacing:1px;background:var(--green);color:#fff;padding:11px 16px;border-radius:5px;margin-left:20px;white-space:nowrap;}
+.growth-book-cta:hover{filter:brightness(.9);color:#fff;}
+@media(max-width:767px){.growth-book-cta{font-size:10px;padding:9px 12px;margin-left:auto;}}
 </style>
 </head>
 <body class="intro-on">
@@ -1297,8 +1301,15 @@ body.intro-on :is(.stage-area,.next-bubble){display:none !important;}
     </li>
     <li><a href="/career">Career</a></li>
     <li><a href="/skills">Skills</a></li>
-    <li><a href="/contact">Contact</a></li>
+    <li class="nav-dd">
+      <a href="/contact">Contact</a>
+      <ul class="nav-dd-menu">
+        <li><a href="/book">Book a Call<small>Find time on my calendar</small></a></li>
+        <li><a href="/contact">Send a Message<small>Contact by email</small></a></li>
+      </ul>
+    </li>
   </ul>
+  <a href="/book" class="growth-book-cta">Let's Talk</a>
 </nav>
 
 <!-- PROGRESS BAR -->
