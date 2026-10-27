@@ -1231,15 +1231,15 @@ export const bookSlot = async (
   contactName: string,
   contactEmail: string,
   notes?: string
-): Promise<{ success: boolean; eventLink?: string; error?: string }> => {
+): Promise<{ success: boolean; eventLink?: string; meetLink?: string | null; meetStatus?: "ready" | "pending" | "failed"; error?: string }> => {
   if (!DB_URL) return { success: false, error: "Not configured." };
   const response = await fetch(`${DB_URL}/functions/v1/google-calendar`, {
     method: "POST",
     headers: { apikey: DB_PUBLIC || "", "Content-Type": "application/json" },
     body: JSON.stringify({ action: "book_slot", repId, startIso, contactName, contactEmail, notes }),
   });
-  const data = (await response.json()) as { success?: boolean; eventLink?: string; error?: string };
-  return { success: Boolean(data.success), eventLink: data.eventLink, error: data.error };
+  const data = (await response.json()) as { success?: boolean; eventLink?: string; meetLink?: string | null; meetStatus?: "ready" | "pending" | "failed"; error?: string };
+  return { success: Boolean(data.success), eventLink: data.eventLink, meetLink: data.meetLink ?? null, meetStatus: data.meetStatus, error: data.error };
 };
 
 export type ParsedResumeFields = { credibility_line?: string; background_tags?: string; notable_wins?: string[] };

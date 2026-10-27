@@ -336,10 +336,15 @@ Deno.serve(async (req) => {
           body: JSON.stringify({
             summary: `Introductory Conversation: ${rep.name ?? "Chad"} & ${validName}`,
             description: (notes || "Booked via About Chad scheduling.").slice(0, 1200),
-            start: { dateTime: start.toISOString() },
-            end: { dateTime: end.toISOString() },
+            // UTC instants plus the organizer time zone; invitations render locally.
+            start: { dateTime: start.toISOString(), timeZone: TIME_ZONE },
+            end: { dateTime: end.toISOString(), timeZone: TIME_ZONE },
             attendees: [{ email: validEmail }, ...(rep.email && rep.email !== validEmail ? [{ email: rep.email }] : [])],
-            conferenceData: { createRequest: { requestId: crypto.randomUUID() } },
+            // Require a NEW Google Meet room for every booking.
+            conferenceData: { createRequest: {
+              requestId: crypto.randomUUID(),
+              conferenceSolutionKey: { type: "hangoutsMeet" },
+            } },
           }),
         }
       );
@@ -349,8 +354,42 @@ Deno.serve(async (req) => {
           headers: { ...corsHeaders, "content-type": "application/json" },
         });
       }
-      const event = (await eventResponse.json()) as { htmlLink?: string };
-      return new Response(JSON.stringify({ success: true, eventLink: event.htmlLink }), {
+      // Google Meet creation can be asynchronous. Check for an actual video
+      // entry point instead of treating successful event creation as proof.
+      type CalendarEvent = {
+        id?: string; htmlLink?: string; hangoutLink?: string;
+        conferenceData?: {
+          createRequest?: { status?: { statusCode?: string } };
+          entryPoints?: Array<{ entryPointType?: string; uri?: string }>;
+        };
+      };
+      let event = (await eventResponse.json()) as CalendarEvent;
+      const videoLink = (item: CalendarEvent): string | null => {
+        const link = item.hangoutLink ??
+          item.conferenceData?.entryPoints?.find((x) => x.entryPointType === "video")?.uri;
+        return link && /^https:\/\/meet\.google\.com\/[a-z0-9-]+(?:[/?#].*)?$/i.test(link) ? link : null;
+      };
+      let meetLink = videoLink(event);
+      const eventId = event.id;
+      if (eventId && !meetLink) {
+        for (let attempt = 0; attempt < 6; attempt++) {
+          if (event.conferenceData?.createRequest?.status?.statusCode === "failure") break;
+          await new Promise((resolve) => setTimeout(resolve, 400));
+          const detailsResponse = await fetch(
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events/" + encodeURIComponent(eventId),
+            { headers: { Authorization: "Bearer " + accessToken } },
+          );
+          if (!detailsResponse.ok) continue;
+          event = (await detailsResponse.json()) as CalendarEvent;
+          meetLink = videoLink(event);
+          if (meetLink) break;
+        }
+      }
+      const meetStatus = meetLink ? "ready" :
+        event.conferenceData?.createRequest?.status?.statusCode === "failure" ? "failed" : "pending";
+      return new Response(JSON.stringify({
+        success: true, eventLink: event.htmlLink, meetLink, meetStatus,
+      }), {
         headers: { ...corsHeaders, "content-type": "application/json" },
       });
     }

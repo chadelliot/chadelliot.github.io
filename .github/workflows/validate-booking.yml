@@ -27,6 +27,8 @@ jobs:
           VITE_PROPOSAL_DB_URL: ${{ vars.VITE_PROPOSAL_DB_URL }}
           VITE_PROPOSAL_DB_PUBLIC: ${{ vars.VITE_PROPOSAL_DB_PUBLIC }}
           VITE_GOOGLE_CLIENT_ID: ${{ vars.VITE_GOOGLE_CLIENT_ID }}
+      - name: Test time zone conversion and DST
+        run: node scripts/test-booking-timezones.mjs
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
