@@ -32,3 +32,8 @@ jobs:
           deno-version: v2.x
       - name: Check calendar function syntax
         run: deno check --node-modules-dir=auto supabase/functions/google-calendar/index.ts
+      - name: Smoke-test live calendar availability (read only)
+        run: node scripts/smoke-calendar-availability.mjs
+        env:
+          VITE_PROPOSAL_DB_URL: ${{ vars.VITE_PROPOSAL_DB_URL }}
+          VITE_PROPOSAL_DB_PUBLIC: ${{ vars.VITE_PROPOSAL_DB_PUBLIC }}
