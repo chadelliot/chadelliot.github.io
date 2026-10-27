@@ -245,7 +245,7 @@ Deno.serve(async (req) => {
       const candidates = generateCandidateSlots();
       const timeMin = candidates[0].start.toISOString();
       const timeMax = candidates[candidates.length - 1].end.toISOString();
-      const busy = await calendarBusy(accessToken, timeMin, timeMax);
+      const busy = await calendarBusy(accessToken, new Date(new Date(timeMin).getTime() - BUFFER_MINUTES * 60000).toISOString(), new Date(new Date(timeMax).getTime() + BUFFER_MINUTES * 60000).toISOString());
       if (!busy) return new Response(JSON.stringify({ error: "Couldn't read calendar availability." }), {
         status: 502, headers: { ...corsHeaders, "content-type": "application/json" },
       });
@@ -290,7 +290,7 @@ Deno.serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "content-type": "application/json" },
       });
       const end = selectedSlot.end;
-      const freshBusy = await calendarBusy(accessToken, start.toISOString(), end.toISOString());
+      const freshBusy = await calendarBusy(accessToken, new Date(start.getTime() - BUFFER_MINUTES * 60000).toISOString(), new Date(end.getTime() + BUFFER_MINUTES * 60000).toISOString());
       if (!freshBusy) return new Response(JSON.stringify({ error: "Couldn't verify current availability." }), {
         status: 502, headers: { ...corsHeaders, "content-type": "application/json" },
       });
