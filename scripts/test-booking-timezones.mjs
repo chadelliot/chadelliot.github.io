@@ -33,4 +33,16 @@ assert.match(times.meetingClock(afterDST, "America/Phoenix"), /2:00\s*PM\s*MST/i
 // Travelers may see a different *calendar day*, not just a different clock.
 assert.match(times.meetingDay("2026-10-30T23:30:00.000Z", "Asia/Tokyo"), /October 31, 2026/);
 assert.match(times.meetingDay("2026-10-30T23:30:00.000Z", "America/New_York"), /October 30, 2026/);
+// Regression: when Chad visits from Texas, selecting 2:00 PM must mean
+// 2:00 PM Eastern (1:00 PM Texas). Browser location only changes the secondary label.
+const twoEastern = "2026-10-29T18:00:00.000Z";
+assert.match(times.meetingClock(twoEastern, times.HOST_TIME_ZONE), /2:00\s*PM\s*EDT/i);
+assert.match(times.meetingClock(twoEastern, "America/Chicago"), /1:00\s*PM\s*CDT/i);
+for (const file of ["BookCallPage.tsx", "SchedulePage.tsx"]) {
+  const page = readFileSync(new URL("../src/pages/" + file, import.meta.url), "utf8");
+  assert.match(page, /meetingDay\(iso, HOST_TIME_ZONE\)/, file + ": day grouping must be Eastern");
+  assert.match(page, /meetingClock\(iso, HOST_TIME_ZONE\)/, file + ": primary slot text must be Eastern");
+  assert.doesNotMatch(page, /<span[^>]*>\{meetingClock\(iso, visitorZone\)\}<\/span>/, file + ": local time must not be primary");
+}
+console.log("Passed: Texas 2 PM click means 2 PM Eastern; local zone comparison is secondary.");
 console.log("Passed: Eastern / Mountain, DST, Arizona, and cross-date time zone cases.");
