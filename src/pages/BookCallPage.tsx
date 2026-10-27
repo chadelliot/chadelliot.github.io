@@ -54,11 +54,12 @@ const BookCallPage = () => {
   const days = useMemo(() => {
     const grouped = new Map<string, string[]>();
     slots.forEach((slot) => {
-      const key = meetingDay(slot, visitorZone);
+      // Always group by Eastern calendar days, independent of the visitor location.
+      const key = meetingDay(slot, HOST_TIME_ZONE);
       grouped.set(key, [...(grouped.get(key) || []), slot]);
     });
     return Array.from(grouped.entries());
-  }, [slots, visitorZone]);
+  }, [slots]);
 
   const handleConfirm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -109,12 +110,12 @@ const BookCallPage = () => {
             </h1>
             <p className="mt-6 max-w-md text-[15px] leading-[1.9] text-muted-foreground">
               Exploring a growth opportunity, a commercial challenge, or a potential partnership?
-              Choose a time below and we'll talk through what's on your mind.
+              Choose a time in Eastern Time (ET) below and we'll talk through what's on your mind.
             </p>
             <div className="mt-9 space-y-4 border-t border-border pt-8 text-[13px] text-foreground">
               <div className="flex items-center gap-3"><Clock3 size={17} className="text-primary" /> 30-minute introductory conversation</div>
               <div className="flex items-center gap-3"><Video size={17} className="text-primary" /> Google Meet link included in the invitation</div>
-              <div className="flex items-center gap-3"><Globe2 size={17} className="text-primary" /> Your local time and my Eastern Time are shown side by side.</div>
+              <div className="flex items-center gap-3"><Globe2 size={17} className="text-primary" /> Booking times are always Eastern (ET), even when you're traveling.</div>
             </div>
             <p className="mt-9 text-[12px] leading-[1.8] text-muted-foreground">
               Prefer email? <a href="mailto:cparker@audaption.com" className="font-semibold text-primary">cparker@audaption.com</a>
@@ -130,8 +131,8 @@ const BookCallPage = () => {
                   Your booking is on my Audaption calendar. Google Calendar will send the invitation to {email}.
                 </p>
                 <div className="mt-5 space-y-2 text-[13px] leading-6 text-foreground">
-                  <p><strong>Your time ({timeZoneLabel(visitorZone)}):</strong> {meetingDateTime(selected, visitorZone)}</p>
-                  <p><strong>My time (Eastern):</strong> {meetingDateTime(selected, HOST_TIME_ZONE)}</p>
+                  <p className="font-bold"><strong>Booked (Eastern Time):</strong> {meetingDateTime(selected, HOST_TIME_ZONE)}</p>
+                  {visitorZone !== HOST_TIME_ZONE && <p><strong>Your local equivalent ({timeZoneLabel(visitorZone)}):</strong> {meetingDateTime(selected, visitorZone)}</p>}
                 </div>
                 {meetStatus === "ready" && meetLink ? (
                   <a href={meetLink} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 font-semibold text-primary-foreground no-underline hover:opacity-90"><Video size={17} /> Join Google Meet <ArrowRight size={15} /></a>
@@ -148,17 +149,18 @@ const BookCallPage = () => {
                 <div className="flex items-start justify-between gap-4 border-b border-border pb-6">
                   <div>
                     <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-primary">Introductory Conversation</p>
-                    <h2 className="mt-2 font-display text-[23px] font-extrabold text-foreground">Find a time that works.</h2>
+                    <h2 className="mt-2 font-display text-[23px] font-extrabold text-foreground">Choose an Eastern Time (ET) slot.</h2>
                   </div>
                   <span className="rounded-full border border-border px-3 py-1 text-[11px] text-muted-foreground">30 min</span>
                 </div>
 
                 <div className="mt-6 rounded-lg border border-border bg-background p-4">
-                  <label htmlFor="visitor-time-zone" className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-foreground"><Globe2 size={16} className="text-primary" /> Display times in your time zone</label>
-                  <select id="visitor-time-zone" value={visitorZone} onChange={(event) => { setVisitorZone(event.target.value); setSelected(""); setBookError(""); }} className="w-full rounded-md border border-border bg-card px-3 py-3 text-[13px] text-foreground outline-none focus:border-primary">
+                  <p className="mb-3 text-[13px] font-bold text-foreground">All times below are Eastern Time (ET).</p>
+                  <label htmlFor="visitor-time-zone" className="mb-2 flex items-center gap-2 text-[12px] font-semibold text-foreground"><Globe2 size={16} className="text-primary" /> Compare with your local time (optional)</label>
+                  <select id="visitor-time-zone" value={visitorZone} onChange={(event) => setVisitorZone(event.target.value)} className="w-full rounded-md border border-border bg-card px-3 py-3 text-[13px] text-foreground outline-none focus:border-primary">
                     {zoneOptions.map((zone) => <option key={zone.value} value={zone.value}>{zone.label}</option>)}
                   </select>
-                  <p className="mt-2 text-[11px] leading-5 text-muted-foreground">Automatically detected. Change it if you're traveling. My availability is based on Eastern Time, and each meeting includes the equivalent in both zones.</p>
+                  <p className="mt-2 text-[11px] leading-5 text-muted-foreground">Your location is detected for comparison only. Changing it does not change which Eastern Time slot you book.</p>
                 </div>
 
                 {loading ? <p className="py-12 text-center text-[13px] text-muted-foreground" role="status">Checking live availability…</p> : null}
@@ -184,10 +186,10 @@ const BookCallPage = () => {
                         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
                           {times.map((iso) => (
                             <button key={iso} type="button" onClick={() => { setSelected(iso); setBookError(""); }}
-                              aria-label={meetingDateTime(iso, visitorZone) + " your time, " + meetingDateTime(iso, HOST_TIME_ZONE) + " Eastern Time"}
+                              aria-label={meetingDateTime(iso, HOST_TIME_ZONE) + " Eastern booking time, " + meetingDateTime(iso, visitorZone) + " in comparison time zone"}
                               className="flex flex-col items-center justify-center gap-1 rounded-md border border-border bg-background px-1 py-3 text-[11px] font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/[0.05] focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary">
-                              <span>{meetingClock(iso, visitorZone)}</span>
-                              {visitorZone !== HOST_TIME_ZONE && <span className="text-[9px] font-normal text-muted-foreground">ET: {meetingClock(iso, HOST_TIME_ZONE)}</span>}
+                              <span>{meetingClock(iso, HOST_TIME_ZONE)}</span>
+                              {visitorZone !== HOST_TIME_ZONE && <span className="text-[9px] font-normal text-muted-foreground">Local: {meetingClock(iso, visitorZone)}</span>}
                             </button>
                           ))}
                         </div>
@@ -201,8 +203,8 @@ const BookCallPage = () => {
                     <div className="flex items-center justify-between rounded-lg border border-primary/25 bg-primary/[0.05] px-4 py-3">
                       <div>
                         <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">Selected time</p>
-                        <p className="mt-1 text-[13px] font-bold text-foreground">You ({timeZoneLabel(visitorZone)}): {meetingDateTime(selected, visitorZone)}</p>
-                        <p className="mt-1 text-[12px] text-muted-foreground">Chad (Eastern): {meetingDateTime(selected, HOST_TIME_ZONE)}</p>
+                        <p className="mt-1 text-[13px] font-bold text-foreground">Booking in Eastern Time: {meetingDateTime(selected, HOST_TIME_ZONE)}</p>
+                        {visitorZone !== HOST_TIME_ZONE && <p className="mt-1 text-[12px] text-muted-foreground">In your local zone ({timeZoneLabel(visitorZone)}): {meetingDateTime(selected, visitorZone)}</p>}
                       </div>
                       <button type="button" onClick={() => { setSelected(""); setBookError(""); void loadSlots(); }} className="text-[11px] font-semibold text-primary hover:underline">Change</button>
                     </div>
@@ -233,7 +235,7 @@ const BookCallPage = () => {
                       {saving ? "Confirming…" : "Confirm Meeting"} <ArrowRight size={15} />
                     </button>
                     <p className="text-center text-[11px] leading-6 text-muted-foreground">
-                      We will meet at the same instant regardless of time zone. Your invitation will show the time in your Google Calendar settings.
+                      You are booking the Eastern Time shown above. Your calendar invitation will convert that exact instant to the time zone configured in Google Calendar.
                     </p>
                   </form>
                 ) : null}
