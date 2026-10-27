@@ -370,12 +370,13 @@ Deno.serve(async (req) => {
         return link && /^https:\/\/meet\.google\.com\/[a-z0-9-]+(?:[/?#].*)?$/i.test(link) ? link : null;
       };
       let meetLink = videoLink(event);
-      if (event.id && !meetLink) {
+      const eventId = event.id;
+      if (eventId && !meetLink) {
         for (let attempt = 0; attempt < 6; attempt++) {
           if (event.conferenceData?.createRequest?.status?.statusCode === "failure") break;
           await new Promise((resolve) => setTimeout(resolve, 400));
           const detailsResponse = await fetch(
-            "https://www.googleapis.com/calendar/v3/calendars/primary/events/" + encodeURIComponent(event.id),
+            "https://www.googleapis.com/calendar/v3/calendars/primary/events/" + encodeURIComponent(eventId),
             { headers: { Authorization: "Bearer " + accessToken } },
           );
           if (!detailsResponse.ok) continue;
