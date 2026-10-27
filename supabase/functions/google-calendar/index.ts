@@ -131,16 +131,47 @@ const generateCandidateSlots = (): { start: Date; end: Date }[] => {
   return slots;
 };
 type BusyWindow = { start: string; end: string };
+// The calendar was originally authorized with calendar.events (read/write)
+// but not the separate calendar.freebusy scope. Use events.list, which is
+// valid for calendar.events, so the owner need not reconnect to grant more
+// permissions. Only event start/end times are retained.
 const calendarBusy = async (accessToken: string, timeMin: string, timeMax: string): Promise<BusyWindow[] | null> => {
-  const response = await fetch("https://www.googleapis.com/calendar/v3/freeBusy", {
-    method: "POST",
-    headers: { Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
-    body: JSON.stringify({ timeMin, timeMax, items: [{ id: "primary" }] }),
-  });
-  if (!response.ok) return null;
-  const data = (await response.json()) as { calendars?: { primary?: { busy?: BusyWindow[]; errors?: unknown[] } } };
-  if (!data.calendars?.primary || data.calendars.primary.errors?.length) return null;
-  return data.calendars.primary.busy ?? [];
+  const busy: BusyWindow[] = [];
+  let nextPageToken: string | undefined;
+  const dayStart = (date: string): string => {
+    const [year, month, day] = date.split("-").map(Number);
+    return easternDateToUtc(year, month, day, 0, 0).toISOString();
+  };
+  for (let page = 0; page < 10; page++) {
+    const parameters = new URLSearchParams({
+      timeMin, timeMax, singleEvents: "true", showDeleted: "false",
+      maxResults: "2500", ...(nextPageToken ? { pageToken: nextPageToken } : {}),
+    });
+    const response = await fetch(
+      "https://www.googleapis.com/calendar/v3/calendars/primary/events?" + parameters.toString(),
+      { headers: { Authorization: "Bearer " + accessToken } },
+    );
+    if (!response.ok) return null;
+    const data = (await response.json()) as {
+      items?: Array<{
+        status?: string; transparency?: string;
+        start?: { dateTime?: string; date?: string };
+        end?: { dateTime?: string; date?: string };
+      }>;
+      nextPageToken?: string;
+    };
+    if (!Array.isArray(data.items)) return null;
+    for (const event of data.items) {
+      if (event.status === "cancelled" || event.transparency === "transparent") continue;
+      const start = event.start?.dateTime ?? (event.start?.date ? dayStart(event.start.date) : undefined);
+      const end = event.end?.dateTime ?? (event.end?.date ? dayStart(event.end.date) : undefined);
+      if (!start || !end || !Number.isFinite(Date.parse(start)) || !Number.isFinite(Date.parse(end))) return null;
+      busy.push({ start, end });
+    }
+    if (!data.nextPageToken) return busy;
+    nextPageToken = data.nextPageToken;
+  }
+  return null; // Fail closed if pagination unexpectedly exceeds the safety cap.
 };
 const slotIsFree = (slot: { start: Date; end: Date }, busy: BusyWindow[]): boolean =>
   !busy.some((b) => {
