@@ -139,7 +139,22 @@ const describeEvent = (e: ContactActivityEvent): ActivityDescription => {
     return result("Email draft opened", "An email draft was opened. Delivery has not been confirmed.", false, "Sending unconfirmed");
   }
   if (e.event_type === "note") {
+    if (raw.startsWith("{")) {
+      try {
+        const payload = JSON.parse(raw) as Record<string, unknown>;
+        if (typeof payload.change === "string") {
+          return result("Outreach message updated", "The messaging and positioning were revised. This records a draft change, not a sent message.", true);
+        }
+        return result("Contact record updated", "Saved additional information about this contact.", true);
+      } catch { /* Preserve malformed or historical notes as readable text. */ }
+    }
     if (/^\s*manual lead\s*\|/i.test(raw)) return result("Manual lead added", "Added to Chad's outreach list.", true);
+    if (/^ownership verified/i.test(raw) && /assigned to/i.test(raw)) return result("Contact assigned", "This lead was assigned to its outreach owner.", true);
+    if (/preflight/i.test(raw) && /employer conflict|hold for review|unconfirmed/i.test(raw)) {
+      return result("Profile needs review", "A detail needs to be verified before outreach continues.", true, "Needs review");
+    }
+    if (/^reconciled/i.test(raw)) return result("Outreach history checked", "Previous contact activity and LinkedIn status were reviewed.", true);
+    if (/introduction sent and visibly verified/i.test(raw)) return result("LinkedIn introduction sent", "Introduction was sent and verified.", true);
     return result("Note added", raw || "A note was added to this contact.", true);
   }
 
