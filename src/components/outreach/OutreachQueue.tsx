@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ArrowRight, Building2, Info, CheckCircle2, ChevronDown, ChevronRight, Inbox, Linkedin, Mail, Search, Users, X } from "lucide-react";
 import type { ProposalSession } from "@/lib/companyStatus";
-import { COMPANY_STAGE_LABELS, type CompanySignal, type ProjectContact } from "@/lib/projectContacts";
+import { COMPANY_STAGE_LABELS, formatAnnualRevenue, type CompanySignal, type ProjectContact } from "@/lib/projectContacts";
 import {
   LEAD_TIER_ORDER,
   LEAD_TIER_SHORT,
@@ -68,6 +68,7 @@ const COMPANY_SORTS: { key: CompanySort; label: string }[] = [
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright/70 focus-visible:ring-offset-1";
 const SELECT = `h-9 min-w-0 rounded-lg border border-rh-line bg-white px-2.5 text-[13px] text-rh-body hover:border-rh-line-strong ${FOCUS_RING}`;
 const PAGE_SIZE = 40;
+const formatAddedDate = (value?: string | null) => value ? new Date(value).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Not available";
 
 const useIsDesktop = () => {
   const query = "(min-width: 1280px)";
@@ -235,7 +236,7 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
       const el = e.target as HTMLElement | null;
       const typing = el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.tagName === "SELECT" || el.isContentEditable);
       if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if (e.key === "Escape" && (leadId || companyId) && !document.querySelector(".fixed.inset-0.z-50, [role=dialog][data-state=open], [data-radix-popper-content-wrapper]")) { if (leadId) closeLead(); else closeCompany(); return; }
+      if (e.key === "Escape" && (leadId || companyId) && !document.querySelector('[role="dialog"][data-state="open"], [data-radix-popper-content-wrapper]')) { e.preventDefault(); if (leadId) closeLead(); else closeCompany(); return; }
       if (typing) return;
       if (e.key === "/") { e.preventDefault(); searchRef.current?.focus(); }
       else if (e.key === "j") { e.preventDefault(); moveSelection(1); }
@@ -246,12 +247,12 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
   }, [leadId, companyId, closeLead, closeCompany, moveSelection]);
 
   useEffect(() => {
-    if ((selected || selectedGroup) && !isDesktop) {
+    if (selected || selectedGroup) {
       const prev = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => { document.body.style.overflow = prev; };
     }
-  }, [selected, selectedGroup, isDesktop]);
+  }, [selected, selectedGroup]);
 
   const defaultFilterKey = grouped ? "all" : defaultLeadFilter;
   const activeFilterKey = grouped ? companyFilter : leadFilter;
@@ -290,7 +291,7 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
     : `${allGroups.length} compan${allGroups.length === 1 ? "y" : "ies"} · ${scopedRows.length} contact${scopedRows.length === 1 ? "" : "s"}`;
 
   return (
-    <div className="xl:grid xl:grid-cols-[minmax(0,1fr)_27rem] xl:items-start xl:gap-6">
+    <div className="w-full min-w-0">
       <div className="min-w-0">
         <PageHeader
           title={title}
@@ -453,11 +454,13 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
         <p className="sr-only" aria-live="polite">{resultCount} {grouped ? "companies" : "leads"} shown</p>
       </div>
 
-      {/* Detail panel: docked on wide screens, full-screen dialog on narrow ones.
-          A lead wins over a company; a lead opened from a company panel keeps a
-          way back to it. */}
+      {/* The list always owns the full width. The selected detail opens above it
+          without resizing or shifting table columns. */}
+      {(selected || selectedGroup) ? (
+        <button type="button" aria-label="Close details" onClick={selected ? closeLead : closeCompany} className="fixed inset-0 z-[60] cursor-default bg-rh-ink/25" />
+      ) : null}
       {selected ? (
-        <div className={isDesktop ? "sticky top-4 hidden xl:block" : undefined}>
+        <div className={isDesktop ? "fixed inset-y-4 right-4 z-[61] w-[min(34rem,calc(100vw-2rem))]" : "fixed inset-0 z-[61]"}>
           <LeadPanel
             row={selected}
             siblings={siblings}
@@ -481,7 +484,7 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
           />
         </div>
       ) : selectedGroup ? (
-        <div className={isDesktop ? "sticky top-4 hidden xl:block" : undefined}>
+        <div className={isDesktop ? "fixed inset-y-4 right-4 z-[61] w-[min(34rem,calc(100vw-2rem))]" : "fixed inset-0 z-[61]"}>
           <CompanyPanel
             group={selectedGroup}
             signals={signalsByCompanyId[selectedGroup.company.id] ?? []}
@@ -493,11 +496,6 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
             onOpenLead={openLead}
           />
         </div>
-      ) : isDesktop ? (
-        <aside className="sticky top-4 hidden h-56 flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-rh-line-strong p-6 text-center text-[13px] text-rh-muted xl:flex">
-          <Inbox size={20} className="text-rh-faint" aria-hidden="true" />
-          {grouped ? <>Select a company for the big picture,<br />or a contact to reach out.</> : <>Select a lead to see context, reach out,<br />and log what happened.</>}
-        </aside>
       ) : null}
     </div>
   );
