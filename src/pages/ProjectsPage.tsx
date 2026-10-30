@@ -1170,7 +1170,8 @@ const ProjectsPage = () => {
   // shows "Saved" once the write has actually succeeded, and keeps the form
   // (with an error) when it hasn't.
   const handleSaveOutcome = async (contact: ProjectContact, input: OutcomeInput): Promise<OutcomeResult> => {
-    if (input.action !== "do_not_contact" && input.action !== "linkedin_accepted" && (contact.do_not_contact || contact.needs_research || !isContactProfileCurrent(contact))) return { ok: false, error: "Employer and role verification is required before outreach." };
+    if (input.action !== "do_not_contact" && contact.do_not_contact) return { ok: false, error: "Contact is marked Do Not Contact." };
+    if (input.action !== "do_not_contact" && input.action !== "linkedin_accepted" && (contact.needs_research || !isContactProfileCurrent(contact))) return { ok: false, error: "Employer and role verification is required before outreach." };
     if (!session) return { ok: false, error: "You’re signed out. Sign in again to save." };
     const current = progress[contact.id];
     const status: ContactStatus = current?.status ?? "not_contacted";
