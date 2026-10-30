@@ -37,6 +37,21 @@ export type ProjectContact = {
   profile_verified_at?: string | null;
   profile_verification_source?: string | null;
   profile_validation_note?: string | null;
+  // Company / contact intelligence is separate from profile verification.
+  // A saved research brief does not lift the outreach verification hold.
+  research_business_model?: string | null;
+  research_personalization_angle?: string | null;
+  research_suggested_invite?: string | null;
+  research_suggested_followup?: string | null;
+  research_discovery_question?: string | null;
+  research_fit_type?: string | null;
+  research_evidence_urls?: string | null;
+  research_confidence?: string | null;
+  research_checked_on?: string | null;
+  research_owner_direction?: string | null;
+  research_hiring_roles_summary?: string | null;
+  research_hiring_roles_sources?: string | null;
+  research_hiring_roles_checked_on?: string | null;
   // Email outreach thread - separate from the LinkedIn connect/intro/
   // follow-up messages above. Populated from the email_* columns on the
   // RevHub-Marketing tab. email_assumption_notice is non-empty when the
