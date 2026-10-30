@@ -296,6 +296,18 @@ export type Company = {
   lead_type_needs_review?: boolean;
 };
 
+// Annual revenue is intentionally blank without a sourced value. Never infer it
+// from headcount or treat an estimate as an audited financial statement.
+export const formatAnnualRevenue = (company?: Company | null): string => {
+  if (!company) return "Not available";
+  if (company.annual_revenue_display?.trim()) return company.annual_revenue_display.trim();
+  if (company.annual_revenue_usd == null) return "Not available";
+  const n = company.annual_revenue_usd;
+  if (n >= 1_000_000_000) return "$" + (n / 1_000_000_000).toFixed(n % 1_000_000_000 === 0 ? 0 : 1) + "B";
+  if (n >= 1_000_000) return "$" + (n / 1_000_000).toFixed(n % 1_000_000 === 0 ? 0 : 1) + "M";
+  return "$" + Math.round(n).toLocaleString("en-US");
+};
+
 export type ContactMeetingBlock = {
   contact_id: string;
   company_id: string;
