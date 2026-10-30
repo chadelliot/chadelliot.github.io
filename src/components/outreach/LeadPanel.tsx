@@ -102,7 +102,7 @@ const describeEvent = (e: ContactActivityEvent): ActivityDescription => {
   const result = (title: string, summary: string, confirmed = meta.confirmed, statusNote = ""): ActivityDescription => ({
     title,
     detail: activityPreview(summary),
-    fullDetail: raw && raw !== summary ? raw : "",
+    fullDetail: raw && (raw !== summary || activityPreview(summary) !== summary) ? raw : "",
     confirmed,
     statusNote,
   });
