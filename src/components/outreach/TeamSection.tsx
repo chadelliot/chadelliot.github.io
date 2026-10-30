@@ -5,7 +5,7 @@ import { STATUS_LABELS, type ClosedDeal, type ContactStatus, type Meeting, type 
 const FOCUS = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright/70 focus-visible:ring-offset-1";
 const FIELD = `h-9 w-full rounded-lg border border-rh-line bg-white px-2.5 text-[13px] text-rh-ink hover:border-rh-line-strong ${FOCUS}`;
 const CARD = "rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.03)]";
-const STATUS_COLUMNS: ContactStatus[] = ["not_contacted", "connection_sent", "introduction_sent", "follow_up_sent", "meeting_set", "do_not_contact"];
+const STATUS_COLUMNS: ContactStatus[] = ["not_contacted", "connection_sent", "connection_accepted", "introduction_sent", "follow_up_sent", "meeting_set", "do_not_contact"];
 
 type Props = {
   teamMembers: TeamMember[];

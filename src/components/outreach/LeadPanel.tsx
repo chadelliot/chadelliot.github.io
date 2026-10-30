@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Ban, Briefcase, CalendarCheck, CalendarClock, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink, FileText, History, Info, Linkedin, Loader2, Mail, MessageSquare, PenLine, Phone, Reply, Send, TriangleAlert, UserPlus, Users, X, type LucideIcon } from "lucide-react";
+import { ArrowLeft, ArrowRight, Ban, Briefcase, CalendarCheck, CalendarClock, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, ExternalLink, FileText, History, Info, Linkedin, Loader2, Mail, MessageSquare, PenLine, Phone, Reply, Send, TriangleAlert, UserPlus, UserCheck, Users, X, type LucideIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   fetchContactActivity,
@@ -16,6 +16,7 @@ import { UrgencyChip } from "./UrgencyChip";
 
 export type OutcomeAction =
   | "linkedin_connection"
+  | "linkedin_accepted"
   | "linkedin_message"
   | "email"
   | "replied"
@@ -40,7 +41,8 @@ type ActionOption = { value: OutcomeAction; label: string; short: string; Icon: 
 //   meeting -> status meeting_set (opens the existing meeting prompt),
 //   do_not_contact -> status do_not_contact.
 const ACTIONS: ActionOption[] = [
-  { value: "linkedin_connection", label: "Sent LinkedIn connection request", short: "Connection request", Icon: UserPlus, hint: "Stage → Connection sent", followUpDays: 3, nextAction: "Send intro message once they accept" },
+  { value: "linkedin_connection", label: "Sent LinkedIn connection request", short: "Connection request", Icon: UserPlus, hint: "Stage → Connection sent", followUpDays: 3, nextAction: "Check whether invitation was accepted" },
+  { value: "linkedin_accepted", label: "LinkedIn invitation accepted (no intro sent)", short: "Connection accepted", Icon: UserCheck, hint: "Stage → Connection accepted, intro pending", followUpDays: 1, nextAction: "Send introduction after acceptance" },
   { value: "linkedin_message", label: "Sent LinkedIn message", short: "LinkedIn message", Icon: MessageSquare, hint: "Stage → next LinkedIn step", followUpDays: 4, nextAction: "Follow up if no reply" },
   { value: "email", label: "Sent email", short: "Email", Icon: Mail, hint: "Email progress +1 (max 3)", followUpDays: 4, nextAction: "Send next email in the sequence" },
   { value: "replied", label: "They replied", short: "They replied", Icon: Reply, hint: "Stage unchanged", followUpDays: 2, nextAction: "Reply and propose a time" },
@@ -52,6 +54,7 @@ const ACTIONS: ActionOption[] = [
 const EVENT_LABELS: Record<string, { label: string; confirmed: boolean }> = {
   outcome_logged: { label: "Outcome logged", confirmed: true },
   status_changed: { label: "Stage changed", confirmed: true },
+  connection_accepted: { label: "Connection accepted", confirmed: true },
   email_sequence_changed: { label: "Email progress changed", confirmed: true },
   email_send_clicked: { label: "Opened email draft", confirmed: false },
   email_message_copied: { label: "Copied email text", confirmed: false },
@@ -279,7 +282,8 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
           nextRow={nextRow}
           followUpSupported={followUpSupported}
           onSaveOutcome={async (input) => {
-            if (profileHeld && input.action !== "do_not_contact") return { ok: false, error: "Verify this person's current employer and role before outreach." };
+            if (contact.do_not_contact && input.action !== "do_not_contact") return { ok: false, error: "Contact is marked Do Not Contact." };
+            if (profileHeld && input.action !== "do_not_contact" && input.action !== "linkedin_accepted") return { ok: false, error: "Verify this person's current employer and role before outreach." };
             const result = await onSaveOutcome(contact, input);
             if (result.ok) { setAttempt(null); setSavedLocal((v) => v + 1); }
             return result;

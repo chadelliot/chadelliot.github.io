@@ -9,7 +9,7 @@ import OutreachQueue from "@/components/outreach/OutreachQueue";
 import PageHeader from "@/components/outreach/PageHeader";
 import TeamSection from "@/components/outreach/TeamSection";
 import type { OutcomeInput, OutcomeResult } from "@/components/outreach/LeadPanel";
-import { buildLeadRows, leadTierOf, suggestedLinkedInDraft, type LeadTier } from "@/lib/outreachQueue";
+import { buildLeadRows, leadTierOf, suggestedLinkedInDraft, addDaysYmd, type LeadTier } from "@/lib/outreachQueue";
 import ProjectsSidebar, { type ProjectsSection } from "@/components/ProjectsSidebar";
 import { useProposalSession } from "@/hooks/useProposalSession";
 import { signInToProposalDirectory, clearStoredProposalSession, hydrateSessionFromUrlFragment, setOwnPassword } from "@/lib/companyStatus";
@@ -84,11 +84,12 @@ const DB_URL = (import.meta.env.VITE_PROPOSAL_DB_URL as string | undefined)?.rep
 const DB_PUBLIC = import.meta.env.VITE_PROPOSAL_DB_PUBLIC as string | undefined;
 const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
 
-type FilterKey = "all" | "warm_signal" | "not_contacted" | "engaged" | "connection_sent" | "introduction_sent" | "follow_up_sent" | "meeting_set" | "needs_research";
+type FilterKey = "all" | "warm_signal" | "not_contacted" | "engaged" | "connection_sent" | "connection_accepted" | "introduction_sent" | "follow_up_sent" | "meeting_set" | "needs_research";
 
 const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   not_contacted: "bg-rh-canvas text-rh-muted",
   connection_sent: "bg-rh-teal-soft text-rh-teal-ink",
+  connection_accepted: "bg-emerald-50 text-emerald-700",
   introduction_sent: "bg-rh-teal-soft text-rh-teal-ink",
   follow_up_sent: "bg-rh-amber-soft text-rh-amber",
   meeting_set: "bg-[#EAF0FD] text-[#2F55B0]",
@@ -125,6 +126,7 @@ const STAGE_ICON: Record<CompanyStage, typeof Zap> = {
 const STATUS_CHART_COLORS: Record<ContactStatus, string> = {
   not_contacted: "#94A3B8",
   connection_sent: "#6D28D9",
+  connection_accepted: "#059669",
   introduction_sent: "#1D4ED8",
   follow_up_sent: "#B45309",
   meeting_set: "#2FA37F",
@@ -907,7 +909,7 @@ const ProjectsPage = () => {
   const statusCountsByMember = useMemo(() => {
     const counts: Record<string, Record<ContactStatus, number>> = {};
     for (const member of teamMembers) {
-      counts[member.id] = { not_contacted: 0, connection_sent: 0, introduction_sent: 0, follow_up_sent: 0, meeting_set: 0, do_not_contact: 0 };
+      counts[member.id] = { not_contacted: 0, connection_sent: 0, connection_accepted: 0, introduction_sent: 0, follow_up_sent: 0, meeting_set: 0, do_not_contact: 0 };
     }
     for (const contact of contacts) {
       const p = progress[contact.id];
@@ -949,8 +951,17 @@ const ProjectsPage = () => {
     [teamMembers, companies]
   );
 
+  const acceptedAwaitingIntroCount = useMemo(
+    () => contacts.filter((c) => !c.do_not_contact && progress[c.id]?.status === "connection_accepted").length,
+    [contacts, progress]
+  );
+  const myAcceptedAwaitingIntroCount = useMemo(() => {
+    const assigned = new Set(myAssignedCompanies.map((c) => c.id));
+    return contacts.filter((c) => !c.do_not_contact && c.company_id && assigned.has(c.company_id) && progress[c.id]?.status === "connection_accepted").length;
+  }, [contacts, progress, myAssignedCompanies]);
+
   const contactStatusPieData = useMemo(() => {
-    const counts: Record<ContactStatus, number> = { not_contacted: 0, connection_sent: 0, introduction_sent: 0, follow_up_sent: 0, meeting_set: 0, do_not_contact: 0 };
+    const counts: Record<ContactStatus, number> = { not_contacted: 0, connection_sent: 0, connection_accepted: 0, introduction_sent: 0, follow_up_sent: 0, meeting_set: 0, do_not_contact: 0 };
     for (const contact of contacts) {
       const status = progress[contact.id]?.status ?? "not_contacted";
       counts[status] = (counts[status] ?? 0) + 1;
@@ -970,6 +981,7 @@ const ProjectsPage = () => {
     // other than not_contacted), not a specific status value.
     if (activeFilter === "engaged") rows = rows.filter((c) => !c.needs_research && (progress[c.id]?.status ?? "not_contacted") !== "not_contacted");
     if (activeFilter === "connection_sent") rows = rows.filter((c) => progress[c.id]?.status === "connection_sent");
+    if (activeFilter === "connection_accepted") rows = rows.filter((c) => progress[c.id]?.status === "connection_accepted");
     if (activeFilter === "meeting_set") rows = rows.filter((c) => progress[c.id]?.status === "meeting_set");
     if (activeFilter === "introduction_sent") rows = rows.filter((c) => progress[c.id]?.status === "introduction_sent");
     if (activeFilter === "follow_up_sent") rows = rows.filter((c) => progress[c.id]?.status === "follow_up_sent");
@@ -1103,18 +1115,24 @@ const ProjectsPage = () => {
   // our own advance here as well would race against that trigger using a
   // stale client-side company_stage and could clobber meeting_scheduled
   // back down to opportunities_engaged.
-  const ENGAGED_STATUS_VALUES: ContactStatus[] = ["connection_sent", "introduction_sent", "follow_up_sent"];
+  const ENGAGED_STATUS_VALUES: ContactStatus[] = ["connection_sent", "connection_accepted", "introduction_sent", "follow_up_sent"];
 
   const handleStatusChange = async (contact: ProjectContact, status: ContactStatus) => {
     if (!session) return;
     const previousStatus = progress[contact.id]?.status ?? "not_contacted";
-    setProgress((current) => ({
-      ...current,
-      [contact.id]: { contact_id: contact.id, status, updated_at: new Date().toISOString(), assigned_to: current[contact.id]?.assigned_to ?? null },
-    }));
-    const saved = await updateContactProgress(session, contact.id, { status }, currentTeamMember?.id);
-    if (saved) setProgress((current) => ({ ...current, [contact.id]: saved }));
+    // Acceptance is inbound, not proof that an introduction was sent.
+    const patch: Parameters<typeof updateContactProgress>[2] = { status };
+    if (status === "connection_accepted" && followUpSupported) {
+      patch.follow_up_at = addDaysYmd(new Date(), 1);
+      patch.next_action = "Send introduction after connection acceptance";
+    }
+    const saved = await updateContactProgress(session, contact.id, patch, currentTeamMember?.id);
+    if (!saved) return;
+    setProgress((current) => ({ ...current, [contact.id]: saved }));
     logContactActivity(session, contact.id, "status_changed", status, currentTeamMember?.id);
+    if (status === "connection_accepted" && previousStatus !== "connection_accepted") {
+      logContactActivity(session, contact.id, "connection_accepted", "Acceptance confirmed manually", currentTeamMember?.id);
+    }
     if (ENGAGED_STATUS_VALUES.includes(status)) handleAdvanceEngagement(contact.company_id);
     if (status === "meeting_set") {
       setMeetingPrompt(contact);
@@ -1152,7 +1170,8 @@ const ProjectsPage = () => {
   // shows "Saved" once the write has actually succeeded, and keeps the form
   // (with an error) when it hasn't.
   const handleSaveOutcome = async (contact: ProjectContact, input: OutcomeInput): Promise<OutcomeResult> => {
-    if (input.action !== "do_not_contact" && (contact.do_not_contact || contact.needs_research || !isContactProfileCurrent(contact))) return { ok: false, error: "Employer and role verification is required before outreach." };
+    if (input.action !== "do_not_contact" && contact.do_not_contact) return { ok: false, error: "Contact is marked Do Not Contact." };
+    if (input.action !== "do_not_contact" && input.action !== "linkedin_accepted" && (contact.needs_research || !isContactProfileCurrent(contact))) return { ok: false, error: "Employer and role verification is required before outreach." };
     if (!session) return { ok: false, error: "You’re signed out. Sign in again to save." };
     const current = progress[contact.id];
     const status: ContactStatus = current?.status ?? "not_contacted";
@@ -1164,6 +1183,7 @@ const ProjectsPage = () => {
 
     switch (input.action) {
       case "linkedin_connection": channel = "linkedin"; if (rank < STATUS_ORDER.connection_sent) newStatus = "connection_sent"; break;
+      case "linkedin_accepted": channel = "linkedin"; if (rank < STATUS_ORDER.connection_accepted) newStatus = "connection_accepted"; break;
       case "linkedin_message":
         channel = "linkedin";
         if (rank < STATUS_ORDER.introduction_sent) newStatus = "introduction_sent";
@@ -1179,8 +1199,11 @@ const ProjectsPage = () => {
     if (newEmailPosition !== null) updates.email_sequence_position = newEmailPosition;
     if (followUpSupported) {
       const closing = input.action === "meeting" || input.action === "do_not_contact";
-      updates.last_contacted_at = new Date().toISOString();
-      updates.last_channel = channel;
+      // An accepted invitation is an inbound signal, not an outbound touch.
+      if (input.action !== "linkedin_accepted") {
+        updates.last_contacted_at = new Date().toISOString();
+        updates.last_channel = channel;
+      }
       updates.follow_up_at = closing ? null : input.followUpAt;
       updates.next_action = closing || !input.followUpAt ? null : input.nextAction || null;
     }
@@ -1195,6 +1218,7 @@ const ProjectsPage = () => {
     const recorded = await recordContactActivity(session, contact.id, "outcome_logged", JSON.stringify({ action: input.action, note: input.note, followUpAt: input.followUpAt }), currentTeamMember?.id);
     if (!recorded && (input.note || Object.keys(updates).length === 0)) warning = "Saved, but the note couldn’t be added to the activity log.";
     if (newStatus) logContactActivity(session, contact.id, "status_changed", newStatus, currentTeamMember?.id);
+    if (newStatus === "connection_accepted") logContactActivity(session, contact.id, "connection_accepted", "Acceptance confirmed manually", currentTeamMember?.id);
     if (newEmailPosition !== null) logContactActivity(session, contact.id, "email_sequence_changed", String(newEmailPosition), currentTeamMember?.id);
 
     if (newStatus && ENGAGED_STATUS_VALUES.includes(newStatus)) handleAdvanceEngagement(contact.company_id);
@@ -1405,17 +1429,18 @@ const ProjectsPage = () => {
           // threshold brings the button straight back.
           const statusRank = STATUS_ORDER[status];
           const showConnectionNote = statusRank < STATUS_ORDER.connection_sent;
-          const showAfterAccepted = statusRank < STATUS_ORDER.follow_up_sent;
+          const showAfterAccepted = status === "connection_accepted";
+          const showFollowUp = status === "introduction_sent";
           const hasAnyButton =
             (contact.linkedin_connect_message && showConnectionNote) ||
             (contact.intro_message && showAfterAccepted) ||
-            contact.follow_up_message;
+            (contact.follow_up_message && showFollowUp);
           if (isBlocked || !hasAnyButton) return null;
           return (
             <div className="flex flex-wrap items-center gap-2 border-t border-rh-line bg-rh-canvas px-4 py-3 md:px-5">
               {contact.linkedin_connect_message && showConnectionNote ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-lg border border-rh-line bg-white px-3.5 py-2 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
               {contact.intro_message && showAfterAccepted ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-lg border border-rh-line bg-white px-3.5 py-2 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
-              {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-lg border border-rh-line bg-white px-3.5 py-2 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+              {contact.follow_up_message && showFollowUp ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-lg border border-rh-line bg-white px-3.5 py-2 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
             </div>
           );
         })()}
@@ -2049,6 +2074,11 @@ const ProjectsPage = () => {
               <div className="mb-6" />
             )}
 
+            <button type="button" onClick={() => setActiveFilter(activeFilter === "connection_accepted" ? "all" : "connection_accepted")}
+              className={`mb-3 rounded-lg border px-4 py-2 text-sm font-medium ${activeFilter === "connection_accepted" ? "border-emerald-500 bg-emerald-50 text-emerald-800" : "border-rh-line bg-white text-rh-body"}`}>
+              Connection accepted · awaiting introduction: <strong>{myAcceptedAwaitingIntroCount}</strong>
+            </button>
+
             {/* Same search/status/priority controls the owner gets - Lead
                 Type deliberately isn't here (owner-only data, see
                 fetchOwnerCompanyLeadFields). */}
@@ -2068,6 +2098,7 @@ const ProjectsPage = () => {
                   <option value="not_contacted">Not Contacted</option>
                   <option value="engaged">Engaged</option>
                   <option value="connection_sent">Connection Sent</option>
+                   <option value="connection_accepted">Connection Accepted · Intro Pending</option>
                   <option value="introduction_sent">Introduction Sent</option>
                   <option value="follow_up_sent">Follow-Up Sent</option>
                   <option value="meeting_set">Meetings set</option>
@@ -2387,6 +2418,10 @@ const ProjectsPage = () => {
           </>
           ) : null}
 
+          <button type="button" onClick={() => setActiveFilter(activeFilter === "connection_accepted" ? "all" : "connection_accepted")}
+            className={`mb-3 rounded-lg border px-4 py-2 text-sm font-medium ${activeFilter === "connection_accepted" ? "border-emerald-500 bg-emerald-50 text-emerald-800" : "border-rh-line bg-white text-rh-body"}`}>
+            Connection accepted · awaiting introduction: <strong>{acceptedAwaitingIntroCount}</strong>
+          </button>
           <div className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl border border-rh-line bg-white px-4 py-3 shadow-sm">
             <input
               type="text"
@@ -2403,6 +2438,7 @@ const ProjectsPage = () => {
                 <option value="not_contacted">Not Contacted</option>
                 <option value="engaged">Engaged</option>
                 <option value="connection_sent">Connection Sent</option>
+                   <option value="connection_accepted">Connection Accepted · Intro Pending</option>
                 <option value="introduction_sent">Introduction Sent</option>
                 <option value="follow_up_sent">Follow-Up Sent</option>
                 <option value="meeting_set">Meetings set</option>
