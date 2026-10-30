@@ -98,7 +98,8 @@ export const describeStage = (status: ContactStatus, emailPosition: number): str
   const parts: string[] = [];
   switch (status) {
     case "not_contacted": break;
-    case "connection_sent": parts.push("LinkedIn: connection sent"); break;
+    case "connection_sent": parts.push("LinkedIn: invitation pending"); break;
+    case "connection_accepted": parts.push("LinkedIn: accepted, intro not sent"); break;
     case "introduction_sent": parts.push("LinkedIn: intro sent"); break;
     case "follow_up_sent": parts.push("LinkedIn: follow-up sent"); break;
     case "meeting_set": parts.push("Meeting set"); break;
@@ -392,14 +393,15 @@ export const whyStatement = (contact: ProjectContact): string | null => {
 // Which pre-written LinkedIn message fits where this lead is right now.
 export type LinkedInDraftField = "linkedin_connect_message" | "intro_message" | "follow_up_message";
 export const suggestedLinkedInDraft = (status: ContactStatus, contact: ProjectContact): { field: LinkedInDraftField; label: string } | null => {
-  const order: { field: LinkedInDraftField; label: string; max: number }[] = [
-    { field: "linkedin_connect_message", label: "connection note", max: 0 },
-    { field: "intro_message", label: "intro message", max: 1 },
-    { field: "follow_up_message", label: "follow-up message", max: 99 },
-  ];
-  const rank = status === "not_contacted" ? 0 : status === "connection_sent" ? 1 : 2;
-  const pick = order.find((o) => rank <= o.max && contact[o.field]) ?? order.slice().reverse().find((o) => contact[o.field]);
-  return pick ? { field: pick.field, label: pick.label } : null;
+  // Never suggest an introduction before acceptance has been confirmed.
+  // Copying a draft does not mark it as sent.
+  const byStatus: Partial<Record<ContactStatus, { field: LinkedInDraftField; label: string }>> = {
+    not_contacted: { field: "linkedin_connect_message", label: "connection note" },
+    connection_accepted: { field: "intro_message", label: "intro message" },
+    introduction_sent: { field: "follow_up_message", label: "follow-up message" },
+  };
+  const next = byStatus[status];
+  return next && contact[next.field] ? next : null;
 };
 
 export const STALLED_EXPLAINER = `Stalled means an opportunity is going cold: a new opportunity nobody has contacted ${STALE_NEW_OPPORTUNITY_DAYS}+ days after its role was posted, or a meeting set ${STALE_MEETING_DAYS}+ days ago with no update.`;
