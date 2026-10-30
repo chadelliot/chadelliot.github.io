@@ -36,12 +36,12 @@ const CompanyPanel = ({ group, signals, tier, repName, stalledReason, isDesktop,
 
   return (
     <div
-      role={isDesktop ? "complementary" : "dialog"}
-      aria-modal={isDesktop ? undefined : true}
+      role="dialog"
+      aria-modal={true}
       aria-label={`Company details: ${company.name}`}
       className={isDesktop
-        ? "flex h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.04),0_12px_32px_rgba(21,23,28,0.06)]"
-        : "fixed inset-0 z-[60] flex flex-col bg-white"}
+        ? "flex h-full w-full flex-col overflow-hidden rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.04),0_12px_32px_rgba(21,23,28,0.06)]"
+        : "flex h-full w-full flex-col overflow-hidden bg-white"}
     >
       <div className="flex items-start gap-3 px-5 pb-3 pt-5">
         <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-sm font-semibold text-rh-body ring-1 ring-inset ring-rh-line-strong" aria-hidden="true">
@@ -54,7 +54,7 @@ const CompanyPanel = ({ group, signals, tier, repName, stalledReason, isDesktop,
             {tier ? <span>· {LEAD_TIER_LABEL[tier]}</span> : null}
           </p>
         </div>
-        <button type="button" onClick={onClose} aria-label="Close company details" className={ICON_BTN}><X size={17} /></button>
+        <button type="button" onClick={onClose} autoFocus aria-label="Close company details" className={ICON_BTN}><X size={17} /></button>
       </div>
 
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 pb-6">
