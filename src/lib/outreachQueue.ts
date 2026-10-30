@@ -32,7 +32,7 @@ export const URGENCY_LABEL: Record<Urgency, string> = {
   stale: "No reply yet",
   upcoming: "Scheduled",
   waiting: "Waiting",
-  needs_research: "Needs research",
+  needs_research: "Verify profile",
   closed: "Closed",
 };
 
