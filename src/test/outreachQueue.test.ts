@@ -91,9 +91,20 @@ describe("outreach queue", () => {
   it("picks the LinkedIn draft that matches the stage", () => {
     const c = mk("a", { linkedin_connect_message: "c", intro_message: "i", follow_up_message: "f" });
     expect(suggestedLinkedInDraft("not_contacted", c)?.field).toBe("linkedin_connect_message");
-    expect(suggestedLinkedInDraft("connection_sent", c)?.field).toBe("intro_message");
+    expect(suggestedLinkedInDraft("connection_sent", c)).toBeNull(); // invite pending, not accepted
+    expect(suggestedLinkedInDraft("connection_accepted", c)?.field).toBe("intro_message");
     expect(suggestedLinkedInDraft("introduction_sent", c)?.field).toBe("follow_up_message");
+    expect(suggestedLinkedInDraft("follow_up_sent", c)).toBeNull();
     expect(suggestedLinkedInDraft("not_contacted", mk("b"))).toBeNull();
+  });
+
+  it("keeps accepted connections pending until an introduction is actually sent", () => {
+    const [accepted] = build([mk("accepted")], {
+      accepted: { status: "connection_accepted", follow_up_at: "2026-10-24", updated_at: iso(0) },
+    });
+    expect(accepted.stageLabel).toContain("accepted, intro not sent");
+    expect(accepted.urgency).toBe("upcoming");
+    expect(accepted.contacted).toBe(true);
   });
 
   it("maps lead types onto the three project plays", () => {
