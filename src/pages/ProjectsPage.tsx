@@ -1548,8 +1548,8 @@ const ProjectsPage = () => {
 
               {othersResearch.length > 0 ? (
                 <div className="border border-[#FDE68A] bg-[#FFFBEB] p-4">
-                  <p className="mb-1 text-xs font-medium text-[#92400E]">Additional research needed</p>
-                  <p className="mb-3 text-sm text-[#92400E]">These need a manual LinkedIn search — click through and confirm you've found the right person.</p>
+                  <p className="mb-1 text-xs font-medium text-[#92400E]">Profile verification needed</p>
+                  <p className="mb-3 text-sm text-[#92400E]">These contacts need their current employer and role checked. Company research may already be on file.</p>
                   <div className="grid gap-2">
                     {othersResearch.map((contact) => renderAssignedResearchRow(contact))}
                   </div>
@@ -2102,7 +2102,7 @@ const ProjectsPage = () => {
                   <option value="introduction_sent">Introduction Sent</option>
                   <option value="follow_up_sent">Follow-Up Sent</option>
                   <option value="meeting_set">Meetings set</option>
-                  <option value="needs_research">Need research</option>
+                  <option value="needs_research">Verify profile</option>
                 </select>
               </label>
               <label className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -2442,7 +2442,7 @@ const ProjectsPage = () => {
                 <option value="introduction_sent">Introduction Sent</option>
                 <option value="follow_up_sent">Follow-Up Sent</option>
                 <option value="meeting_set">Meetings set</option>
-                <option value="needs_research">Need research</option>
+                <option value="needs_research">Verify profile</option>
               </select>
             </label>
             <label className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground">
