@@ -13,6 +13,7 @@ import {
 import type { ProposalSession } from "@/lib/companyStatus";
 import { LEAD_TIER_LABEL, addDaysYmd, formatAgo, formatShortDate, suggestedLinkedInDraft, toYmd, whyStatement, type LeadRow, type LeadTier } from "@/lib/outreachQueue";
 import { UrgencyChip } from "./UrgencyChip";
+import ResearchBrief from "./ResearchBrief";
 
 export type OutcomeAction =
   | "linkedin_connection"
@@ -306,11 +307,12 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
 
       <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-5 pb-6">
         <div role="note" className={`rounded-xl border p-3 text-[13px] ${profileHeld ? "border-amber-300 bg-amber-50 text-amber-900" : "border-rh-line bg-rh-canvas text-rh-body"}`}>
-          <p className="font-semibold">{profileHeld ? "Outreach held — profile review required" : "Employer and role checked"}</p>
-          <p>{contact.profile_validation_note || "This person's current employer and role have not been verified. A job posting or sheet import does not count as a profile check."}</p>
+          <p className="font-semibold">{profileHeld ? "Outreach paused: current role needs verification" : "Employer and role checked"}</p>
+          <p>{contact.profile_validation_note || "This person's current employer and role still need checking. Company research alone does not verify identity."}</p>
           {contact.profile_verified_at ? <p>Checked {formatShortDate(contact.profile_verified_at)} · Recheck after 30 days.</p> : null}
-          {contact.profile_verification_source ? <a className="underline" href={contact.profile_verification_source} target="_blank" rel="noreferrer">Verification source</a> : null}
+          {contact.profile_verification_source && /^https:\/\//i.test(contact.profile_verification_source) ? <a className="underline" href={contact.profile_verification_source} target="_blank" rel="noreferrer">Profile evidence</a> : null}
         </div>
+        <ResearchBrief contact={contact} />
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <UrgencyChip row={row} showDetail />
           <span className="text-[13px] text-rh-body">{row.stageLabel}</span>
