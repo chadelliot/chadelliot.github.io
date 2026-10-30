@@ -40,7 +40,7 @@ const LEAD_FILTERS: { key: QueueFilter; label: string }[] = [
   { key: "stale", label: "No reply yet" },
   { key: "upcoming", label: "Scheduled" },
   { key: "closed", label: "Closed" },
-  { key: "needs_research", label: "Verification holds" },
+  { key: "needs_research", label: "Verify profiles" },
   { key: "all", label: "All" },
 ];
 const COMPANY_FILTERS: { key: CompanyFilter; label: string }[] = [
@@ -319,7 +319,7 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
 
         {rows.some((r) => r.urgency === "needs_research") ? (
           <p role="note" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-900">
-            {rows.filter((r) => r.urgency === "needs_research").length} contacts are held for employer and role verification. They are excluded from Needs action, including overdue follow-ups.
+            {rows.filter((r) => r.urgency === "needs_research").length} contacts need a current employer and role check before outreach. Company research may already be saved. These remain outside Needs action until verified.
           </p>
         ) : null}
 
@@ -531,6 +531,7 @@ const LeadItem = ({ r, isSel, onOpen, nested = false }: { r: LeadRow; isSel: boo
             </span>
           </span>
           <span className="block truncate text-[13px] text-rh-muted">{nested ? c.title : [c.title, c.company].filter(Boolean).join(" · ")}</span>
+          {c.research_checked_on && c.research_business_model && c.research_personalization_angle ? <span className="block text-[11px] text-rh-teal">Company research on file</span> : null}
           {!nested && r.project ? <span className="block truncate text-xs text-rh-faint">{r.project}</span> : null}
           {warn ? (
             <span className="mt-0.5 flex items-center gap-1 truncate text-xs font-medium text-rh-amber"><Users size={11} aria-hidden="true" />{warn.name} already contacted{warn.lastTouchAt ? ` · ${formatAgo(warn.lastTouchAt).toLowerCase()}` : ""}</span>
