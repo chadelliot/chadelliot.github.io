@@ -394,6 +394,18 @@ const OutreachQueue = ({ mode, rows, stalledReasons, signalsByCompanyId, repName
             <p className="flex items-start gap-2 border-b border-rh-line bg-rh-amber-soft/60 px-5 py-2.5 text-xs text-rh-amber"><Info size={13} className="mt-0.5 shrink-0" aria-hidden="true" />{STALLED_EXPLAINER}</p>
           ) : null}
 
+          {/* These labels align with the full-width tables on desktop. */}
+          <div className="hidden border-b border-rh-line bg-rh-canvas/30 px-5 py-2.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-rh-muted xl:block">
+            {grouped ? (
+              <div className="grid grid-cols-[minmax(0,1.8fr)_minmax(6rem,.6fr)_7rem_minmax(0,1.1fr)_minmax(7rem,.85fr)_3rem] items-center gap-x-4">
+                <span>Company</span><span>Annual revenue</span><span>Added</span><span>Company status</span><span>Next action</span><span />
+              </div>
+            ) : (
+              <div className="grid grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_minmax(6rem,.65fr)_7rem_minmax(7rem,.8fr)_1rem] items-center gap-x-4">
+                <span>Contact</span><span>Role / company</span><span>Annual revenue</span><span>Date added</span><span>Next action</span><span />
+              </div>
+            )}
+          </div>
           {isLoading ? (
             <ul aria-busy="true" aria-label="Loading">
               {[0, 1, 2, 3, 4].map((i) => (
@@ -515,7 +527,7 @@ const LeadItem = ({ r, isSel, onOpen, nested = false }: { r: LeadRow; isSel: boo
       onClick={() => onOpen(c.id)}
       aria-current={isSel ? "true" : undefined}
       aria-label={`${c.contact_name}, ${c.company}. ${URGENCY_LABEL[r.urgency]}. ${r.stageLabel}.${warn ? ` ${warn.name} at this company was already contacted.` : ""}`}
-      className={`group relative grid w-full gap-x-4 gap-y-2 py-3.5 pr-5 text-left transition-colors md:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)_8.5rem_1rem] md:items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 ${nested ? "pl-12" : "pl-5"} ${isSel ? "bg-rh-teal-soft/50" : "hover:bg-rh-canvas/70"}`}
+      className={`group relative grid w-full gap-x-4 gap-y-2 py-3.5 pr-5 text-left transition-colors md:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)_8.5rem_1rem] xl:grid-cols-[minmax(0,1.3fr)_minmax(0,1.5fr)_minmax(6rem,.65fr)_7rem_minmax(7rem,.8fr)_1rem] md:items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 ${nested ? "pl-12" : "pl-5"} ${isSel ? "bg-rh-teal-soft/50" : "hover:bg-rh-canvas/70"}`}
     >
       {isSel ? <span className="absolute inset-y-0 left-0 w-0.5 bg-rh-teal" aria-hidden="true" /> : null}
       <span className="flex min-w-0 items-center gap-3">
@@ -528,7 +540,8 @@ const LeadItem = ({ r, isSel, onOpen, nested = false }: { r: LeadRow; isSel: boo
               {c.email ? <Mail size={12} /> : null}
             </span>
           </span>
-          <span className="block truncate text-[13px] text-rh-muted">{nested ? c.title : [c.title, c.company].filter(Boolean).join(" · ")}</span>
+          <span className="block truncate text-[13px] text-rh-muted xl:hidden">{nested ? c.title : [c.title, c.company].filter(Boolean).join(" · ")}</span>
+          <span className="block truncate text-[11px] text-rh-muted xl:hidden">Revenue: {formatAnnualRevenue(r.company)} · Added: {formatAddedDate(c.created_at)}</span>
           {c.research_checked_on && c.research_business_model && c.research_personalization_angle ? <span className="block text-[11px] text-rh-teal">Company research on file</span> : null}
           {!nested && r.project ? <span className="block truncate text-xs text-rh-faint">{r.project}</span> : null}
           {warn ? (
@@ -537,9 +550,13 @@ const LeadItem = ({ r, isSel, onOpen, nested = false }: { r: LeadRow; isSel: boo
         </span>
       </span>
       <span className="min-w-0 pl-12 md:pl-0">
-        <span className="line-clamp-2 text-[13px] text-rh-body">{r.stageLabel}</span>
+        <span className="hidden truncate text-[13px] font-medium text-rh-body xl:block">{c.title || "Role not recorded"}</span>
+        <span className="hidden truncate text-xs text-rh-muted xl:block">{c.company}</span>
+        <span className="line-clamp-2 text-[13px] text-rh-body xl:hidden">{r.stageLabel}</span>
         <span className="block truncate text-xs text-rh-muted">{r.lastTouchAt ? `${formatAgo(r.lastTouchAt)}${r.lastTouchIsLogged ? "" : " · stage change"}` : "No contact yet"}</span>
       </span>
+      <span className="hidden min-w-0 text-[13px] font-medium text-rh-body xl:block" title={r.company?.annual_revenue_basis ?? undefined}>{formatAnnualRevenue(r.company)}</span>
+      <span className="hidden min-w-0 whitespace-nowrap text-[13px] text-rh-body xl:block">{formatAddedDate(c.created_at)}</span>
       <span className="flex min-w-0 flex-col items-start gap-0.5 pl-12 md:pl-0">
         <UrgencyChip row={r} showDetail />
         {r.urgency === "overdue" || r.urgency === "upcoming" || r.urgency === "stale" ? (
@@ -568,15 +585,18 @@ const CompanyGroupItem = ({ g, open, selected, stalledReason, onToggle, onSelect
           id={`company-row-${g.company.id}`}
           onClick={onSelect}
           aria-current={selected ? "true" : undefined}
-          className="grid min-w-0 flex-1 gap-x-4 gap-y-2 py-3.5 pl-5 pr-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)_8.5rem]"
+          className="grid min-w-0 flex-1 gap-x-4 gap-y-2 py-3.5 pl-5 pr-2 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-rh-teal-bright/70 md:grid-cols-[minmax(0,1.7fr)_minmax(0,1.1fr)_8.5rem] xl:grid-cols-[minmax(0,1.8fr)_minmax(6rem,.6fr)_7rem_minmax(0,1.1fr)_minmax(7rem,.85fr)]"
         >
           <span className="flex min-w-0 items-center gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-xs font-semibold text-rh-body ring-1 ring-inset ring-rh-line-strong" aria-hidden="true">{initials(g.company.name)}</span>
             <span className="min-w-0">
               <span className="block truncate text-sm font-semibold text-rh-ink">{g.company.name}</span>
               <span className="block truncate text-[13px] text-rh-muted">{g.rows.length} contact{g.rows.length === 1 ? "" : "s"}{g.project ? ` · ${g.project}` : ""}</span>
+              <span className="block text-[11px] text-rh-muted xl:hidden">Revenue: {formatAnnualRevenue(g.company)} · Added: {formatAddedDate(g.company.created_at)}</span>
             </span>
           </span>
+          <span className="hidden min-w-0 text-[13px] font-medium text-rh-body xl:block" title={g.company.annual_revenue_basis ?? undefined}>{formatAnnualRevenue(g.company)}</span>
+          <span className="hidden whitespace-nowrap text-[13px] text-rh-body xl:block">{formatAddedDate(g.company.created_at)}</span>
           <span className="min-w-0 pl-12 md:pl-0">
             <span className="flex items-center gap-1.5 text-[13px] text-rh-body"><span className={`h-1.5 w-1.5 shrink-0 rounded-full ${STAGE_DOT[stage] ?? "bg-rh-faint"}`} aria-hidden="true" />{COMPANY_STAGE_LABELS[stage]}{g.stalled ? <span className="text-rh-amber" title={stalledReason ?? STALLED_EXPLAINER}> · stalled</span> : null}</span>
             <span className="block truncate text-xs text-rh-muted">{g.contacted} of {g.rows.length} contacted{g.lastTouchAt ? ` · last ${formatAgo(g.lastTouchAt).toLowerCase()}` : ""}</span>
