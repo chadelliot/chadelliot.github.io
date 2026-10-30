@@ -7,6 +7,7 @@ import { getStoredProposalSession, type ProposalSession } from "./companyStatus"
 export type ContactStatus =
   | "not_contacted"
   | "connection_sent"
+  | "connection_accepted"
   | "introduction_sent"
   | "follow_up_sent"
   | "meeting_set"
@@ -1072,6 +1073,7 @@ export const findCurrentTeamMember = (session: ProposalSession, teamMembers: Tea
 export const STATUS_LABELS: Record<ContactStatus, string> = {
   not_contacted: "Not Contacted",
   connection_sent: "Connection Sent",
+  connection_accepted: "Connection Accepted",
   introduction_sent: "Introduction Sent",
   follow_up_sent: "Follow-Up Sent",
   meeting_set: "Meeting Set",
@@ -1098,10 +1100,11 @@ export const EMAIL_SEQUENCE_STAGES: { position: 1 | 2 | 3; label: string; field:
 export const STATUS_ORDER: Record<ContactStatus, number> = {
   not_contacted: 0,
   connection_sent: 1,
-  introduction_sent: 2,
-  follow_up_sent: 3,
-  meeting_set: 4,
-  do_not_contact: 5,
+  connection_accepted: 2,
+  introduction_sent: 3,
+  follow_up_sent: 4,
+  meeting_set: 5,
+  do_not_contact: 6,
 };
 
 // Generic mail providers that show up constantly in this data (personal
