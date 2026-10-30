@@ -52,27 +52,98 @@ const ACTIONS: ActionOption[] = [
 ];
 
 const EVENT_LABELS: Record<string, { label: string; confirmed: boolean }> = {
-  outcome_logged: { label: "Outcome logged", confirmed: true },
-  status_changed: { label: "Stage changed", confirmed: true },
+  note: { label: "Note added", confirmed: true },
+  outcome_logged: { label: "Contact update", confirmed: true },
+  status_changed: { label: "Contact status updated", confirmed: true },
+  priority_updated: { label: "Outreach priority updated", confirmed: true },
+  connection_sent: { label: "LinkedIn invitation sent", confirmed: true },
   connection_accepted: { label: "Connection accepted", confirmed: true },
-  email_sequence_changed: { label: "Email progress changed", confirmed: true },
-  email_send_clicked: { label: "Opened email draft", confirmed: false },
-  email_message_copied: { label: "Copied email text", confirmed: false },
-  message_copied: { label: "Copied LinkedIn message", confirmed: false },
+  outreach_blocked: { label: "Invitation not sent", confirmed: false },
+  email_sequence_changed: { label: "Email progress updated", confirmed: true },
+  email_send_clicked: { label: "Email draft opened", confirmed: false },
+  email_message_copied: { label: "Email draft copied", confirmed: false },
+  message_copied: { label: "LinkedIn draft copied", confirmed: false },
 };
 
-const describeEvent = (e: ContactActivityEvent): { title: string; detail: string; confirmed: boolean } => {
+type ActivityDescription = {
+  title: string;
+  detail: string;
+  fullDetail: string;
+  confirmed: boolean;
+  statusNote: string;
+};
+
+// Keep the original audit trail untouched. Only simplify the first thing a person sees.
+const activityPreview = (value: string, limit = 170) => {
+  const normalized = value.replace(/\s+/g, " ").trim();
+  if (normalized.length <= limit) return normalized;
+  const fragment = normalized.slice(0, limit + 1);
+  const lastSpace = fragment.lastIndexOf(" ");
+  const end = lastSpace > limit * 0.65 ? lastSpace : limit;
+  return fragment.slice(0, end).trimEnd() + "…";
+};
+
+const humanStatus = (status: string) => {
+  const labels: Record<string, string> = {
+    not_contacted: "Not contacted",
+    connection_sent: "Invitation sent",
+    connection_accepted: "Connection accepted",
+    intro_sent: "Introduction sent",
+    follow_up_sent: "Follow-up sent",
+    meeting_set: "Meeting booked",
+    do_not_contact: "Do not contact",
+  };
+  return labels[status] ?? status.replace(/_/g, " ");
+};
+
+const describeEvent = (e: ContactActivityEvent): ActivityDescription => {
+  const raw = (e.event_detail ?? "").trim();
   const meta = EVENT_LABELS[e.event_type] ?? { label: e.event_type.replace(/_/g, " "), confirmed: false };
-  let detail = e.event_detail ?? "";
+  const result = (title: string, summary: string, confirmed = meta.confirmed, statusNote = ""): ActivityDescription => ({
+    title,
+    detail: activityPreview(summary),
+    fullDetail: raw && raw !== summary ? raw : "",
+    confirmed,
+    statusNote,
+  });
+
   if (e.event_type === "outcome_logged") {
     try {
-      const parsed = JSON.parse(detail) as { action?: string; note?: string };
-      const option = ACTIONS.find((a) => a.value === parsed.action);
-      return { title: option?.label ?? meta.label, detail: parsed.note ?? "", confirmed: true };
-    } catch { /* fall through to raw detail */ }
+      const parsed = JSON.parse(raw) as { action?: string; note?: string; followUpAt?: string | null };
+      const action = ACTIONS.find((a) => a.value === parsed.action);
+      const note = typeof parsed.note === "string" ? parsed.note.trim() : "";
+      const followUp = parsed.followUpAt ? " Next follow-up: " + parsed.followUpAt + "." : "";
+      return result(action?.label ?? "Contact update recorded", (note || "Contact activity recorded.") + followUp);
+    } catch { /* Treat historical free-text outcomes as notes. */ }
   }
-  if (e.event_type === "status_changed") detail = detail.replace(/_/g, " ");
-  return { title: meta.label, detail, confirmed: meta.confirmed };
+
+  if (e.event_type === "status_changed") return result("Status: " + humanStatus(raw), "", true);
+  if (e.event_type === "connection_sent") return result("LinkedIn invitation sent", "Waiting for the contact to accept.", true);
+  if (e.event_type === "connection_accepted") return result("Connection accepted", "Ready for a personalized follow-up.", true);
+  if (e.event_type === "outreach_blocked") {
+    const emailRequired = /recipient email required|email required|email address/i.test(raw);
+    return result("LinkedIn invitation not sent", emailRequired ? "LinkedIn required an email address, so the invitation was not sent." : "The invitation could not be completed.", false, "Needs attention");
+  }
+  if (e.event_type === "priority_updated") {
+    const rank = raw.match(/(?:invitation )?order to\s+(\d+)\s+of\s+(\d+)/i);
+    const explanation = rank ? "Now #" + rank[1] + " of " + rank[2] + " in the outreach queue." : "The lead's place in the outreach queue changed.";
+    return result("Outreach priority updated", explanation + (/no invitation sent|no invitation was sent/i.test(raw) ? " No invitation was sent." : ""), true);
+  }
+  if (e.event_type === "email_sequence_changed") {
+    return result("Email progress updated", /^\d+$/.test(raw) ? "Moved to email step " + raw + "." : "Email follow-up step updated.", true);
+  }
+  if (e.event_type === "message_copied" || e.event_type === "email_message_copied") {
+    return result(meta.label, "Draft copied for review. This does not mean it was sent.", false, "Not sent");
+  }
+  if (e.event_type === "email_send_clicked") {
+    return result("Email draft opened", "An email draft was opened. Delivery has not been confirmed.", false, "Sending unconfirmed");
+  }
+  if (e.event_type === "note") {
+    if (/^\s*manual lead\s*\|/i.test(raw)) return result("Manual lead added", "Added to Chad's outreach list.", true);
+    return result("Note added", raw || "A note was added to this contact.", true);
+  }
+
+  return result(meta.label, raw, meta.confirmed);
 };
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright/70 focus-visible:ring-offset-1";
@@ -356,10 +427,16 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
                       <div className="min-w-0">
                         <p className="text-rh-ink">
                           <span className="font-medium">{d.title}</span>
-                          <span className="ml-2 text-xs text-rh-muted">{d.confirmed ? "" : "attempt, not confirmed"}</span>
+                          {d.statusNote ? <span className="ml-2 text-xs text-rh-muted">{d.statusNote}</span> : null}
                         </p>
-                        {d.detail ? <p className="whitespace-pre-wrap break-words text-rh-muted">{d.detail}</p> : null}
-                        {e.created_at ? <p className="text-xs text-rh-faint">{formatAgo(e.created_at)}</p> : null}
+                        {d.detail ? <p className="mt-0.5 break-words leading-relaxed text-rh-muted">{d.detail}</p> : null}
+                        {d.fullDetail ? (
+                          <details className="mt-1.5 text-xs text-rh-muted">
+                            <summary className="w-fit cursor-pointer select-none font-medium text-rh-teal hover:underline">View full details</summary>
+                            <p className="mt-1.5 whitespace-pre-wrap break-words rounded-lg bg-rh-canvas px-3 py-2 leading-relaxed">{d.fullDetail}</p>
+                          </details>
+                        ) : null}
+                        {e.created_at ? <p className="mt-1 text-xs text-rh-faint">{formatAgo(e.created_at)}</p> : null}
                       </div>
                     </li>
                   );
