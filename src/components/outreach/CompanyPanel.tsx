@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight, Briefcase, CalendarClock, ExternalLink, History, Info, TriangleAlert, UserRound, Users, X } from "lucide-react";
-import { COMPANY_STAGE_LABELS, OUTREACH_MODEL_LABELS, daysAgo, type CompanySignal } from "@/lib/projectContacts";
+import { COMPANY_STAGE_LABELS, OUTREACH_MODEL_LABELS, daysAgo, formatAnnualRevenue, type CompanySignal } from "@/lib/projectContacts";
 import { LEAD_TIER_LABEL, STALLED_EXPLAINER, formatAgo, formatShortDate, whyStatement, type CompanyGroup, type LeadTier } from "@/lib/outreachQueue";
 import { UrgencyChip } from "./UrgencyChip";
 
@@ -84,6 +84,18 @@ const CompanyPanel = ({ group, signals, tier, repName, stalledReason, isDesktop,
             <dd className="mt-1 font-medium text-rh-ink">{group.nextDue ? formatShortDate(group.nextDue) : <span className="font-normal text-rh-muted">None scheduled</span>}</dd>
           </div>
         </dl>
+        <div className="rounded-xl border border-rh-line bg-white px-4 py-3 text-[13px]">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-xs font-medium text-rh-muted">Annual company revenue</span>
+            <span className="font-semibold text-rh-ink">{formatAnnualRevenue(company)}</span>
+          </div>
+          {company.annual_revenue_basis ? <p className="mt-1 text-xs text-rh-muted">{company.annual_revenue_basis} · source checked {company.annual_revenue_as_of ?? "date unknown"}</p> : (
+            <p className="mt-1 text-xs text-rh-muted">No reliable revenue figure on file yet.</p>
+          )}
+          {company.annual_revenue_source_url ? (
+            <a href={company.annual_revenue_source_url} target="_blank" rel="noopener noreferrer" className="mt-1.5 inline-flex items-center gap-1 text-xs font-medium text-rh-teal hover:underline">View revenue source <ExternalLink size={12} /></a>
+          ) : null}
+        </div>
 
         {/* Who's been contacted */}
         <section aria-labelledby="who-h">
