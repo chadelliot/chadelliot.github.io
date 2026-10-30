@@ -257,12 +257,12 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
 
   return (
     <div
-      role={isDesktop ? "complementary" : "dialog"}
-      aria-modal={isDesktop ? undefined : true}
+      role="dialog"
+      aria-modal={true}
       aria-label={`Lead details: ${contact.contact_name ?? "contact"}`}
       className={isDesktop
-        ? "flex h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.04),0_12px_32px_rgba(21,23,28,0.06)]"
-        : "fixed inset-0 z-[60] flex flex-col bg-white"}
+        ? "flex h-full w-full flex-col overflow-hidden rounded-2xl border border-rh-line bg-white shadow-[0_1px_2px_rgba(21,23,28,0.04),0_12px_32px_rgba(21,23,28,0.06)]"
+        : "flex h-full w-full flex-col overflow-hidden bg-white"}
     >
       {backToCompany ? (
         <button type="button" onClick={backToCompany.onBack} className={`flex items-center gap-1.5 px-5 pt-4 text-left text-[13px] font-medium text-rh-teal hover:underline ${FOCUS_RING}`}>
