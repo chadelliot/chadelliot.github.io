@@ -42,7 +42,7 @@ const URGENCY_RANK: Record<Urgency, number> = {
 };
 
 export type QueueFilter = "action" | "overdue" | "due_today" | "first_contact" | "stale" | "upcoming" | "closed" | "needs_research" | "all";
-export type QueueSort = "priority" | "name" | "company" | "last_touch";
+export type QueueSort = "priority" | "name" | "company" | "last_touch" | "date_added";
 
 export type LeadRow = {
   contact: ProjectContact;
@@ -222,6 +222,7 @@ export const matchesSearch = (row: LeadRow, query: string): boolean => {
 export const sortRows = (rows: LeadRow[], sort: QueueSort): LeadRow[] => {
   const byName = (a: LeadRow, b: LeadRow) => (a.contact.contact_name ?? "").localeCompare(b.contact.contact_name ?? "");
   const copy = [...rows];
+  if (sort === "date_added") return copy.sort((a, b) => (b.contact.created_at ?? "").localeCompare(a.contact.created_at ?? "") || byName(a, b));
   if (sort === "name") return copy.sort(byName);
   if (sort === "company") return copy.sort((a, b) => a.contact.company.localeCompare(b.contact.company) || byName(a, b));
   if (sort === "last_touch") {
@@ -276,7 +277,7 @@ export const formatAgo = (iso: string | null | undefined, now: Date = new Date()
 // ---- Company grouping (one row per company, contacts nested) ----
 
 export type CompanyFilter = "all" | "action" | "new" | "engaged" | "meeting" | "closed" | "stalled";
-export type CompanySort = "priority" | "name" | "last_touch" | "contacts";
+export type CompanySort = "priority" | "name" | "last_touch" | "contacts" | "revenue" | "date_added";
 
 export type CompanyGroup = {
   company: Company;
@@ -339,6 +340,8 @@ export const sortGroups = (groups: CompanyGroup[], sort: CompanySort): CompanyGr
   const copy = [...groups];
   const byName = (a: CompanyGroup, b: CompanyGroup) => a.company.name.localeCompare(b.company.name);
   if (sort === "name") return copy.sort(byName);
+  if (sort === "revenue") return copy.sort((a, b) => (b.company.annual_revenue_usd ?? -1) - (a.company.annual_revenue_usd ?? -1) || byName(a, b));
+  if (sort === "date_added") return copy.sort((a, b) => (b.company.created_at ?? "").localeCompare(a.company.created_at ?? "") || byName(a, b));
   if (sort === "contacts") return copy.sort((a, b) => b.rows.length - a.rows.length || byName(a, b));
   if (sort === "last_touch") return copy.sort((a, b) => (a.lastTouchAt ?? "").localeCompare(b.lastTouchAt ?? "") || byName(a, b));
   return copy.sort((a, b) => {
