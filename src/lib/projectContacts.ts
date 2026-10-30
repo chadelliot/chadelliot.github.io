@@ -23,6 +23,7 @@ export type ProjectContact = {
   title?: string | null;
   linkedin_url?: string | null;
   email?: string | null;
+  created_at?: string | null;
   priority?: string | null;
   target_type_raw?: string | null;
   outreach_angle?: string | null;
@@ -276,6 +277,12 @@ export type Company = {
   id: string;
   name: string;
   normalized_name: string;
+  created_at?: string | null;
+  annual_revenue_usd?: number | null;
+  annual_revenue_display?: string | null;
+  annual_revenue_basis?: string | null;
+  annual_revenue_source_url?: string | null;
+  annual_revenue_as_of?: string | null;
   assigned_rep?: string | null;
   company_stage: CompanyStage;
   meeting_contact_id?: string | null;
@@ -378,7 +385,7 @@ export const fetchProjectContacts = async (session: ProposalSession): Promise<Pr
 // SELECT on the owner-only lead-type columns for everyone at the table
 // level, so a select=* here would fail for Owners and Members alike. Owner
 // views merge in fetchOwnerCompanyLeadFields() separately.
-const COMPANY_SAFE_COLUMNS = "id,name,normalized_name,assigned_rep,company_stage,meeting_contact_id,meeting_date,closed_lost_reason";
+const COMPANY_SAFE_COLUMNS = "id,name,normalized_name,created_at,annual_revenue_usd,annual_revenue_display,annual_revenue_basis,annual_revenue_source_url,annual_revenue_as_of,assigned_rep,company_stage,meeting_contact_id,meeting_date,closed_lost_reason";
 
 export const fetchCompanies = async (session: ProposalSession): Promise<Company[]> =>
   fetchAllRows<Company>(session, `companies?select=${COMPANY_SAFE_COLUMNS}&order=name.asc`);
