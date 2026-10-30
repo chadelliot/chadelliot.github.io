@@ -63,6 +63,7 @@ import { clearStoredProposalSession } from "@/lib/companyStatus";
 const STATUS_CHART_COLORS: Record<ContactStatus, string> = {
   not_contacted: "#94A3B8",
   connection_sent: "#6D28D9",
+  connection_accepted: "#059669",
   introduction_sent: "#1D4ED8",
   follow_up_sent: "#B45309",
   meeting_set: "#2FA37F",
@@ -76,6 +77,7 @@ const IS_DB_READY = Boolean(DB_URL && DB_PUBLIC);
 const STATUS_PILL_CLASS: Record<ContactStatus, string> = {
   not_contacted: "bg-rh-canvas text-rh-muted",
   connection_sent: "bg-rh-teal-soft text-rh-teal-ink",
+  connection_accepted: "bg-emerald-50 text-emerald-700",
   introduction_sent: "bg-rh-teal-soft text-rh-teal-ink",
   follow_up_sent: "bg-rh-amber-soft text-rh-amber",
   meeting_set: "bg-[#EAF0FD] text-[#2F55B0]",
@@ -342,11 +344,12 @@ const CompanyDetailPage = () => {
     const emailPosition = contactProgress?.email_sequence_position ?? 0;
     const statusRank = STATUS_ORDER[status];
     const showConnectionNote = statusRank < STATUS_ORDER.connection_sent;
-    const showAfterAccepted = statusRank < STATUS_ORDER.follow_up_sent;
+    const showAfterAccepted = status === "connection_accepted";
+    const showFollowUp = status === "introduction_sent";
     const hasAnyButton =
       (contact.linkedin_connect_message && showConnectionNote) ||
       (contact.intro_message && showAfterAccepted) ||
-      contact.follow_up_message;
+      (contact.follow_up_message && showFollowUp);
 
     return (
       <div key={contact.id} className={`overflow-hidden rounded-lg border bg-white ${isMeetingContact ? "border-primary/40" : "border-rh-line"}`}>
@@ -393,7 +396,7 @@ const CompanyDetailPage = () => {
           <div className="flex flex-wrap items-center gap-2 border-t border-rh-line bg-rh-canvas px-3 py-2">
             {contact.linkedin_connect_message && showConnectionNote ? <button type="button" onClick={() => handleOpenMessage(contact, "linkedin_connect_message", "1. Connection note")} className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-linkedin_connect_message`] ?? "1. Connection note"}</button> : null}
             {contact.intro_message && showAfterAccepted ? <button type="button" onClick={() => handleOpenMessage(contact, "intro_message", "2. After accepted")} className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-intro_message`] ?? "2. After accepted"}</button> : null}
-            {contact.follow_up_message ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
+            {contact.follow_up_message && showFollowUp ? <button type="button" onClick={() => handleOpenMessage(contact, "follow_up_message", "3. If no response")} className="rounded-lg border border-rh-line bg-white px-3 py-1.5 text-[13px] font-medium text-rh-body hover:border-primary hover:text-primary">{copyFeedback[`${contact.id}-follow_up_message`] ?? "3. If no response"}</button> : null}
           </div>
         ) : null}
       </div>
