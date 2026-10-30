@@ -52,6 +52,7 @@ export type ProjectContact = {
   research_hiring_roles_summary?: string | null;
   research_hiring_roles_sources?: string | null;
   research_hiring_roles_checked_on?: string | null;
+  linkedin_hiring_badge_visible?: boolean | null;
   // Email outreach thread - separate from the LinkedIn connect/intro/
   // follow-up messages above. Populated from the email_* columns on the
   // RevHub-Marketing tab. email_assumption_notice is non-empty when the
