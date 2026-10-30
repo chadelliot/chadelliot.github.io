@@ -56,6 +56,7 @@ const LEAD_SORTS: { key: QueueSort; label: string }[] = [
   { key: "priority", label: "Most urgent" },
   { key: "last_touch", label: "Longest since contact" },
   { key: "company", label: "Company A–Z" },
+  { key: "date_added", label: "Newest contacts" },
   { key: "name", label: "Name A–Z" },
 ];
 const COMPANY_SORTS: { key: CompanySort; label: string }[] = [
@@ -63,6 +64,8 @@ const COMPANY_SORTS: { key: CompanySort; label: string }[] = [
   { key: "last_touch", label: "Longest since contact" },
   { key: "name", label: "Company A–Z" },
   { key: "contacts", label: "Most contacts" },
+  { key: "revenue", label: "Highest annual revenue" },
+  { key: "date_added", label: "Newest companies" },
 ];
 
 const FOCUS_RING = "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rh-teal-bright/70 focus-visible:ring-offset-1";
