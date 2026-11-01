@@ -381,7 +381,8 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
           followUpSupported={followUpSupported}
           onSaveOutcome={async (input) => {
             if (contact.do_not_contact && input.action !== "do_not_contact") return { ok: false, error: "Contact is marked Do Not Contact." };
-            if (profileHeld && input.action !== "do_not_contact" && input.action !== "linkedin_accepted") return { ok: false, error: "Verify this person's current employer and role before outreach." };
+            const inboundAction = ["replied", "positive_reply", "neutral_reply", "negative_reply"].includes(input.action);
+            if (profileHeld && input.action !== "do_not_contact" && input.action !== "linkedin_accepted" && !inboundAction) return { ok: false, error: "Verify this person's current employer and role before outreach." };
             const result = await onSaveOutcome(contact, input);
             if (result.ok) { setAttempt(null); setSavedLocal((v) => v + 1); }
             return result;
