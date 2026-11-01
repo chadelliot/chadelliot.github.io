@@ -1171,7 +1171,8 @@ const ProjectsPage = () => {
   // (with an error) when it hasn't.
   const handleSaveOutcome = async (contact: ProjectContact, input: OutcomeInput): Promise<OutcomeResult> => {
     if (input.action !== "do_not_contact" && contact.do_not_contact) return { ok: false, error: "Contact is marked Do Not Contact." };
-    if (input.action !== "do_not_contact" && input.action !== "linkedin_accepted" && (contact.needs_research || !isContactProfileCurrent(contact))) return { ok: false, error: "Employer and role verification is required before outreach." };
+    const inboundAction = ["replied", "positive_reply", "neutral_reply", "negative_reply"].includes(input.action);
+    if (input.action !== "do_not_contact" && input.action !== "linkedin_accepted" && !inboundAction && (contact.needs_research || !isContactProfileCurrent(contact))) return { ok: false, error: "Employer and role verification is required before outreach." };
     if (!session) return { ok: false, error: "You’re signed out. Sign in again to save." };
     const current = progress[contact.id];
     const status: ContactStatus = current?.status ?? "not_contacted";
@@ -1190,7 +1191,16 @@ const ProjectsPage = () => {
         else if (rank === STATUS_ORDER.introduction_sent) newStatus = "follow_up_sent";
         break;
       case "email": channel = "email"; newEmailPosition = Math.min(3, (current?.email_sequence_position ?? 0) + 1); break;
-      case "replied": channel = current?.last_channel ?? "other"; break;
+      case "replied":
+      case "positive_reply":
+      case "neutral_reply":
+      case "negative_reply":
+        channel = current?.last_channel ?? "other";
+        break;
+      case "qualified_conversation":
+      case "proposal_sent":
+        channel = current?.last_channel ?? "other";
+        break;
       case "other_contact": channel = "other"; break;
       case "meeting": newStatus = "meeting_set"; channel = current?.last_channel ?? "other"; break;
       case "do_not_contact": newStatus = "do_not_contact"; channel = current?.last_channel ?? "other"; break;
@@ -1198,7 +1208,7 @@ const ProjectsPage = () => {
     if (newStatus) updates.status = newStatus;
     if (newEmailPosition !== null) updates.email_sequence_position = newEmailPosition;
     if (followUpSupported) {
-      const closing = input.action === "meeting" || input.action === "do_not_contact";
+      const closing = input.action === "meeting" || input.action === "do_not_contact" || input.action === "negative_reply";
       // An accepted invitation is an inbound signal, not an outbound touch.
       if (input.action !== "linkedin_accepted") {
         updates.last_contacted_at = new Date().toISOString();

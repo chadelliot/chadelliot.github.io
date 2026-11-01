@@ -79,6 +79,16 @@ export const addDaysYmd = (from: Date, days: number): string => {
   return toYmd(d);
 };
 
+export const addBusinessDaysYmd = (from: Date, businessDays: number): string => {
+  const d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
+  let left = Math.max(0, businessDays);
+  while (left > 0) {
+    d.setDate(d.getDate() + 1);
+    if (d.getDay() !== 0 && d.getDay() !== 6) left--;
+  }
+  return toYmd(d);
+};
+
 const ymdToLocalDate = (ymd: string): Date => {
   const [y, m, d] = ymd.split("-").map(Number);
   return new Date(y, m - 1, d);
