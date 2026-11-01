@@ -11,7 +11,7 @@ import {
   type ProjectContact,
 } from "@/lib/projectContacts";
 import type { ProposalSession } from "@/lib/companyStatus";
-import { LEAD_TIER_LABEL, addDaysYmd, formatAgo, formatShortDate, suggestedLinkedInDraft, toYmd, whyStatement, type LeadRow, type LeadTier } from "@/lib/outreachQueue";
+import { LEAD_TIER_LABEL, addBusinessDaysYmd, addDaysYmd, formatAgo, formatShortDate, suggestedLinkedInDraft, toYmd, whyStatement, type LeadRow, type LeadTier } from "@/lib/outreachQueue";
 import { UrgencyChip } from "./UrgencyChip";
 import ResearchBrief from "./ResearchBrief";
 
@@ -21,6 +21,11 @@ export type OutcomeAction =
   | "linkedin_message"
   | "email"
   | "replied"
+  | "positive_reply"
+  | "neutral_reply"
+  | "negative_reply"
+  | "qualified_conversation"
+  | "proposal_sent"
   | "other_contact"
   | "meeting"
   | "do_not_contact";
@@ -38,7 +43,7 @@ type ActionOption = { value: OutcomeAction; label: string; short: string; Icon: 
 
 // What each choice writes to the existing data model:
 //   linkedin_* -> contact_progress.status, email -> email_sequence_position,
-//   replied/other_contact -> no stage change (just last-contacted + note),
+//   replies/qualified_conversation/proposal_sent/other_contact -> activity only, no stage change,
 //   meeting -> status meeting_set (opens the existing meeting prompt),
 //   do_not_contact -> status do_not_contact.
 const ACTIONS: ActionOption[] = [
@@ -46,7 +51,12 @@ const ACTIONS: ActionOption[] = [
   { value: "linkedin_accepted", label: "LinkedIn invitation accepted (no intro sent)", short: "Connection accepted", Icon: UserCheck, hint: "Stage → Connection accepted, intro pending", followUpDays: 1, nextAction: "Send introduction after acceptance" },
   { value: "linkedin_message", label: "Sent LinkedIn message", short: "LinkedIn message", Icon: MessageSquare, hint: "Stage → next LinkedIn step", followUpDays: 4, nextAction: "Follow up if no reply" },
   { value: "email", label: "Sent email", short: "Email", Icon: Mail, hint: "Email progress +1 (max 3)", followUpDays: 4, nextAction: "Send next email in the sequence" },
-  { value: "replied", label: "They replied", short: "They replied", Icon: Reply, hint: "Stage unchanged", followUpDays: 2, nextAction: "Reply and propose a time" },
+  { value: "replied", label: "They replied (unclassified)", short: "Reply received", Icon: Reply, hint: "Conversation requires Chad's review; no automatic reply", followUpDays: 2, nextAction: "Review reply and respond personally" },
+  { value: "positive_reply", label: "Positive reply received", short: "Positive reply", Icon: Reply, hint: "Positive interest; stop automated outreach and handle manually", followUpDays: 2, nextAction: "Respond to the expressed interest" },
+  { value: "neutral_reply", label: "Question or neutral reply received", short: "Neutral reply", Icon: MessageSquare, hint: "Human conversation; stop automated outreach", followUpDays: 2, nextAction: "Answer the question personally" },
+  { value: "negative_reply", label: "Negative reply received (not necessarily an opt-out)", short: "Negative reply", Icon: Ban, hint: "Stop follow-up sequence; use Do Not Contact if they opted out", followUpDays: null, nextAction: "" },
+  { value: "qualified_conversation", label: "Qualified business conversation held", short: "Qualified talk", Icon: Users, hint: "Meaningful commercial discussion logged; not automatically a meeting or proposal", followUpDays: 3, nextAction: "Confirm business problem, sponsor and next step" },
+  { value: "proposal_sent", label: "Proposal actually delivered", short: "Proposal sent", Icon: FileText, hint: "Only select after delivery is verified; no automatic proposal sends", followUpDays: 5, nextAction: "Follow up on proposal feedback" },
   { value: "other_contact", label: "Other contact (call, text, in person)", short: "Call or other", Icon: Phone, hint: "Stage unchanged", followUpDays: 3, nextAction: "Follow up" },
   { value: "meeting", label: "Meeting booked", short: "Meeting booked", Icon: CalendarCheck, hint: "Stage → Meeting set", followUpDays: null, nextAction: "" },
   { value: "do_not_contact", label: "Not interested / do not contact", short: "Do not contact", Icon: Ban, hint: "Stage → Do not contact", followUpDays: null, nextAction: "" },
@@ -114,7 +124,7 @@ const describeEvent = (e: ContactActivityEvent): ActivityDescription => {
       const action = ACTIONS.find((a) => a.value === parsed.action);
       const note = typeof parsed.note === "string" ? parsed.note.trim() : "";
       const followUp = parsed.followUpAt ? " Next follow-up: " + parsed.followUpAt + "." : "";
-      return result(action?.label ?? "Contact update recorded", (note || "Contact activity recorded.") + followUp);
+      return result(action?.label ?? "Contact update recorded", (note || "Contact activity recorded; no message sent by this log.") + followUp);
     } catch { /* Treat historical free-text outcomes as notes. */ }
   }
 
@@ -312,7 +322,7 @@ const LeadPanel = ({ row, siblings, tier, index, total, nextRow, isDesktop, sess
           {contact.profile_verified_at ? <p>Checked {formatShortDate(contact.profile_verified_at)} · Recheck after 30 days.</p> : null}
           {contact.profile_verification_source && /^https:\/\//i.test(contact.profile_verification_source) ? <a className="underline" href={contact.profile_verification_source} target="_blank" rel="noreferrer">Profile evidence</a> : null}
         </div>
-        <ResearchBrief contact={contact} />
+        <ResearchBrief contact={contact} company={company} />
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
           <UrgencyChip row={row} showDetail />
           <span className="text-[13px] text-rh-body">{row.stageLabel}</span>
@@ -502,7 +512,7 @@ const OutcomeForm = ({ row, nextRow, formRef, followUpSupported, onSaveOutcome, 
     const option = ACTIONS.find((a) => a.value === value)!;
     // Suggest a follow-up unless the person already picked their own.
     if (!touchedFollowUp) {
-      setFollowUpAt(option.followUpDays ? addDaysYmd(new Date(), option.followUpDays) : "");
+      setFollowUpAt(option.followUpDays ? (value === "linkedin_message" ? addBusinessDaysYmd(new Date(), option.followUpDays) : addDaysYmd(new Date(), option.followUpDays)) : "");
       setNextAction(option.nextAction);
     }
   };
