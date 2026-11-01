@@ -541,7 +541,7 @@ const OutcomeForm = ({ row, nextRow, formRef, followUpSupported, onSaveOutcome, 
   const presets: { label: string; days: number }[] = [
     { label: "Tomorrow", days: 1 }, { label: "3 days", days: 3 }, { label: "1 week", days: 7 }, { label: "2 weeks", days: 14 },
   ];
-  const showFollowUp = action && action !== "do_not_contact" && action !== "meeting";
+  const showFollowUp = action && action !== "do_not_contact" && action !== "meeting" && action !== "negative_reply";
 
   if (done) {
     return (
